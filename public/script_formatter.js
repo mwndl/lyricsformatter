@@ -252,13 +252,15 @@ function handleRefreshButtonClick() {
             }
             resetLineIssues();
             closeContainers();
-            resetImprovementsBoxes('Tap the <span class="hightlight_text">Refresh</span> icon to update the suggestions.');
-
+            resetImprovementsBoxes();
         }
 
-        function resetImprovementsBoxes(text) {
+        function resetImprovementsBoxes() {
             // Obtém a referência ao contêiner de melhorias
             const improvementsContainer = document.getElementById('improvements_containers');
+        
+            // Obtém a referência ao textarea com o ID 'editor'
+            const editorTextarea = document.getElementById('editor');
         
             // Remove todas as divs dentro do contêiner de melhorias
             improvementsContainer.innerHTML = '';
@@ -268,11 +270,17 @@ function handleRefreshButtonClick() {
             improvementsPlaceholderDiv.className = 'improvements_placeholder_div';
             improvementsPlaceholderDiv.id = 'improvements_placeholder_div';
         
-            // Cria a div de espaço reservado para melhorias com o texto fornecido
+            // Cria a div de espaço reservado para melhorias com base no conteúdo do textarea
             const improvementsPlaceholder = document.createElement('div');
             improvementsPlaceholder.className = 'improvements_placeholder';
             improvementsPlaceholder.id = 'improvements_placeholder';
-            improvementsPlaceholder.innerHTML = text;
+        
+            // Verifica se o textarea está vazio
+            if (editorTextarea.value.trim() === '') {
+                improvementsPlaceholder.innerHTML = 'Type something or paste your transcription to start...';
+            } else {
+                improvementsPlaceholder.innerHTML = 'Tap the <span class="highlight_text">Refresh</span> icon to update the suggestions.';
+            }
         
             // Adiciona a div de espaço reservado para melhorias ao contêiner de melhorias
             improvementsPlaceholderDiv.appendChild(improvementsPlaceholder);
