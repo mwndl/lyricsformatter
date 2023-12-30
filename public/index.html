@@ -7,77 +7,6 @@
     <meta name="google" value="notranslate">
     <link rel="stylesheet" href="lyricsformatter.css">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <script type="text/javascript"
-        src="https://www.languagetool.org/js/jquery-1.7.0.min.js"></script>
-    <script type="text/javascript"
-        src="https://www.languagetool.org/online-check/tiny_mce/tiny_mce.js"></script>
-    <script type="text/javascript"
-        src="https://www.languagetool.org/online-check/tiny_mce/plugins/atd-tinymce/editor_plugin2.js"></script>
-    
-    <script language="javascript" type="text/javascript">  
-    tinyMCE.init({
-        mode : "textareas",
-        plugins : "AtD,paste",
-        paste_text_sticky : true,
-        setup : function(ed) {
-            ed.onInit.add(function(ed) {
-                ed.pasteAsPlainText = true;
-            });
-        },  
-        /* translations: */
-        languagetool_i18n_no_errors : {
-            // "No errors were found.":
-            "de-DE": "Keine Fehler gefunden."
-        },
-        languagetool_i18n_explain : {
-            // "Explain..." - shown if there is an URL with a detailed description:
-            "de-DE": "Mehr Informationen..."
-        },
-        languagetool_i18n_ignore_once : {
-            // "Ignore this error":
-            "de-DE": "Hier ignorieren"
-        },
-        languagetool_i18n_ignore_all : {
-            // "Ignore this kind of error":
-            "de-DE": "Fehler dieses Typs ignorieren"
-        },
-        languagetool_i18n_rule_implementation : {
-            // "Rule implementation":
-            "de-DE": "Implementierung der Regel"
-        },
-    
-        languagetool_i18n_current_lang :
-            function() { return document.checkform.lang.value; },
-        /* The URL of your LanguageTool server.
-            If you use your own server here and it's not running on the same domain 
-            as the text form, make sure the server gets started with '--allow-origin ...' 
-            and use 'https://your-server/v2/check' as URL: */
-        languagetool_rpc_url                 : "https://languagetool.org/api/v2/check",
-        /* edit this file to customize how LanguageTool shows errors: */
-        languagetool_css_url :
-            "https://www.languagetool.org/online-check/" +
-            "tiny_mce/plugins/atd-tinymce/css/content.css",
-        /* this stuff is a matter of preference: */
-        theme                              : "advanced",
-        theme_advanced_buttons1            : "",
-        theme_advanced_buttons2            : "",
-        theme_advanced_buttons3            : "",
-        theme_advanced_toolbar_location    : "none",
-        theme_advanced_toolbar_align       : "left",
-        theme_advanced_statusbar_location  : "bottom",
-        theme_advanced_path                : false,
-        theme_advanced_resizing            : true,
-        theme_advanced_resizing_use_cookie : false,
-        gecko_spellcheck                   : false
-    });
-    
-    function doit() {
-        var langCode = localStorage.getItem('selectedLanguage');
-        tinyMCE.activeEditor.execCommand("mceWritingImprovementTool", langCode);
-    }
-    </script>
-
     <script src="script_formatter.js"></script>
     <link rel="icon" href="/images/favicon.ico" type="image/x-icon">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" integrity="sha384-e3b0a8b1e4095176f4a6f42c37b4efb51337fba6c937e281a5f3800f76475893" crossorigin="anonymous">
@@ -87,9 +16,9 @@
     <body>
         <div class="top">
             <div class="return">
-                <img class="return_arrow" id="return_arrow" src="images\arrow.svg" alt="Return Arrow" title="Return to Home" draggable="false">
+                <img class="return_arrow" id="return_arrow" src="images\arrow.svg" alt="Return Arrow" title="Return to Home" draggable="false" style="display:none">
             </div>
-            <div class="page_title">Lyrics Formatter</div>
+            <div class="page_title">Lyrics Formatter (Beta)</div>
             <div class="settings">
                 <img class="options_dots" id="settings_dots" src="images\options.svg" alt="Options" title="Options" draggable="false" style="display:none">
             </div>
