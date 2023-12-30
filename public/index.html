@@ -31,22 +31,7 @@
                         <div class="editor-container">
                             <div class="line_issues" id="line_issues"></div>
                             <div class="character_counter"></div>
-                            <textarea class="editor" id="editor" placeholder="Paste the lyrics here..." oninput="updateCharacterCounter(); checkContent();">
-                                <form name="checkform" action="http://community.languagetool.org" method="post">
- 
-                                    <p id="checktextpara">
-                                        <textarea id="checktext" name="text" style="width: 100%"
-                                          rows="6">Paste your own text here... or check check this text.</textarea>
-                                    </p>
-                                   
-                                    <div>
-                                        <input type="submit" name="_action_checkText"
-                                            value="Check Text" onClick="doit();return false;"> Powered by <a href="https://languagetool.org">languagetool.org</a>
-                                        <div id="feedbackErrorMessage" style="color: red;"></div>
-                                    </div>
-                                   
-                                  </form>
-                            </textarea>
+                            <textarea class="editor" id="editor" placeholder="Paste the lyrics here..." oninput="updateCharacterCounter(); checkContent();"></textarea>
                         </div>
                     </div>
                 </div>
