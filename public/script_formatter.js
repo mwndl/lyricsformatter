@@ -13,6 +13,8 @@ document.addEventListener('DOMContentLoaded', function () {
     var refreshButton = document.getElementById('refresh_button');
     var loadingSpinner = document.getElementById('loading_spinner');
 
+    var improvementsPlaceholder = document.getElementById('improvements_placeholder')
+
     const searchBtn = document.querySelector('#search_btn');
     const search_input = document.querySelector('#search_input');
     const loading_spinner = document.querySelector('#loading_spinner');
@@ -21,97 +23,105 @@ document.addEventListener('DOMContentLoaded', function () {
     const notification_div = document.getElementById("notification");
     const message = document.getElementById("notification-message");
 
+    
+ // Add this function to your existing code
+function handleRefreshButtonClick() {
+    resetLineIssues();
+    // Get references to the elements
 
-    // Função para verificar o conteúdo do textarea e ajustar a visibilidade do botão
-    function handleTextareaInput() {
-        var textareaContent = document.getElementById('editor').value;
-        var refreshButton = document.getElementById('refresh_button');
+    // Hide the refresh button and show the loading spinner
+    refreshButton.style.display = 'none';
+    loadingSpinner.style.display = 'block';
 
-        if (textareaContent.trim() !== '') {
-            refreshButton.style.display = 'inline-block'; // Mostrar o botão se o conteúdo não estiver vazio
-        } else {
-            refreshButton.style.display = 'none'; // Esconder o botão se o conteúdo estiver vazio
-        }
+    // Get the language code from the selected language element
+    var selectedLanguageCode = localStorage.getItem('selectedLanguage');
+
+    // Check if a language is selected
+    if (!selectedLanguageCode) {
+        notification('Please select a language to start.', 'info');
+        // Show the refresh button and hide the loading spinner
+        refreshButton.style.display = 'block';
+        loadingSpinner.style.display = 'none';
+        return;
     }
-    
-    // Add this function to your existing code
-    function handleRefreshButtonClick() {
-        resetLineIssues();
-        // Get references to the elements
 
-        // Hide the refresh button and show the loading spinner
-        refreshButton.style.display = 'none';
-        loadingSpinner.style.display = 'block';
+    // Prepare the data to send to the API
+    var requestData = {
+        text: textArea.value,
+    };
 
-        // Get the language code from the selected language element
-        var selectedLanguageCode = localStorage.getItem('selectedLanguage');
-
-        // Prepare the data to send to the API
-        var requestData = {
-            text: textArea.value,
-        };
-
-        
-        fetch(`https://datamatch-backend.onrender.com/formatter/${selectedLanguageCode}`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(requestData),
-        })
-            .then(response => response.json())
-            .then(data => {
-                // Handle the API response here
-                console.log('API Response:', data);
-    
-                // Remove existing HTML elements inside the improvements_containers
-                const improvementsContainer = document.getElementById('improvements_containers');
-                improvementsContainer.innerHTML = '';
-
-                if (data.result.issues === false) {
-                    // Create and append the "No issues found" div
-                    const noIssuesDiv = document.createElement('div');
-                    noIssuesDiv.className = 'container_no_issues';
-                    noIssuesDiv.id = 'container_no_issues';
-                    noIssuesDiv.style.display = 'block';
-                
-                    const contentDiv = document.createElement('div');
-                    contentDiv.className = 'content_ok';
-                
-                    const h2 = document.createElement('h2');
-                    h2.textContent = 'No issues found! ✨';
-                
-                    const copyBtn = document.createElement('div');
-                    copyBtn.className = 'content_copy_btn';
-                    copyBtn.textContent = 'Copy';
-                    copyBtn.onclick = copyToClipboard;
-                
-                    contentDiv.appendChild(h2);
-                    contentDiv.appendChild(copyBtn);
-                    noIssuesDiv.appendChild(contentDiv);
-                
-                    improvementsContainer.appendChild(noIssuesDiv);
+    fetch(`https://datamatch-backend.onrender.com/formatter/${selectedLanguageCode}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestData),
+    })
+        .then(response => {
+            if (!response.ok) {
+                if (response.status === 404) {
+                    // Show notification for language not selected
+                    notification("Language not supported: ", 'info');
                 } else {
-                    // Adiciona os containers HTML ao contêiner "improvements_containers"
-                    for (const alertaKey in data.result.containers.alerts) {
-                        const alerta = data.result.containers.alerts[alertaKey];
-                        const container = createContainer(alerta.container);
-                        improvementsContainer.appendChild(container);
-                    }
+                    // Handle other errors here
+                    console.error('Error with API request. Status:', response.status);
+                    notification('We are experiencing internal issues, please try again later. 🔧');
                 }
-    
-            })
-            .catch(error => {
-                // Handle errors here
-                console.error('Error sending data to API:', error);
-                notification('We are experiencing internal issues, please try again later. 🔧');
-            })
-            .finally(() => {
-                // Show the refresh button and hide the loading spinner after the request is complete
-                refreshButton.style.display = 'block';
-                loadingSpinner.style.display = 'none';
-            });
-    }
+            }
+            return response.json();
+        })
+        .then(data => {
+            // Handle the API response here
+            console.log('API Response:', data);
+
+            // Remove existing HTML elements inside the improvements_containers
+            const improvementsContainer = document.getElementById('improvements_containers');
+            improvementsContainer.innerHTML = '';
+
+            if (data.result.issues === false) {
+                // Create and append the "No issues found" div
+                const noIssuesDiv = document.createElement('div');
+                noIssuesDiv.className = 'container_no_issues';
+                noIssuesDiv.id = 'container_no_issues';
+                noIssuesDiv.style.display = 'block';
+
+                const contentDiv = document.createElement('div');
+                contentDiv.className = 'content_ok';
+
+                const h2 = document.createElement('h2');
+                h2.textContent = 'No issues found! ✨';
+
+                const copyBtn = document.createElement('div');
+                copyBtn.className = 'content_copy_btn';
+                copyBtn.textContent = 'Copy';
+                copyBtn.onclick = copyToClipboard;
+
+                contentDiv.appendChild(h2);
+                contentDiv.appendChild(copyBtn);
+                noIssuesDiv.appendChild(contentDiv);
+
+                improvementsContainer.appendChild(noIssuesDiv);
+            } else {
+                // Adiciona os containers HTML ao contêiner "improvements_containers"
+                for (const alertaKey in data.result.containers.alerts) {
+                    const alerta = data.result.containers.alerts[alertaKey];
+                    const container = createContainer(alerta.container);
+                    improvementsContainer.appendChild(container);
+                }
+            }
+        })
+        .catch(error => {
+            // Handle errors here
+            console.error('Error sending data to API:', error);
+            notification('We are experiencing internal issues, please try again later. 🔧');
+        })
+        .finally(() => {
+            // Show the refresh button and hide the loading spinner after the request is complete
+            refreshButton.style.display = 'block';
+            loadingSpinner.style.display = 'none';
+        });
+}
+
 
     refreshButton.addEventListener('click', handleRefreshButtonClick);
 
@@ -216,7 +226,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     line.textContent = lineLength;
     
                     var selectedLanguageCode = localStorage.getItem('selectedLanguage');
-                    if (selectedLanguageCode === 'BR' || selectedLanguageCode === 'PT') {        
+                    if (selectedLanguageCode === 'PT-BR' || selectedLanguageCode === 'PT-PT') {        
                         if (lineLength > 50) {
                             line.style.fontWeight = 'bold';
                             line.style.color = 'yellow';
@@ -241,8 +251,32 @@ document.addEventListener('DOMContentLoaded', function () {
                 characterCounter.appendChild(line);
             }
             resetLineIssues();
-            closeContainers()
+            closeContainers();
+            resetImprovementsBoxes('Tap the <span class="hightlight_text">Refresh</span> icon to update the suggestions.');
 
+        }
+
+        function resetImprovementsBoxes(text) {
+            // Obtém a referência ao contêiner de melhorias
+            const improvementsContainer = document.getElementById('improvements_containers');
+        
+            // Remove todas as divs dentro do contêiner de melhorias
+            improvementsContainer.innerHTML = '';
+        
+            // Cria a div de espaço reservado para melhorias
+            const improvementsPlaceholderDiv = document.createElement('div');
+            improvementsPlaceholderDiv.className = 'improvements_placeholder_div';
+            improvementsPlaceholderDiv.id = 'improvements_placeholder_div';
+        
+            // Cria a div de espaço reservado para melhorias com o texto fornecido
+            const improvementsPlaceholder = document.createElement('div');
+            improvementsPlaceholder.className = 'improvements_placeholder';
+            improvementsPlaceholder.id = 'improvements_placeholder';
+            improvementsPlaceholder.innerHTML = text;
+        
+            // Adiciona a div de espaço reservado para melhorias ao contêiner de melhorias
+            improvementsPlaceholderDiv.appendChild(improvementsPlaceholder);
+            improvementsContainer.appendChild(improvementsPlaceholderDiv);
         }
 
         updateCharacterCounter();
@@ -325,10 +359,10 @@ document.addEventListener('DOMContentLoaded', function () {
     // Função para obter o nome completo do idioma com base no código
     function getLanguageFullName(code) {
         const languageMap = {
-            'UK': 'English (UK)',
-            'US': 'English (US)',
-            'BR': 'Portuguese (BR)',
-            'PT': 'Portuguese (PT)'
+            'EN-UK': 'English (UK)',
+            'EN-US': 'English (US)',
+            'PT-BR': 'Portuguese (BR)',
+            'PT-PT': 'Portuguese (PT)'
             // Adicione mais idiomas conforme necessário
         };
 
