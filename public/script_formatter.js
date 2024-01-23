@@ -370,7 +370,8 @@ function handleRefreshButtonClick() {
             'EN-UK': 'English (UK)',
             'EN-US': 'English (US)',
             'PT-BR': 'Portuguese (BR)',
-            'PT-PT': 'Portuguese (PT)'
+            'PT-PT': 'Portuguese (PT)',
+            'ES': 'Spanish'
             // Adicione mais idiomas conforme necessário
         };
 
