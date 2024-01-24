@@ -211,7 +211,6 @@ function handleRefreshButtonClick() {
 
 
         function updateCharacterCounter() {
-        
             var lines = textarea.value.split('\n');
             characterCounter.innerHTML = '';
         
@@ -221,16 +220,16 @@ function handleRefreshButtonClick() {
                 var lineLength = lines[i].trim().length;
         
                 if (lowercaseLine === '' || /^#instrumental$/.test(lowercaseLine) || /^#intro$/.test(lowercaseLine) || /^#verse$/.test(lowercaseLine) || /^#pre-chorus$/.test(lowercaseLine) || /^#chorus$/.test(lowercaseLine) || /^#hook$/.test(lowercaseLine) || /^#bridge$/.test(lowercaseLine) || /^#outro$/.test(lowercaseLine)) {
-                    line.textContent = " ";            
+                    line.textContent = " ";
                 } else {
                     line.textContent = lineLength;
-    
+        
                     var selectedLanguageCode = localStorage.getItem('selectedLanguage');
-                    if (selectedLanguageCode === 'PT-BR' || selectedLanguageCode === 'PT-PT') {        
+                    if (selectedLanguageCode === 'PT-BR' || selectedLanguageCode === 'PT-PT') {
                         if (lineLength > 50) {
                             line.style.fontWeight = 'bold';
                             line.style.color = 'yellow';
-                        }     
+                        }
                         if (lineLength > 55) {
                             line.style.fontWeight = 'bold';
                             line.style.color = 'red';
@@ -239,21 +238,29 @@ function handleRefreshButtonClick() {
                         if (lineLength > 65) {
                             line.style.fontWeight = 'bold';
                             line.style.color = 'yellow';
-                        }     
+                        }
                         if (lineLength > 70) {
                             line.style.fontWeight = 'bold';
                             line.style.color = 'red';
                         }
                     }
-    
                 }
         
+                // Adicione a linha ao DOM antes de calcular a altura
                 characterCounter.appendChild(line);
+        
+                // Obtenha a altura da linha após ela ter sido adicionada ao DOM
+                var lineHeight = line.getBoundingClientRect().height;
+        
+                // Ajustar a altura da linha para a altura calculada
+                line.style.height = lineHeight + 'px';
             }
+        
             resetLineIssues();
             closeContainers();
             resetImprovementsBoxes();
         }
+        
 
         function resetImprovementsBoxes() {
             // Obtém a referência ao contêiner de melhorias

@@ -345,7 +345,7 @@ body {
         font-size: 18px;
         resize: none; /* Impede o redimensionamento do textarea */
         overflow: auto; /* Permite a rolagem */
-        white-space: nowrap; /* Impede a quebra automática de linha */
+        white-space: normal; 
         scrollbar-width: thin; /* Firefox */
         scrollbar-color: transparent transparent; /* Firefox */
         position: relative;
@@ -1158,9 +1158,11 @@ body {
             background-color: transparent;
             color: white;
             font-size: 18px;
+            white-space: normal;
             resize: none; /* Impede o redimensionamento do textarea */
             overflow: auto; /* Permite a rolagem */
             scrollbar-width: thin; /* Firefox */
+            
             scrollbar-color: transparent transparent; /* Firefox */
             position: relative;
         }
@@ -1305,11 +1307,11 @@ body {
     }
     
     .footer.expanded {
-        height: 40%; /* Ajuste a altura conforme necessário */
+        height: 80%; /* Ajuste a altura conforme necessário */
     }
 
     .footer_hided_content {
-        height: 85%;
+        height: 92%;
     }
 
     .hided_content {
@@ -1323,11 +1325,11 @@ body {
     }
 
     .improvements_box {
-        height: 75%;
+        height: 88%;
     }
 
     .language_selector {
-        height: 20%;
+        height: 10%;
         background-color: #616161;
         border-radius: 20px;
     }
