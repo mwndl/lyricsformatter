@@ -342,7 +342,7 @@ body {
         outline: none;
         background-color: transparent;
         color: white;
-        font-size: 16px;
+        font-size: 18px;
         resize: none; /* Impede o redimensionamento do textarea */
         overflow: auto; /* Permite a rolagem */
         white-space: nowrap; /* Impede a quebra automática de linha */
@@ -1157,7 +1157,7 @@ body {
             outline: none;
             background-color: transparent;
             color: white;
-            font-size: 12px;
+            font-size: 18px;
             resize: none; /* Impede o redimensionamento do textarea */
             overflow: auto; /* Permite a rolagem */
             scrollbar-width: thin; /* Firefox */
