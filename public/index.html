@@ -18,7 +18,7 @@
             <div class="return">
                 <img class="return_arrow" id="return_arrow" src="images\arrow.svg" alt="Return Arrow" title="Return to Home" draggable="false" style="display:none">
             </div>
-            <div class="page_title">Lyrics Formatter (Beta)</div>
+            <div class="page_title">Lyrics Formatter</div>
             <div class="settings">
                 <img class="options_dots" id="settings_dots" src="images\options.svg" alt="Options" title="Options" draggable="false" style="display:none">
             </div>
@@ -114,15 +114,59 @@
               <p id="notification-message"></p>
             </div>
         </div>
-        <div class="footer">
+        <div class="footer" id="footer">
             <div class="footer_message">Please note that this tool only provides suggestions based on your current transcription. It is still essential to thoroughly review all the content before sending.</div>
-            <div class="mobile_footer_div">
+            <div class="mobile_footer_div" id="mobile_footer_div" style="height: 100%;">
                 <div class="status_light_div">
                     <div class="status_light status-yellow"></div>
                 </div>
-                <div class="mobile_footer_text">Page under development</div>
+                <div class="mobile_footer_text">The mobile UI is under development, please use a PC</div>
                 <div class="mobile_footer_arrow">
                     <img class="expand_arrow" id="expand_arrow" src="images/expand_arrow.svg" alt="Expand Arrow" title="Tap to check suggestions" draggable="false">
+                </div>
+            </div>
+            <div id="footer_hided_content" class="footer_hided_content" style="display:none">
+                <div class="hided_content">
+                    <div class="improvements_box">
+                        <div class="improvements_box_top">
+                            <div class="improvements_box_text">
+                                <p>Suggestions</p>
+                            </div>
+                            <div class="improvements_box_refresh" style="">
+                                <button class="refresh_button" id="refresh_button_mob" style="" title="Refresh suggestions" onclick="handleRefreshButtonClick()">
+                                    <div class="refresh_symbol"></div>
+                                  </button>
+                                <div class="loading_spinner_loop" id="loading_spinner" style="display:none">
+                                    <div class="loading_spinner">
+                                      <div></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="improvements_box_content">
+                            <div class="improvements" id="improvements_containers">
+                                <div class="improvements_placeholder_div" id="improvements_placeholder_div">
+                                    <div class="improvements_placeholder" id="improvements_placeholder">Type something or paste your transcription to start...</div>
+                                </div>
+                            </div>                            
+                        </div>
+                    </div>
+                    <div class="language_selector">
+                        <div class="lang_selector_div" title="Tap to see list of supported languages">
+                            <div class="selected_language">Select Language</div>
+                            <div class="mobile_footer_arrow">
+                                <img class="lang_expand_arrow" id="lang_expand_arrow" src="images/expand_arrow.svg" alt="Expand Arrow" draggable="false">
+                            </div>
+                        </div>
+                        <ul class="language_list">
+                            <li data-lang="EN-UK">English (UK)</li>
+                            <li data-lang="EN-US">English (US)</li>
+                            <li data-lang="PT-BR">Portuguese (BR)</li>
+                            <li data-lang="PT-PT">Portuguese (PT)</li>
+                            <li data-lang="ES">Spanish</li>
+                            <p>More languages soon...</p>
+                        </ul>
+                    </div>
                 </div>
             </div>
         </div>       
@@ -130,15 +174,18 @@
         function checkContent() {
             var editor = document.getElementById('editor');
             var refreshButton = document.getElementById('refresh_button');
+            var refreshButtonMob = document.getElementById('refresh_button_mob');
             var improvementsPlaceholder = document.getElementById('improvements_placeholder')
 
             if (editor.value.trim() === '') {
                 refreshButton.style.display = 'none';
+                refreshButtonMob.style.display = 'none';
                 improvementsPlaceholder.textContent = 'Type something or paste your transcription to start...';
                 improvementsPlaceholder.onclick = '';
 
             } else {
                 refreshButton.style.display = 'block';
+                refreshButtonMob.style.display = 'block';
                 improvementsPlaceholder.innerHTML = 'Tap the <span class="hightlight_text">Refresh</span> icon to update the suggestions.';
                 improvementsPlaceholder.onclick = handleRefreshButtonClick;
             }
@@ -170,6 +217,43 @@
             overlay.style.display = "none";
         });
     });
+
+
+
+    document.addEventListener('DOMContentLoaded', function () {
+        var expandArrow = document.getElementById('expand_arrow');
+        var footer = document.getElementById('footer');
+        var footerHidedContent = document.getElementById('footer_hided_content');
+        var mobileFooterDiv = document.getElementById('mobile_footer_div');
+
+        expandArrow.addEventListener('click', function (event) {
+            event.stopPropagation(); // Impede que o clique seja propagado para o corpo/documento
+            footer.classList.toggle('expanded');
+
+            if (footer.classList.contains('expanded')) {
+                footerHidedContent.style.display = "block";
+                mobileFooterDiv.style.height = "15%";
+                expandArrow.style.transform = "rotate(180deg)";
+            } else {
+                footerHidedContent.style.display = "none";
+                mobileFooterDiv.style.height = "100%";
+                expandArrow.style.transform = "rotate(0deg)";
+            }
+        });
+
+        // Adiciona um ouvinte de eventos ao corpo/documento para fechar o footer quando clicar fora dele
+        document.body.addEventListener('click', function (event) {
+            if (!footer.contains(event.target)) {
+                // Se o clique ocorreu fora do footer, oculta o conteúdo e recolhe o footer
+                footerHidedContent.style.display = "none";
+                mobileFooterDiv.style.height = "100%";
+                expandArrow.style.transform = "rotate(0deg)";
+                footer.classList.remove('expanded');
+            }
+        });
+    });
+
+
             </script>
         <div id="overlay"></div>
 

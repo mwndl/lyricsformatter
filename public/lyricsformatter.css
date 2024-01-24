@@ -978,7 +978,6 @@ body {
 
 .footer_message {
     width: 100%;
-    height: 100%;
     flex-grow: 1;
     color: white;
     text-align: center;
@@ -1123,6 +1122,7 @@ body {
             font-family: monospace;
             line-height: 21px;
             overflow: auto;
+            touch-action: manipulation;
         }
 
         .character_counter {
@@ -1229,14 +1229,14 @@ body {
         background-color: #383838;
         border-top-left-radius: 20px;
         border-top-right-radius: 20px;
-        padding: 2%;
         box-sizing: border-box;
-        position: relative;
+        position: fixed;
+        bottom: 0; /* Inicialmente na parte inferior */
+        transition: height 0.3s ease; /* Adiciona uma transição suave para a animação */
     }
 
     .mobile_footer_div {
         width: 100%;
-        height: 100%;
         display: flex;
     }
 
@@ -1304,15 +1304,38 @@ body {
         display:none;
     }
     
-    .expanded_content {
-        display: none;
-        position: fixed;
-        bottom: 0;
-        width: 100%;
-        height: 0;
-        background-color: #fff; /* Cor de fundo para o conteúdo expandido */
+    .footer.expanded {
+        height: 40%; /* Ajuste a altura conforme necessário */
+    }
+
+    .footer_hided_content {
+        height: 85%;
+    }
+
+    .hided_content {
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0 2% 2%;
+        box-sizing: border-box;
+    }
+
+    .improvements_box {
+        height: 75%;
+    }
+
+    .language_selector {
+        height: 20%;
+        background-color: #616161;
         border-radius: 20px;
-        transition: height 0.5s;
+    }
+
+    .lang_expand_arrow {
+        width: 20%;
+        height: 20%;
+        transform: rotate(180deg);
     }
 
     
