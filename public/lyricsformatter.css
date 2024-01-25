@@ -345,7 +345,7 @@ body {
         font-size: 18px;
         resize: none; /* Impede o redimensionamento do textarea */
         overflow: auto; /* Permite a rolagem */
-        white-space: normal; 
+        white-space: nowrap; 
         scrollbar-width: thin; /* Firefox */
         scrollbar-color: transparent transparent; /* Firefox */
         position: relative;
@@ -1158,7 +1158,7 @@ body {
             background-color: transparent;
             color: white;
             font-size: 18px;
-            white-space: normal;
+            white-space: nowrap;
             resize: none; /* Impede o redimensionamento do textarea */
             overflow: auto; /* Permite a rolagem */
             scrollbar-width: thin; /* Firefox */
