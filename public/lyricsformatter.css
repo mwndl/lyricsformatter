@@ -992,6 +992,10 @@ body {
     display:none;
 }
 
+.development_message {
+    display:none;
+}
+
 
 /* FOOTER - END */
 
