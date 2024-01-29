@@ -225,7 +225,7 @@ function handleRefreshButtonClick() {
                     line.textContent = lineLength;
         
                     var selectedLanguageCode = localStorage.getItem('selectedLanguage');
-                    if (selectedLanguageCode === 'PT-BR' || selectedLanguageCode === 'PT-PT') {
+                    if (selectedLanguageCode === 'pt-BR' || selectedLanguageCode === 'pt-PT') {
                         if (lineLength > 50) {
                             line.style.fontWeight = 'bold';
                             line.style.color = 'yellow';
@@ -374,11 +374,16 @@ function handleRefreshButtonClick() {
     // Função para obter o nome completo do idioma com base no código
     function getLanguageFullName(code) {
         const languageMap = {
-            'EN-UK': 'English (UK)',
-            'EN-US': 'English (US)',
-            'PT-BR': 'Portuguese (BR)',
-            'PT-PT': 'Portuguese (PT)',
-            'ES': 'Spanish'
+            'en-UK': 'English (UK)',
+            'en-US': 'English (US)',
+            'nl': 'Dutch',
+            'fr': 'French',
+            'de': 'German',
+            'it': 'Italian',
+            'pt-BR': 'Portuguese (BR)',
+            'pt-PT': 'Portuguese (PT)',
+            'es': 'Spanish'
+                
             // Adicione mais idiomas conforme necessário
         };
 
