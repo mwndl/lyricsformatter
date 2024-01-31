@@ -21,7 +21,24 @@
             </div>
             <div class="page_title">Lyrics Formatter</div>
             <div class="settings">
-                <img class="options_dots" id="settings_dots" src="images\options.svg" alt="Options" title="Options" draggable="false" style="display:none">
+                <img class="options_dots" id="settings_dots" src="images\options.svg" alt="Options" title="Options" draggable="false" style="display:block">
+                <!-- Mini menu -->
+                <div id="mini_menu" class="mini-menu">
+                    <ul>
+                        <li id="settings_option" style="display:block">
+                            <p>Settings</p>
+                        </li>
+                        <li id="credits_option" style="display:block">
+                            <p>Credits</p>
+                        </li>
+                        <li id="suggest_option" style="display:block">
+                            <p>Suggest a Feature</p>
+                        </li>
+                        <li id="about_option" style="display:block">
+                            <p>About This Tool</p>
+                        </li>
+                    </ul>
+                </div>
             </div>
         </div>
     
@@ -45,7 +62,7 @@
                             </div>
                         </div>
                         <ul class="language_list">
-                            <li data-lang="en-UK">English (UK)</li>
+                            <li data-lang="EN-UK">English (UK)</li>
                             <li data-lang="en-US">English (US)</li>
                             <li data-lang="nl">Dutch</li>
                             <li data-lang="fr">French</li>
@@ -211,21 +228,91 @@
 
         document.addEventListener("DOMContentLoaded", function () {
         var optionsDots = document.getElementById("settings_dots");
-        var popup = document.getElementById("popup");
+        var miniMenu = document.getElementById("mini_menu");
+
+        var settingsOption = document.getElementById("settings_option");
+        var creditsOption = document.getElementById("credits_option");
+        var suggestOption = document.getElementById("suggest_option");
+        var aboutOption = document.getElementById("about_option");
+
+        var settingsPopup = document.getElementById("settings_popup");
+        var creditsPopup = document.getElementById("credits_popup");
+        var suggestPopup = document.getElementById("suggest_popup");
+        var aboutPopup = document.getElementById("about_popup");
+
         var overlay = document.getElementById("overlay");
 
-        // Exibir pop-up e overlay ao clicar nos 'options_dots'
-        optionsDots.addEventListener("click", function () {
-            popup.style.display = "block";
+        // Exibir mini menu ao clicar nos 'options_dots'
+        optionsDots.addEventListener("click", function (event) {
+            event.stopPropagation();
+            miniMenu.style.display = "block";
+        });
+
+        // Ocultar mini menu ao clicar fora dele
+        document.addEventListener("click", function () {
+            miniMenu.style.display = "none";
+        });
+
+        // Evitar que o clique no mini menu propague para o documento
+        miniMenu.addEventListener("click", function (event) {
+            event.stopPropagation();
+        });
+
+        // Show Settings
+        settingsOption.addEventListener("click", function () {
+            miniMenu.style.display = "none";
+            settingsPopup.style.display = "block";
             overlay.style.display = "block";
         });
 
-        // Ocultar pop-up e overlay ao clicar fora do pop-up
+        // Hide Settings
         overlay.addEventListener("click", function () {
-            popup.style.display = "none";
+            settingsPopup.style.display = "none";
+            overlay.style.display = "none";
+        });
+
+        // Show Credits
+        creditsOption.addEventListener("click", function () {
+            miniMenu.style.display = "none";
+            creditsPopup.style.display = "block";
+            overlay.style.display = "block";
+        });
+
+        // Hide Credits
+        overlay.addEventListener("click", function () {
+            creditsPopup.style.display = "none";
+            overlay.style.display = "none";
+        });
+
+        // Show Suggestions
+        suggestOption.addEventListener("click", function () {
+            miniMenu.style.display = "none";
+            suggestPopup.style.display = "block";
+            overlay.style.display = "block";
+        });
+
+        // Hide Suggestions
+        overlay.addEventListener("click", function () {
+            suggestPopup.style.display = "none";
+            overlay.style.display = "none";
+        });
+
+        // Show About Info
+        aboutOption.addEventListener("click", function () {
+            miniMenu.style.display = "none";
+            aboutPopup.style.display = "block";
+            overlay.style.display = "block";
+        });
+
+        // Hide About Info
+        overlay.addEventListener("click", function () {
+            aboutPopup.style.display = "none";
             overlay.style.display = "none";
         });
     });
+
+
+
 
 
 
@@ -266,12 +353,12 @@
             </script>
         <div id="overlay"></div>
 
-        <div id="popup">
-            <div id="closeButton" onclick="closePopup()">&#215;</div>
+        <div id="settings_popup" class="popup">
+            <div id="closeButton" onclick="closeSettings()">&#215;</div>
             <div class="popup_title">
                 <h2>Settings</h2>
             </div>
-            <div class="popup_content">
+            <div class="popup_content" style="display:none">
                 <div class="popup_option">
                     <p class="popup_option_title">Character Counter</p>
                     <label class="switch">
@@ -316,11 +403,58 @@
                 </div>
             </div>
         </div>
+
+        <div id="credits_popup" class="popup">
+            <div id="closeButton" onclick="closeCredits()">&#215;</div>
+            <div class="popup_title">
+                <h2>Credits</h2>
+            </div>
+            <div class="popup_content">
+            </div>
+        </div>
+
+        <div id="suggest_popup" class="popup">
+            <div id="closeButton" onclick="closeSuggestions()">&#215;</div>
+            <div class="popup_title">
+                <h2>Suggest a Feature</h2>
+            </div>
+            <div class="popup_content">
+            </div>
+        </div>
+
+        <div id="about_popup" class="popup">
+            <div id="closeButton" onclick="closeAboutInfo()">&#215;</div>
+            <div class="popup_title">
+                <h2>About this tool</h2>
+            </div>
+            <div class="popup_content" style="display:none">
+                <p>The Lyrics Formatter is a tool developed to simplify the routine of Musixmatch users, offering an effective way to check transcription and formatting errors in song lyrics. Developed and maintained by Musixmatch Specialists, this platform emerges as a resource for new contributors to quickly adapt to Musixmatch guidelines, while providing experienced users with an efficient way to optimize the time dedicated to their contributions.</p>
+            </div>
+        </div>
+
         <script>
-                function closePopup() {
-                    var popup = document.getElementById("popup");
+                function closeSettings() {
+                    var settingsPopup = document.getElementById("settings_popup");
                     var overlay = document.getElementById("overlay");
-                    popup.style.display = "none";
+                    settingsPopup.style.display = "none";
+                    overlay.style.display = "none";
+                }
+                function closeCredits() {
+                    var creditsPopup = document.getElementById("credits_popup");
+                    var overlay = document.getElementById("overlay");
+                    creditsPopup.style.display = "none";
+                    overlay.style.display = "none";
+                }
+                function closeSuggestions() {
+                    var suggestPopup = document.getElementById("suggest_popup");
+                    var overlay = document.getElementById("overlay");
+                    suggestPopup.style.display = "none";
+                    overlay.style.display = "none";
+                }
+                function closeAboutInfo() {
+                    var aboutPopup = document.getElementById("about_popup");
+                    var overlay = document.getElementById("overlay");
+                    aboutPopup.style.display = "none";
                     overlay.style.display = "none";
                 }
         </script>
