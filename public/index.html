@@ -21,24 +21,7 @@
             </div>
             <div class="page_title">Lyrics Formatter</div>
             <div class="settings">
-                <img class="options_dots" id="settings_dots" src="images\options.svg" alt="Options" title="Options" draggable="false" style="display:block">
-                <!-- Mini menu -->
-                <div id="mini_menu" class="mini-menu">
-                    <ul>
-                        <li id="settings_option" style="display:block">
-                            <p>Settings</p>
-                        </li>
-                        <li id="credits_option" style="display:block">
-                            <p>Credits</p>
-                        </li>
-                        <li id="suggest_option" style="display:block">
-                            <p>Suggest a Feature</p>
-                        </li>
-                        <li id="about_option" style="display:block">
-                            <p>About This Tool</p>
-                        </li>
-                    </ul>
-                </div>
+                <img class="options_dots" id="settings_dots" src="images\options.svg" alt="Options" title="Options" draggable="false" style="display:none">
             </div>
         </div>
     
@@ -61,13 +44,13 @@
                                 <img class="lang_expand_arrow" id="lang_expand_arrow" src="images/expand_arrow.svg" alt="Expand Arrow" draggable="false">
                             </div>
                         </div>
-                        <ul class="language_list" id="language_list">
-                            <li data-lang="EN-UK">English (UK)</li>
+                        <ul class="language_list">
+                            <li data-lang="en-UK">English (UK)</li>
                             <li data-lang="en-US">English (US)</li>
-                            <li data-lang="nl">Dutch</li>
-                            <li data-lang="fr">French</li>
-                            <li data-lang="de">German</li>
-                            <li data-lang="it">Italian</li>
+                            <li data-lang="nl" style="display:none">Dutch</li>
+                            <li data-lang="fr" style="display:none">French</li>
+                            <li data-lang="de" style="display:none">German</li>
+                            <li data-lang="it" style="display:none">Italian</li>
                             <li data-lang="pt-BR">Portuguese (BR)</li>
                             <li data-lang="pt-PT">Portuguese (PT)</li>
                             <li data-lang="es">Spanish</li>
@@ -138,59 +121,6 @@
         </div>
         <div class="footer" id="footer">
             <div class="footer_message">Please note that this tool only provides suggestions based on your current transcription. It is still essential to thoroughly review all the content before sending.</div>
-            <div class="mobile_footer_div" id="mobile_footer_div" style="height: 100%;">
-                <div class="status_light_div">
-                    <div class="status_light status-yellow"></div>
-                </div>
-                <div class="mobile_footer_text" style="font-size: 12px;">The mobile UI is under development, please use a PC</div>
-                <div class="mobile_footer_arrow">
-                    <img class="expand_arrow" id="expand_arrow" src="images/expand_arrow.svg" alt="Expand Arrow" title="Tap to check suggestions" draggable="false">
-                </div>
-            </div>
-            <div id="footer_hided_content" class="footer_hided_content" style="display:none">
-                <div class="hided_content">
-                    <div class="improvements_box">
-                        <div class="improvements_box_top">
-                            <div class="improvements_box_text">
-                                <p>Suggestions</p>
-                            </div>
-                            <div class="improvements_box_refresh" style="">
-                                <button class="refresh_button" id="refresh_button_mob" style="" title="Refresh suggestions" onclick="handleRefreshButtonClick()">
-                                    <div class="refresh_symbol"></div>
-                                  </button>
-                                <div class="loading_spinner_loop" id="loading_spinner" style="display:none">
-                                    <div class="loading_spinner">
-                                      <div></div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="improvements_box_content">
-                            <div class="improvements" id="improvements_containers">
-                                <div class="improvements_placeholder_div" id="improvements_placeholder_div">
-                                    <div class="improvements_placeholder" id="improvements_placeholder">Type something or paste your transcription to start...</div>
-                                </div>
-                            </div>                            
-                        </div>
-                    </div>
-                    <div class="language_selector">
-                        <div class="lang_selector_div" title="Tap to see list of supported languages">
-                            <div class="selected_language">Select Language</div>
-                            <div class="mobile_footer_arrow">
-                                <img class="lang_expand_arrow" id="lang_expand_arrow" src="images/expand_arrow.svg" alt="Expand Arrow" draggable="false">
-                            </div>
-                        </div>
-                        <ul class="language_list">
-                            <li data-lang="EN-UK">English (UK)</li>
-                            <li data-lang="EN-US">English (US)</li>
-                            <li data-lang="PT-BR">Portuguese (BR)</li>
-                            <li data-lang="PT-PT">Portuguese (PT)</li>
-                            <li data-lang="ES">Spanish</li>
-                            <p>More languages soon...</p>
-                        </ul>
-                    </div>
-                </div>
-            </div>
         </div>    
         <div class="development_message">
             <h2>Mobile Interface Under Development</h2>
@@ -226,6 +156,23 @@
             // Implement your refresh button click logic here
         }
 
+        document.addEventListener("DOMContentLoaded", function () {
+        var optionsDots = document.getElementById("settings_dots");
+        var popup = document.getElementById("popup");
+        var overlay = document.getElementById("overlay");
+
+        // Exibir pop-up e overlay ao clicar nos 'options_dots'
+        optionsDots.addEventListener("click", function () {
+            popup.style.display = "block";
+            overlay.style.display = "block";
+        });
+
+        // Ocultar pop-up e overlay ao clicar fora do pop-up
+        overlay.addEventListener("click", function () {
+            popup.style.display = "none";
+            overlay.style.display = "none";
+        });
+    });
 
 
 
@@ -266,48 +213,48 @@
             </script>
         <div id="overlay"></div>
 
-        <div id="settings_popup" class="popup">
-            <div id="closeButton" onclick="closeSettings()">&#215;</div>
+        <div id="popup">
+            <div id="closeButton" onclick="closePopup()">&#215;</div>
             <div class="popup_title">
                 <h2>Settings</h2>
             </div>
             <div class="popup_content">
-                <div class="popup_option" style="display:none">
+                <div class="popup_option">
                     <p class="popup_option_title">Character Counter</p>
                     <label class="switch">
                         <input type="checkbox">
                         <span class="slider round"></span>
                     </label>
                 </div>
-                <div class="popup_option" style="display:none">
+                <div class="popup_option">
                     <p class="popup_option_title">Smart Capitalization</p>
                     <label class="switch">
                         <input type="checkbox">
                         <span class="slider round"></span>
                     </label>
                 </div>
-                <div class="popup_option" style="display:none">
+                <div class="popup_option">
                     <p class="popup_option_title">Trim Lines</p>
                     <label class="switch">
                         <input type="checkbox">
                         <span class="slider round"></span>
                     </label>
                 </div>
-                <div class="popup_option" style="display:none">
+                <div class="popup_option">
                     <p class="popup_option_title">Remove Double Spaces and Lines</p>
                     <label class="switch">
                         <input type="checkbox">
                         <span class="slider round"></span>
                     </label>
                 </div>
-                <div class="popup_option" style="display:none">
+                <div class="popup_option">
                     <p class="popup_option_title">Auto Capitalize Tags</p>
                     <label class="switch">
                         <input type="checkbox">
                         <span class="slider round"></span>
                     </label>
                 </div>
-                <div class="popup_option" style="display:none">
+                <div class="popup_option">
                     <p class="popup_option_title">Grammar Check (LanguageTool)</p>
                     <label class="switch">
                         <input type="checkbox">
@@ -316,147 +263,13 @@
                 </div>
             </div>
         </div>
-
-        <div id="credits_popup" class="popup">
-            <div id="closeButton" onclick="closeCredits()">&#215;</div>
-            <div class="popup_title">
-                <h2>Credits</h2>
-            </div>
-            <div class="popup_description">
-                <p></p>
-            </div>
-            <div class="popup_content" style="display: flex; align-items: center;">
-                <div class="loading_container" id="loading_container">
-                    <div class="loading_spinner_loop" id="loading_spinner_credits" style="display:block">
-                        <div class="loading_spinner">
-                            <div></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div id="suggest_popup" class="popup">
-            <div id="closeButton" onclick="closeSuggestions()">&#215;</div>
-            <div class="popup_title">
-                <h2>Suggest a Feature</h2>
-            </div>
-            <div class="popup_content">
-                <div class="popup_content">
-                </div>
-            </div>
-        </div>
-
-        <div id="about_popup" class="popup">
-            <div id="closeButton" onclick="closeAboutInfo()">&#215;</div>
-            <div class="popup_title">
-                <h2>About this tool</h2>
-            </div>
-            <div class="popup_content">
-                <p style="display:none">The Lyrics Formatter is a tool developed to simplify the routine of Musixmatch users, offering an effective way to check transcription and formatting errors in song lyrics. Developed and maintained by Musixmatch Specialists, this platform emerges as a resource for new contributors to quickly adapt to Musixmatch guidelines, while providing experienced users with an efficient way to optimize the time dedicated to their contributions.</p>
-            </div>
-        </div>
-
         <script>
-                function closeSettings() {
-                    var settingsPopup = document.getElementById("settings_popup");
+                function closePopup() {
+                    var popup = document.getElementById("popup");
                     var overlay = document.getElementById("overlay");
-                    settingsPopup.style.display = "none";
+                    popup.style.display = "none";
                     overlay.style.display = "none";
                 }
-                function closeCredits() {
-                    var creditsPopup = document.getElementById("credits_popup");
-                    var overlay = document.getElementById("overlay");
-                    creditsPopup.style.display = "none";
-                    overlay.style.display = "none";
-                }
-                function closeSuggestions() {
-                    var suggestPopup = document.getElementById("suggest_popup");
-                    var overlay = document.getElementById("overlay");
-                    suggestPopup.style.display = "none";
-                    overlay.style.display = "none";
-                }
-                function closeAboutInfo() {
-                    var aboutPopup = document.getElementById("about_popup");
-                    var overlay = document.getElementById("overlay");
-                    aboutPopup.style.display = "none";
-                    overlay.style.display = "none";
-                }
-// Função para fazer uma solicitação AJAX
-function fetchCreditsData() {
-    fetch('https://datamatch-backend2.onrender.com//formatter/credits')
-    .then(response => response.json())
-    .then(data => updateCredits(data.credits))
-    .catch(error => console.error('Erro ao buscar dados da API:', error));
-}
-
-// Função para atualizar os elementos HTML com os novos dados
-function updateCredits(credits) {
-    const popupContent = document.querySelector('#credits_popup .popup_content'); // Seleciona o popup_content dentro de credits_popup
-    const loadingContainer = document.getElementById('loading_container')
-
-    loadingContainer.style = 'display:none'
-
-     // Define o texto de descrição
-     const popupDescription = document.querySelector('.popup_description p');
-    popupDescription.textContent = "Here's the list of contributors who made this project real in each language. 🚀";
-
-    credits.forEach(credit => {
-
-        const colaboratorElement = document.createElement('a');
-        colaboratorElement.href = credit.mxm_profile;
-        colaboratorElement.className = 'colaborator';
-        colaboratorElement.target = '_blank'; // Abre o link em uma nova aba
-
-        const colaboratorImage = document.createElement('div');
-        colaboratorImage.className = 'colaborator_image';
-
-        const imageElement = document.createElement('img');
-        imageElement.src = credit.image;
-        imageElement.alt = credit.name;
-
-        const countryElement = document.createElement('div');
-        countryElement.className = 'colaborator_country';
-        countryElement.textContent = credit.country;
-
-        colaboratorImage.appendChild(imageElement);
-        colaboratorImage.appendChild(countryElement);
-
-        const colaboratorInfo = document.createElement('div');
-        colaboratorInfo.className = 'colaborator_info';
-
-        const nameElement = document.createElement('div');
-        nameElement.className = 'colaborator_name';
-        nameElement.textContent = credit.name;
-
-        // Adicionando o nome do colaborador antes de outros elementos
-        colaboratorInfo.appendChild(nameElement);
-
-        // Criar os elementos de colaborator_role
-        credit.roles.forEach(role => {
-            const roleElement = document.createElement('div');
-            roleElement.className = 'colaborator_role';
-            roleElement.textContent = role;
-            colaboratorInfo.appendChild(roleElement);
-        });
-
-        // Criar os elementos de colaborator_languages
-        credit.languages.forEach(language => {
-            const languageElement = document.createElement('div');
-            languageElement.className = 'colaborator_languages';
-            languageElement.textContent = language;
-            colaboratorInfo.appendChild(languageElement);
-        });
-
-        colaboratorElement.appendChild(colaboratorImage);
-        colaboratorElement.appendChild(colaboratorInfo);
-
-        popupContent.appendChild(colaboratorElement);
-    });
-}
-
-// Chama a função para buscar dados da API quando o documento estiver pronto
-document.addEventListener('DOMContentLoaded', fetchCreditsData);
-
         </script>
     </body>
 </html>
