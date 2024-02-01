@@ -23,6 +23,8 @@ document.addEventListener('DOMContentLoaded', function () {
     const notification_div = document.getElementById("notification");
     const message = document.getElementById("notification-message");
 
+    var miniMenu = document.getElementById("mini_menu");
+
     
  // Add this function to your existing code
 function handleRefreshButtonClick() {
@@ -50,7 +52,7 @@ function handleRefreshButtonClick() {
         text: textArea.value,
     };
 
-    fetch(`https://datamatch-backend.onrender.com/formatter/${selectedLanguageCode}`, {
+    fetch(`https://datamatch-backend2.onrender.com/formatter/${selectedLanguageCode}`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -416,6 +418,8 @@ function handleRefreshButtonClick() {
             languageList.style.display = 'block';
             languageArrow.style.transform = "rotate(0)";
             langButtonContent.title = "Tap to hide the list of supported languages";
+            miniMenu.style.display = "none";
+            
         }
     });
 
@@ -667,9 +671,10 @@ function expandContainer(container) {
     const content = container.querySelector('.content');
 
     if (container.classList.contains('expanded')) {
-        // O contêiner já está expandido, não fazer nada.
+        miniMenu.style.display = "none";
     } else {
         closeContainers(); // Fecha todos os containers antes de expandir o novo
+        miniMenu.style.display = "none";
 
         container.classList.add('expanded');
         content.style.display = 'block';
@@ -722,3 +727,89 @@ function resetLineIssues() {
     });
 }
 
+document.addEventListener("DOMContentLoaded", function () {
+    var optionsDots = document.getElementById("settings_dots");
+    var miniMenu = document.getElementById("mini_menu");
+    var langList = document.getElementById("language_list");
+
+    var settingsOption = document.getElementById("settings_option");
+    var creditsOption = document.getElementById("credits_option");
+    var suggestOption = document.getElementById("suggest_option");
+    var aboutOption = document.getElementById("about_option");
+
+    var settingsPopup = document.getElementById("settings_popup");
+    var creditsPopup = document.getElementById("credits_popup");
+    var suggestPopup = document.getElementById("suggest_popup");
+    var aboutPopup = document.getElementById("about_popup");
+
+    var overlay = document.getElementById("overlay");
+
+    // Exibir mini menu ao clicar nos 'options_dots'
+    optionsDots.addEventListener("click", function (event) {
+        event.stopPropagation();
+        miniMenu.style.display = "block";
+        langList.style.display = "none"
+    });
+
+    // Ocultar mini menu ao clicar fora dele
+    document.addEventListener("click", function () {
+        miniMenu.style.display = "none";
+    });
+
+    // Evitar que o clique no mini menu propague para o documento
+    miniMenu.addEventListener("click", function (event) {
+        event.stopPropagation();
+    });
+
+    // Show Settings
+    settingsOption.addEventListener("click", function () {
+        miniMenu.style.display = "none";
+        settingsPopup.style.display = "block";
+        overlay.style.display = "block";
+    });
+
+    // Hide Settings
+    overlay.addEventListener("click", function () {
+        settingsPopup.style.display = "none";
+        overlay.style.display = "none";
+    });
+
+    // Show Credits
+    creditsOption.addEventListener("click", function () {
+        miniMenu.style.display = "none";
+        creditsPopup.style.display = "block";
+        overlay.style.display = "block";
+    });
+
+    // Hide Credits
+    overlay.addEventListener("click", function () {
+        creditsPopup.style.display = "none";
+        overlay.style.display = "none";
+    });
+
+    // Show Suggestions
+    suggestOption.addEventListener("click", function () {
+        miniMenu.style.display = "none";
+        suggestPopup.style.display = "block";
+        overlay.style.display = "block";
+    });
+
+    // Hide Suggestions
+    overlay.addEventListener("click", function () {
+        suggestPopup.style.display = "none";
+        overlay.style.display = "none";
+    });
+
+    // Show About Info
+    aboutOption.addEventListener("click", function () {
+        miniMenu.style.display = "none";
+        aboutPopup.style.display = "block";
+        overlay.style.display = "block";
+    });
+
+    // Hide About Info
+    overlay.addEventListener("click", function () {
+        aboutPopup.style.display = "none";
+        overlay.style.display = "none";
+    });
+});
