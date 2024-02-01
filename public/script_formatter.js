@@ -671,10 +671,8 @@ function expandContainer(container) {
     const content = container.querySelector('.content');
 
     if (container.classList.contains('expanded')) {
-        miniMenu.style.display = "none";
     } else {
         closeContainers(); // Fecha todos os containers antes de expandir o novo
-        miniMenu.style.display = "none";
 
         container.classList.add('expanded');
         content.style.display = 'block';
