@@ -617,7 +617,7 @@ body {
     }
 
     .language_selector,
-    .improvements_box,
+    ._box,
     .sp_player_div {
         width: 100%;
     }
@@ -696,7 +696,7 @@ body {
         background-color: #2b2b2b;
     }
 
-    .improvements_box {
+    ._box {
         height: 68%;
         background-color: #131313;
         border-radius: 18px;
@@ -706,14 +706,14 @@ body {
         box-sizing: border-box;
     }
 
-    .improvements_box_top {
+    ._box_top {
         display: flex;
         flex-direction: row;
         width: 100%;
         height: 10%;
     }
 
-    .improvements_box_text {
+    ._box_text {
         color: white;
         font-size: 18px;
         display: flex;
@@ -859,7 +859,7 @@ body {
             /* Para navegadores Firefox */
             .improvements_box_content {
                 scrollbar-width: thin;
-                scrollbar-color: #383838 #686868; /* Cor da barra e do fundo */
+                scrollbar-color: #383838 #282828; /* Cor da barra e do fundo */
             }
             
             .improvements_box_content::-webkit-scrollbar-track {
