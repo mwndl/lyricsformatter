@@ -52,7 +52,7 @@ function handleRefreshButtonClick() {
         text: textArea.value,
     };
 
-    fetch(`https://datamatch-backend2.onrender.com/formatter/${selectedLanguageCode}`, {
+    fetch(`${window.serverPath}/formatter/${selectedLanguageCode}`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -742,11 +742,15 @@ document.addEventListener("DOMContentLoaded", function () {
 
     var overlay = document.getElementById("overlay");
 
-    // Exibir mini menu ao clicar nos 'options_dots'
+    // Exibir ou ocultar mini menu ao clicar nos 'options_dots'
     optionsDots.addEventListener("click", function (event) {
         event.stopPropagation();
-        miniMenu.style.display = "block";
-        langList.style.display = "none"
+        if (miniMenu.style.display === "block") {
+            miniMenu.style.display = "none";
+        } else {
+            miniMenu.style.display = "block";
+            langList.style.display = "none";
+        }
     });
 
     // Ocultar mini menu ao clicar fora dele
@@ -811,3 +815,187 @@ document.addEventListener("DOMContentLoaded", function () {
         overlay.style.display = "none";
     });
 });
+/* 
+window.serverPath = 'http://localhost:3000'; 
+window.serverPath = 'https://datamatch-backend2.onrender.com';
+*/
+
+window.serverPath = 'http://localhost:3000';
+
+// Função para fazer uma solicitação AJAX
+function fetchCreditsData() {
+    fetch(`${window.serverPath}/formatter/credits`)
+    .then(response => response.json())
+    .then(data => updateCredits(data.credits))
+    .catch(error => console.error('Erro ao buscar dados da API:', error));
+}
+
+// Função para atualizar os elementos HTML com os novos dados
+function updateCredits(credits) {
+    const popupContent = document.querySelector('#credits_popup .popup_content'); // Seleciona o popup_content dentro de credits_popup
+    const loadingContainer = document.getElementById('loading_container')
+
+    loadingContainer.style = 'display:none'
+
+     // Define o texto de descrição
+     const popupDescription = document.querySelector('.popup_description p');
+    popupDescription.textContent = "Here's the list of contributors who made this project real in each language. 🚀";
+
+    credits.forEach(credit => {
+
+        const colaboratorElement = document.createElement('a');
+        colaboratorElement.href = credit.mxm_profile;
+        colaboratorElement.className = 'colaborator';
+        colaboratorElement.target = '_blank'; // Abre o link em uma nova aba
+
+        const colaboratorImage = document.createElement('div');
+        colaboratorImage.className = 'colaborator_image';
+
+        const imageElement = document.createElement('img');
+        imageElement.src = credit.image;
+        imageElement.alt = credit.name;
+
+        const countryElement = document.createElement('div');
+        countryElement.className = 'colaborator_country';
+        countryElement.textContent = credit.country;
+
+        colaboratorImage.appendChild(imageElement);
+        colaboratorImage.appendChild(countryElement);
+
+        const colaboratorInfo = document.createElement('div');
+        colaboratorInfo.className = 'colaborator_info';
+
+        const nameElement = document.createElement('div');
+        nameElement.className = 'colaborator_name';
+        nameElement.textContent = credit.name;
+
+        // Adicionando o nome do colaborador antes de outros elementos
+        colaboratorInfo.appendChild(nameElement);
+
+        // Criar os elementos de colaborator_role
+        credit.roles.forEach(role => {
+            const roleElement = document.createElement('div');
+            roleElement.className = 'colaborator_role';
+            roleElement.textContent = role;
+            colaboratorInfo.appendChild(roleElement);
+        });
+
+        // Criar os elementos de colaborator_languages
+        credit.languages.forEach(language => {
+            const languageElement = document.createElement('div');
+            languageElement.className = 'colaborator_languages';
+            languageElement.textContent = language;
+            colaboratorInfo.appendChild(languageElement);
+        });
+
+        colaboratorElement.appendChild(colaboratorImage);
+        colaboratorElement.appendChild(colaboratorInfo);
+
+        popupContent.appendChild(colaboratorElement);
+    });
+}
+
+// Chama a função para buscar dados da API quando o documento estiver pronto
+document.addEventListener('DOMContentLoaded', fetchCreditsData);
+
+// Função para fechar o popup de informações
+function closeAboutInfo() {
+    document.getElementById('about_popup').style.display = 'none';
+}
+
+// Função para buscar dados do servidor
+function fetchServerInfo() {
+    fetch(`${window.serverPath}/formatter/about`)
+        .then(response => response.json())
+        .then(data => updateServerInfo(data))
+        .catch(error => console.error('Erro ao buscar dados do servidor:', error));
+}
+
+// Função para atualizar os elementos HTML com os novos dados do servidor
+function updateServerInfo(data) {
+    // Selecione os elementos HTML onde você deseja atualizar as informações do servidor
+    const popupContent = document.querySelector('#aboutContent'); // Seleciona o popup_content dentro de about_popup
+
+    // Limpe o conteúdo antigo antes de adicionar novas informações
+    popupContent.innerHTML = '';
+
+    // Verifica se há dados do servidor
+    if (data.serverInfo) {
+        const serverInfo = data.serverInfo;
+
+        // Adiciona o título How to use acima da descrição
+        const howToUseTitleElement = document.createElement('h3');
+        howToUseTitleElement.textContent = 'How to use';
+        popupContent.appendChild(howToUseTitleElement);
+
+        // Divide o texto How to use em parágrafos usando '\n\n\n'
+        const howToUseParagraphs = serverInfo.howToUseText.split('\n\n\n');
+
+        // Adiciona cada parágrafo como um elemento <p>
+        howToUseParagraphs.forEach((paragraph, index) => {
+            const paragraphElement = document.createElement('p');
+            paragraphElement.textContent = paragraph;
+            
+            // Adiciona margem inferior de 10px entre os parágrafos, exceto para o último parágrafo
+            if (index !== howToUseParagraphs.length - 1) {
+                paragraphElement.style.marginBottom = '10px';
+            }
+            
+            popupContent.appendChild(paragraphElement);
+        });
+
+        // Adiciona uma barra fina cinza horizontal abaixo do how to use
+        const howToUseDividerElement = document.createElement('hr');
+        howToUseDividerElement.style.border = 'none';
+        howToUseDividerElement.style.borderTop = '1px solid #646464';
+        popupContent.appendChild(howToUseDividerElement);
+
+        // Adiciona o título Changelog acima da descrição
+        const changelogTitleElement = document.createElement('h3');
+        changelogTitleElement.textContent = 'Changelog';
+        popupContent.appendChild(changelogTitleElement);
+
+        // Adiciona a descrição acima das informações do servidor
+        const descriptionElement = document.createElement('p');
+        descriptionElement.textContent = serverInfo.description;
+        popupContent.appendChild(descriptionElement);
+
+        // Adiciona uma barra fina cinza horizontal abaixo da descrição
+        const dividerElement = document.createElement('hr');
+        dividerElement.style.border = 'none';
+        dividerElement.style.borderTop = '1px solid #646464';
+        popupContent.appendChild(dividerElement);
+
+        // Cria o contêiner para as informações do servidor
+        const serverInfoContainer = document.createElement('div');
+        serverInfoContainer.classList.add('server_info'); // Adiciona a classe 'server_info'
+
+        // Adiciona o título das informações do servidor
+        const titleElement = document.createElement('h3');
+        titleElement.textContent = serverInfo.title;
+        serverInfoContainer.appendChild(titleElement);
+
+        // Itera sobre os dados do servidor
+        for (const item of serverInfo.data) {
+            const itemElement = document.createElement('p');
+
+            // Adiciona a classe 'bold' apenas ao valor
+            itemElement.innerHTML = `<span>${item.label}: </span><span class="bold">${item.value}</span>`;
+            serverInfoContainer.appendChild(itemElement);
+        }
+
+        // Adiciona o contêiner das informações do servidor ao popupContent
+        popupContent.appendChild(serverInfoContainer);
+    }
+
+    
+}
+
+// Chama a função para buscar dados do servidor quando o documento estiver pronto
+document.addEventListener('DOMContentLoaded', fetchServerInfo);
+
+
+
+
+
+

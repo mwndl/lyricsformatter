@@ -22,6 +22,10 @@
     user-select: none;
 }
 
+.bold {
+    font-weight: bold;
+}
+
 /* DESKTOP */
 
 * {
@@ -189,6 +193,40 @@ body {
     background: #131313;
     border-radius: 5px; /* Bordas arredondadas */
 }
+
+#aboutContent {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 20px;
+}
+
+.section {
+    margin-bottom: 20px;
+}
+
+h3 {
+    margin-bottom: 10px;
+    text-align: left; /* Alinha o texto à esquerda */
+    width: 100%;
+}
+
+hr {
+    border: 1px solid #646464;
+    width: 100%;
+    margin: 20px 0;
+}
+
+.server_info {
+    text-align: left;
+    width: 100%;
+}
+
+.bold {
+    font-weight: bold;
+}
+
+
 
 
     #closeButton {
@@ -696,6 +734,36 @@ body {
         background-color: #2b2b2b;
     }
 
+    /* Tag Beta */
+    .language_selector .language_list .beta_tag {
+        background-color: #ff5353;
+        color: white;
+        padding: 3px 6px;
+        border-radius: 10px;
+        margin-left: 12px;
+        font-size: 12px;
+        font-weight: 700;
+    }
+    
+    .language_selector .language_list .beta_tag:hover {
+        background-color: #ff3333;
+    }
+
+    /* Tag New */
+    .language_selector .language_list .new_tag {
+        background-color: #3a8cff;
+        color: white;
+        padding: 3px 6px;
+        border-radius: 10px;
+        margin-left: 12px;
+        font-size: 12px;
+        font-weight: 700;
+    }
+    
+    .language_selector .language_list .new_tag:hover {
+        background-color: #1b7aff;
+    }
+
     .improvements_box {
         height: 68%;
         background-color: #131313;
@@ -859,7 +927,7 @@ body {
             /* Para navegadores Firefox */
             .improvements_box_content {
                 scrollbar-width: thin;
-                scrollbar-color: #383838 #131313; /* Cor da barra e do fundo */
+                scrollbar-color: #383838 #282828; /* Cor da barra e do fundo */
             }
             
             .improvements_box_content::-webkit-scrollbar-track {
