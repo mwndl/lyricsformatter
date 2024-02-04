@@ -23,6 +23,8 @@ document.addEventListener('DOMContentLoaded', function () {
     const notification_div = document.getElementById("notification");
     const message = document.getElementById("notification-message");
 
+    var miniMenu = document.getElementById("mini_menu");
+
     
  // Add this function to your existing code
 function handleRefreshButtonClick() {
@@ -50,7 +52,7 @@ function handleRefreshButtonClick() {
         text: textArea.value,
     };
 
-    fetch(`https://datamatch-backend.onrender.com/formatter/${selectedLanguageCode}`, {
+    fetch(`${window.serverPath}/formatter/${selectedLanguageCode}`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -416,6 +418,8 @@ function handleRefreshButtonClick() {
             languageList.style.display = 'block';
             languageArrow.style.transform = "rotate(0)";
             langButtonContent.title = "Tap to hide the list of supported languages";
+            miniMenu.style.display = "none";
+            
         }
     });
 
@@ -497,7 +501,7 @@ function handleRefreshButtonClick() {
                 // Se o tipo for URL, adicione o atributo href ao link
                 contentLearnMore.href = containerData.learn_more.url;
                 contentLearnMore.target = '_blank'; // Abre o link em uma nova guia/janela
-                contentLearnMore.textContent = containerData.learn_more.title || 'Saiba Mais';
+                contentLearnMore.textContent = containerData.learn_more.title || 'Learn More';
             } else {
                 // Se o tipo não for URL, use o texto como conteúdo do parágrafo
                 contentLearnMore.textContent = containerData.learn_more.title || '';
@@ -517,6 +521,7 @@ function handleRefreshButtonClick() {
         if (containerData.placeholder_text) {
             const placeholderText = document.createElement('p');
             placeholderText.textContent = containerData.placeholder_text;
+            placeholderText.style.textAlign = 'center'; // Adiciona o estilo text-align: center;
             contentButtons.appendChild(placeholderText);
         }
 
@@ -667,7 +672,6 @@ function expandContainer(container) {
     const content = container.querySelector('.content');
 
     if (container.classList.contains('expanded')) {
-        // O contêiner já está expandido, não fazer nada.
     } else {
         closeContainers(); // Fecha todos os containers antes de expandir o novo
 
@@ -721,4 +725,278 @@ function resetLineIssues() {
         lineDiv.querySelector('.status-1').className = 'status-1';
     });
 }
+
+document.addEventListener("DOMContentLoaded", function () {
+    var optionsDots = document.getElementById("settings_dots");
+    var miniMenu = document.getElementById("mini_menu");
+    var langList = document.getElementById("language_list");
+
+    var settingsOption = document.getElementById("settings_option");
+    var creditsOption = document.getElementById("credits_option");
+    var suggestOption = document.getElementById("suggest_option");
+    var aboutOption = document.getElementById("about_option");
+
+    var settingsPopup = document.getElementById("settings_popup");
+    var creditsPopup = document.getElementById("credits_popup");
+    var suggestPopup = document.getElementById("suggest_popup");
+    var aboutPopup = document.getElementById("about_popup");
+
+    var overlay = document.getElementById("overlay");
+
+    // Exibir ou ocultar mini menu ao clicar nos 'options_dots'
+    optionsDots.addEventListener("click", function (event) {
+        event.stopPropagation();
+        if (miniMenu.style.display === "block") {
+            miniMenu.style.display = "none";
+        } else {
+            miniMenu.style.display = "block";
+            langList.style.display = "none";
+        }
+    });
+
+    // Ocultar mini menu ao clicar fora dele
+    document.addEventListener("click", function () {
+        miniMenu.style.display = "none";
+    });
+
+    // Evitar que o clique no mini menu propague para o documento
+    miniMenu.addEventListener("click", function (event) {
+        event.stopPropagation();
+    });
+
+    // Show Settings
+    settingsOption.addEventListener("click", function () {
+        miniMenu.style.display = "none";
+        settingsPopup.style.display = "block";
+        overlay.style.display = "block";
+    });
+
+    // Hide Settings
+    overlay.addEventListener("click", function () {
+        settingsPopup.style.display = "none";
+        overlay.style.display = "none";
+    });
+
+    // Show Credits
+    creditsOption.addEventListener("click", function () {
+        miniMenu.style.display = "none";
+        creditsPopup.style.display = "block";
+        overlay.style.display = "block";
+    });
+
+    // Hide Credits
+    overlay.addEventListener("click", function () {
+        creditsPopup.style.display = "none";
+        overlay.style.display = "none";
+    });
+
+    // Show Suggestions
+    suggestOption.addEventListener("click", function () {
+        miniMenu.style.display = "none";
+        suggestPopup.style.display = "block";
+        overlay.style.display = "block";
+    });
+
+    // Hide Suggestions
+    overlay.addEventListener("click", function () {
+        suggestPopup.style.display = "none";
+        overlay.style.display = "none";
+    });
+
+    // Show About Info
+    aboutOption.addEventListener("click", function () {
+        miniMenu.style.display = "none";
+        aboutPopup.style.display = "block";
+        overlay.style.display = "block";
+    });
+
+    // Hide About Info
+    overlay.addEventListener("click", function () {
+        aboutPopup.style.display = "none";
+        overlay.style.display = "none";
+    });
+});
+/* 
+window.serverPath = 'http://localhost:3000'; 
+window.serverPath = 'https://datamatch-backend.onrender.com';
+*/
+
+window.serverPath = 'https://datamatch-backend.onrender.com';
+
+// Função para fazer uma solicitação AJAX
+function fetchCreditsData() {
+    fetch(`${window.serverPath}/formatter/credits`)
+    .then(response => response.json())
+    .then(data => updateCredits(data.credits))
+    .catch(error => console.error('Erro ao buscar dados da API:', error));
+}
+
+// Função para atualizar os elementos HTML com os novos dados
+function updateCredits(credits) {
+    const popupContent = document.querySelector('#credits_popup .popup_content'); // Seleciona o popup_content dentro de credits_popup
+    const loadingContainer = document.getElementById('loading_container')
+
+    loadingContainer.style = 'display:none'
+
+     // Define o texto de descrição
+     const popupDescription = document.querySelector('.popup_description p');
+    popupDescription.textContent = "Here's the list of contributors who made this project real in each language. 🚀";
+
+    credits.forEach(credit => {
+
+        const colaboratorElement = document.createElement('a');
+        colaboratorElement.href = credit.mxm_profile;
+        colaboratorElement.className = 'colaborator';
+        colaboratorElement.target = '_blank'; // Abre o link em uma nova aba
+
+        const colaboratorImage = document.createElement('div');
+        colaboratorImage.className = 'colaborator_image';
+
+        const imageElement = document.createElement('img');
+        imageElement.src = credit.image;
+        imageElement.alt = credit.name;
+
+        const countryElement = document.createElement('div');
+        countryElement.className = 'colaborator_country';
+        countryElement.textContent = credit.country;
+
+        colaboratorImage.appendChild(imageElement);
+        colaboratorImage.appendChild(countryElement);
+
+        const colaboratorInfo = document.createElement('div');
+        colaboratorInfo.className = 'colaborator_info';
+
+        const nameElement = document.createElement('div');
+        nameElement.className = 'colaborator_name';
+        nameElement.textContent = credit.name;
+
+        // Adicionando o nome do colaborador antes de outros elementos
+        colaboratorInfo.appendChild(nameElement);
+
+        // Criar os elementos de colaborator_role
+        credit.roles.forEach(role => {
+            const roleElement = document.createElement('div');
+            roleElement.className = 'colaborator_role';
+            roleElement.textContent = role;
+            colaboratorInfo.appendChild(roleElement);
+        });
+
+        // Criar os elementos de colaborator_languages
+        credit.languages.forEach(language => {
+            const languageElement = document.createElement('div');
+            languageElement.className = 'colaborator_languages';
+            languageElement.textContent = language;
+            colaboratorInfo.appendChild(languageElement);
+        });
+
+        colaboratorElement.appendChild(colaboratorImage);
+        colaboratorElement.appendChild(colaboratorInfo);
+
+        popupContent.appendChild(colaboratorElement);
+    });
+}
+
+// Chama a função para buscar dados da API quando o documento estiver pronto
+document.addEventListener('DOMContentLoaded', fetchCreditsData);
+
+// Função para fechar o popup de informações
+function closeAboutInfo() {
+    document.getElementById('about_popup').style.display = 'none';
+}
+
+// Função para buscar dados do servidor
+function fetchServerInfo() {
+    fetch(`${window.serverPath}/formatter/about`)
+        .then(response => response.json())
+        .then(data => updateServerInfo(data))
+        .catch(error => console.error('Erro ao buscar dados do servidor:', error));
+}
+
+// Função para atualizar os elementos HTML com os novos dados do servidor
+function updateServerInfo(data) {
+    // Selecione os elementos HTML onde você deseja atualizar as informações do servidor
+    const popupContent = document.querySelector('#aboutContent'); // Seleciona o popup_content dentro de about_popup
+
+    // Limpe o conteúdo antigo antes de adicionar novas informações
+    popupContent.innerHTML = '';
+
+    // Verifica se há dados do servidor
+    if (data.serverInfo) {
+        const serverInfo = data.serverInfo;
+
+        // Adiciona o título How to use acima da descrição
+        const howToUseTitleElement = document.createElement('h3');
+        howToUseTitleElement.textContent = 'How to use';
+        popupContent.appendChild(howToUseTitleElement);
+
+        // Divide o texto How to use em parágrafos usando '\n\n\n'
+        const howToUseParagraphs = serverInfo.howToUseText.split('\n\n\n');
+
+        // Adiciona cada parágrafo como um elemento <p>
+        howToUseParagraphs.forEach((paragraph, index) => {
+            const paragraphElement = document.createElement('p');
+            paragraphElement.textContent = paragraph;
+            
+            // Adiciona margem inferior de 10px entre os parágrafos, exceto para o último parágrafo
+            if (index !== howToUseParagraphs.length - 1) {
+                paragraphElement.style.marginBottom = '10px';
+            }
+            
+            popupContent.appendChild(paragraphElement);
+        });
+
+        // Adiciona uma barra fina cinza horizontal abaixo do how to use
+        const howToUseDividerElement = document.createElement('hr');
+        howToUseDividerElement.style.border = 'none';
+        howToUseDividerElement.style.borderTop = '1px solid #646464';
+        popupContent.appendChild(howToUseDividerElement);
+
+        // Adiciona o título Changelog acima da descrição
+        const changelogTitleElement = document.createElement('h3');
+        changelogTitleElement.textContent = 'Changelog';
+        popupContent.appendChild(changelogTitleElement);
+
+        // Adiciona a descrição acima das informações do servidor
+        const descriptionElement = document.createElement('p');
+        descriptionElement.textContent = serverInfo.description;
+        popupContent.appendChild(descriptionElement);
+
+        // Adiciona uma barra fina cinza horizontal abaixo da descrição
+        const dividerElement = document.createElement('hr');
+        dividerElement.style.border = 'none';
+        dividerElement.style.borderTop = '1px solid #646464';
+        popupContent.appendChild(dividerElement);
+
+        // Cria o contêiner para as informações do servidor
+        const serverInfoContainer = document.createElement('div');
+        serverInfoContainer.classList.add('server_info'); // Adiciona a classe 'server_info'
+
+        // Adiciona o título das informações do servidor
+        const titleElement = document.createElement('h3');
+        titleElement.textContent = serverInfo.title;
+        serverInfoContainer.appendChild(titleElement);
+
+        // Itera sobre os dados do servidor
+        for (const item of serverInfo.data) {
+            const itemElement = document.createElement('p');
+
+            // Adiciona a classe 'bold' apenas ao valor
+            itemElement.innerHTML = `<span>${item.label}: </span><span class="bold">${item.value}</span>`;
+            serverInfoContainer.appendChild(itemElement);
+        }
+
+        // Adiciona o contêiner das informações do servidor ao popupContent
+        popupContent.appendChild(serverInfoContainer);
+    }
+
+    
+}
+
+// Chama a função para buscar dados do servidor quando o documento estiver pronto
+document.addEventListener('DOMContentLoaded', fetchServerInfo);
+
+
+
+
+
 
