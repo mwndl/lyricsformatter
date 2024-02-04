@@ -501,7 +501,7 @@ function handleRefreshButtonClick() {
                 // Se o tipo for URL, adicione o atributo href ao link
                 contentLearnMore.href = containerData.learn_more.url;
                 contentLearnMore.target = '_blank'; // Abre o link em uma nova guia/janela
-                contentLearnMore.textContent = containerData.learn_more.title || 'Saiba Mais';
+                contentLearnMore.textContent = containerData.learn_more.title || 'Learn More';
             } else {
                 // Se o tipo não for URL, use o texto como conteúdo do parágrafo
                 contentLearnMore.textContent = containerData.learn_more.title || '';
@@ -521,6 +521,7 @@ function handleRefreshButtonClick() {
         if (containerData.placeholder_text) {
             const placeholderText = document.createElement('p');
             placeholderText.textContent = containerData.placeholder_text;
+            placeholderText.style.textAlign = 'center'; // Adiciona o estilo text-align: center;
             contentButtons.appendChild(placeholderText);
         }
 
@@ -820,7 +821,7 @@ window.serverPath = 'http://localhost:3000';
 window.serverPath = 'https://datamatch-backend2.onrender.com';
 */
 
-window.serverPath = 'https://datamatch-backend2.onrender.com';
+window.serverPath = 'http://localhost:3000';
 
 // Função para fazer uma solicitação AJAX
 function fetchCreditsData() {
