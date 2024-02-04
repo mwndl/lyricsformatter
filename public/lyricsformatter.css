@@ -927,7 +927,7 @@ hr {
             /* Para navegadores Firefox */
             .improvements_box_content {
                 scrollbar-width: thin;
-                scrollbar-color: #383838 #282828; /* Cor da barra e do fundo */
+                scrollbar-color: #383838 #131313; /* Cor da barra e do fundo */
             }
             
             .improvements_box_content::-webkit-scrollbar-track {
