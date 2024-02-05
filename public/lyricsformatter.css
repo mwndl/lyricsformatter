@@ -1166,10 +1166,10 @@ hr {
     .search-container {
         display: flex;
         align-items: center;
+        justify-content: space-between; /* Distribui os elementos uniformemente */
         background-color: #282828;
         box-sizing: border-box;
         width: 100%;
-        height: 100%;
         padding: 10px;
         border-radius: 12px;
         user-select: none;
@@ -1181,6 +1181,10 @@ hr {
         background-color: transparent;
         font-size: 16px;
         color: #ffffff;
+        max-width: calc(100% - 100px); /* ajuste conforme necessário */
+        text-overflow: ellipsis; /* adiciona ... quando o texto ultrapassa a largura máxima */
+        overflow: hidden; /* oculta o texto que ultrapassa a largura máxima */
+        white-space: nowrap; /* impede que o texto seja quebrado em várias linhas */
     }
     
     input.search-container::-webkit-autofill {
@@ -1196,8 +1200,8 @@ hr {
         border: none;
         color: #f0f0f0;
         font-size: 16px;
-        margin-left: 10px;
         cursor: pointer;
+        white-space: nowrap; /* impede que o texto seja quebrado em várias linhas */
     }
     
     .search-container input[type="text"]::placeholder {
