@@ -489,6 +489,10 @@ function handleRefreshButtonClick() {
         contentText.classList.add('content_text');
         contentText.innerHTML = containerData.description;
 
+        const contentObs = document.createElement('p'); // Criando o elemento para obs_text
+        contentObs.classList.add('content_obs');
+        contentObs.innerHTML = containerData.obs_text || ''; // Verificando se obs_text está presente
+
         const contentOptions = document.createElement('div');
         contentOptions.classList.add('content_options');
 
@@ -548,6 +552,7 @@ function handleRefreshButtonClick() {
         contentOptions.appendChild(contentButtons);
 
         content.appendChild(contentText);
+        content.appendChild(contentObs);
         content.appendChild(contentOptions);
 
         container.appendChild(title);
