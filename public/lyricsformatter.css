@@ -743,6 +743,7 @@ hr {
         margin-left: 12px;
         font-size: 12px;
         font-weight: 700;
+        text-align: center;
     }
     
     .language_selector .language_list .beta_tag:hover {
@@ -758,6 +759,7 @@ hr {
         margin-left: 12px;
         font-size: 12px;
         font-weight: 700;
+        text-align: center;
     }
     
     .language_selector .language_list .new_tag:hover {
