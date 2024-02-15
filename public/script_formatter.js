@@ -261,6 +261,7 @@ function handleRefreshButtonClick() {
             resetLineIssues();
             closeContainers();
             resetImprovementsBoxes();
+            syncScroll()
         }
         
 
@@ -403,6 +404,7 @@ function handleRefreshButtonClick() {
 
             // Armazene o idioma selecionado em cache
             localStorage.setItem('selectedLanguage', selected);
+            updateSidebar() // resetar sugestões e caracteres
         }
     });
 
@@ -688,6 +690,7 @@ function expandContainer(container) {
         const lines = JSON.parse(container.getAttribute('data-lines'));
         resetLineIssues();
         updateLineIssues(color, lines);
+        syncScroll()
     }
 }
 
@@ -826,7 +829,7 @@ window.serverPath = 'http://localhost:3000';
 window.serverPath = 'https://datamatch-backend.onrender.com';
 */
 
-window.serverPath = 'https://datamatch-backend.onrender.com';
+window.serverPath = 'http://localhost:3000';
 
 // Função para fazer uma solicitação AJAX
 function fetchCreditsData() {
@@ -999,9 +1002,3 @@ function updateServerInfo(data) {
 
 // Chama a função para buscar dados do servidor quando o documento estiver pronto
 document.addEventListener('DOMContentLoaded', fetchServerInfo);
-
-
-
-
-
-
