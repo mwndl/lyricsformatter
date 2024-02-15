@@ -455,12 +455,41 @@ function handleRefreshButtonClick() {
         });
     });
 
-    function fixButton(button) {
+    function fixButton(container, trigger) {
         // Add if else para ocultar apenas se a correção for bem sucedida
-        var container = button.closest('.container');
+        if (typeof trigger === 'function') {
+            // Se o trigger for uma função, chame-a
+            trigger();
+        } else if (typeof trigger === 'string') {
+            // Se o trigger for uma string, interprete-a e execute a ação apropriada
+            interpretAndExecuteTrigger(trigger);
+        }
+    
+        // Oculta o container após a correção (ou tentativa de correção)
         container.style.display = 'none';
         checkAndShowPlaceholder();
-        resetLineIssues()
+        resetLineIssues();
+    }
+    
+    // Definindo a função para interpretar e executar o trigger
+    function interpretAndExecuteTrigger(trigger) {
+        try {
+            // Extrai os termos entre colchetes usando uma expressão regular
+            const match = trigger.match(/\[(.*?)\], \[(.*?)\]/);
+
+            // Verifica se a correspondência foi bem-sucedida
+            if (match && match.length === 3) {
+                const incorrectTerm = match[1];
+                const correction = match[2];
+
+                // Chamando a função findAndReplace com os termos extraídos
+                findAndReplace(incorrectTerm, correction);
+            } else {
+                console.error('Formato de trigger inválido:', trigger);
+            }
+        } catch (error) {
+            console.error('Erro ao interpretar e executar o trigger:', error);
+        }
     }
     
     var fixButtons = document.querySelectorAll('.content_fix_btn');
@@ -536,7 +565,7 @@ function handleRefreshButtonClick() {
             contentFixBtn.classList.add('content_fix_btn');
             contentFixBtn.textContent = 'Fix';
             contentFixBtn.onclick = function() {
-                fixButton(container);
+                fixButton(container, containerData.trigger);
             };
             contentButtons.appendChild(contentFixBtn);
         }
@@ -690,7 +719,6 @@ function expandContainer(container) {
         const lines = JSON.parse(container.getAttribute('data-lines'));
         resetLineIssues();
         updateLineIssues(color, lines);
-        syncScroll()
     }
 }
 
@@ -722,6 +750,24 @@ function updateLineIssues(color, lines) {
             }
         }
     });
+}
+
+// Definindo a função findAndReplace
+function findAndReplace(incorrectTerm, correction) {
+    // Remove os colchetes dos termos
+    const cleanIncorrectTerm = incorrectTerm.replace(/\[|\]/g, '');
+    const cleanCorrection = correction.replace(/\[|\]/g, '');
+
+    // Obtém o conteúdo do textarea com ID 'editor'
+    const editor = document.getElementById('editor');
+    let content = editor.value;
+
+    // Substitui todas as ocorrências de incorrectTerm por correction
+    const regex = new RegExp(cleanIncorrectTerm, 'g');
+    content = content.replace(regex, cleanCorrection);
+
+    // Define o conteúdo do textarea como o texto modificado
+    editor.value = content;
 }
 
 function resetLineIssues() {
