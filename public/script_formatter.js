@@ -469,6 +469,7 @@ function handleRefreshButtonClick() {
         container.style.display = 'none';
         checkAndShowPlaceholder();
         resetLineIssues();
+        handleRefreshButtonClick()
     }
     
     // Definindo a função para interpretar e executar o trigger
@@ -875,7 +876,7 @@ window.serverPath = 'http://localhost:3000';
 window.serverPath = 'https://datamatch-backend.onrender.com';
 */
 
-window.serverPath = 'https://datamatch-backend.onrender.com';
+window.serverPath = 'http://localhost:3000';
 
 // Função para fazer uma solicitação AJAX
 function fetchCreditsData() {
