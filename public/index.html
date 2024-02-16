@@ -79,13 +79,20 @@
                             <div class="improvements_box_text">
                                 <p>Suggestions</p>
                             </div>
-                            <div class="improvements_box_refresh" style="">
-                                <button class="refresh_button" id="refresh_button" style="" title="Refresh suggestions" onclick="handleRefreshButtonClick()">
-                                    <div class="refresh_symbol"></div>
-                                  </button>
-                                <div class="loading_spinner_loop" id="loading_spinner" style="display:none">
-                                    <div class="loading_spinner">
-                                      <div></div>
+                            <div class="improvements_box_buttons" style="">
+                                <div class="reset_div">
+                                    <button class="reset_button" id="reset_button" style="display:none" title="Reset transcription" onclick="resetTranscription()">
+                                        <div class="reset_symbol"></div>
+                                    </button>
+                                </div>
+                                <div class="refresh_div">
+                                    <button class="refresh_button" id="refresh_button" style="display:none" title="Refresh suggestions" onclick="handleRefreshButtonClick()">
+                                        <div class="refresh_symbol"></div>
+                                    </button>
+                                    <div class="loading_spinner_loop" id="loading_spinner" style="display:none">
+                                        <div class="loading_spinner">
+                                          <div></div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -146,23 +153,27 @@
         <script>
         function checkContent() {
             var editor = document.getElementById('editor');
+            var resetButton = document.getElementById('reset_button')
             var refreshButton = document.getElementById('refresh_button');
             var refreshButtonMob = document.getElementById('refresh_button_mob');
             var improvementsPlaceholder = document.getElementById('improvements_placeholder')
 
             if (editor.value.trim() === '') {
+                resetButton.style.display = 'none';
                 refreshButton.style.display = 'none';
                 refreshButtonMob.style.display = 'none';
                 improvementsPlaceholder.textContent = 'Type something or paste your transcription to start...';
                 improvementsPlaceholder.onclick = '';
 
             } else {
+                resetButton.style.display = 'block';
                 refreshButton.style.display = 'block';
                 refreshButtonMob.style.display = 'block';
                 improvementsPlaceholder.innerHTML = 'Tap the <span class="hightlight_text">Refresh</span> icon to update the suggestions.';
                 improvementsPlaceholder.onclick = handleRefreshButtonClick;
             }
         }
+
 
         function updateCharacterCounter() {
             // Implement your character counter logic here
