@@ -767,7 +767,7 @@ function findAndReplace(incorrectTerm, correction) {
     const escapedTerm = cleanIncorrectTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
     // Substitui todas as ocorrências de incorrectTerm por correction
-    const regex = new RegExp('(^|\\s|[,.;:!?\\-])' + escapedTerm + '(?=\\s|[,.;:!?\\-]|$)', 'g');
+    const regex = new RegExp('(^|\\s|[,.;:!?\\-¿¡])' + escapedTerm + '(?=\\s|[,.;:!?\\-¿¡]|$)', 'g');
     content = content.replace(regex, '$1' + cleanCorrection);
 
     // Define o conteúdo do textarea como o texto modificado
