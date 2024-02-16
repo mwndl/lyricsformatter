@@ -25,7 +25,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
     var miniMenu = document.getElementById("mini_menu");
 
-    
+    var ignoredContainers = []; // aqui ficam guardados temporariamente os IDs ignorados, ao limpar o texto, tocar em 'Copy' ou então ao tocar no botão de lixo, esse array será resetado
+
  // Add this function to your existing code
 function handleRefreshButtonClick() {
     resetLineIssues();
@@ -79,7 +80,7 @@ function handleRefreshButtonClick() {
             // Remove existing HTML elements inside the improvements_containers
             const improvementsContainer = document.getElementById('improvements_containers');
             improvementsContainer.innerHTML = '';
-
+    
             if (data.result.issues === false) {
                 // Create and append the "No issues found" div
                 const noIssuesDiv = document.createElement('div');
@@ -108,9 +109,14 @@ function handleRefreshButtonClick() {
                 for (const alertaKey in data.result.containers.alerts) {
                     const alerta = data.result.containers.alerts[alertaKey];
                     const container = createContainer(alerta.container);
-                    improvementsContainer.appendChild(container);
+                    
+                    // Verifica se o container não é null antes de adicioná-lo
+                    if (container !== null) {
+                        improvementsContainer.appendChild(container);
+                    }
                 }
             }
+            checkAndShowPlaceholder()
         })
         .catch(error => {
             // Handle errors here
@@ -288,6 +294,7 @@ function handleRefreshButtonClick() {
             // Verifica se o textarea está vazio
             if (editorTextarea.value.trim() === '') {
                 improvementsPlaceholder.innerHTML = 'Type something or paste your transcription to start...';
+                ignoredContainers = []; // reseta o conteúdo ignorado
             } else {
                 improvementsPlaceholder.innerHTML = 'Tap the <span class="highlight_text">Refresh</span> icon to update the suggestions.';
             }
@@ -443,10 +450,12 @@ function handleRefreshButtonClick() {
 
     function ignoreButton(button) {
         var container = button.closest('.container');
+        var containerId = container.id; // Obter o ID da DIV container
+        ignoredContainers.push(containerId); // Adicionar o ID ao array ignoredContainers
         container.style.display = 'none';
         checkAndShowPlaceholder();
-        resetLineIssues()
-    }
+        resetLineIssues();
+    } 
     
     var ignoreButtons = document.querySelectorAll('.content_ignore_btn');
     ignoreButtons.forEach(function (button) {
@@ -502,10 +511,17 @@ function handleRefreshButtonClick() {
 
     // Função auxiliar para criar um container HTML com base nos dados da API
     function createContainer(containerData) {
+
+        // Verifica se o div_id já está armazenado em ignoredContainers
+        if (ignoredContainers.includes(containerData.div_id)) {
+            return null; // Retorna null se o div_id já estiver na lista de ignoredContainers
+        }
+
         // Content
         const container = document.createElement('div');
         container.classList.add('container');
         container.setAttribute('onclick', 'expandContainer(this)');
+        container.id = containerData.div_id;
 
         // Adiciona os atributos de dados ao container
         container.setAttribute('data-color', containerData.position.color);
@@ -595,7 +611,7 @@ function handleRefreshButtonClick() {
 
     function copyToClipboard() {
         if (textArea.value.trim() === '') {
-            notification("Well... there's no content to be copied here... 🤔");
+            notification("Sorry, there's no content to be copied here");
             return;
         }
     
@@ -606,6 +622,12 @@ function handleRefreshButtonClick() {
             var successful = document.execCommand('copy');
             var message = successful ? 'Copied to your clipboard!' : 'Something went wrong, please try again.';
             notification(message);
+            
+
+            textArea.value = ''; // apaga a transcrição
+            updateSidebar(); // reseta os contadores de caracteres e a barra lateral
+            ignoredContainers = []; // limpa a memória de alertas ignorados
+
         } catch (err) {
             console.error('An error occurred while copying the text: ', err);
             notification('An error occurred while copying the text.');
@@ -613,6 +635,7 @@ function handleRefreshButtonClick() {
     
         // Deseleciona a textarea
         window.getSelection().removeAllRanges();
+
     }
 
     // Função para verificar e exibir a div placeholder
@@ -773,6 +796,7 @@ function findAndReplace(incorrectTerm, correction) {
     // Define o conteúdo do textarea como o texto modificado
     editor.value = content;
 }
+
 
 function resetLineIssues() {
     // Obtém todas as divs das linhas dentro do elemento com ID 'line_issues'
