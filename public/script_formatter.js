@@ -10,6 +10,8 @@ document.addEventListener('DOMContentLoaded', function () {
     const languageArrow = document.querySelector('.lang_expand_arrow');
     const langButtonContent = document.querySelector('.lang_selector_div');
 
+    var resetButton = document.getElementById('reset_button');
+
     var refreshButton = document.getElementById('refresh_button');
     var loadingSpinner = document.getElementById('loading_spinner');
 
@@ -116,7 +118,7 @@ function handleRefreshButtonClick() {
                     }
                 }
             }
-            checkAndShowPlaceholder()
+
         })
         .catch(error => {
             // Handle errors here
@@ -129,6 +131,15 @@ function handleRefreshButtonClick() {
             loadingSpinner.style.display = 'none';
         });
 }
+
+    resetButton.addEventListener('click', function() {
+    
+        textArea.value = ''; // apaga a transcrição
+        updateSidebar(); // reseta os contadores de caracteres e a barra lateral
+        ignoredContainers = []; // limpa a memória de alertas ignorados
+        checkContent();
+    
+    });
 
 
     refreshButton.addEventListener('click', handleRefreshButtonClick);
@@ -807,6 +818,7 @@ function resetLineIssues() {
         lineDiv.querySelector('.status-1').className = 'status-1';
     });
 }
+
 
 document.addEventListener("DOMContentLoaded", function () {
     var optionsDots = document.getElementById("settings_dots");
