@@ -907,7 +907,45 @@ hr {
             }
         }
         
-    /* */
+    /* Botão reset */
+
+    .reset_button {
+        width: 30px;
+        height: 30px;
+        background-color: #6c6c6c;
+        box-shadow: rgba(0, 0, 0, 0.494) 1px 3px 12px;
+        display: flex;
+        cursor: pointer;
+        position: absolute;
+        border-radius: 50%;
+        border-width: 0.1px;
+        border-style: solid;
+        border-color: #6c6c6c;
+        border-image: initial;
+        display: none;
+    }
+    
+    .reset_button:hover {
+        background-color: #898989;
+    }
+    
+    .reset_symbol {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+    }
+    
+    .reset_symbol {
+        width: 14px;
+        height: 14px;
+        background-image: url(/images/reset.svg);
+        background-size: contain;
+        background-repeat: no-repeat;
+        background-position: center center;
+    }
+
+    /**/
     
 
     .improvements_box_content {
