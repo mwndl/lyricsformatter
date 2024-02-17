@@ -424,6 +424,7 @@ function handleRefreshButtonClick() {
             // Armazene o idioma selecionado em cache
             localStorage.setItem('selectedLanguage', selected);
             updateSidebar() // resetar sugestões e caracteres
+            ignoredContainers = []; // limpar memória de alertas ignorados
         }
     });
 
