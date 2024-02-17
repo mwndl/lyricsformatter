@@ -117,6 +117,7 @@ function handleRefreshButtonClick() {
                         improvementsContainer.appendChild(container);
                     }
                 }
+                checkAndShowPlaceholder()
             }
 
         })
@@ -487,7 +488,6 @@ function handleRefreshButtonClick() {
     
         // Oculta o container após a correção (ou tentativa de correção)
         container.style.display = 'none';
-        checkAndShowPlaceholder();
         resetLineIssues();
         handleRefreshButtonClick()
     }
@@ -660,30 +660,31 @@ function handleRefreshButtonClick() {
         if (visibleContainers.length > 0) {
             console.log('> 0');
             return;
+        } else {
+            // Create and append the "No issues found" div
+            const noIssuesDiv = document.createElement('div');
+            noIssuesDiv.className = 'container_no_issues';
+            noIssuesDiv.id = 'container_no_issues';
+            noIssuesDiv.style.display = 'block';
+    
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'content_ok';
+    
+            const h2 = document.createElement('h2');
+            h2.textContent = 'No issues found! ✨';
+    
+            const copyBtn = document.createElement('div');
+            copyBtn.className = 'content_copy_btn';
+            copyBtn.textContent = 'Copy';
+            copyBtn.onclick = copyToClipboard;
+    
+            contentDiv.appendChild(h2);
+            contentDiv.appendChild(copyBtn);
+            noIssuesDiv.appendChild(contentDiv);
+    
+            improvementsContainers.appendChild(noIssuesDiv);
         }
 
-        // Create and append the "No issues found" div
-        const noIssuesDiv = document.createElement('div');
-        noIssuesDiv.className = 'container_no_issues';
-        noIssuesDiv.id = 'container_no_issues';
-        noIssuesDiv.style.display = 'block';
-
-        const contentDiv = document.createElement('div');
-        contentDiv.className = 'content_ok';
-
-        const h2 = document.createElement('h2');
-        h2.textContent = 'No issues found! ✨';
-
-        const copyBtn = document.createElement('div');
-        copyBtn.className = 'content_copy_btn';
-        copyBtn.textContent = 'Copy';
-        copyBtn.onclick = copyToClipboard;
-
-        contentDiv.appendChild(h2);
-        contentDiv.appendChild(copyBtn);
-        noIssuesDiv.appendChild(contentDiv);
-
-        improvementsContainers.appendChild(noIssuesDiv);
     }
     checkAndShowPlaceholder();
 
@@ -915,7 +916,7 @@ window.serverPath = 'http://localhost:3000';
 window.serverPath = 'https://datamatch-backend.onrender.com';
 */
 
-window.serverPath = 'http://localhost:3000';
+window.serverPath = 'https://datamatch-backend.onrender.com';
 
 // Função para fazer uma solicitação AJAX
 function fetchCreditsData() {
