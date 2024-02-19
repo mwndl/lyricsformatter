@@ -31,9 +31,26 @@ document.addEventListener('DOMContentLoaded', function () {
 
  // Add this function to your existing code
 function handleRefreshButtonClick() {
-    resetLineIssues();
-    // Get references to the elements
 
+    // Auto trim (se ativo)
+    var autoTrimToggle = document.getElementById('autoTrimToggle');
+    var removeDoubleSpacesAndLinesToggle = document.getElementById('removeDoubleSpacesAndLinesToggle');
+    var autoCapTagsToggle = document.getElementById('autoCapTagsToggle');
+
+    if (autoTrimToggle.checked) {
+        autoTrim();
+    }
+    if (removeDoubleSpacesAndLinesToggle.checked) {
+        removeDuplicateEmptyLines();
+    }
+    if (autoCapTagsToggle.checked) {
+        replaceSpecialTags();
+    }
+
+    resetLineIssues();
+    updateSidebar();
+
+    // Get references to the elements
     // Hide the refresh button and show the loading spinner
     refreshButton.style.display = 'none';
     loadingSpinner.style.display = 'block';
@@ -116,8 +133,8 @@ function handleRefreshButtonClick() {
                     if (container !== null) {
                         improvementsContainer.appendChild(container);
                     }
+                    checkAndShowPlaceholder();
                 }
-                checkAndShowPlaceholder()
             }
 
         })
@@ -392,6 +409,7 @@ function handleRefreshButtonClick() {
             // Adicione integração do idioma aqui
         }
     }
+    
 
     // Função para obter o nome completo do idioma com base no código
     function getLanguageFullName(code) {
@@ -419,12 +437,10 @@ function handleRefreshButtonClick() {
             selectedLanguage.textContent = getLanguageFullName(selected);
             languageList.style.display = 'none';
 
-            // Adicione integração do idioma aqui
-
             // Armazene o idioma selecionado em cache
             localStorage.setItem('selectedLanguage', selected);
             updateSidebar() // resetar sugestões e caracteres
-            ignoredContainers = []; // limpar memória de alertas ignorados
+            ignoredContainers = []; // limpa a memória de alertas ignorados
         }
     });
 
@@ -454,8 +470,31 @@ function handleRefreshButtonClick() {
         }
     });
 
+    // Função para verificar e definir o estado dos checkboxes ao carregar a página
+    function setCheckboxStates() {
+        // Adicione IDs aos seus elementos de checkbox para tornar a manipulação mais fácil
+        const checkboxIds = [
+            'characterCounterToggle',
+            'autoCapToggle',
+            'autoTrimToggle',
+            'removeDoubleSpacesAndLinesToggle',
+            'autoCapTagsToggle',
+            'lagToolToggle'
+        ];
+
+        checkboxIds.forEach(function (checkboxId) {
+            const checkbox = document.getElementById(checkboxId);
+            const checkboxState = localStorage.getItem(checkboxId);
+
+            if (checkboxState !== null) {
+                checkbox.checked = JSON.parse(checkboxState);
+            }
+        });
+    }
+
     // Configurar o idioma padrão ao carregar a página
     setDefaultLanguage();
+    setCheckboxStates();
     
     // Adicione um evento de clique ao botão de cópia
     var copyButton = document.querySelector('.content_copy_btn');
@@ -489,6 +528,7 @@ function handleRefreshButtonClick() {
     
         // Oculta o container após a correção (ou tentativa de correção)
         container.style.display = 'none';
+        checkAndShowPlaceholder();
         resetLineIssues();
         handleRefreshButtonClick()
     }
@@ -661,32 +701,32 @@ function handleRefreshButtonClick() {
         if (visibleContainers.length > 0) {
             console.log('> 0');
             return;
-        } else {
-            // Create and append the "No issues found" div
-            const noIssuesDiv = document.createElement('div');
-            noIssuesDiv.className = 'container_no_issues';
-            noIssuesDiv.id = 'container_no_issues';
-            noIssuesDiv.style.display = 'block';
-    
-            const contentDiv = document.createElement('div');
-            contentDiv.className = 'content_ok';
-    
-            const h2 = document.createElement('h2');
-            h2.textContent = 'No issues found! ✨';
-    
-            const copyBtn = document.createElement('div');
-            copyBtn.className = 'content_copy_btn';
-            copyBtn.textContent = 'Copy';
-            copyBtn.onclick = copyToClipboard;
-    
-            contentDiv.appendChild(h2);
-            contentDiv.appendChild(copyBtn);
-            noIssuesDiv.appendChild(contentDiv);
-    
-            improvementsContainers.appendChild(noIssuesDiv);
         }
 
+        // Create and append the "No issues found" div
+        const noIssuesDiv = document.createElement('div');
+        noIssuesDiv.className = 'container_no_issues';
+        noIssuesDiv.id = 'container_no_issues';
+        noIssuesDiv.style.display = 'block';
+
+        const contentDiv = document.createElement('div');
+        contentDiv.className = 'content_ok';
+
+        const h2 = document.createElement('h2');
+        h2.textContent = 'No issues found! ✨';
+
+        const copyBtn = document.createElement('div');
+        copyBtn.className = 'content_copy_btn';
+        copyBtn.textContent = 'Copy';
+        copyBtn.onclick = copyToClipboard;
+
+        contentDiv.appendChild(h2);
+        contentDiv.appendChild(copyBtn);
+        noIssuesDiv.appendChild(contentDiv);
+
+        improvementsContainers.appendChild(noIssuesDiv);
     }
+
     checkAndShowPlaceholder();
 
     function selectText(linesToSelect) { // SELECIONA LINHAS ESPECIFICAS
@@ -803,7 +843,7 @@ function findAndReplace(incorrectTerm, correction) {
     const escapedTerm = cleanIncorrectTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
     // Substitui todas as ocorrências de incorrectTerm por correction
-    const regex = new RegExp('(^|\\s|[,.;:!?\\-¿¡()"\\[\\]])' + escapedTerm + '(?=\\s|[,.;:!?\\-¿¡()"\\[\\]]|$)', 'g');
+    const regex = new RegExp('(^|\\s|[,.;:!?\\-¿¡])' + escapedTerm + '(?=\\s|[,.;:!?\\-¿¡]|$)', 'g');
     content = content.replace(regex, '$1' + cleanCorrection);
 
     // Define o conteúdo do textarea como o texto modificado

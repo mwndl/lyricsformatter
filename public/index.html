@@ -25,13 +25,13 @@
                 <!-- Mini menu -->
                 <div id="mini_menu" class="mini-menu">
                     <ul>
-                        <li id="settings_option" style="display:none; border-radius: 10px;">
+                        <li id="settings_option" style="display:block; border-radius: 10px;">
                             <p>Settings</p>
                         </li>
                         <li id="credits_option" style="display:block; border-radius: 10px;">
                             <p>Credits</p>
                         </li>
-                        <li id="suggest_option" style="display:none; border-radius: 10px;">
+                        <li id="suggest_option" style="display:block; border-radius: 10px;">
                             <p>Suggest a Feature</p>
                         </li>
                         <li id="about_option" style="display:block; border-radius: 10px;">
@@ -49,7 +49,7 @@
                         <div class="editor-container">
                             <div class="line_issues" id="line_issues"></div>
                             <div class="character_counter"></div>
-                            <textarea class="editor" id="editor" placeholder="Paste the lyrics here..." oninput="updateCharacterCounter(); checkContent();"></textarea>
+                            <textarea class="editor" id="editor" placeholder="Paste the lyrics here..." oninput="checkContent();"></textarea>
                         </div>
                     </div>
                 </div>
@@ -151,21 +151,48 @@
             <p>The interface for mobile devices is still under development. Please use a PC for the best experience.</p>
         </div>
         <script>
+
         function checkContent() {
             var editor = document.getElementById('editor');
             var resetButton = document.getElementById('reset_button')
             var refreshButton = document.getElementById('refresh_button');
             var refreshButtonMob = document.getElementById('refresh_button_mob');
-            var improvementsPlaceholder = document.getElementById('improvements_placeholder')
+            var improvementsPlaceholder = document.getElementById('improvements_placeholder');
 
-            if (editor.value.trim() === '') {
+            var content = editor.value;
+
+            const checkboxIds = [
+                'characterCounterToggle',
+                'autoCapToggle',
+                'autoTrimToggle',
+                'removeDoubleSpacesAndLinesToggle',
+                'autoCapTagsToggle',
+                'autoSuggestions'
+            ];
+
+            checkboxIds.forEach(function (checkboxId) {
+                const checkbox = document.getElementById(checkboxId);
+                localStorage.setItem(checkboxId, checkbox.checked);
+            });
+
+            if (content.trim() === '') {
                 resetButton.style.display = 'none';
                 refreshButton.style.display = 'none';
                 refreshButtonMob.style.display = 'none';
                 improvementsPlaceholder.textContent = 'Type something or paste your transcription to start...';
                 improvementsPlaceholder.onclick = '';
-
             } else {
+
+                var autoCapToggle = document.getElementById('autoCapToggle'); 
+
+                if (autoCapToggle.checked) {
+                    autoCap();
+                };
+                if (removeDoubleSpacesAndLinesToggle.checked) {
+                    removeDuplicateSpaces();
+                }
+
+
                 resetButton.style.display = 'block';
                 refreshButton.style.display = 'block';
                 refreshButtonMob.style.display = 'block';
@@ -174,14 +201,107 @@
             }
         }
 
+        function autoCap() {
+            var editor = document.getElementById('editor');
+            var content = editor.value;
 
-        function updateCharacterCounter() {
-            // Implement your character counter logic here
-            // This function is called when the textarea content is updated
+            // Split the content into lines
+            var lines = content.split('\n');
+
+            // Capitalize the first character of each line
+            for (var i = 0; i < lines.length; i++) {
+                lines[i] = lines[i].charAt(0).toUpperCase() + lines[i].slice(1);
+            }
+
+            // Join the lines back together
+            content = lines.join('\n');
+
+            // Update the editor's content
+            editor.value = content;
         }
 
-        function handleRefreshButtonClick() {
-            // Implement your refresh button click logic here
+        function autoTrim() {
+            var editor = document.getElementById('editor');
+            var content = editor.value;
+
+            // Split the content into lines
+            var lines = content.split('\n');
+
+            // Trim extra spaces at the end of each line
+            for (var i = 0; i < lines.length; i++) {
+                lines[i] = lines[i].trimRight();
+            }
+
+            // Join the lines back together
+            content = lines.join('\n');
+
+            // Update the editor's content
+            editor.value = content;
+        }
+
+        function removeDuplicateSpaces() {
+            var editor = document.getElementById('editor');
+            var content = editor.value;
+
+            // Dividir o conteúdo em linhas
+            var lines = content.split('\n');
+
+            // Iterar sobre cada linha e substituir espaços duplicados por um único espaço
+            for (var i = 0; i < lines.length; i++) {
+                lines[i] = lines[i].replace(/\s+/g, ' ');
+            }
+
+            // Juntar as linhas de volta
+            content = lines.join('\n');
+
+            // Atualizar o conteúdo do editor
+            editor.value = content;
+        }
+
+        function removeDuplicateEmptyLines() {
+            var editor = document.getElementById('editor');
+            var content = editor.value;
+
+            // Dividir o conteúdo em linhas
+            var lines = content.split('\n');
+
+            // Filtrar linhas não vazias e adicionar uma linha vazia no final
+            lines = lines.filter(function(line, index, self) {
+                return line.trim() !== '' || index === self.length - 1 || line.trim() !== self[index + 1].trim();
+            });
+
+            // Juntar as linhas de volta
+            content = lines.join('\n');
+
+            // Atualizar o conteúdo do editor
+            editor.value = content;
+        }
+
+        function replaceSpecialTags() {
+            var editor = document.getElementById('editor');
+            var content = editor.value;
+
+            // Substituir padrões específicos
+            content = content.replace(/#i\s*\/?(?=\n|$)/ig, '#INTRO ');
+            content = content.replace(/#v\s*\/?(?=\n|$)/ig, '#VERSE ');
+            content = content.replace(/#p\s*\/?(?=\n|$)/ig, '#PRE-CHORUS ');
+            content = content.replace(/#c\s*\/?(?=\n|$)/ig, '#CHORUS ');
+            content = content.replace(/#b\s*\/?(?=\n|$)/ig, '#BRIDGE ');
+            content = content.replace(/#h\s*\/?(?=\n|$)/ig, '#HOOK ');
+            content = content.replace(/#o\s*\/?(?=\n|$)/ig, '#OUTRO ');
+            content = content.replace(/##\s*\/?(?=\n|$)/ig, '#INSTRUMENTAL ');
+
+            content = content.replace(/#intro\s*\/?(?=\n|$)/ig, '#INTRO ');
+            content = content.replace(/#verse\s*\/?(?=\n|$)/ig, '#VERSE ');
+            content = content.replace(/#pre-chorus\s*\/?(?=\n|$)/ig, '#PRE-CHORUS ');
+            content = content.replace(/#chorus\s*\/?(?=\n|$)/ig, '#CHORUS ');
+            content = content.replace(/#bridge\s*\/?(?=\n|$)/ig, '#BRIDGE ');
+            content = content.replace(/#hook\s*\/?(?=\n|$)/ig, '#HOOK ');
+            content = content.replace(/#outro\s*\/?(?=\n|$)/ig, '#OUTRO ');
+            content = content.replace(/#instrumental\s*\/?(?=\n|$)/ig, '#INSTRUMENTAL ');
+
+            // Atualizar o conteúdo do editor
+            editor.value = content;
         }
 
 
@@ -231,44 +351,62 @@
             </div>
             <div class="popup_content">
                 <div class="popup_option" style="display:none">
-                    <p class="popup_option_title">Character Counter</p>
+                    <div class="popup_title">
+                        <p class="popup_option_title">Character counter</p>
+                        <p class="popup_option_description">Select this option for the character counter</p>
+                    </div>
                     <label class="switch">
-                        <input type="checkbox">
+                        <input type="checkbox" id="characterCounterToggle" onclick="checkContent()">
                         <span class="slider round"></span>
                     </label>
                 </div>
-                <div class="popup_option" style="display:none">
-                    <p class="popup_option_title">Smart Capitalization</p>
+                <div class="popup_option">
+                    <div class="popup_title">
+                        <p class="popup_option_title">Auto capitalization</p>
+                        <p class="popup_option_description">Select this option to automatically capitalize the first letter of the lines</p>
+                    </div>
                     <label class="switch">
-                        <input type="checkbox">
+                        <input type="checkbox" id="autoCapToggle" onclick="checkContent()">
                         <span class="slider round"></span>
                     </label>
                 </div>
-                <div class="popup_option" style="display:none">
-                    <p class="popup_option_title">Trim Lines</p>
+                <div class="popup_option">
+                    <div class="popup_title">
+                        <p class="popup_option_title">Auto trim lines</p>
+                        <p class="popup_option_description">Select this option to automatically trim the lines</p>
+                    </div>
                     <label class="switch">
-                        <input type="checkbox">
+                        <input type="checkbox" id="autoTrimToggle" onclick="checkContent()">
                         <span class="slider round"></span>
                     </label>
                 </div>
-                <div class="popup_option" style="display:none">
-                    <p class="popup_option_title">Remove Double Spaces and Lines</p>
+                <div class="popup_option">
+                    <div class="popup_title">
+                        <p class="popup_option_title">Remove duplicate lines and spaces</p>
+                        <p class="popup_option_description">Select this option to automatically remove spaces and duplicate lines</p>
+                    </div>
                     <label class="switch">
-                        <input type="checkbox">
+                        <input type="checkbox" id="removeDoubleSpacesAndLinesToggle" onclick="checkContent()">
                         <span class="slider round"></span>
                     </label>
                 </div>
-                <div class="popup_option" style="display:none">
-                    <p class="popup_option_title">Auto Capitalize Tags</p>
+                <div class="popup_option">
+                    <div class="popup_title">
+                        <p class="popup_option_title">Auto capitalize tags</p>
+                        <p class="popup_option_description">Select this option to automatically capitalize tags</p>
+                    </div>
                     <label class="switch">
-                        <input type="checkbox">
+                        <input type="checkbox" id="autoCapTagsToggle" onclick="checkContent()">
                         <span class="slider round"></span>
                     </label>
                 </div>
-                <div class="popup_option" style="display:none">
-                    <p class="popup_option_title">Grammar Check (LanguageTool)</p>
+                <div class="popup_option">
+                    <div class="popup_title">
+                        <p class="popup_option_title">Automatic suggestions</p>
+                        <p class="popup_option_description">Select this option for automatic format suggestions</p>
+                    </div>
                     <label class="switch">
-                        <input type="checkbox">
+                        <input type="checkbox" id="autoSuggestions" onclick="checkContent()">
                         <span class="slider round"></span>
                     </label>
                 </div>
@@ -296,19 +434,29 @@
         <div id="suggest_popup" class="popup">
             <div id="closeButton" onclick="closeSuggestions()">&#215;</div>
             <div class="popup_title">
-                <h2>Suggest a Feature</h2>
+                <h2>Suggest a feature</h2>
             </div>
             <div class="popup_description">
                 <p></p>
             </div>
             <div class="popup_content" style="display: flex; align-items: center;">
-                <div class="loading_container" id="loading_container">
-                    <div class="loading_spinner_loop" id="loading_spinner_credits" style="display:block">
-                        <div class="loading_spinner">
-                            <div></div>
-                        </div>
-                    </div>
-                </div>
+                <form>
+                    <select name="select_menu" id="select_menu" onchange="updateOptions()">
+                        <option value="" disabled selected>Select an option</option>
+                        <option value="option1">Suggest word for the dictionary</option>
+                        <option value="option2">Suggest a new format alert</option>
+                        <option value="option3">Send a feedback</option>
+                        <option value="option4">Report a bug</option>
+                    </select>
+                    <br>
+                    <input type="text" name="text1" style="display: none;">
+                    <br>
+                    <input type="text" name="text2" style="display: none;">
+                    <br>
+                    <input type="text" name="text3" style="display: none;">
+                    <br>
+                    <textarea type="text" name="text4" style="display: none; word-wrap: break-word;"></textarea>
+                </form>
             </div>
         </div>
 
@@ -355,6 +503,102 @@
                     aboutPopup.style.display = "none";
                     overlay.style.display = "none";
                 }
+
+
+                // Função para atualizar as opções abaixo com base na seleção do menu seletor
+                function updateOptions() {
+                    var selectMenu = document.getElementById("select_menu");
+                    var text1 = document.getElementsByName("text1")[0];
+                    var text2 = document.getElementsByName("text2")[0];
+                    var text3 = document.getElementsByName("text3")[0];
+                    var text4 = document.getElementsByName("text4")[0];
+
+                    // Verifica a opção selecionada
+                    var selectedOption = selectMenu.value;
+
+                    // Remove todas as classes dos elementos de texto
+                    text1.classList.remove("option1", "option2", "option3", "option4");
+                    text2.classList.remove("option1", "option2", "option3", "option4");
+                    text3.classList.remove("option1", "option2", "option3", "option4");
+                    text4.classList.remove("option1", "option2", "option3", "option4");
+
+                    // Adiciona as classes apropriadas com base na opção selecionada
+                    switch (selectedOption) {
+                        case "option1": // Suggest word for the dictionary
+                            text1.classList.add("option1");
+                            text1.placeholder = "Digite o seu nome";
+                            text1.style.display = "block"
+
+                            text2.classList.add("option1");
+                            text2.placeholder = "Digite aqui as palavras incorretas (separe cada uma usando uma '/')";
+                            text2.style.display = "block"; 
+
+                            text3.classList.add("option1");
+                            text3.placeholder = "Digite aqui a correção";
+                            text3.style.display = "block"; 
+
+                            text4.classList.add("popup_details");
+                            text4.placeholder = "Observações";
+                            text4.style.display = "block"; 
+                            break;
+                        case "option2": // Suggest a new format alert
+                            text1.classList.add("option2");
+                            text1.placeholder = "Digite o seu nome";
+                            text1.style.display = "block"
+
+                            text2.classList.add("option2");
+                            text2.placeholder = "Format suggestion";
+                            text2.style.display = "block"; 
+
+                            text3.classList.add("option2");
+                            text3.placeholder = "Digite aqui a correção";
+                            text3.style.display = "block"; 
+
+                            text4.classList.add("popup_details");
+                            text4.placeholder = "Observações";
+                            text4.style.display = "block"; 
+                            break;
+                        case "option3": // Send a feedback
+                            text1.classList.add("option3");
+                            text1.placeholder = "Digite o seu nome";
+                            text1.style.display = "block"
+
+                            text2.classList.add("option3");
+                            text2.placeholder = "Enter your feedback";
+                            text2.style.display = "block"; 
+
+                            text3.classList.add("option3");
+                            text3.placeholder = "Digite aqui a correção";
+                            text3.style.display = "none"; 
+
+                            text4.classList.add("popup_details");
+                            text4.placeholder = "Observações";
+                            text4.style.display = "none"; 
+                            break;
+                        case "option4": // Report a bug
+                            text1.classList.add("option4");
+                            text1.placeholder = "Digite o seu nome";
+                            text1.style.display = "block"
+
+                            text2.classList.add("option4");
+                            text2.placeholder = "Enter the bug details";
+                            text2.style.display = "block"; // Exibe o segundo campo de texto
+
+                            
+                            text3.classList.add("option4");
+                            text3.placeholder = "Digite aqui a correção";
+                            text3.style.display = "none"; 
+
+                            text4.classList.add("popup_details");
+                            text4.placeholder = "Observações";
+                            text4.style.display = "none"; 
+                            break;
+                        default:
+                            break;
+                    }
+                }
         </script>
     </body>
 </html>
+
+
