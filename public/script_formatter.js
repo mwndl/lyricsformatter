@@ -41,6 +41,7 @@ function handleRefreshButtonClick() {
         autoTrim();
     }
     if (removeDoubleSpacesAndLinesToggle.checked) {
+        removeDuplicateSpaces();
         removeDuplicateEmptyLines();
     }
     if (autoCapTagsToggle.checked) {
@@ -479,7 +480,7 @@ function handleRefreshButtonClick() {
             'autoTrimToggle',
             'removeDoubleSpacesAndLinesToggle',
             'autoCapTagsToggle',
-            'lagToolToggle'
+            'autoSuggestions'
         ];
 
         checkboxIds.forEach(function (checkboxId) {
