@@ -243,7 +243,165 @@ function handleRefreshButtonClick() {
 
 
     textarea.addEventListener('input', updateSidebar);
+    textarea.addEventListener('input', checkContent);
     textarea.addEventListener('scroll', syncScroll);
+
+    let typingTimer;
+    const doneTypingInterval = 3000;
+
+    function checkContent() {
+        var editor = document.getElementById('editor');
+        var resetButton = document.getElementById('reset_button')
+        var refreshButton = document.getElementById('refresh_button');
+        var refreshButtonMob = document.getElementById('refresh_button_mob');
+        var improvementsPlaceholder = document.getElementById('improvements_placeholder');
+
+        var content = editor.value;
+
+        const checkboxIds = [
+            'characterCounterToggle',
+            'autoCapToggle',
+            'autoTrimToggle',
+            'removeDoubleSpacesAndLinesToggle',
+            'autoCapTagsToggle',
+            'autoSuggestions'
+        ];
+
+        checkboxIds.forEach(function (checkboxId) {
+            const checkbox = document.getElementById(checkboxId);
+            localStorage.setItem(checkboxId, checkbox.checked);
+        });
+
+        if (content.trim() === '') {
+            resetButton.style.display = 'none';
+            refreshButton.style.display = 'none';
+            improvementsPlaceholder.textContent = 'Type something or paste your transcription to start...';
+            improvementsPlaceholder.onclick = '';
+        } else {
+
+            var autoCapToggle = document.getElementById('autoCapToggle'); 
+
+            if (autoCapToggle.checked) {
+                autoCap();
+            };
+
+            resetButton.style.display = 'block';
+            refreshButton.style.display = 'block';
+            improvementsPlaceholder.innerHTML = 'Tap the <span class="hightlight_text">Refresh</span> icon to update the suggestions.';
+        }
+
+        if (autoSuggestions.checked) {
+            // atualiza as sugestões após 3s
+            clearTimeout(typingTimer);
+            typingTimer = setTimeout(function() {
+                console.log("Usuário parou de digitar após 3 segundos de inatividade.");
+                handleRefreshButtonClick();
+            }, doneTypingInterval);
+        };
+    }
+
+    function autoCap() {
+        var editor = document.getElementById('editor');
+        var content = editor.value;
+
+        // Split the content into lines
+        var lines = content.split('\n');
+
+        // Capitalize the first character of each line
+        for (var i = 0; i < lines.length; i++) {
+            lines[i] = lines[i].charAt(0).toUpperCase() + lines[i].slice(1);
+        }
+
+        // Join the lines back together
+        content = lines.join('\n');
+
+        // Update the editor's content
+        editor.value = content;
+    }
+
+    function autoTrim() {
+        var editor = document.getElementById('editor');
+        var content = editor.value;
+
+        // Split the content into lines
+        var lines = content.split('\n');
+
+        // Trim extra spaces at the end of each line
+        for (var i = 0; i < lines.length; i++) {
+            lines[i] = lines[i].trimRight();
+        }
+
+        // Join the lines back together
+        content = lines.join('\n');
+
+        // Update the editor's content
+        editor.value = content;
+    }
+
+    function removeDuplicateSpaces() {
+        var editor = document.getElementById('editor');
+        var content = editor.value;
+
+        // Dividir o conteúdo em linhas
+        var lines = content.split('\n');
+
+        // Iterar sobre cada linha e substituir espaços duplicados por um único espaço
+        for (var i = 0; i < lines.length; i++) {
+            lines[i] = lines[i].replace(/\s+/g, ' ');
+        }
+
+        // Juntar as linhas de volta
+        content = lines.join('\n');
+
+        // Atualizar o conteúdo do editor
+        editor.value = content;
+    }
+
+    function removeDuplicateEmptyLines() {
+        var editor = document.getElementById('editor');
+        var content = editor.value;
+
+        // Dividir o conteúdo em linhas
+        var lines = content.split('\n');
+
+        // Filtrar linhas não vazias e adicionar uma linha vazia no final
+        lines = lines.filter(function(line, index, self) {
+            return line.trim() !== '' || index === self.length - 1 || line.trim() !== self[index + 1].trim();
+        });
+
+        // Juntar as linhas de volta
+        content = lines.join('\n');
+
+        // Atualizar o conteúdo do editor
+        editor.value = content;
+    }
+
+    function replaceSpecialTags() {
+        var editor = document.getElementById('editor');
+        var content = editor.value;
+
+        // Substituir padrões específicos
+        content = content.replace(/#i\s*\/?(?=\n|$)/ig, '#INTRO ');
+        content = content.replace(/#v\s*\/?(?=\n|$)/ig, '#VERSE ');
+        content = content.replace(/#p\s*\/?(?=\n|$)/ig, '#PRE-CHORUS ');
+        content = content.replace(/#c\s*\/?(?=\n|$)/ig, '#CHORUS ');
+        content = content.replace(/#b\s*\/?(?=\n|$)/ig, '#BRIDGE ');
+        content = content.replace(/#h\s*\/?(?=\n|$)/ig, '#HOOK ');
+        content = content.replace(/#o\s*\/?(?=\n|$)/ig, '#OUTRO ');
+        content = content.replace(/##\s*\/?(?=\n|$)/ig, '#INSTRUMENTAL ');
+
+        content = content.replace(/#intro\s*\/?(?=\n|$)/ig, '#INTRO ');
+        content = content.replace(/#verse\s*\/?(?=\n|$)/ig, '#VERSE ');
+        content = content.replace(/#pre-chorus\s*\/?(?=\n|$)/ig, '#PRE-CHORUS ');
+        content = content.replace(/#chorus\s*\/?(?=\n|$)/ig, '#CHORUS ');
+        content = content.replace(/#bridge\s*\/?(?=\n|$)/ig, '#BRIDGE ');
+        content = content.replace(/#hook\s*\/?(?=\n|$)/ig, '#HOOK ');
+        content = content.replace(/#outro\s*\/?(?=\n|$)/ig, '#OUTRO ');
+        content = content.replace(/#instrumental\s*\/?(?=\n|$)/ig, '#INSTRUMENTAL ');
+
+        // Atualizar o conteúdo do editor
+        editor.value = content;
+    }
 
     function updateSidebar() {
 
