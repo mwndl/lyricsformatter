@@ -195,6 +195,29 @@
                 improvementsPlaceholder.innerHTML = 'Tap the <span class="hightlight_text">Refresh</span> icon to update the suggestions.';
                 improvementsPlaceholder.onclick = handleRefreshButtonClick;
             }
+
+            // Seu textarea com ID "editor"
+            const editor = document.getElementById('editor');
+            
+            // Variável para armazenar o temporizador
+            let timeout;
+            
+            // Função para executar após 3 segundos de inatividade
+            function executarAposInatividade() {
+                console.log('Executando após 3 segundos de inatividade...');
+                // Coloque sua lógica aqui
+            }
+            
+            // Função para redefinir o temporizador
+            function redefinirTemporizador() {
+                clearTimeout(timeout);
+                timeout = setTimeout(executarAposInatividade, 3000); // 3000 ms = 3 segundos
+            }
+            
+            // Ouvir eventos de digitação no textarea
+            editor.addEventListener('input', redefinirTemporizador);
+            editor.addEventListener('keyup', redefinirTemporizador);
+
         }
 
         function autoCap() {
