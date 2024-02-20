@@ -51,8 +51,6 @@ function handleRefreshButtonClick() {
     resetLineIssues();
     updateSidebar();
     clearTimeout(typingTimer); // auto 3s
-    checkTokensInUrl();
-    authenticateWithSpotifyTokens();
 
     // Get references to the elements
     // Hide the refresh button and show the loading spinner
@@ -1291,54 +1289,70 @@ function updateServerInfo(data) {
     
 }
 
-// Função para extrair parâmetros da URL
-function getParamsFromUrl() {
-    var params = {};
-    var queryString = window.location.hash.substring(1);
-    var regex = /([^&=]+)=([^&]*)/g;
-    var match;
-    while (match = regex.exec(queryString)) {
-        params[decodeURIComponent(match[1])] = decodeURIComponent(match[2]);
-    }
-    return params;
-}
+function processSpotifyTokensFromURL() {
+    // Verificar se há tokens do Spotify na URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const accessToken = urlParams.get('access_token');
+    const refreshToken = urlParams.get('refresh_token');
 
-// Função para verificar se os tokens estão presentes na URL
-function checkTokensInUrl() {
-    var params = getParamsFromUrl();
-    if (params.access_token && params.token_type && params.expires_in) {
-        // Tokens encontrados na URL, armazenar em cache
-        localStorage.setItem('spotifyTokens', JSON.stringify(params));
-        // Remover os tokens da URL para evitar exposição
+    // Se os tokens estiverem presentes, armazená-los em cache e fazer a solicitação para obter dados do usuário
+    if (accessToken && refreshToken) {
+        // Armazenar os tokens em cache
+        cacheSpotifyTokens(accessToken, refreshToken);
+
+        // Remover os parâmetros da URL
         window.history.replaceState({}, document.title, window.location.pathname);
+
+        // Fazer a solicitação para obter dados do usuário
+        fetchUserData()
+            .then(() => {
+                // Atualizar os dados do site com os dados recebidos
+                updateUIWithData();
+            })
+            .catch(error => {
+                console.error('Error processing Spotify tokens:', error);
+            });
     }
 }
 
-// Função para fazer uma solicitação ao servidor para autenticar com os tokens armazenados em cache
-function authenticateWithSpotifyTokens() {
-    var cachedTokens = localStorage.getItem('spotifyTokens');
-    if (cachedTokens) {
-        // Tokens armazenados em cache, fazer solicitação ao servidor
-        var tokens = JSON.parse(cachedTokens);
-        fetch(window.serverPath + '/sp_auth', {
+// Função para armazenar os tokens do Spotify em cache
+function cacheSpotifyTokens(accessToken, refreshToken) {
+    localStorage.setItem('accessToken', accessToken);
+    localStorage.setItem('refreshToken', refreshToken);
+}
+
+// Função para fazer uma solicitação para obter dados do usuário do Spotify
+async function fetchUserData() {
+    try {
+        // Recuperar os tokens do armazenamento local do navegador
+        const accessToken = localStorage.getItem('accessToken');
+        const refreshToken = localStorage.getItem('refreshToken');
+
+        // Fazer uma solicitação fetch para a rota /user
+        const response = await fetch('/user', {
             method: 'GET',
             headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(tokens)
-        })
-        .then(function(response) {
-            if (response.ok) {
-                console.log('Autenticado com sucesso com os tokens do Spotify.');
-            } else {
-                console.error('Erro ao autenticar com os tokens do Spotify:', response.statusText);
+                'Authorization': `Bearer ${accessToken}`
+                // Se necessário, inclua outros cabeçalhos aqui
             }
-        })
-        .catch(function(error) {
-            console.error('Erro ao autenticar com os tokens do Spotify:', error);
         });
+
+        // Verificar se a solicitação foi bem-sucedida
+        if (!response.ok) {
+            throw new Error('Error getting user data.');
+        }
+
+        // Extrair os dados do usuário da resposta
+        const userData = await response.json();
+
+        // Exibir os dados do usuário no console (você pode fazer outra coisa com eles)
+        console.log('User data:', userData);
+    } catch (error) {
+        console.error('Error getting user data.', error.message);
     }
 }
 
-// Chama a função para buscar dados do servidor quando o documento estiver pronto
-document.addEventListener('DOMContentLoaded', fetchServerInfo);
+document.addEventListener('DOMContentLoaded', function () {
+    fetchServerInfo();
+    processSpotifyTokensFromURL();
+});
