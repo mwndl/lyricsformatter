@@ -29,6 +29,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     var ignoredContainers = []; // aqui ficam guardados temporariamente os IDs ignorados, ao limpar o texto, tocar em 'Copy' ou então ao tocar no botão de lixo, esse array será resetado
 
+
  // Add this function to your existing code
 function handleRefreshButtonClick() {
 
@@ -73,6 +74,16 @@ function handleRefreshButtonClick() {
     var requestData = {
         text: textArea.value,
     };
+
+    // Obter o valor de localHostToggle do localStorage
+    const localHostToggle = localStorage.getItem('localHostToggle');
+
+    // Verificar o valor de localHostToggle e definir window.serverPath
+    if (localHostToggle === 'true') {
+        window.serverPath = 'http://localhost:3000'; 
+    } else {
+        window.serverPath = 'https://datamatch-backend.onrender.com';
+    }
 
     fetch(`${window.serverPath}/formatter/${selectedLanguageCode}`, {
         method: 'POST',
@@ -153,7 +164,7 @@ function handleRefreshButtonClick() {
 }
 
     resetButton.addEventListener('click', function() {
-    
+
         textArea.value = ''; // apaga a transcrição
         updateSidebar(); // reseta os contadores de caracteres e a barra lateral
         ignoredContainers = []; // limpa a memória de alertas ignorados
@@ -254,7 +265,6 @@ function handleRefreshButtonClick() {
         var editor = document.getElementById('editor');
         var resetButton = document.getElementById('reset_button')
         var refreshButton = document.getElementById('refresh_button');
-        var refreshButtonMob = document.getElementById('refresh_button_mob');
         var improvementsPlaceholder = document.getElementById('improvements_placeholder');
 
         var content = editor.value;
@@ -265,7 +275,8 @@ function handleRefreshButtonClick() {
             'autoTrimToggle',
             'removeDoubleSpacesAndLinesToggle',
             'autoCapTagsToggle',
-            'autoSuggestions'
+            'autoSuggestions',
+            'localHostToggle'
         ];
 
         checkboxIds.forEach(function (checkboxId) {
@@ -631,28 +642,6 @@ function handleRefreshButtonClick() {
         }
     });
 
-    // Função para verificar e definir o estado dos checkboxes ao carregar a página
-    function setCheckboxStates() {
-        // Adicione IDs aos seus elementos de checkbox para tornar a manipulação mais fácil
-        const checkboxIds = [
-            'characterCounterToggle',
-            'autoCapToggle',
-            'autoTrimToggle',
-            'removeDoubleSpacesAndLinesToggle',
-            'autoCapTagsToggle',
-            'autoSuggestions'
-        ];
-
-        checkboxIds.forEach(function (checkboxId) {
-            const checkbox = document.getElementById(checkboxId);
-            const checkboxState = localStorage.getItem(checkboxId);
-
-            if (checkboxState !== null) {
-                checkbox.checked = JSON.parse(checkboxState);
-            }
-        });
-    }
-
     // Configurar o idioma padrão ao carregar a página
     setDefaultLanguage();
     setCheckboxStates();
@@ -990,6 +979,30 @@ function updateLineIssues(color, lines) {
     });
 }
 
+
+    // Função para verificar e definir o estado dos checkboxes ao carregar a página
+    function setCheckboxStates() {
+        // Adicione IDs aos seus elementos de checkbox para tornar a manipulação mais fácil
+        const checkboxIds = [
+            'characterCounterToggle',
+            'autoCapToggle',
+            'autoTrimToggle',
+            'removeDoubleSpacesAndLinesToggle',
+            'autoCapTagsToggle',
+            'autoSuggestions',
+            'localHostToggle'
+        ];
+
+        checkboxIds.forEach(function (checkboxId) {
+            const checkbox = document.getElementById(checkboxId);
+            const checkboxState = localStorage.getItem(checkboxId);
+
+            if (checkboxState !== null) {
+                checkbox.checked = JSON.parse(checkboxState);
+            }
+        });
+    }
+
 // Definindo a função findAndReplace
 function findAndReplace(incorrectTerm, correction) {
     // Remove os colchetes dos termos
@@ -1113,15 +1126,20 @@ document.addEventListener("DOMContentLoaded", function () {
         overlay.style.display = "none";
     });
 });
-/* 
-window.serverPath = 'http://localhost:3000'; 
-window.serverPath = 'https://datamatch-backend.onrender.com';
-*/
-
-window.serverPath = 'https://datamatch-backend.onrender.com';
 
 // Função para fazer uma solicitação AJAX
 function fetchCreditsData() {
+
+    // Obter o valor de localHostToggle do localStorage
+    const localHostToggle = localStorage.getItem('localHostToggle');
+
+    // Verificar o valor de localHostToggle e definir window.serverPath
+    if (localHostToggle === 'true') {
+        window.serverPath = 'http://localhost:3000'; 
+    } else {
+        window.serverPath = 'https://datamatch-backend.onrender.com';
+    }
+
     fetch(`${window.serverPath}/formatter/credits`)
     .then(response => response.json())
     .then(data => updateCredits(data.credits))
@@ -1193,8 +1211,16 @@ function updateCredits(credits) {
     });
 }
 
-// Chama a função para buscar dados da API quando o documento estiver pronto
-document.addEventListener('DOMContentLoaded', fetchCreditsData);
+document.addEventListener('DOMContentLoaded', function () {
+    // Adicionar evento de clique à div com id 'disconnect_option'
+    document.getElementById('disconnect_option').addEventListener('click', disconnectSpotify);
+    fetchCreditsData();
+    fetchServerInfo();
+    fetchUserData();
+    processSpotifyTokensFromURL();
+    toggleDevMode();
+});
+
 
 // Função para fechar o popup de informações
 function closeAboutInfo() {
@@ -1203,10 +1229,21 @@ function closeAboutInfo() {
 
 // Função para buscar dados do servidor
 function fetchServerInfo() {
+
+    // Obter o valor de localHostToggle do localStorage
+    const localHostToggle = localStorage.getItem('localHostToggle');
+
+    // Verificar o valor de localHostToggle e definir window.serverPath
+    if (localHostToggle === 'true') {
+        window.serverPath = 'http://localhost:3000'; 
+    } else {
+        window.serverPath = 'https://datamatch-backend.onrender.com';
+    }
+
     fetch(`${window.serverPath}/formatter/about`)
-        .then(response => response.json())
-        .then(data => updateServerInfo(data))
-        .catch(error => console.error('Erro ao buscar dados do servidor:', error));
+    .then(response => response.json())
+    .then(data => updateServerInfo(data))
+    .catch(error => console.error('Erro ao buscar dados do servidor:', error));
 }
 
 // Função para atualizar os elementos HTML com os novos dados do servidor
@@ -1281,13 +1318,55 @@ function updateServerInfo(data) {
             itemElement.innerHTML = `<span>${item.label}: </span><span class="bold">${item.value}</span>`;
             serverInfoContainer.appendChild(itemElement);
         }
+       // Adiciona o contêiner das informações do servidor ao popupContent
+       popupContent.appendChild(serverInfoContainer);
+    }
+}
 
-        // Adiciona o contêiner das informações do servidor ao popupContent
-        popupContent.appendChild(serverInfoContainer);
+// Adicionar evento de clique ao h2 com id 'settings_title'
+const settingsTitle = document.getElementById('settings_title');
+let clickCount = 0;
+
+settingsTitle.addEventListener('click', function () {
+    clickCount++;
+
+    // Se o usuário clicou 5 vezes, exibir a div e reiniciar a contagem
+    if (clickCount === 5) {
+        displayDevModeDiv();
+        clickCount = 0;
+    }
+});
+
+// Função para exibir/ocultar a div e salvar a escolha em cache
+function displayDevModeDiv() {
+    const devHidedDiv = document.getElementById('dev_hided_div');
+    const devMode = localStorage.getItem('devMode') === 'true'; // Obtém o estado atual do modo de desenvolvimento
+
+    // Alterna entre exibir e ocultar a div
+    if (devMode) {
+        devHidedDiv.style.display = 'none';
+    } else {
+        devHidedDiv.style.display = 'block';
     }
 
-    
+    // Salva a escolha em cache invertendo o valor atual
+    localStorage.setItem('devMode', (!devMode).toString());
 }
+
+// Carrega a escolha do modo de desenvolvimento do cache e exibe/oculta a div conforme necessário
+function loadDevMode() {
+    const devMode = localStorage.getItem('devMode') === 'true';
+    const devHidedDiv = document.getElementById('dev_hided_div');
+
+    if (devMode) {
+        devHidedDiv.style.display = 'block';
+    } else {
+        devHidedDiv.style.display = 'none';
+    }
+}
+
+// Chama a função ao carregar a página para aplicar o estado do modo de desenvolvimento
+loadDevMode();
 
 function processSpotifyTokensFromURL() {
     // Verificar se há tokens do Spotify na URL
@@ -1321,6 +1400,7 @@ function cacheSpotifyTokens(accessToken, refreshToken) {
     localStorage.setItem('refreshToken', refreshToken);
 }
 
+
 // Função para desconectar o Spotify e atualizar a interface do usuário
 function disconnectSpotify() {
     // Remover os tokens do armazenamento local do navegador
@@ -1341,6 +1421,16 @@ async function fetchUserData() {
         // Verificar se os tokens estão em cache
         if (!accessToken || !refreshToken) {
             return; // sair da função porque não há tokens do spotify
+        }
+
+        // Obter o valor de localHostToggle do localStorage
+        const localHostToggle = localStorage.getItem('localHostToggle');
+
+        // Verificar o valor de localHostToggle e definir window.serverPath
+        if (localHostToggle === 'true') {
+            window.serverPath = 'http://localhost:3000'; 
+        } else {
+            window.serverPath = 'https://datamatch-backend.onrender.com';
         }
 
         // Fazer uma solicitação fetch para a rota /formatter/user
@@ -1380,11 +1470,3 @@ async function fetchUserData() {
         console.error('Error getting user data.', error.message);
     }
 }
-
-
-document.addEventListener('DOMContentLoaded', function () {
-    document.getElementById('disconnect_option').addEventListener('click', disconnectSpotify);
-    fetchServerInfo();
-    fetchUserData();
-    processSpotifyTokensFromURL();
-});

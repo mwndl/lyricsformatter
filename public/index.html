@@ -156,7 +156,7 @@
         <div id="settings_popup" class="popup">
             <div id="closeButton" onclick="closeSettings()">&#215;</div>
             <div class="popup_title">
-                <h2>Settings</h2>
+                <h2 onclick="handleSettingsClick()">Settings</h2>
             </div>
             <div class="popup_content">
                 <div class="popup_option">
@@ -164,13 +164,13 @@
                         <p class="popup_option_title">Spotify account</p>
                         <p class="popup_option_description">Connect your Spotify account to LyricsFormatter</p>
                     </div>
-                    <div class="spotify_login" id="spotify_login_button" style="display:block">
+                    <div class="spotify_login" id="spotify_login_button" style="display:none">
                         <button class="spotify_button" onclick="window.location.href='https://accounts.spotify.com/pt-BR/authorize?client_id=51a45f01c96645e386611edf4a345b50&redirect_uri=http://localhost:3000/formatter/sp_callback&response_type=code&scope=user-read-playback-state%20user-modify-playback-state%20user-modify-playback-state%20user-read-currently-playing%20user-read-email%20user-read-playback-state'">
                             <img src="images/spotify_logo.webp" alt="Spotify Logo" class="spotify_logo">
                             Login with Spotify
                         </button>
                     </div>
-                    <div class="user-profile" id="user_profile" style="display:none">
+                    <div class="user-profile" id="user_profile" style="display:block">
                         <img class="user-photo" id="sp_user_pic" src="https://i.imgur.com/zW9FtAc.png" alt="User Photo" title="User Photo" draggable="false">
                         <div id="user_menu" class="user-menu">
                             <ul>
@@ -215,7 +215,7 @@
                 <div class="popup_option">
                     <div class="popup_title">
                         <p class="popup_option_title">Remove duplicate lines and spaces</p>
-                        <p class="popup_option_description">Select this option to automatically remove spaces and duplicate lines</p>
+                        <p class="popup_option_description">Select this option to automatically remove duplicate spaces and lines</p>
                     </div>
                     <label class="switch">
                         <input type="checkbox" id="removeDoubleSpacesAndLinesToggle" onclick="checkContent()">
@@ -241,6 +241,19 @@
                         <input type="checkbox" id="autoSuggestions" onclick="checkContent()">
                         <span class="slider round"></span>
                     </label>
+                </div>
+                <div class="dev_hided_div" id="dev_hided_div" style="display:none">
+                    <hr style="border-top: 1px solid rgb(100, 100, 100); border-right: none; border-bottom: none; border-left: none; border-image: initial;">
+                    <div class="popup_option">
+                        <div class="popup_title">
+                            <p class="popup_option_title">Development mode</p>
+                            <p class="popup_option_description">Select this option to switch to the local server</p>
+                        </div>
+                        <label class="switch">
+                            <input type="checkbox" id="localHostToggle" onclick="checkContent()">
+                            <span class="slider round"></span>
+                        </label>
+                    </div>
                 </div>
             </div>
         </div>
@@ -311,38 +324,98 @@
         </div>
 
         <script>
-                document.addEventListener('DOMContentLoaded', function () {
-                var expandArrow = document.getElementById('expand_arrow');
-                var footer = document.getElementById('footer');
-                var footerHidedContent = document.getElementById('footer_hided_content');
-                var mobileFooterDiv = document.getElementById('mobile_footer_div');
 
-                expandArrow.addEventListener('click', function (event) {
-                    event.stopPropagation(); // Impede que o clique seja propagado para o corpo/documento
-                    footer.classList.toggle('expanded');
+                function checkContent() {
 
-                    if (footer.classList.contains('expanded')) {
-                        footerHidedContent.style.display = "block";
-                        mobileFooterDiv.style.height = "8%";
-                        expandArrow.style.transform = "rotate(180deg)";
+                        const checkboxIds = [
+                            'characterCounterToggle',
+                            'autoCapToggle',
+                            'autoTrimToggle',
+                            'removeDoubleSpacesAndLinesToggle',
+                            'autoCapTagsToggle',
+                            'autoSuggestions',
+                            'localHostToggle'
+                        ];
+
+                        checkboxIds.forEach(function (checkboxId) {
+                            const checkbox = document.getElementById(checkboxId);
+                            localStorage.setItem(checkboxId, checkbox.checked);
+                        });
+                        setCheckboxStates();
+                }
+
+                function handleSettingsClick() {
+                    clickCount++;
+
+                    // Se o usuário clicou 5 vezes, exibir a div e reiniciar a contagem
+                    if (clickCount === 5) {
+                        displayDevModeDiv();
+                        clickCount = 0;
+                    }
+                }
+
+                // Função para exibir/ocultar a div e salvar a escolha em cache
+                function displayDevModeDiv() {
+                    const devHidedDiv = document.getElementById('dev_hided_div');
+                    const devMode = localStorage.getItem('devMode') === 'true'; // Obtém o estado atual do modo de desenvolvimento
+
+                    // Alterna entre exibir e ocultar a div
+                    if (devMode) {
+                        devHidedDiv.style.display = 'none';
                     } else {
-                        footerHidedContent.style.display = "none";
-                        mobileFooterDiv.style.height = "100%";
-                        expandArrow.style.transform = "rotate(0deg)";
+                        devHidedDiv.style.display = 'block';
                     }
-                });
 
-                // Adiciona um ouvinte de eventos ao corpo/documento para fechar o footer quando clicar fora dele
-                document.body.addEventListener('click', function (event) {
-                    if (!footer.contains(event.target)) {
-                        // Se o clique ocorreu fora do footer, oculta o conteúdo e recolhe o footer
-                        footerHidedContent.style.display = "none";
-                        mobileFooterDiv.style.height = "100%";
-                        expandArrow.style.transform = "rotate(0deg)";
-                        footer.classList.remove('expanded');
+                    // Salva a escolha em cache invertendo o valor atual
+                    localStorage.setItem('devMode', (!devMode).toString());
+                }
+
+                // Carrega a escolha do modo de desenvolvimento do cache e exibe/oculta a div conforme necessário
+                function loadDevMode() {
+                    const devMode = localStorage.getItem('devMode') === 'true';
+                    const devHidedDiv = document.getElementById('dev_hided_div');
+
+                    if (devMode) {
+                        devHidedDiv.style.display = 'block';
+                    } else {
+                        devHidedDiv.style.display = 'none';
                     }
+                }
+                loadDevMode();
+
+
+                document.addEventListener('DOMContentLoaded', function () {
+                    var expandArrow = document.getElementById('expand_arrow');
+                    var footer = document.getElementById('footer');
+                    var footerHidedContent = document.getElementById('footer_hided_content');
+                    var mobileFooterDiv = document.getElementById('mobile_footer_div');
+
+                    expandArrow.addEventListener('click', function (event) {
+                        event.stopPropagation(); // Impede que o clique seja propagado para o corpo/documento
+                        footer.classList.toggle('expanded');
+
+                        if (footer.classList.contains('expanded')) {
+                            footerHidedContent.style.display = "block";
+                            mobileFooterDiv.style.height = "8%";
+                            expandArrow.style.transform = "rotate(180deg)";
+                        } else {
+                            footerHidedContent.style.display = "none";
+                            mobileFooterDiv.style.height = "100%";
+                            expandArrow.style.transform = "rotate(0deg)";
+                        }
+                    });
+
+                    // Adiciona um ouvinte de eventos ao corpo/documento para fechar o footer quando clicar fora dele
+                    document.body.addEventListener('click', function (event) {
+                        if (!footer.contains(event.target)) {
+                            // Se o clique ocorreu fora do footer, oculta o conteúdo e recolhe o footer
+                            footerHidedContent.style.display = "none";
+                            mobileFooterDiv.style.height = "100%";
+                            expandArrow.style.transform = "rotate(0deg)";
+                            footer.classList.remove('expanded');
+                        }
+                    });
                 });
-            });
                 function closeSettings() {
                     var settingsPopup = document.getElementById("settings_popup");
                     var overlay = document.getElementById("overlay");
