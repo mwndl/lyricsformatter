@@ -74,7 +74,7 @@ function handleRefreshButtonClick() {
         text: textArea.value,
     };
 
-    fetch(`${Path}/formatter/${selectedLanguageCode}`, {
+    fetch(`${window.serverPath}/formatter/${selectedLanguageCode}`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -1118,7 +1118,7 @@ window.serverPath = 'http://localhost:3000';
 window.serverPath = 'https://datamatch-backend.onrender.com';
 */
 
-window.serverPath = 'https://datamatch-backend.onrender.com';
+window.serverPath = 'http://localhost:3000';
 
 // Função para fazer uma solicitação AJAX
 function fetchCreditsData() {
@@ -1321,19 +1321,22 @@ function cacheSpotifyTokens(accessToken, refreshToken) {
     localStorage.setItem('refreshToken', refreshToken);
 }
 
-// Função para fazer uma solicitação para obter dados do usuário do Spotify
 async function fetchUserData() {
     try {
         // Recuperar os tokens do armazenamento local do navegador
         const accessToken = localStorage.getItem('accessToken');
         const refreshToken = localStorage.getItem('refreshToken');
 
-        // Fazer uma solicitação fetch para a rota /user
+        // Verificar se os tokens estão em cache
+        if (!accessToken || !refreshToken) {
+            return; // sair da função porque não há tokens do spotify
+        }
+
+        // Fazer uma solicitação fetch para a rota /formatter/user
         const response = await fetch(`${window.serverPath}/formatter/user`, {
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${accessToken}`
-                // Se necessário, inclua outros cabeçalhos aqui
             }
         });
 
@@ -1354,5 +1357,6 @@ async function fetchUserData() {
 
 document.addEventListener('DOMContentLoaded', function () {
     fetchServerInfo();
+    fetchUserData();
     processSpotifyTokensFromURL();
 });
