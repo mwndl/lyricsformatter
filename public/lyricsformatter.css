@@ -158,6 +158,60 @@ body {
     margin-right: 5px;
 }
 
+/**/
+
+/* foto de usuario */
+
+.user-profile {
+    position: relative;
+    display: inline-block;
+    cursor: pointer;
+}
+
+.user-menu {
+    position: absolute;
+    top: 40px; /* Adjust as needed */
+    right: 0;
+    font-size: 12px;
+    font-weight: bold;
+    background-color: #434343;
+    border-radius: 5px;
+    display: none;
+    text-align: center;
+    width: 140px;
+    z-index: 1;
+}
+
+.user-menu ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+
+.user-menu ul li {
+    padding: 10px;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+.user-menu ul li:hover {
+    background-color: #393939;
+}
+
+.user-photo {
+    width: 40px; /* Adjust as needed */
+    height: 40px; /* Adjust as needed */
+    border-radius: 50%;
+    margin-right: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+}
+
+.user-profile:hover .user-menu {
+    display: block;
+}
+
+/**/
+
 
 
 /* TOP - END */
