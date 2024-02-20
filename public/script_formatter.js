@@ -50,6 +50,7 @@ function handleRefreshButtonClick() {
 
     resetLineIssues();
     updateSidebar();
+    clearTimeout(typingTimer); // auto 3s
 
     // Get references to the elements
     // Hide the refresh button and show the loading spinner
@@ -157,7 +158,7 @@ function handleRefreshButtonClick() {
         updateSidebar(); // reseta os contadores de caracteres e a barra lateral
         ignoredContainers = []; // limpa a memória de alertas ignorados
         checkContent();
-    
+        clearTimeout(typingTimer);
     });
 
 
@@ -294,7 +295,6 @@ function handleRefreshButtonClick() {
             // atualiza as sugestões após 3s
             clearTimeout(typingTimer);
             typingTimer = setTimeout(function() {
-                console.log("Usuário parou de digitar após 3 segundos de inatividade.");
                 handleRefreshButtonClick();
             }, doneTypingInterval);
         };
@@ -483,6 +483,8 @@ function handleRefreshButtonClick() {
             if (editorTextarea.value.trim() === '') {
                 improvementsPlaceholder.innerHTML = 'Type something or paste your transcription to start...';
                 ignoredContainers = []; // reseta o conteúdo ignorado
+                clearTimeout(typingTimer);
+
             } else {
                 improvementsPlaceholder.innerHTML = 'Tap the <span class="highlight_text">Refresh</span> icon to update the suggestions.';
             }
