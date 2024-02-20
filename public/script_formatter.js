@@ -51,7 +51,8 @@ function handleRefreshButtonClick() {
     resetLineIssues();
     updateSidebar();
     clearTimeout(typingTimer); // auto 3s
-    handleSpotifyCallback();
+    checkTokensInUrl();
+    authenticateWithSpotifyTokens();
 
     // Get references to the elements
     // Hide the refresh button and show the loading spinner
@@ -1332,12 +1333,6 @@ function authenticateWithSpotifyTokens() {
         });
     }
 }
-
-// Executar a verificação de tokens e autenticação ao carregar a página
-$(document).ready(function() {
-    checkTokensInUrl();
-    authenticateWithSpotifyTokens();
-});
 
 // Chama a função para buscar dados do servidor quando o documento estiver pronto
 document.addEventListener('DOMContentLoaded', fetchServerInfo);
