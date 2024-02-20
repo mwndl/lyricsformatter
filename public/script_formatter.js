@@ -1350,10 +1350,26 @@ async function fetchUserData() {
 
         // Exibir os dados do usuário no console (você pode fazer outra coisa com eles)
         console.log('User data:', userData);
+
+        // Exibir a foto de perfil do usuário e ocultar o botão de login
+        const spotifyLoginButton = document.getElementById('spotify_login_button');
+        const userProfileDiv = document.getElementById('user_profile');
+        const userProfileImage = document.getElementById('sp_user_pic');
+
+        if (userProfileImage && userData.profile_image) {
+            userProfileImage.src = userData.profile_image;
+        }
+
+        if (spotifyLoginButton && userProfileDiv) {
+            spotifyLoginButton.style.display = 'none';
+            userProfileDiv.style.display = 'block';
+        }
+
     } catch (error) {
         console.error('Error getting user data.', error.message);
     }
 }
+
 
 document.addEventListener('DOMContentLoaded', function () {
     fetchServerInfo();
