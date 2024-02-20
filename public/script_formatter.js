@@ -74,7 +74,7 @@ function handleRefreshButtonClick() {
         text: textArea.value,
     };
 
-    fetch(`${window.serverPath}/formatter/${selectedLanguageCode}`, {
+    fetch(`${Path}/formatter/${selectedLanguageCode}`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -1329,7 +1329,7 @@ async function fetchUserData() {
         const refreshToken = localStorage.getItem('refreshToken');
 
         // Fazer uma solicitação fetch para a rota /user
-        const response = await fetch('/user', {
+        const response = await fetch(`${window.serverPath}/formatter/user`, {
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${accessToken}`
