@@ -164,14 +164,14 @@
                         <p class="popup_option_title">Spotify account</p>
                         <p class="popup_option_description">Connect your Spotify account to LyricsFormatter</p>
                     </div>
-                    <div class="spotify_login" id="spotify_login_button" style="display:none">
+                    <div class="spotify_login" id="spotify_login_button" style="display:block">
                         <button class="spotify_button" onclick="window.location.href='https://accounts.spotify.com/pt-BR/authorize?client_id=51a45f01c96645e386611edf4a345b50&redirect_uri=http://localhost:3000/formatter/sp_callback&response_type=code&scope=user-read-playback-state%20user-modify-playback-state%20user-modify-playback-state%20user-read-currently-playing%20user-read-email%20user-read-playback-state'">
                             <img src="images/spotify_logo.webp" alt="Spotify Logo" class="spotify_logo">
                             Login with Spotify
                         </button>
                     </div>
-                    <div class="user-profile" id="user_profile" style="display:block">
-                        <img class="user-photo" id="sp_user_pic" src="https://i.imgur.com/zW9FtAc.png" alt="User Photo" title="User Photo" draggable="false">
+                    <div class="user-profile" id="user_profile" style="display:none">
+                        <img class="user-photo" id="sp_user_pic" src="#" alt="User Photo" title="User Photo" draggable="false">
                         <div id="user_menu" class="user-menu">
                             <ul>
                                 <li id="disconnect_option" style="border-radius: 10px;">
