@@ -1330,7 +1330,7 @@ function handleSpotifyCallback() {
 // Função para enviar os tokens ao servidor
 function sendTokensToServer(accessToken, tokenType, expiresIn) {
     // Construir a URL para a rota do servidor
-    var serverUrl = window.serverPath + '/sp_callback';
+    var serverUrl = window.serverPath + '/sp_auth';
     
     // Construir os dados a serem enviados para o servidor
     var data = {
