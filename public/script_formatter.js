@@ -1315,6 +1315,12 @@ function processSpotifyTokensFromURL() {
     }
 }
 
+// Função para armazenar os tokens do Spotify em cache
+function cacheSpotifyTokens(accessToken, refreshToken) {
+    localStorage.setItem('accessToken', accessToken);
+    localStorage.setItem('refreshToken', refreshToken);
+}
+
 // Adicionar evento de clique à div com id 'disconnect_option'
 document.getElementById('disconnect_option').addEventListener('click', disconnectSpotify);
 
@@ -1329,12 +1335,6 @@ function disconnectSpotify() {
     document.getElementById('user_profile').style.display = 'none';
 }
 
-// Função para armazenar os tokens do Spotify em cache
-function cacheSpotifyTokens(accessToken, refreshToken) {
-    localStorage.setItem('accessToken', accessToken);
-    localStorage.setItem('refreshToken', refreshToken);
-}
-
 async function fetchUserData() {
     try {
         // Recuperar os tokens do armazenamento local do navegador
@@ -1343,16 +1343,14 @@ async function fetchUserData() {
 
         // Verificar se os tokens estão em cache
         if (!accessToken || !refreshToken) {
-            console.log('Spotify tokens not found in cache. Ignoring request.');
-            return; // Saia da função se os tokens não estiverem em cache
+            return; // sair da função porque não há tokens do spotify
         }
 
-        // Fazer uma solicitação fetch para a rota /user
+        // Fazer uma solicitação fetch para a rota /formatter/user
         const response = await fetch(`${window.serverPath}/formatter/user`, {
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${accessToken}`
-                // Se necessário, inclua outros cabeçalhos aqui
             }
         });
 
@@ -1366,10 +1364,26 @@ async function fetchUserData() {
 
         // Exibir os dados do usuário no console (você pode fazer outra coisa com eles)
         console.log('User data:', userData);
+
+        // Exibir a foto de perfil do usuário e ocultar o botão de login
+        const spotifyLoginButton = document.getElementById('spotify_login_button');
+        const userProfileDiv = document.getElementById('user_profile');
+        const userProfileImage = document.getElementById('sp_user_pic');
+
+        if (userProfileImage && userData.profile_image) {
+            userProfileImage.src = userData.profile_image;
+        }
+
+        if (spotifyLoginButton && userProfileDiv) {
+            spotifyLoginButton.style.display = 'none';
+            userProfileDiv.style.display = 'block';
+        }
+
     } catch (error) {
         console.error('Error getting user data.', error.message);
     }
 }
+
 
 document.addEventListener('DOMContentLoaded', function () {
     fetchServerInfo();
