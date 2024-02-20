@@ -1320,16 +1320,22 @@ function authenticateWithSpotifyTokens() {
     if (cachedTokens) {
         // Tokens armazenados em cache, fazer solicitação ao servidor
         var tokens = JSON.parse(cachedTokens);
-        $.ajax({
-            type: 'GET',
-            url: window.serverPath + '/sp_auth',
-            data: tokens,
-            success: function(response) {
-                console.log('Autenticado com sucesso com os tokens do Spotify.');
+        fetch(window.serverPath + '/sp_auth', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
             },
-            error: function(xhr, status, error) {
-                console.error('Erro ao autenticar com os tokens do Spotify:', error);
+            body: JSON.stringify(tokens)
+        })
+        .then(function(response) {
+            if (response.ok) {
+                console.log('Autenticado com sucesso com os tokens do Spotify.');
+            } else {
+                console.error('Erro ao autenticar com os tokens do Spotify:', response.statusText);
             }
+        })
+        .catch(function(error) {
+            console.error('Erro ao autenticar com os tokens do Spotify:', error);
         });
     }
 }
