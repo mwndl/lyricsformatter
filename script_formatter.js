@@ -1118,7 +1118,7 @@ window.serverPath = 'http://localhost:3000';
 window.serverPath = 'https://datamatch-backend.onrender.com';
 */
 
-window.serverPath = 'http://localhost:3000';
+window.serverPath = 'https://datamatch-backend.onrender.com';
 
 // Função para fazer uma solicitação AJAX
 function fetchCreditsData() {
