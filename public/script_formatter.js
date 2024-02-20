@@ -1321,9 +1321,6 @@ function cacheSpotifyTokens(accessToken, refreshToken) {
     localStorage.setItem('refreshToken', refreshToken);
 }
 
-// Adicionar evento de clique à div com id 'disconnect_option'
-document.getElementById('disconnect_option').addEventListener('click', disconnectSpotify);
-
 // Função para desconectar o Spotify e atualizar a interface do usuário
 function disconnectSpotify() {
     // Remover os tokens do armazenamento local do navegador
@@ -1386,6 +1383,7 @@ async function fetchUserData() {
 
 
 document.addEventListener('DOMContentLoaded', function () {
+    document.getElementById('disconnect_option').addEventListener('click', disconnectSpotify);
     fetchServerInfo();
     fetchUserData();
     processSpotifyTokensFromURL();
