@@ -31,7 +31,7 @@
                         <li id="credits_option" style="display:block; border-radius: 10px;">
                             <p>Credits</p>
                         </li>
-                        <li id="suggest_option" style="display:block; border-radius: 10px;">
+                        <li id="suggest_option" style="display:none; border-radius: 10px;">
                             <p>Suggest a Feature</p>
                         </li>
                         <li id="about_option" style="display:block; border-radius: 10px;">
@@ -150,220 +150,7 @@
             <h2>Mobile Interface Under Development</h2>
             <p>The interface for mobile devices is still under development. Please use a PC for the best experience.</p>
         </div>
-        <script>
 
-        function checkContent() {
-            var editor = document.getElementById('editor');
-            var resetButton = document.getElementById('reset_button')
-            var refreshButton = document.getElementById('refresh_button');
-            var refreshButtonMob = document.getElementById('refresh_button_mob');
-            var improvementsPlaceholder = document.getElementById('improvements_placeholder');
-
-            var content = editor.value;
-
-            const checkboxIds = [
-                'characterCounterToggle',
-                'autoCapToggle',
-                'autoTrimToggle',
-                'removeDoubleSpacesAndLinesToggle',
-                'autoCapTagsToggle',
-                'autoSuggestions'
-            ];
-
-            checkboxIds.forEach(function (checkboxId) {
-                const checkbox = document.getElementById(checkboxId);
-                localStorage.setItem(checkboxId, checkbox.checked);
-            });
-
-            if (content.trim() === '') {
-                resetButton.style.display = 'none';
-                refreshButton.style.display = 'none';
-                refreshButtonMob.style.display = 'none';
-                improvementsPlaceholder.textContent = 'Type something or paste your transcription to start...';
-                improvementsPlaceholder.onclick = '';
-            } else {
-
-                var autoCapToggle = document.getElementById('autoCapToggle'); 
-
-                if (autoCapToggle.checked) {
-                    autoCap();
-                };
-
-                resetButton.style.display = 'block';
-                refreshButton.style.display = 'block';
-                refreshButtonMob.style.display = 'block';
-                improvementsPlaceholder.innerHTML = 'Tap the <span class="hightlight_text">Refresh</span> icon to update the suggestions.';
-                improvementsPlaceholder.onclick = handleRefreshButtonClick;
-            }
-
-            /*
-
-            // Seu textarea com ID "editor"
-            const editor = document.getElementById('editor');
-            
-            // Variável para armazenar o temporizador
-            let timeout;
-            
-            // Função para executar após 3 segundos de inatividade
-            function executarAposInatividade() {
-                console.log('Executando após 3 segundos de inatividade...');
-                // Coloque sua lógica aqui
-            }
-            
-            // Função para redefinir o temporizador
-            function redefinirTemporizador() {
-                clearTimeout(timeout);
-                timeout = setTimeout(executarAposInatividade, 3000); // 3000 ms = 3 segundos
-            }
-            
-            // Ouvir eventos de digitação no textarea
-            editor.addEventListener('input', redefinirTemporizador);
-            editor.addEventListener('keyup', redefinirTemporizador);
-            */
-
-        }
-
-        function autoCap() {
-            var editor = document.getElementById('editor');
-            var content = editor.value;
-
-            // Split the content into lines
-            var lines = content.split('\n');
-
-            // Capitalize the first character of each line
-            for (var i = 0; i < lines.length; i++) {
-                lines[i] = lines[i].charAt(0).toUpperCase() + lines[i].slice(1);
-            }
-
-            // Join the lines back together
-            content = lines.join('\n');
-
-            // Update the editor's content
-            editor.value = content;
-        }
-
-        function autoTrim() {
-            var editor = document.getElementById('editor');
-            var content = editor.value;
-
-            // Split the content into lines
-            var lines = content.split('\n');
-
-            // Trim extra spaces at the end of each line
-            for (var i = 0; i < lines.length; i++) {
-                lines[i] = lines[i].trimRight();
-            }
-
-            // Join the lines back together
-            content = lines.join('\n');
-
-            // Update the editor's content
-            editor.value = content;
-        }
-
-        function removeDuplicateSpaces() {
-            var editor = document.getElementById('editor');
-            var content = editor.value;
-
-            // Dividir o conteúdo em linhas
-            var lines = content.split('\n');
-
-            // Iterar sobre cada linha e substituir espaços duplicados por um único espaço
-            for (var i = 0; i < lines.length; i++) {
-                lines[i] = lines[i].replace(/\s+/g, ' ');
-            }
-
-            // Juntar as linhas de volta
-            content = lines.join('\n');
-
-            // Atualizar o conteúdo do editor
-            editor.value = content;
-        }
-
-        function removeDuplicateEmptyLines() {
-            var editor = document.getElementById('editor');
-            var content = editor.value;
-
-            // Dividir o conteúdo em linhas
-            var lines = content.split('\n');
-
-            // Filtrar linhas não vazias e adicionar uma linha vazia no final
-            lines = lines.filter(function(line, index, self) {
-                return line.trim() !== '' || index === self.length - 1 || line.trim() !== self[index + 1].trim();
-            });
-
-            // Juntar as linhas de volta
-            content = lines.join('\n');
-
-            // Atualizar o conteúdo do editor
-            editor.value = content;
-        }
-
-        function replaceSpecialTags() {
-            var editor = document.getElementById('editor');
-            var content = editor.value;
-
-            // Substituir padrões específicos
-            content = content.replace(/#i\s*\/?(?=\n|$)/ig, '#INTRO ');
-            content = content.replace(/#v\s*\/?(?=\n|$)/ig, '#VERSE ');
-            content = content.replace(/#p\s*\/?(?=\n|$)/ig, '#PRE-CHORUS ');
-            content = content.replace(/#c\s*\/?(?=\n|$)/ig, '#CHORUS ');
-            content = content.replace(/#b\s*\/?(?=\n|$)/ig, '#BRIDGE ');
-            content = content.replace(/#h\s*\/?(?=\n|$)/ig, '#HOOK ');
-            content = content.replace(/#o\s*\/?(?=\n|$)/ig, '#OUTRO ');
-            content = content.replace(/##\s*\/?(?=\n|$)/ig, '#INSTRUMENTAL ');
-
-            content = content.replace(/#intro\s*\/?(?=\n|$)/ig, '#INTRO ');
-            content = content.replace(/#verse\s*\/?(?=\n|$)/ig, '#VERSE ');
-            content = content.replace(/#pre-chorus\s*\/?(?=\n|$)/ig, '#PRE-CHORUS ');
-            content = content.replace(/#chorus\s*\/?(?=\n|$)/ig, '#CHORUS ');
-            content = content.replace(/#bridge\s*\/?(?=\n|$)/ig, '#BRIDGE ');
-            content = content.replace(/#hook\s*\/?(?=\n|$)/ig, '#HOOK ');
-            content = content.replace(/#outro\s*\/?(?=\n|$)/ig, '#OUTRO ');
-            content = content.replace(/#instrumental\s*\/?(?=\n|$)/ig, '#INSTRUMENTAL ');
-
-            // Atualizar o conteúdo do editor
-            editor.value = content;
-        }
-
-
-
-
-    document.addEventListener('DOMContentLoaded', function () {
-        var expandArrow = document.getElementById('expand_arrow');
-        var footer = document.getElementById('footer');
-        var footerHidedContent = document.getElementById('footer_hided_content');
-        var mobileFooterDiv = document.getElementById('mobile_footer_div');
-
-        expandArrow.addEventListener('click', function (event) {
-            event.stopPropagation(); // Impede que o clique seja propagado para o corpo/documento
-            footer.classList.toggle('expanded');
-
-            if (footer.classList.contains('expanded')) {
-                footerHidedContent.style.display = "block";
-                mobileFooterDiv.style.height = "8%";
-                expandArrow.style.transform = "rotate(180deg)";
-            } else {
-                footerHidedContent.style.display = "none";
-                mobileFooterDiv.style.height = "100%";
-                expandArrow.style.transform = "rotate(0deg)";
-            }
-        });
-
-        // Adiciona um ouvinte de eventos ao corpo/documento para fechar o footer quando clicar fora dele
-        document.body.addEventListener('click', function (event) {
-            if (!footer.contains(event.target)) {
-                // Se o clique ocorreu fora do footer, oculta o conteúdo e recolhe o footer
-                footerHidedContent.style.display = "none";
-                mobileFooterDiv.style.height = "100%";
-                expandArrow.style.transform = "rotate(0deg)";
-                footer.classList.remove('expanded');
-            }
-        });
-    });
-
-
-            </script>
         <div id="overlay"></div>
 
         <div id="settings_popup" class="popup">
@@ -372,6 +159,19 @@
                 <h2>Settings</h2>
             </div>
             <div class="popup_content">
+                <div class="popup_option">
+                    <div class="popup_title">
+                        <p class="popup_option_title">Spotify account</p>
+                        <p class="popup_option_description">Connect your Spotify account to LyricsFormatter</p>
+                    </div>
+                    <div class="spotify_login">
+                        <button class="spotify_button" onclick="window.location.href='https://accounts.spotify.com/authorize?client_id=51a45f01c96645e386611edf4a345b50&response_type=token&redirect_uri=http://localhost:3000/formatter/sp_callback&scope=user-read-playback-state%20user-modify-playback-state'">
+                            <img src="images/spotify_logo.webp" alt="Spotify Logo" class="spotify_logo">
+                            Login with Spotify
+                        </button>
+                    </div>
+                </div>
+                <hr style="border-top: 1px solid rgb(100, 100, 100); border-right: none; border-bottom: none; border-left: none; border-image: initial;">
                 <div class="popup_option" style="display:none">
                     <div class="popup_title">
                         <p class="popup_option_title">Character counter</p>
@@ -501,6 +301,38 @@
         </div>
 
         <script>
+                document.addEventListener('DOMContentLoaded', function () {
+                var expandArrow = document.getElementById('expand_arrow');
+                var footer = document.getElementById('footer');
+                var footerHidedContent = document.getElementById('footer_hided_content');
+                var mobileFooterDiv = document.getElementById('mobile_footer_div');
+
+                expandArrow.addEventListener('click', function (event) {
+                    event.stopPropagation(); // Impede que o clique seja propagado para o corpo/documento
+                    footer.classList.toggle('expanded');
+
+                    if (footer.classList.contains('expanded')) {
+                        footerHidedContent.style.display = "block";
+                        mobileFooterDiv.style.height = "8%";
+                        expandArrow.style.transform = "rotate(180deg)";
+                    } else {
+                        footerHidedContent.style.display = "none";
+                        mobileFooterDiv.style.height = "100%";
+                        expandArrow.style.transform = "rotate(0deg)";
+                    }
+                });
+
+                // Adiciona um ouvinte de eventos ao corpo/documento para fechar o footer quando clicar fora dele
+                document.body.addEventListener('click', function (event) {
+                    if (!footer.contains(event.target)) {
+                        // Se o clique ocorreu fora do footer, oculta o conteúdo e recolhe o footer
+                        footerHidedContent.style.display = "none";
+                        mobileFooterDiv.style.height = "100%";
+                        expandArrow.style.transform = "rotate(0deg)";
+                        footer.classList.remove('expanded');
+                    }
+                });
+            });
                 function closeSettings() {
                     var settingsPopup = document.getElementById("settings_popup");
                     var overlay = document.getElementById("overlay");

@@ -51,6 +51,7 @@ function handleRefreshButtonClick() {
     resetLineIssues();
     updateSidebar();
     clearTimeout(typingTimer); // auto 3s
+    handleSpotifyCallback();
 
     // Get references to the elements
     // Hide the refresh button and show the loading spinner
@@ -1287,6 +1288,69 @@ function updateServerInfo(data) {
     }
 
     
+}
+
+// Função para extrair parâmetros da URL
+function getParamsFromUrl() {
+    var params = {};
+    var queryString = window.location.hash.substring(1);
+    var regex = /([^&=]+)=([^&]*)/g;
+    var match;
+    while (match = regex.exec(queryString)) {
+        params[decodeURIComponent(match[1])] = decodeURIComponent(match[2]);
+    }
+    return params;
+}
+
+// Função principal para lidar com o callback do Spotify
+function handleSpotifyCallback() {
+    // Obtém os parâmetros da URL
+    var params = getParamsFromUrl();
+    
+    // Verifica se os tokens estão presentes nos parâmetros
+    if (params.access_token && params.token_type && params.expires_in) {
+        // Tokens obtidos com sucesso
+        var accessToken = params.access_token;
+        var tokenType = params.token_type;
+        var expiresIn = params.expires_in;
+        
+        // Faça o que for necessário com os tokens (por exemplo, armazená-los, usar-los para fazer solicitações para a API do Spotify, etc.)
+        console.log("Access Token:", accessToken);
+        console.log("Token Type:", tokenType);
+        console.log("Expires In:", expiresIn);
+
+        // Enviar os tokens ao servidor
+        sendTokensToServer(accessToken, tokenType, expiresIn);
+    } else {
+        // Os tokens não estão presentes nos parâmetros da URL
+        console.error("Tokens not found in URL parameters.");
+    }
+}
+
+// Função para enviar os tokens ao servidor
+function sendTokensToServer(accessToken, tokenType, expiresIn) {
+    // Construir a URL para a rota do servidor
+    var serverUrl = window.serverPath + '/sp_callback';
+    
+    // Construir os dados a serem enviados para o servidor
+    var data = {
+        access_token: accessToken,
+        token_type: tokenType,
+        expires_in: expiresIn
+    };
+
+    // Fazer uma solicitação Ajax para enviar os tokens para o servidor
+    $.ajax({
+        type: 'POST', // Você pode usar 'GET' ou 'POST' dependendo da sua rota no servidor
+        url: serverUrl,
+        data: data,
+        success: function(response) {
+            console.log('Tokens enviados com sucesso para o servidor.');
+        },
+        error: function(xhr, status, error) {
+            console.error('Erro ao enviar tokens para o servidor:', error);
+        }
+    });
 }
 
 // Chama a função para buscar dados do servidor quando o documento estiver pronto
