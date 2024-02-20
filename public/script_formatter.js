@@ -1302,56 +1302,42 @@ function getParamsFromUrl() {
     return params;
 }
 
-// Função principal para lidar com o callback do Spotify
-function handleSpotifyCallback() {
-    // Obtém os parâmetros da URL
+// Função para verificar se os tokens estão presentes na URL
+function checkTokensInUrl() {
     var params = getParamsFromUrl();
-    
-    // Verifica se os tokens estão presentes nos parâmetros
     if (params.access_token && params.token_type && params.expires_in) {
-        // Tokens obtidos com sucesso
-        var accessToken = params.access_token;
-        var tokenType = params.token_type;
-        var expiresIn = params.expires_in;
-        
-        // Faça o que for necessário com os tokens (por exemplo, armazená-los, usar-los para fazer solicitações para a API do Spotify, etc.)
-        console.log("Access Token:", accessToken);
-        console.log("Token Type:", tokenType);
-        console.log("Expires In:", expiresIn);
-
-        // Enviar os tokens ao servidor
-        sendTokensToServer(accessToken, tokenType, expiresIn);
-    } else {
-        // Os tokens não estão presentes nos parâmetros da URL
-        console.error("Tokens not found in URL parameters.");
+        // Tokens encontrados na URL, armazenar em cache
+        localStorage.setItem('spotifyTokens', JSON.stringify(params));
+        // Remover os tokens da URL para evitar exposição
+        window.history.replaceState({}, document.title, window.location.pathname);
     }
 }
 
-// Função para enviar os tokens ao servidor
-function sendTokensToServer(accessToken, tokenType, expiresIn) {
-    // Construir a URL para a rota do servidor
-    var serverUrl = window.serverPath + '/sp_auth';
-    
-    // Construir os dados a serem enviados para o servidor
-    var data = {
-        access_token: accessToken,
-        token_type: tokenType,
-        expires_in: expiresIn
-    };
-
-    // Fazer uma solicitação Ajax para enviar os tokens para o servidor
-    $.ajax({
-        type: 'POST', // Você pode usar 'GET' ou 'POST' dependendo da sua rota no servidor
-        url: serverUrl,
-        data: data,
-        success: function(response) {
-            console.log('Tokens enviados com sucesso para o servidor.');
-        },
-        error: function(xhr, status, error) {
-            console.error('Erro ao enviar tokens para o servidor:', error);
-        }
-    });
+// Função para fazer uma solicitação ao servidor para autenticar com os tokens armazenados em cache
+function authenticateWithSpotifyTokens() {
+    var cachedTokens = localStorage.getItem('spotifyTokens');
+    if (cachedTokens) {
+        // Tokens armazenados em cache, fazer solicitação ao servidor
+        var tokens = JSON.parse(cachedTokens);
+        $.ajax({
+            type: 'GET',
+            url: window.serverPath + '/sp_auth',
+            data: tokens,
+            success: function(response) {
+                console.log('Autenticado com sucesso com os tokens do Spotify.');
+            },
+            error: function(xhr, status, error) {
+                console.error('Erro ao autenticar com os tokens do Spotify:', error);
+            }
+        });
+    }
 }
+
+// Executar a verificação de tokens e autenticação ao carregar a página
+$(document).ready(function() {
+    checkTokensInUrl();
+    authenticateWithSpotifyTokens();
+});
 
 // Chama a função para buscar dados do servidor quando o documento estiver pronto
 document.addEventListener('DOMContentLoaded', fetchServerInfo);
