@@ -119,12 +119,26 @@
                                 </div>
                             </div>
                             <div class="sp_player">
-                                <div class="spotify_preview" style="border-radius: 12px; overflow: hidden; user-select: none;">
+                                <div class="spotify_preview" style="border-radius: 12px; overflow: hidden; user-select: none; display:none">
                                     <iframe id="spotify_iframe_preview" border-radius: 12px user-select: none src="" width="100%"
                                       height="100%" frameBorder="0" allowfullscreen=""
                                       allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
                                       loading="lazy"></iframe>
-                                  </div>
+                                </div>
+                                <div class="spotify_player">
+                                    <div class="sp_web_player">
+                                        <div class="sp_left">
+                                            <div class="sp_album_art" id="sp_album_art"></div>
+                                        </div>
+                                        <div class="sp_right">
+                                            <div class="song-info">
+                                                <p class="sp_title" id="sp_title"></p>
+                                                <p class="sp_album" id="sp_album"></p>
+                                                <p class="sp_artist" id="sp_artist"></p>
+                                            </div>
+                                        </div>      
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>

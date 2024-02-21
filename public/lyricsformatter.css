@@ -40,6 +40,17 @@ body {
     height: 100vh;
 }
 
+/* Remover estilizações de links */
+a {
+    text-decoration: none;
+    color: inherit; /* Para herdar a cor do texto pai */
+}
+
+/* Adicionar sublinhado apenas ao passar o mouse (hover) */
+a:hover {
+    text-decoration: underline;
+}
+
 /* TOP - START */
 
 .top {
@@ -1368,10 +1379,102 @@ hr {
         flex-direction: column;
         justify-content: flex-end; /* Isso alinhará o item no final da div verticalmente */
         width: 100%;
-        height: 70%;
+        height: 80px;
         background-color: #282828;
         border-radius: 18px;
     }
+
+    /* SP PLAYER REAL */
+
+    .spotify_player {
+        width: 100%;
+        height: 100%; 
+    }
+      
+    .sp_web_player {
+        width: 100%;
+        height: 80%;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        box-sizing: border-box;
+        width: 100%;
+        height: 100%;
+        padding: 5px 8px;
+        border-radius: 18px;
+    }
+    
+    .sp_left,
+    .sp_right {
+        display: flex;
+        flex-direction: column; 
+        justify-content: center;
+    }
+
+    .sp_left {
+        margin-right: 10px;
+    }
+
+    .sp_right {
+        flex-grow: 1; /* ocupa o espaço width restante disponível */
+        box-sizing: border-box;
+        height: 90%;
+    }
+    
+    .sp_album_art, .sp_album_art img {
+        width: 70px;
+        height: 70px;
+        border-radius: 12px;
+        background-color: #4a4a4a;
+    }
+
+    .sp_album_art:hover {
+        filter: brightness(95%); /* Reduz o brilho para escurecer a imagem em hover */
+    }
+    
+    .player-controls {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    /* Adjustments for SVG icons */
+    svg {
+        fill: #ffffff;
+        cursor: pointer;
+        margin: 0 5px;
+        transition: transform 0.3s ease;
+    }
+    
+    svg:hover {
+        transform: scale(1.1);
+    }
+
+    .sp_title,
+    .sp_album,
+    .sp_artist {
+        overflow: hidden; 
+        text-overflow: ellipsis;
+        box-sizing: border-box;
+    }
+    
+    .sp_title {
+        font-size: 12px;
+        font-weight: bold;
+        color: #fff;
+    }
+    
+    .sp_album,
+    .sp_artist {
+        font-size: 10px;
+        color: #cecece;
+    }
+
+
+    
+
+    /**/
     
 
     /* Search container */

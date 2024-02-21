@@ -52,6 +52,7 @@ function handleRefreshButtonClick() {
     resetLineIssues();
     updateSidebar();
     clearTimeout(typingTimer); // auto 3s
+    fetchCurrentlyPlayingData()
 
     // Get references to the elements
     // Hide the refresh button and show the loading spinner
@@ -1218,7 +1219,7 @@ document.addEventListener('DOMContentLoaded', function () {
     fetchServerInfo();
     fetchUserData();
     processSpotifyTokensFromURL();
-    toggleDevMode();
+    fetchCurrentlyPlayingData()
 });
 
 
@@ -1468,5 +1469,59 @@ async function fetchUserData() {
 
     } catch (error) {
         console.error('Error getting user data.', error.message);
+    }
+}
+
+async function fetchCurrentlyPlayingData() {
+    try {
+        // Obter o token de acesso do armazenamento local do navegador
+        const accessToken = localStorage.getItem('accessToken');
+
+        // Verificar se o token de acesso está em cache
+        if (!accessToken) {
+            return; // Sair da função porque não há token do Spotify
+        }
+
+        // Fazer uma solicitação fetch para a rota /me/player/currently-playing do Spotify
+        const response = await fetch('https://api.spotify.com/v1/me/player/currently-playing', {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${accessToken}`
+            }
+        });
+
+        // Verificar se a solicitação foi bem-sucedida
+        if (!response.ok) {
+            throw new Error('Erro ao obter dados da música atualmente reproduzida.');
+        }
+
+        // Extrair os dados da música atualmente reproduzida da resposta
+        const currentlyPlayingData = await response.json();
+
+        // Atualizar os elementos HTML com as informações da música atualmente reproduzida
+        const albumArtElement = document.getElementById('sp_album_art');
+        const titleElement = document.getElementById('sp_title');
+        const albumElement = document.getElementById('sp_album');
+        const artistElement = document.getElementById('sp_artist');
+
+        if (albumArtElement && currentlyPlayingData.item.album.images.length > 0) {
+            albumArtElement.innerHTML = `<img src="${currentlyPlayingData.item.album.images[0].url}" alt="album art" title="${currentlyPlayingData.item.name} | ${currentlyPlayingData.item.artists[0].name}">`;
+        }
+
+        if (titleElement) {
+            titleElement.innerHTML = `<a href="https://open.spotify.com/track/${currentlyPlayingData.item.id}" target="_blank">${currentlyPlayingData.item.name}</a>`;
+        }
+
+        if (artistElement) {
+            const artistLinks = currentlyPlayingData.item.artists.map(artist => `<a href="https://open.spotify.com/artist/${artist.id}" target="_blank">${artist.name}</a>`);
+            artistElement.innerHTML = artistLinks.join(', ');
+        }
+
+        if (albumElement) {
+            albumElement.innerHTML = `<a href="https://open.spotify.com/album/${currentlyPlayingData.item.album.id}" target="_blank">${currentlyPlayingData.item.album.name}</a>`;
+        }
+
+    } catch (error) {
+        console.error('Erro ao obter dados da música atualmente reproduzida.', error.message);
     }
 }
