@@ -10,6 +10,8 @@ document.addEventListener('DOMContentLoaded', function () {
     const languageArrow = document.querySelector('.lang_expand_arrow');
     const langButtonContent = document.querySelector('.lang_selector_div');
 
+    var resetButton = document.getElementById('reset_button');
+
     var refreshButton = document.getElementById('refresh_button');
     var loadingSpinner = document.getElementById('loading_spinner');
 
@@ -25,12 +27,32 @@ document.addEventListener('DOMContentLoaded', function () {
 
     var miniMenu = document.getElementById("mini_menu");
 
-    
+    var ignoredContainers = []; // aqui ficam guardados temporariamente os IDs ignorados, ao limpar o texto, tocar em 'Copy' ou então ao tocar no botão de lixo, esse array será resetado
+
  // Add this function to your existing code
 function handleRefreshButtonClick() {
-    resetLineIssues();
-    // Get references to the elements
 
+    // Auto trim (se ativo)
+    var autoTrimToggle = document.getElementById('autoTrimToggle');
+    var removeDoubleSpacesAndLinesToggle = document.getElementById('removeDoubleSpacesAndLinesToggle');
+    var autoCapTagsToggle = document.getElementById('autoCapTagsToggle');
+
+    if (autoTrimToggle.checked) {
+        autoTrim();
+    }
+    if (removeDoubleSpacesAndLinesToggle.checked) {
+        removeDuplicateSpaces();
+        removeDuplicateEmptyLines();
+    }
+    if (autoCapTagsToggle.checked) {
+        replaceSpecialTags();
+    }
+
+    resetLineIssues();
+    updateSidebar();
+    clearTimeout(typingTimer); // auto 3s
+
+    // Get references to the elements
     // Hide the refresh button and show the loading spinner
     refreshButton.style.display = 'none';
     loadingSpinner.style.display = 'block';
@@ -79,7 +101,7 @@ function handleRefreshButtonClick() {
             // Remove existing HTML elements inside the improvements_containers
             const improvementsContainer = document.getElementById('improvements_containers');
             improvementsContainer.innerHTML = '';
-
+    
             if (data.result.issues === false) {
                 // Create and append the "No issues found" div
                 const noIssuesDiv = document.createElement('div');
@@ -108,9 +130,15 @@ function handleRefreshButtonClick() {
                 for (const alertaKey in data.result.containers.alerts) {
                     const alerta = data.result.containers.alerts[alertaKey];
                     const container = createContainer(alerta.container);
-                    improvementsContainer.appendChild(container);
+                    
+                    // Verifica se o container não é null antes de adicioná-lo
+                    if (container !== null) {
+                        improvementsContainer.appendChild(container);
+                    }
+                    checkAndShowPlaceholder();
                 }
             }
+
         })
         .catch(error => {
             // Handle errors here
@@ -123,6 +151,15 @@ function handleRefreshButtonClick() {
             loadingSpinner.style.display = 'none';
         });
 }
+
+    resetButton.addEventListener('click', function() {
+    
+        textArea.value = ''; // apaga a transcrição
+        updateSidebar(); // reseta os contadores de caracteres e a barra lateral
+        ignoredContainers = []; // limpa a memória de alertas ignorados
+        checkContent();
+        clearTimeout(typingTimer);
+    });
 
 
     refreshButton.addEventListener('click', handleRefreshButtonClick);
@@ -207,7 +244,164 @@ function handleRefreshButtonClick() {
 
 
     textarea.addEventListener('input', updateSidebar);
+    textarea.addEventListener('input', checkContent);
     textarea.addEventListener('scroll', syncScroll);
+
+    let typingTimer;
+    const doneTypingInterval = 3000;
+
+    function checkContent() {
+        var editor = document.getElementById('editor');
+        var resetButton = document.getElementById('reset_button')
+        var refreshButton = document.getElementById('refresh_button');
+        var refreshButtonMob = document.getElementById('refresh_button_mob');
+        var improvementsPlaceholder = document.getElementById('improvements_placeholder');
+
+        var content = editor.value;
+
+        const checkboxIds = [
+            'characterCounterToggle',
+            'autoCapToggle',
+            'autoTrimToggle',
+            'removeDoubleSpacesAndLinesToggle',
+            'autoCapTagsToggle',
+            'autoSuggestions'
+        ];
+
+        checkboxIds.forEach(function (checkboxId) {
+            const checkbox = document.getElementById(checkboxId);
+            localStorage.setItem(checkboxId, checkbox.checked);
+        });
+
+        if (content.trim() === '') {
+            resetButton.style.display = 'none';
+            refreshButton.style.display = 'none';
+            improvementsPlaceholder.textContent = 'Type something or paste your transcription to start...';
+            improvementsPlaceholder.onclick = '';
+        } else {
+
+            var autoCapToggle = document.getElementById('autoCapToggle'); 
+
+            if (autoCapToggle.checked) {
+                autoCap();
+            };
+
+            resetButton.style.display = 'block';
+            refreshButton.style.display = 'block';
+            improvementsPlaceholder.innerHTML = 'Tap the <span class="hightlight_text">Refresh</span> icon to update the suggestions.';
+        }
+
+        if (autoSuggestions.checked) {
+            // atualiza as sugestões após 3s
+            clearTimeout(typingTimer);
+            typingTimer = setTimeout(function() {
+                handleRefreshButtonClick();
+            }, doneTypingInterval);
+        };
+    }
+
+    function autoCap() {
+        var editor = document.getElementById('editor');
+        var content = editor.value;
+
+        // Split the content into lines
+        var lines = content.split('\n');
+
+        // Capitalize the first character of each line
+        for (var i = 0; i < lines.length; i++) {
+            lines[i] = lines[i].charAt(0).toUpperCase() + lines[i].slice(1);
+        }
+
+        // Join the lines back together
+        content = lines.join('\n');
+
+        // Update the editor's content
+        editor.value = content;
+    }
+
+    function autoTrim() {
+        var editor = document.getElementById('editor');
+        var content = editor.value;
+
+        // Split the content into lines
+        var lines = content.split('\n');
+
+        // Trim extra spaces at the end of each line
+        for (var i = 0; i < lines.length; i++) {
+            lines[i] = lines[i].trimRight();
+        }
+
+        // Join the lines back together
+        content = lines.join('\n');
+
+        // Update the editor's content
+        editor.value = content;
+    }
+
+    function removeDuplicateSpaces() {
+        var editor = document.getElementById('editor');
+        var content = editor.value;
+
+        // Dividir o conteúdo em linhas
+        var lines = content.split('\n');
+
+        // Iterar sobre cada linha e substituir espaços duplicados por um único espaço
+        for (var i = 0; i < lines.length; i++) {
+            lines[i] = lines[i].replace(/\s+/g, ' ');
+        }
+
+        // Juntar as linhas de volta
+        content = lines.join('\n');
+
+        // Atualizar o conteúdo do editor
+        editor.value = content;
+    }
+
+    function removeDuplicateEmptyLines() {
+        var editor = document.getElementById('editor');
+        var content = editor.value;
+
+        // Dividir o conteúdo em linhas
+        var lines = content.split('\n');
+
+        // Filtrar linhas não vazias e adicionar uma linha vazia no final
+        lines = lines.filter(function(line, index, self) {
+            return line.trim() !== '' || index === self.length - 1 || line.trim() !== self[index + 1].trim();
+        });
+
+        // Juntar as linhas de volta
+        content = lines.join('\n');
+
+        // Atualizar o conteúdo do editor
+        editor.value = content;
+    }
+
+    function replaceSpecialTags() {
+        var editor = document.getElementById('editor');
+        var content = editor.value;
+
+        // Substituir padrões específicos
+        content = content.replace(/#i\s*\/?(?=\n|$)/ig, '#INTRO ');
+        content = content.replace(/#v\s*\/?(?=\n|$)/ig, '#VERSE ');
+        content = content.replace(/#p\s*\/?(?=\n|$)/ig, '#PRE-CHORUS ');
+        content = content.replace(/#c\s*\/?(?=\n|$)/ig, '#CHORUS ');
+        content = content.replace(/#b\s*\/?(?=\n|$)/ig, '#BRIDGE ');
+        content = content.replace(/#h\s*\/?(?=\n|$)/ig, '#HOOK ');
+        content = content.replace(/#o\s*\/?(?=\n|$)/ig, '#OUTRO ');
+        content = content.replace(/##\s*\/?(?=\n|$)/ig, '#INSTRUMENTAL ');
+
+        content = content.replace(/#intro\s*\/?(?=\n|$)/ig, '#INTRO ');
+        content = content.replace(/#verse\s*\/?(?=\n|$)/ig, '#VERSE ');
+        content = content.replace(/#pre-chorus\s*\/?(?=\n|$)/ig, '#PRE-CHORUS ');
+        content = content.replace(/#chorus\s*\/?(?=\n|$)/ig, '#CHORUS ');
+        content = content.replace(/#bridge\s*\/?(?=\n|$)/ig, '#BRIDGE ');
+        content = content.replace(/#hook\s*\/?(?=\n|$)/ig, '#HOOK ');
+        content = content.replace(/#outro\s*\/?(?=\n|$)/ig, '#OUTRO ');
+        content = content.replace(/#instrumental\s*\/?(?=\n|$)/ig, '#INSTRUMENTAL ');
+
+        // Atualizar o conteúdo do editor
+        editor.value = content;
+    }
 
     function updateSidebar() {
 
@@ -261,6 +455,7 @@ function handleRefreshButtonClick() {
             resetLineIssues();
             closeContainers();
             resetImprovementsBoxes();
+            syncScroll()
         }
         
 
@@ -287,6 +482,9 @@ function handleRefreshButtonClick() {
             // Verifica se o textarea está vazio
             if (editorTextarea.value.trim() === '') {
                 improvementsPlaceholder.innerHTML = 'Type something or paste your transcription to start...';
+                ignoredContainers = []; // reseta o conteúdo ignorado
+                clearTimeout(typingTimer);
+
             } else {
                 improvementsPlaceholder.innerHTML = 'Tap the <span class="highlight_text">Refresh</span> icon to update the suggestions.';
             }
@@ -372,6 +570,7 @@ function handleRefreshButtonClick() {
             // Adicione integração do idioma aqui
         }
     }
+    
 
     // Função para obter o nome completo do idioma com base no código
     function getLanguageFullName(code) {
@@ -399,10 +598,10 @@ function handleRefreshButtonClick() {
             selectedLanguage.textContent = getLanguageFullName(selected);
             languageList.style.display = 'none';
 
-            // Adicione integração do idioma aqui
-
             // Armazene o idioma selecionado em cache
             localStorage.setItem('selectedLanguage', selected);
+            updateSidebar() // resetar sugestões e caracteres
+            ignoredContainers = []; // limpa a memória de alertas ignorados
         }
     });
 
@@ -432,8 +631,31 @@ function handleRefreshButtonClick() {
         }
     });
 
+    // Função para verificar e definir o estado dos checkboxes ao carregar a página
+    function setCheckboxStates() {
+        // Adicione IDs aos seus elementos de checkbox para tornar a manipulação mais fácil
+        const checkboxIds = [
+            'characterCounterToggle',
+            'autoCapToggle',
+            'autoTrimToggle',
+            'removeDoubleSpacesAndLinesToggle',
+            'autoCapTagsToggle',
+            'autoSuggestions'
+        ];
+
+        checkboxIds.forEach(function (checkboxId) {
+            const checkbox = document.getElementById(checkboxId);
+            const checkboxState = localStorage.getItem(checkboxId);
+
+            if (checkboxState !== null) {
+                checkbox.checked = JSON.parse(checkboxState);
+            }
+        });
+    }
+
     // Configurar o idioma padrão ao carregar a página
     setDefaultLanguage();
+    setCheckboxStates();
     
     // Adicione um evento de clique ao botão de cópia
     var copyButton = document.querySelector('.content_copy_btn');
@@ -441,10 +663,12 @@ function handleRefreshButtonClick() {
 
     function ignoreButton(button) {
         var container = button.closest('.container');
+        var containerId = container.id; // Obter o ID da DIV container
+        ignoredContainers.push(containerId); // Adicionar o ID ao array ignoredContainers
         container.style.display = 'none';
         checkAndShowPlaceholder();
-        resetLineIssues()
-    }
+        resetLineIssues();
+    } 
     
     var ignoreButtons = document.querySelectorAll('.content_ignore_btn');
     ignoreButtons.forEach(function (button) {
@@ -453,12 +677,42 @@ function handleRefreshButtonClick() {
         });
     });
 
-    function fixButton(button) {
+    function fixButton(container, trigger) {
         // Add if else para ocultar apenas se a correção for bem sucedida
-        var container = button.closest('.container');
+        if (typeof trigger === 'function') {
+            // Se o trigger for uma função, chame-a
+            trigger();
+        } else if (typeof trigger === 'string') {
+            // Se o trigger for uma string, interprete-a e execute a ação apropriada
+            interpretAndExecuteTrigger(trigger);
+        }
+    
+        // Oculta o container após a correção (ou tentativa de correção)
         container.style.display = 'none';
         checkAndShowPlaceholder();
-        resetLineIssues()
+        resetLineIssues();
+        handleRefreshButtonClick()
+    }
+    
+    // Definindo a função para interpretar e executar o trigger
+    function interpretAndExecuteTrigger(trigger) {
+        try {
+            // Extrai os termos entre colchetes usando uma expressão regular
+            const match = trigger.match(/\[(.*?)\], \[(.*?)\]/);
+
+            // Verifica se a correspondência foi bem-sucedida
+            if (match && match.length === 3) {
+                const incorrectTerm = match[1];
+                const correction = match[2];
+
+                // Chamando a função findAndReplace com os termos extraídos
+                findAndReplace(incorrectTerm, correction);
+            } else {
+                console.error('Formato de trigger inválido:', trigger);
+            }
+        } catch (error) {
+            console.error('Erro ao interpretar e executar o trigger:', error);
+        }
     }
     
     var fixButtons = document.querySelectorAll('.content_fix_btn');
@@ -470,10 +724,17 @@ function handleRefreshButtonClick() {
 
     // Função auxiliar para criar um container HTML com base nos dados da API
     function createContainer(containerData) {
+
+        // Verifica se o div_id já está armazenado em ignoredContainers
+        if (ignoredContainers.includes(containerData.div_id)) {
+            return null; // Retorna null se o div_id já estiver na lista de ignoredContainers
+        }
+
         // Content
         const container = document.createElement('div');
         container.classList.add('container');
         container.setAttribute('onclick', 'expandContainer(this)');
+        container.id = containerData.div_id;
 
         // Adiciona os atributos de dados ao container
         container.setAttribute('data-color', containerData.position.color);
@@ -534,7 +795,7 @@ function handleRefreshButtonClick() {
             contentFixBtn.classList.add('content_fix_btn');
             contentFixBtn.textContent = 'Fix';
             contentFixBtn.onclick = function() {
-                fixButton(container);
+                fixButton(container, containerData.trigger);
             };
             contentButtons.appendChild(contentFixBtn);
         }
@@ -563,7 +824,7 @@ function handleRefreshButtonClick() {
 
     function copyToClipboard() {
         if (textArea.value.trim() === '') {
-            notification("Well... there's no content to be copied here... 🤔");
+            notification("Sorry, there's no content to be copied here");
             return;
         }
     
@@ -574,6 +835,12 @@ function handleRefreshButtonClick() {
             var successful = document.execCommand('copy');
             var message = successful ? 'Copied to your clipboard!' : 'Something went wrong, please try again.';
             notification(message);
+            
+
+            textArea.value = ''; // apaga a transcrição
+            updateSidebar(); // reseta os contadores de caracteres e a barra lateral
+            ignoredContainers = []; // limpa a memória de alertas ignorados
+
         } catch (err) {
             console.error('An error occurred while copying the text: ', err);
             notification('An error occurred while copying the text.');
@@ -581,6 +848,7 @@ function handleRefreshButtonClick() {
     
         // Deseleciona a textarea
         window.getSelection().removeAllRanges();
+
     }
 
     // Função para verificar e exibir a div placeholder
@@ -619,6 +887,7 @@ function handleRefreshButtonClick() {
 
         improvementsContainers.appendChild(noIssuesDiv);
     }
+
     checkAndShowPlaceholder();
 
     function selectText(linesToSelect) { // SELECIONA LINHAS ESPECIFICAS
@@ -721,6 +990,28 @@ function updateLineIssues(color, lines) {
     });
 }
 
+// Definindo a função findAndReplace
+function findAndReplace(incorrectTerm, correction) {
+    // Remove os colchetes dos termos
+    const cleanIncorrectTerm = incorrectTerm.replace(/\[|\]/g, '');
+    const cleanCorrection = correction.replace(/\[|\]/g, '');
+
+    // Obtém o conteúdo do textarea com ID 'editor'
+    const editor = document.getElementById('editor');
+    let content = editor.value;
+
+    // Escapa caracteres especiais da palavra de busca
+    const escapedTerm = cleanIncorrectTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+    // Substitui todas as ocorrências de incorrectTerm por correction
+    const regex = new RegExp('(^|\\s|[,.;:!?\\-¿¡])' + escapedTerm + '(?=\\s|[,.;:!?\\-¿¡]|$)', 'g');
+    content = content.replace(regex, '$1' + cleanCorrection);
+
+    // Define o conteúdo do textarea como o texto modificado
+    editor.value = content;
+}
+
+
 function resetLineIssues() {
     // Obtém todas as divs das linhas dentro do elemento com ID 'line_issues'
     const lineDivs = document.querySelectorAll('.line_issues > div');
@@ -730,6 +1021,7 @@ function resetLineIssues() {
         lineDiv.querySelector('.status-1').className = 'status-1';
     });
 }
+
 
 document.addEventListener("DOMContentLoaded", function () {
     var optionsDots = document.getElementById("settings_dots");
@@ -999,9 +1291,3 @@ function updateServerInfo(data) {
 
 // Chama a função para buscar dados do servidor quando o documento estiver pronto
 document.addEventListener('DOMContentLoaded', fetchServerInfo);
-
-
-
-
-
-
