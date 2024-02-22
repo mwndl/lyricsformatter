@@ -1563,6 +1563,14 @@ async function fetchCurrentlyPlayingData() {
             }
         });
 
+        // Verificar se a resposta indica que não há música sendo reproduzida (código 204)
+        if (response.status === 204) {
+            document.getElementById('sp_player_div').style.display = 'none'; // Ocultar elemento
+            return; // Sair da função
+        } else {
+            document.getElementById('sp_player_div').style.display = ''; // Exibir elemento
+        }
+
         // Verificar se a solicitação foi bem-sucedida
         if (!response.ok) {
             throw new Error(`An error occurred when communicating with Spotify's servers`);
