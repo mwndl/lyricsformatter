@@ -64,7 +64,7 @@ a:hover {
 }
 
 .return {
-    width: 8%;
+    width: 70px;
     height: 100%;
     margin: auto;
     display: flex; /* Adiciona display flex para .return */
