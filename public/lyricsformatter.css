@@ -34,10 +34,12 @@
 }
 
 body {
-    dilay: block;
     font-family: 'Exo', sans-serif;
-    background-color: #282828;
+    background-color: #131313;
     height: 100vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.7);
 }
 
 /* Remover estilizações de links */
@@ -52,13 +54,13 @@ a:hover {
 }
 
 /* TOP - START */
-
 .top {
     width: 100%;
-    height: 8%;
+    height: 60px;
     color: white;
     display: flex;
     align-items: center;
+    border-bottom: 1px solid #252525; /* Adiciona uma borda cinza fina na parte inferior */
 }
 
 .return {
@@ -92,7 +94,7 @@ a:hover {
 }
 
 .settings {
-    width: 8%;
+    width: 70px;
     height: 100%;
     background-size: cover;
     display: flex;
@@ -242,14 +244,14 @@ a:hover {
 .main {
     display: flex;
     width: 100%;
-    height: 90%;
+    flex-grow: 1;
 }
 
 .main_content {
     display: flex;
     width: 100%;
     height: 100%;
-    padding: 0px 50px 5px 50px;
+    padding: 0px 5px 5px 5px;
     box-sizing: border-box;
 }
 
@@ -634,19 +636,16 @@ hr {
 /* MAIN LEFT */
 
     .main_left {
-        width: 75%;
+        flex-grow: 1;
         height: 100%;
-        padding: 0 20px 0 0px;
         box-sizing: border-box;
+        border-right: 1px solid #252525; /* Adiciona uma borda cinza fina na lateral esquerda */
     }
 
     .lyrics_box {
         width: 100%;
         height: 100%;
-        border: 3px solid #0077c2;
-        border-radius: 20px;
         box-sizing: border-box;
-        box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.7);
         background-color: #181818;
         display: flex;
         align-items: center;
@@ -799,10 +798,13 @@ hr {
 /* MAIN RIGHT */
 
     .main_right {
+        padding: 0 0px 0 5px;
         display: flex;
         flex-direction: column;
         justify-content: space-between;
         width: 25%;
+        min-width: 225px;
+        max-width: 350px;
         height: 100%;
     }
 
@@ -813,12 +815,13 @@ hr {
     }
 
     .language_selector {
-        height: 8%;
+        height: 50px;
         background-color: #616161;
         border-radius: 18px;
         position: relative;
         cursor: pointer;
         user-select: none;
+        margin: 5px 0 15px;
     }
 
     .lang_selector_div {
@@ -919,20 +922,20 @@ hr {
     }
 
     .improvements_box {
-        height: 70%;
+        flex-grow: 1;
+        margin: 0 0 5px;
         background-color: #131313;
-        border-radius: 18px;
-        padding: 10px 10px 2px 10px;
         box-sizing: border-box;
         user-select: none;
         box-sizing: border-box;
+        padding: 0 5px;
     }
 
     .improvements_box_top {
         display: flex;
         flex-direction: row;
         width: 100%;
-        height: 10%;
+        height: 50px;
         padding: 3px;
         box-sizing: border-box;
     }
@@ -1132,7 +1135,7 @@ hr {
 
     .improvements_box_content {
         width: 100%;
-        height: 90%;
+        height: 76%;
         overflow: auto;
     }
 
@@ -1350,11 +1353,7 @@ hr {
     }
 
     .sp_player_div {
-        height: 130px;
         box-sizing: border-box;
-        border-radius: 18px;
-        background-color: #131313;
-        padding: 8px;
     }
 
     .sp_player_div_content {
@@ -1387,13 +1386,17 @@ hr {
     /* SP PLAYER REAL */
 
     .spotify_player {
-        width: 100%;
-        height: 100%; 
+        width: 100%; 
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        background-color: #282828;
+        border-radius: 18px;
+        box-sizing: border-box;
+
     }
       
     .sp_web_player {
-        width: 100%;
-        height: 80%;
         display: flex;
         flex-direction: row;
         align-items: center;
@@ -1538,7 +1541,8 @@ hr {
 
 .footer {
     width: 100%;
-    height: 2%;
+    height: 15px;
+    border-top: 1px solid #252525;
 }
 
 .footer_message {
@@ -1700,19 +1704,12 @@ hr {
 
     /* MAIN - START */
 
-    .main {
-        display: flex;
-        width: 100%;
-        height: 84%;
-        background-color: red;
-    }
 
     .main_content {
         display: flex;
         width: 100%;
         height: 100%;
         box-sizing: border-box;
-        background-color: green;
         padding: 0;
     }
 

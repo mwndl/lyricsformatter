@@ -107,7 +107,7 @@
                     </div>
                     <div class="sp_player_div">
                         <div class="sp_player_div_content">
-                            <div class="sp_search">
+                            <div class="sp_search" style="display:none">
                                 <div class="search-container">
                                     <input type="text" placeholder="Paste a Spotify track ID or URL" id="search_input">
                                     <button type="submit" style="" id="search_btn">Search</button>
@@ -119,12 +119,6 @@
                                 </div>
                             </div>
                             <div class="sp_player">
-                                <div class="spotify_preview" style="border-radius: 12px; overflow: hidden; user-select: none; display:none">
-                                    <iframe id="spotify_iframe_preview" border-radius: 12px user-select: none src="" width="100%"
-                                      height="100%" frameBorder="0" allowfullscreen=""
-                                      allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-                                      loading="lazy"></iframe>
-                                </div>
                                 <div class="spotify_player">
                                     <div class="sp_web_player">
                                         <div class="sp_left">
@@ -179,7 +173,7 @@
                         <p class="popup_option_description">Connect your Spotify account to LyricsFormatter</p>
                     </div>
                     <div class="spotify_login" id="spotify_login_button" style="display:block">
-                        <button class="spotify_button" onclick="window.location.href='https://accounts.spotify.com/pt-BR/authorize?client_id=51a45f01c96645e386611edf4a345b50&redirect_uri=https://datamatch-backend.onrender.com/formatter/sp_callback&response_type=code&scope=user-read-playback-state%20user-modify-playback-state%20user-modify-playback-state%20user-read-currently-playing%20user-read-email%20user-read-playback-state'">
+                        <button class="spotify_button" onclick="window.location.href='https://accounts.spotify.com/pt-BR/authorize?client_id=51a45f01c96645e386611edf4a345b50&redirect_uri=http://localhost:3000/formatter/sp_callback&response_type=code&scope=user-read-playback-state%20user-modify-playback-state%20user-modify-playback-state%20user-read-currently-playing%20user-read-email%20user-read-playback-state'">
                             <img src="images/spotify_logo.webp" alt="Spotify Logo" class="spotify_logo">
                             Login with Spotify
                         </button>

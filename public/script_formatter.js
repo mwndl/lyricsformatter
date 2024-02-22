@@ -698,10 +698,10 @@ function handleRefreshButtonClick() {
                 // Chamando a função findAndReplace com os termos extraídos
                 findAndReplace(incorrectTerm, correction);
             } else {
-                console.error('Formato de trigger inválido:', trigger);
+                console.error('Invalid trigger format:', trigger);
             }
         } catch (error) {
-            console.error('Erro ao interpretar e executar o trigger:', error);
+            console.error('An error occurred when interpreting and executing the trigger:', error);
         }
     }
     
@@ -1144,7 +1144,7 @@ function fetchCreditsData() {
     fetch(`${window.serverPath}/formatter/credits`)
     .then(response => response.json())
     .then(data => updateCredits(data.credits))
-    .catch(error => console.error('Erro ao buscar dados da API:', error));
+    .catch(error => console.error('Error fetching data from server:', error));
 }
 
 // Função para atualizar os elementos HTML com os novos dados
@@ -1217,9 +1217,8 @@ document.addEventListener('DOMContentLoaded', function () {
     document.getElementById('disconnect_option').addEventListener('click', disconnectSpotify);
     fetchCreditsData();
     fetchServerInfo();
-    fetchUserData();
     processSpotifyTokensFromURL();
-    fetchCurrentlyPlayingData()
+    loadSpotifyData();
 });
 
 
@@ -1244,7 +1243,7 @@ function fetchServerInfo() {
     fetch(`${window.serverPath}/formatter/about`)
     .then(response => response.json())
     .then(data => updateServerInfo(data))
-    .catch(error => console.error('Erro ao buscar dados do servidor:', error));
+    .catch(error => console.error('Error fetching data from server:', error));
 }
 
 // Função para atualizar os elementos HTML com os novos dados do servidor
@@ -1413,6 +1412,11 @@ function disconnectSpotify() {
     document.getElementById('user_profile').style.display = 'none';
 }
 
+function loadSpotifyData() {
+    fetchUserData();
+    fetchCurrentlyPlayingData();
+}
+
 async function fetchUserData() {
     try {
         // Recuperar os tokens do armazenamento local do navegador
@@ -1421,7 +1425,60 @@ async function fetchUserData() {
 
         // Verificar se os tokens estão em cache
         if (!accessToken || !refreshToken) {
-            return; // sair da função porque não há tokens do spotify
+            return; // sair da função porque não há tokens do Spotify
+        }
+
+        // Fazer uma solicitação fetch para a rota /user no servidor do Spotify
+        const response = await fetch('https://api.spotify.com/v1/me', {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${accessToken}`
+            }
+        });
+
+        // Verificar se a solicitação foi bem-sucedida
+        if (!response.ok) {
+            if (response.status === 401) {
+                // Se o status for 401 (não autorizado), renovar a autorização do Spotify
+                await spotifyRenewAuth();
+            } else {
+                throw new Error(`An error occurred when communicating with Spotify's servers`);
+            }
+        }
+
+        // Extrair os dados do usuário da resposta
+        const userData = await response.json();
+
+        // Exibir os dados do usuário no console (você pode fazer outra coisa com eles)
+        console.log('User data from Spotify: ', userData);
+
+        // Exibir a foto de perfil do usuário e ocultar o botão de login
+        const spotifyLoginButton = document.getElementById('spotify_login_button');
+        const userProfileDiv = document.getElementById('user_profile');
+        const userProfileImage = document.getElementById('sp_user_pic');
+
+        if (userProfileImage && userData.images.length > 0) {
+            userProfileImage.src = userData.images[0].url;
+        }
+
+        if (spotifyLoginButton && userProfileDiv) {
+            spotifyLoginButton.style.display = 'none';
+            userProfileDiv.style.display = 'block';
+        }
+
+    } catch (error) {
+        console.error('Error getting user data from Spotify: ', error.message);
+    }
+}
+
+async function spotifyRenewAuth() {
+    try {
+        // Recuperar o refreshToken do armazenamento local do navegador
+        const refreshToken = localStorage.getItem('refreshToken');
+
+        // Verificar se há refreshToken em cache
+        if (!refreshToken) {
+            throw new Error('No refresh token found, please reconnect your Spotify account on the settings pop-up.');
         }
 
         // Obter o valor de localHostToggle do localStorage
@@ -1434,41 +1491,30 @@ async function fetchUserData() {
             window.serverPath = 'https://datamatch-backend.onrender.com';
         }
 
-        // Fazer uma solicitação fetch para a rota /formatter/user
-        const response = await fetch(`${window.serverPath}/formatter/user`, {
+        // Fazer uma solicitação para a rota /reauth do seu servidor para renovar o accessToken usando refreshToken
+        const response = await fetch(`${window.serverPath}/formatter/reauth`, {
             method: 'GET',
             headers: {
-                'Authorization': `Bearer ${accessToken}`
+                'Authorization': `Bearer ${refreshToken}`
             }
         });
 
         // Verificar se a solicitação foi bem-sucedida
         if (!response.ok) {
-            throw new Error('Error getting user data.');
+            throw new Error('Error renewing Spotify authorization.');
         }
 
-        // Extrair os dados do usuário da resposta
-        const userData = await response.json();
+        // Extrair o novo accessToken da resposta
+        const { accessToken } = await response.json();
 
-        // Exibir os dados do usuário no console (você pode fazer outra coisa com eles)
-        console.log('User data:', userData);
+        // Atualizar o accessToken no armazenamento local do navegador
+        localStorage.setItem('accessToken', accessToken);
 
-        // Exibir a foto de perfil do usuário e ocultar o botão de login
-        const spotifyLoginButton = document.getElementById('spotify_login_button');
-        const userProfileDiv = document.getElementById('user_profile');
-        const userProfileImage = document.getElementById('sp_user_pic');
+        console.log('Spotify authorization renewed successfully!');
 
-        if (userProfileImage && userData.profile_image) {
-            userProfileImage.src = userData.profile_image;
-        }
-
-        if (spotifyLoginButton && userProfileDiv) {
-            spotifyLoginButton.style.display = 'none';
-            userProfileDiv.style.display = 'block';
-        }
-
+        loadSpotifyData(); // recarrega os recursos
     } catch (error) {
-        console.error('Error getting user data.', error.message);
+        console.error('Error renewing Spotify authorization.', error.message);
     }
 }
 
@@ -1492,7 +1538,7 @@ async function fetchCurrentlyPlayingData() {
 
         // Verificar se a solicitação foi bem-sucedida
         if (!response.ok) {
-            throw new Error('Erro ao obter dados da música atualmente reproduzida.');
+            throw new Error(`An error occurred when communicating with Spotify's servers`);
         }
 
         // Extrair os dados da música atualmente reproduzida da resposta
@@ -1522,6 +1568,6 @@ async function fetchCurrentlyPlayingData() {
         }
 
     } catch (error) {
-        console.error('Erro ao obter dados da música atualmente reproduzida.', error.message);
+        console.error('Error getting data from currently playing song: ', error.message);
     }
 }
