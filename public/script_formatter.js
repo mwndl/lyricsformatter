@@ -1219,7 +1219,33 @@ document.addEventListener('DOMContentLoaded', function () {
     fetchServerInfo();
     processSpotifyTokensFromURL();
     loadSpotifyData();
+
+    // Selecionar o botão pelo ID
+    var spotifyButton = document.getElementById('spotify_button');
+
+    // Adicionar um event listener para lidar com o clique
+    spotifyButton.addEventListener('click', function() {
+        openSpotifyAuthorization();
+    });
 });
+
+// Função para abrir a autorização do Spotify na mesma aba
+function openSpotifyAuthorization() {
+    // Obter o valor de localHostToggle do localStorage
+    const localHostToggle = localStorage.getItem('localHostToggle');
+
+    // Verificar o valor de localHostToggle e definir window.serverPath
+    if (localHostToggle === 'true') {
+        window.serverPath = 'http://localhost:3000'; 
+    } else {
+        window.serverPath = 'https://datamatch-backend.onrender.com';
+    }
+
+    var spotifyAuthorizationUrl = `https://accounts.spotify.com/pt-BR/authorize?client_id=51a45f01c96645e386611edf4a345b50&redirect_uri=${window.serverPath}/formatter/sp_callback&response_type=code&scope=user-read-playback-state%20user-modify-playback-state%20user-modify-playback-state%20user-read-currently-playing%20user-read-email%20user-read-playback-state`;
+
+    // Redirecionar para a URL de autorização do Spotify na mesma aba
+    window.location.href = spotifyAuthorizationUrl;
+}
 
 
 // Função para fechar o popup de informações
@@ -1416,6 +1442,7 @@ function loadSpotifyData() {
     fetchUserData();
     fetchCurrentlyPlayingData();
 }
+
 
 async function fetchUserData() {
     try {
