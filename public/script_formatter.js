@@ -176,6 +176,41 @@ function handleRefreshButtonClick() {
 
     refreshButton.addEventListener('click', handleRefreshButtonClick);
 
+        // Melhorar isso ao criar o player, o 0, 1 e 3 deve controlar o player que definirá uma posição ao spotify
+    document.addEventListener('keydown', function(event) {
+
+        // Recuperar os tokens do armazenamento local do navegador
+        const accessToken = localStorage.getItem('accessToken');
+        const refreshToken = localStorage.getItem('refreshToken');
+
+        // Verificar se os tokens estão em cache
+        if (!accessToken || !refreshToken) {
+            return; // sair da função porque não há tokens do Spotify
+        }
+
+        var numericKeys = ['0', '1', '3'];
+
+        // Verifica se a tecla pressionada está no numpad
+        var isNumpadKey = (event.location === KeyboardEvent.DOM_KEY_LOCATION_NUMPAD);
+    
+        if (numericKeys.includes(event.key) && isNumpadKey) {
+            switch (event.key) {
+                case '1':
+                    skipBackward();
+                    break;
+                case '3':
+                    skipForward();
+                    break;
+                case '0':
+                    checkPlaybackStateAndToggle();
+                    break;
+                default:
+                    // Outras teclas não são tratadas
+                    break;
+            }
+        }
+    });
+
     // Função para lidar com a pesquisa
     const handleSearch = () => {
 
@@ -1772,26 +1807,6 @@ async function skipBackward() {
     }
 }
 
-
-document.addEventListener('keydown', function (event) {
-    var numericKeys = ['0', '1', '3'];
-    if (numericKeys.includes(event.key) || (event.keyCode >= 96 && event.keyCode <= 105)) {
-        switch (event.key) {
-            case '1':
-                skipBackward();
-                break;
-            case '3':
-                skipForward();
-                break;
-            case '0':
-                checkPlaybackStateAndToggle();
-                break;
-            default:
-                // Outras teclas não são tratadas
-                break;
-        }
-    }
-});
 
 async function checkPlaybackStateAndToggle() {
     try {
