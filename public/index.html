@@ -74,7 +74,7 @@
                             <p>More languages soon...</p>
                         </ul>
                     </div>
-                    <div class="improvements_box">
+                    <div class="improvements_box" style="height: calc(90% - 100px);">
                         <div class="improvements_box_top">
                             <div class="improvements_box_text">
                                 <p>Suggestions</p>
@@ -332,6 +332,14 @@
         </div>
 
         <script>
+
+    // Adiciona um ouvinte de evento para keydown
+    window.addEventListener('keydown', function(event) {
+      // Obtém a tecla pressionada
+      var teclaPressionada = event.key;
+      
+      // Imprime no console a tecla pressionada
+      console.log('Tecla pressionada:', teclaPressionada);
 
                 function checkContent() {
 

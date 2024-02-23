@@ -243,7 +243,7 @@ a:hover {
 .main {
     display: flex;
     width: 100%;
-    flex-grow: 1;
+    height: 94%;
 }
 
 .main_content {
@@ -805,6 +805,7 @@ hr {
         min-width: 225px;
         max-width: 350px;
         height: 100%;
+        box-sizing: border-box;
     }
 
     .language_selector,
@@ -921,13 +922,14 @@ hr {
     }
 
     .improvements_box {
-        flex-grow: 1;
-        margin: 0 0 5px;
+        /* ALTURA PADRÃO E MÁXIMA DEFINIDA VIA JS COM BASE NA PRESENÇA DO PLAYER! */
+        margin: 0 0 15px;
         background-color: #131313;
         box-sizing: border-box;
         user-select: none;
         box-sizing: border-box;
         padding: 0 5px;
+        flex-grow: 1;
     }
 
     .improvements_box_top {
@@ -1134,8 +1136,9 @@ hr {
 
     .improvements_box_content {
         width: 100%;
-        height: 76%;
+        height: 95%;
         overflow: auto;
+        margin: auto;
     }
 
     /* Barra de rolagem */
