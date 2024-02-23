@@ -1567,10 +1567,10 @@ async function fetchCurrentlyPlayingData() {
         if (response.status === 200) {
             document.getElementById('sp_player_div').style.display = ''; // Exibir elemento
             document.getElementsByClassName('improvements_box').style = 'max-height: calc(90% - 100px);'; // diminuir improvements box
-            return; // Sair da função
         } else {
             document.getElementById('sp_player_div').style.display = 'none'; // Ocultar elemento
             document.getElementsByClassName('improvements_box').style = 'height: calc(90% - 100px)'; // aumentar improvements box
+            return; // Sair da função
         }
 
         // Verificar se a solicitação foi bem-sucedida
