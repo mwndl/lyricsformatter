@@ -176,7 +176,7 @@ function handleRefreshButtonClick() {
 
     refreshButton.addEventListener('click', handleRefreshButtonClick);
 
-        // Melhorar isso ao criar o player, o 0, 1 e 3 deve controlar o player que definirá uma posição ao spotify
+    // CÓDIGO QUE TRATA DOS COMANDOS NUMPAD, APÓS INTEGRAÇÃO DO PLAYER O CÓDIGO DEVE PROCESSAR PELO PLAYER NATIVO E SÓ DEPOIS ENVIAR REQUEST AO SPOTIFY
     document.addEventListener('keydown', function(event) {
 
         // Recuperar os tokens do armazenamento local do navegador
@@ -188,24 +188,36 @@ function handleRefreshButtonClick() {
             return; // sair da função porque não há tokens do Spotify
         }
 
-        var numericKeys = ['0', '1', '3'];
+        var numericKeys = ['0', '1', '3', '4', '5', '6'];
 
-        // Verifica se a tecla pressionada está no numpad
+        // verifica se a tecla pressionada está no numpad
         var isNumpadKey = (event.location === KeyboardEvent.DOM_KEY_LOCATION_NUMPAD);
     
         if (numericKeys.includes(event.key) && isNumpadKey) {
             switch (event.key) {
                 case '1':
+                    console.log("Clique no botão 1 identificado: voltar 3s")
                     skipBackward();
                     break;
                 case '3':
+                    console.log("Clique no botão 3 identificado: avançar 3s")
                     skipForward();
                     break;
+                case '4':
+                    console.log("Clique no botão 4 identificado: voltar para estrofe anterior")
+                    break;
+                case '5':
+                    console.log("Clique no botão 5 identificado: reproduzir estrofe atual novamente")
+                    break;
+                case '6':
+                    console.log("Clique no botão 6 identificado: pular para próxima estrofe")
+                    break;
                 case '0':
+                    console.log("Clique no botão 0 identificado: pausar/reproduzir")
                     checkPlaybackStateAndToggle();
                     break;
                 default:
-                    // Outras teclas não são tratadas
+                    // outras teclas (não são tratadas)
                     break;
             }
         }
