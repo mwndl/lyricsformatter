@@ -543,6 +543,21 @@ hr {
         margin: 5px 0 5px 0;
     }
 
+    .number_selector {
+        display: flex;
+        align-items: center;
+    }
+    
+    .number_selector svg {
+        width: 20px; /* Largura fixa para o SVG */
+        height: 20px; /* Altura fixa para o SVG */
+    }
+    
+    .number_selector span {
+        width: 20px; /* Largura fixa para o número */
+        text-align: center;
+    }
+
     .loading, .error {
         text-align: center;
         margin-top: 50px;

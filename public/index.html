@@ -172,7 +172,7 @@
                             <path d="M12.0016 3.47945C11.9216 3.47945 11.8416 3.48945 11.7616 3.48945L12.5816 2.46945C12.8416 2.14945 12.7916 1.66945 12.4616 1.41945C12.1316 1.16945 11.6716 1.20945 11.4116 1.53945L9.44156 3.99945C9.43156 4.00945 9.43156 4.01945 9.42156 4.03945C9.39156 4.07945 9.37156 4.12945 9.35156 4.16945C9.33156 4.21945 9.31156 4.25945 9.30156 4.29945C9.29156 4.34945 9.29156 4.38945 9.29156 4.43945C9.29156 4.48945 9.29156 4.53945 9.29156 4.58945C9.29156 4.60945 9.29156 4.61945 9.29156 4.63945C9.30156 4.66945 9.32156 4.68945 9.33156 4.71945C9.35156 4.76945 9.37156 4.80945 9.39156 4.85945C9.42156 4.89945 9.45156 4.93945 9.49156 4.96945C9.51156 4.99945 9.52156 5.02945 9.55156 5.04945C9.57156 5.05945 9.58156 5.06945 9.60156 5.07945C9.63156 5.09945 9.65156 5.10945 9.68156 5.11945C9.73156 5.14945 9.79156 5.16945 9.85156 5.17945C9.88156 5.19945 9.91156 5.19945 9.94156 5.19945C9.97156 5.19945 9.99156 5.20945 10.0216 5.20945C10.0516 5.20945 10.0716 5.19945 10.0916 5.18945C10.1216 5.18945 10.1516 5.19945 10.1816 5.18945C10.8216 5.03945 11.4216 4.96945 11.9916 4.96945C16.4816 4.96945 20.1316 8.61945 20.1316 13.1095C20.1316 17.5994 16.4816 21.2495 11.9916 21.2495C7.50156 21.2495 3.85156 17.5994 3.85156 13.1095C3.85156 11.3695 4.42156 9.68945 5.50156 8.24945C5.75156 7.91945 5.68156 7.44945 5.35156 7.19945C5.02156 6.94945 4.55156 7.01945 4.30156 7.34945C3.02156 9.04945 2.35156 11.0395 2.35156 13.1095C2.35156 18.4195 6.67156 22.7495 11.9916 22.7495C17.3116 22.7495 21.6316 18.4295 21.6316 13.1095C21.6316 7.78945 17.3116 3.47945 12.0016 3.47945Z" fill="#ffffff"></path>
                         </g>
                     </svg>
-                    <p style="position: absolute; top: 54%; left: 51%; color: #ffffff; font-size: small; transform: translate(-50%, -50%); z-index: 1;">3</p>
+                    <p style="position: absolute; top: 54%; left: 51%; color: #ffffff; font-size: small; transform: translate(-50%, -50%); z-index: 1;" id="backwardValue"></p>
                 </div>
                 </div>
                 <div class="control-container" id="3s_forward" style="position: relative;">
@@ -183,7 +183,7 @@
                             <path d="M19.4791 7.09052C19.2191 6.77052 18.7491 6.72052 18.4291 6.98052C18.1091 7.24052 18.0591 7.71052 18.3191 8.03052C19.4491 9.43052 20.0791 11.0905 20.1391 12.8305C20.2991 17.3105 16.7791 21.0905 12.2891 21.2405C7.79906 21.4005 4.02906 17.8805 3.86906 13.4005C3.70906 8.92052 7.22906 5.14052 11.7191 4.99052C12.2891 4.97052 12.8891 5.02052 13.5391 5.15052C13.5791 5.16052 13.6191 5.15052 13.6591 5.15052C13.7591 5.20052 13.8791 5.23052 13.9891 5.23052C14.1591 5.23052 14.3191 5.18052 14.4591 5.06052C14.7791 4.80052 14.8291 4.33052 14.5791 4.01052L12.5991 1.54052C12.3391 1.22052 11.8691 1.16052 11.5491 1.42052C11.2291 1.68052 11.1791 2.15052 11.4291 2.47052L12.2591 3.50052C12.0691 3.49052 11.8691 3.48052 11.6791 3.49052C6.36906 3.67052 2.19906 8.15052 2.38906 13.4605C2.57906 18.7705 7.04906 22.9405 12.3591 22.7505C17.6691 22.5605 21.8391 18.0905 21.6491 12.7805C21.5591 10.7105 20.8191 8.74052 19.4791 7.09052Z" fill="#ffffff"></path>         
                         </g>
                     </svg>
-                    <p style="position: absolute; top: 54%; left: 49%; color: #ffffff; font-size: small; transform: translate(-50%, -50%); z-index: 1;">3</p>
+                    <p style="position: absolute; top: 54%; left: 49%; color: #ffffff; font-size: small; transform: translate(-50%, -50%); z-index: 1;" id="forwardValue"></p>
                 </div>
                 <div class="control-container" id="next_section">
                     <img src="images/forward.svg" alt="Forward">
@@ -227,6 +227,46 @@
                                 </li>
                             </ul>
                         </div>
+                    </div>
+                </div>
+                <div class="popup_option">
+                    <div class="popup_title">
+                        <p class="popup_option_title">Autoplay</p>
+                        <p class="popup_option_description">Automatically transfer the playback to LyricsFormatter upon opening the website.</p>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="spAutoPlay" onclick="checkContent()">
+                        <span class="slider round"></span>
+                    </label>
+                </div>
+                <div class="popup_option">
+                    <div class="popup_title">
+                        <p class="popup_option_title">Backwards value</p>
+                        <p class="popup_option_description">Specify the duration in seconds to rewind during backward playback</p>
+                    </div>
+                    <div class="number_selector">
+                        <svg class="arrow left" viewBox="0 0 24 24" onclick="decreaseValue('selectedValue1')">
+                            <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"></path>
+                        </svg>
+                        <span id="selectedValue1">3</span>
+                        <svg class="arrow right" viewBox="0 0 24 24" onclick="increaseValue('selectedValue1')">
+                            <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"></path>
+                        </svg>
+                    </div>
+                </div>
+                <div class="popup_option">
+                    <div class="popup_title">
+                        <p class="popup_option_title">Fast forward value</p>
+                        <p class="popup_option_description">Specify the duration in seconds to fast forward during playback</p>
+                    </div>
+                    <div class="number_selector">
+                        <svg class="arrow left" viewBox="0 0 24 24" onclick="decreaseValue('selectedValue2')">
+                            <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"></path>
+                        </svg>
+                        <span id="selectedValue2">3</span>
+                        <svg class="arrow right" viewBox="0 0 24 24" onclick="increaseValue('selectedValue2')">
+                            <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"></path>
+                        </svg>
                     </div>
                 </div>
                 <hr style="border-top: 1px solid rgb(100, 100, 100); border-right: none; border-bottom: none; border-left: none; border-image: initial;">
@@ -372,12 +412,13 @@
         </div>
 
         <script>
+
                 window.onSpotifyWebPlaybackSDKReady = () => {
                     const token = localStorage.getItem('accessToken');
                     const player = new Spotify.Player({
                         name: 'LyricsFormatter Player',
                         getOAuthToken: cb => { cb(token); },
-                        volume: 0.5
+                        volume: 1.0
                     });
 
                     // Ready
@@ -405,11 +446,148 @@
                     player.connect();
 
                     document.getElementById('play_pause').onclick = function() {
-                        const playerDiv = document.getElementById("sdk_player")
                         player.togglePlay();
                     };
 
+                    document.getElementById('3s_backward').onclick = function() {
+                        rewind(document.getElementById('selectedValue1').textContent)
+                    };
+
+                    document.getElementById('3s_forward').onclick = function() {
+                        fastForward(document.getElementById('selectedValue2').textContent)
+                    };;
+
+                    // CÓDIGO QUE TRATA DOS COMANDOS DO TECLADO
+                    document.addEventListener('keydown', function(event) {
+
+                        // Recuperar os tokens do armazenamento local do navegador
+                        const accessToken = localStorage.getItem('accessToken');
+                        const refreshToken = localStorage.getItem('refreshToken');
+
+                        // Verificar se os tokens estão em cache
+                        if (!accessToken || !refreshToken) {
+                            return; // sair da função porque não há tokens do Spotify
+                        }
+
+                        var numericKeys = ['0', '1', '3', '4', '5', '6'];
+
+                        // verifica se a tecla pressionada está no numpad
+                        var isNumpadKey = (event.location === KeyboardEvent.DOM_KEY_LOCATION_NUMPAD);
+
+                        if (numericKeys.includes(event.key) && isNumpadKey) {
+                            switch (event.key) {
+                                case '1':
+                                    rewind(document.getElementById('selectedValue1').textContent)
+                                    break;
+                                case '3':
+                                     fastForward(document.getElementById('selectedValue2').textContent)
+                                    break;
+                                case '4':
+                                    console.log("Clique no botão 4 identificado: voltar para estrofe anterior")
+                                    break;
+                                case '5':
+                                    console.log("Clique no botão 5 identificado: reproduzir estrofe atual novamente")
+                                    break;
+                                case '6':
+                                    console.log("Clique no botão 6 identificado: pular para próxima estrofe")
+                                    break;
+                                case '0':
+                                    player.togglePlay();
+                                    break;
+                                default:
+                                    // outras teclas (não são tratadas)
+                                    break;
+                            }
+                        }
+
+                        // Event listener para controlar quando uma música termina
+                        player.addListener('player_state_changed', state => {
+                            if (!state || !state.position) {
+                                // Se o estado não estiver disponível ou a posição for indefinida, resete o valor do tracker
+                                document.getElementById('tracker').value = 0;
+                            }
+                        });
+
+                    });
+
+                    // Função para atualizar a barra de progresso com base na posição atual da música
+                    function updateProgressBar(position, duration) {
+                        const tracker = document.getElementById('tracker');
+                        if (duration > 0) {
+                            const progress = (position / duration) * 100;
+                            tracker.value = progress;
+                        }
+                    }
+
+                    // Playback State Changed
+                    player.addListener('player_state_changed', state => {
+                        console.log('Playback state changed:', state);
+                        if (state && state.position && state.duration) {
+                            const newPosition = state.position;
+                            const duration = state.duration;
+                            updateProgressBar(newPosition, duration);
+                        }
+                    });
+
+                    // Função para iniciar o efeito de progresso na barra de progresso
+                    function startProgressEffect() {
+                        const interval = 0.5 * 1000; // Intervalo em milissegundos (0.5 segundos)
+                        setInterval(() => {
+                            player.getCurrentState().then(state => {
+                                if (state) {
+                                    const newPosition = state.position;
+                                    const duration = state.duration;
+                                    updateProgressBar(newPosition, duration);
+                                }
+                            });
+                        }, interval);
+                    }
+
+                    // Chama a função para iniciar o efeito de progresso na barra de progresso
+                    startProgressEffect();
+
+                    // Objeto para armazenar as posições atuais de cada música
+                    const positions = {};
+
+                    // Função para retroceder uma quantidade específica de segundos na reprodução
+                    function rewind(seconds) {
+                        player.getCurrentState().then(state => {
+                            if (state) {
+                                const milliseconds = seconds * 1000; // Convertendo segundos para milissegundos
+                                const newPosition = Math.max(0, state.position - milliseconds);
+                                player.seek(newPosition).then(() => {
+                                    console.log(`Rewound to ${newPosition} milliseconds`);
+                                    positions[state.track.id] = newPosition; // Atualiza a posição para a música atual
+                                });
+                            }
+                        });
+                    }
+
+                    // Função para avançar uma quantidade específica de segundos na reprodução
+                    function fastForward(seconds) {
+                        player.getCurrentState().then(state => {
+                            if (state) {
+                                const milliseconds = seconds * 1000; // Convertendo segundos para milissegundos
+                                const newPosition = Math.min(state.duration, state.position + milliseconds);
+                                player.seek(newPosition).then(() => {
+                                    console.log(`Fast forwarded to ${newPosition} milliseconds`);
+                                    positions[state.track.id] = newPosition; // Atualiza a posição para a música atual
+                                });
+                            }
+                        });
+                    }
+
+                    // Quando uma nova música é reproduzida, obtenha a posição atual se estiver disponível
+                    player.on('track_change', () => {
+                        player.getCurrentState().then(state => {
+                            if (state) {
+                                positions[state.track.id] = state.position; // Armazena a posição para a nova música
+                            }
+                        });
+                    });
+
                 };
+
 
                 function checkContent() {
 
@@ -526,6 +704,57 @@
                     aboutPopup.style.display = "none";
                     overlay.style.display = "none";
                 }
+
+                function increaseValue(selectedId) {
+                    var selectedValue = parseInt(document.getElementById(selectedId).textContent);
+                    if (selectedValue < 15) {
+                        selectedValue++;
+                        updateSelectedValue(selectedId, selectedValue);
+                    }
+                }
+
+                function decreaseValue(selectedId) {
+                    var selectedValue = parseInt(document.getElementById(selectedId).textContent);
+                    if (selectedValue > 3) {
+                        selectedValue--;
+                        updateSelectedValue(selectedId, selectedValue);
+                    }
+                }
+
+                 // Função para obter os valores armazenados no localStorage ou definir padrões
+                function getStoredValue(id) {
+                    return localStorage.getItem(id) || '5'; // Valor padrão é 5 segundos
+                }
+
+                // Função para armazenar os valores selecionados no localStorage
+                function setStoredValue(id, value) {
+                    localStorage.setItem(id, value);
+                }
+
+                // Função para carregar os valores armazenados e definir os elementos correspondentes
+                function loadStoredValues() {
+                    document.getElementById('selectedValue1').textContent = getStoredValue('selectedValue1');
+                    document.getElementById('selectedValue2').textContent = getStoredValue('selectedValue2');
+                    document.getElementById('backwardValue').textContent = getStoredValue('selectedValue1');
+                    document.getElementById('forwardValue').textContent = getStoredValue('selectedValue2');
+                }
+
+                function updateSelectedValue(id, value) {
+                    document.getElementById(id).textContent = value;
+                    setStoredValue(id, value); // Armazenar o valor selecionado no localStorage
+                    // Atualizar os elementos <p> com base nos valores selecionados
+                    if (id === 'selectedValue1') {
+                        document.getElementById('backwardValue').textContent = value;
+                    } else if (id === 'selectedValue2') {
+                        document.getElementById('forwardValue').textContent = value;
+                    }
+                    // Aqui você pode fazer qualquer outra ação necessária com o valor selecionado
+                }
+
+                // Carregar os valores armazenados ao carregar a página
+                window.onload = function() {
+                    loadStoredValues();
+                };
 
 
                 // Função para atualizar as opções abaixo com base na seleção do menu seletor

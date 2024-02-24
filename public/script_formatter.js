@@ -29,54 +29,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
     var ignoredContainers = []; // aqui ficam guardados temporariamente os IDs ignorados, ao limpar o texto, tocar em 'Copy' ou então ao tocar no botão de lixo, esse array será resetado
 
-
-    // CÓDIGO QUE TRATA DOS COMANDOS NUMPAD, APÓS INTEGRAÇÃO DO PLAYER O CÓDIGO DEVE PROCESSAR PELO PLAYER NATIVO E SÓ DEPOIS ENVIAR REQUEST AO SPOTIFY
-    document.addEventListener('keydown', function(event) {
-
-        // Recuperar os tokens do armazenamento local do navegador
-        const accessToken = localStorage.getItem('accessToken');
-        const refreshToken = localStorage.getItem('refreshToken');
-
-        // Verificar se os tokens estão em cache
-        if (!accessToken || !refreshToken) {
-            return; // sair da função porque não há tokens do Spotify
-        }
-
-        var numericKeys = ['0', '1', '3', '4', '5', '6'];
-
-        // verifica se a tecla pressionada está no numpad
-        var isNumpadKey = (event.location === KeyboardEvent.DOM_KEY_LOCATION_NUMPAD);
-    
-        if (numericKeys.includes(event.key) && isNumpadKey) {
-            switch (event.key) {
-                case '1':
-                    console.log("Clique no botão 1 identificado: voltar 3s")
-                    skipBackward();
-                    break;
-                case '3':
-                    console.log("Clique no botão 3 identificado: avançar 3s")
-                    skipForward();
-                    break;
-                case '4':
-                    console.log("Clique no botão 4 identificado: voltar para estrofe anterior")
-                    break;
-                case '5':
-                    console.log("Clique no botão 5 identificado: reproduzir estrofe atual novamente")
-                    break;
-                case '6':
-                    console.log("Clique no botão 6 identificado: pular para próxima estrofe")
-                    break;
-                case '0':
-                    console.log("Clique no botão 0 identificado: pausar/reproduzir")
-                    checkPlaybackStateAndToggle();
-                    break;
-                default:
-                    // outras teclas (não são tratadas)
-                    break;
-            }
-        }
-    });
-
  // Add this function to your existing code
 function handleRefreshButtonClick() {
 
@@ -1585,6 +1537,15 @@ async function spotifyRenewAuth() {
     }
 }
 
+function loadSpotifyData() {
+    const accessToken = localStorage.getItem('accessToken');
+    if (!accessToken) {
+        return; 
+    }
+    fetchUserData();
+    fetchCurrentlyPlayingData()
+}
+
 async function fetchCurrentlyPlayingData() {
     try {
         // Obter o token de acesso do armazenamento local do navegador
@@ -1680,6 +1641,26 @@ async function fetchCurrentlyPlayingData() {
     }
 }
 
+// Definindo a função showTracker()
+function showTracker() {
+    var sdk_player = document.getElementById('sdk_player');
+    if (sdk_player) {
+        sdk_player.style.display = 'flex';
+    } else {
+        console.log("Elemento sdk_player não encontrado.");
+    }
+}
+
+// Definindo a função hideTracker()
+function hideTracker() {
+    var sdk_player = document.getElementById('sdk_player');
+    if (sdk_player) {
+        sdk_player.style.display = 'none';
+    } else {
+        console.log("Elemento sdk_player não encontrado.");
+    }
+}
+
 
 // Função para atualizar o slider da música conforme o tocador toca
 function updateTracker(positionMs, durationMs) {
@@ -1709,19 +1690,6 @@ function updatePlaybackState(isPaused, progressPercent) {
     }
 }
 
-// Adicione um ouvinte de eventos para o botão play/pause
-const controlContainer = document.getElementById('play_pause');
-let isPaused = true; // Variável para rastrear o estado de reprodução
-
-controlContainer.addEventListener('click', async function() {
-    if (isPaused) {
-        await resumePlayback(); // Se estiver pausado, retome a reprodução
-        isPaused = false;
-    } else {
-        await pausePlayback(); // Se estiver reproduzindo, pause a reprodução
-        isPaused = true;
-    }
-});
 
 // Obter o estado atual do player
 player.getCurrentState().then(state => {
@@ -1912,42 +1880,3 @@ async function skipBackward() {
 }
 
 
-
-async function checkPlaybackStateAndToggle() {
-    try {
-        // Recuperar o token de acesso do armazenamento local do navegador
-        const accessToken = localStorage.getItem('accessToken');
-
-        // Verificar se o token de acesso está em cache
-        if (!accessToken) {
-            console.log('Access token not found. Cannot check playback state.');
-            return;
-        }
-
-        // Fazer uma solicitação fetch para obter o estado atual da reprodução
-        const playbackStateResponse = await fetch('https://api.spotify.com/v1/me/player', {
-            method: 'GET',
-            headers: {
-                'Authorization': `Bearer ${accessToken}`
-            }
-        });
-
-        // Verificar se a solicitação foi bem-sucedida
-        if (!playbackStateResponse.ok) {
-            throw new Error(`Failed to get playback state. Status: ${playbackStateResponse.status}`);
-        }
-
-        const playbackStateData = await playbackStateResponse.json();
-
-        // Verificar se a reprodução está pausada para decidir entre pausar ou retomar
-        if (playbackStateData.is_playing) {
-            pausePlayback();
-        } else {
-            resumePlayback();
-        }
-
-    } catch (error) {
-        console.error('Error checking playback state: ', error.message);
-    }
-
-}
