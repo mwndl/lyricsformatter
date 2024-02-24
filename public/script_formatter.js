@@ -1217,6 +1217,7 @@ document.addEventListener('DOMContentLoaded', function () {
     fetchCreditsData();
     fetchServerInfo();
     processSpotifyTokensFromURL();
+    loadSpotifyData();
 
     // Selecionar o botão pelo ID
     var spotifyButton = document.getElementById('spotify_button');
