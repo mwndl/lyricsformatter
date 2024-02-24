@@ -30,6 +30,53 @@ document.addEventListener('DOMContentLoaded', function () {
     var ignoredContainers = []; // aqui ficam guardados temporariamente os IDs ignorados, ao limpar o texto, tocar em 'Copy' ou então ao tocar no botão de lixo, esse array será resetado
 
 
+    // CÓDIGO QUE TRATA DOS COMANDOS NUMPAD, APÓS INTEGRAÇÃO DO PLAYER O CÓDIGO DEVE PROCESSAR PELO PLAYER NATIVO E SÓ DEPOIS ENVIAR REQUEST AO SPOTIFY
+    document.addEventListener('keydown', function(event) {
+
+        // Recuperar os tokens do armazenamento local do navegador
+        const accessToken = localStorage.getItem('accessToken');
+        const refreshToken = localStorage.getItem('refreshToken');
+
+        // Verificar se os tokens estão em cache
+        if (!accessToken || !refreshToken) {
+            return; // sair da função porque não há tokens do Spotify
+        }
+
+        var numericKeys = ['0', '1', '3', '4', '5', '6'];
+
+        // verifica se a tecla pressionada está no numpad
+        var isNumpadKey = (event.location === KeyboardEvent.DOM_KEY_LOCATION_NUMPAD);
+    
+        if (numericKeys.includes(event.key) && isNumpadKey) {
+            switch (event.key) {
+                case '1':
+                    console.log("Clique no botão 1 identificado: voltar 3s")
+                    skipBackward();
+                    break;
+                case '3':
+                    console.log("Clique no botão 3 identificado: avançar 3s")
+                    skipForward();
+                    break;
+                case '4':
+                    console.log("Clique no botão 4 identificado: voltar para estrofe anterior")
+                    break;
+                case '5':
+                    console.log("Clique no botão 5 identificado: reproduzir estrofe atual novamente")
+                    break;
+                case '6':
+                    console.log("Clique no botão 6 identificado: pular para próxima estrofe")
+                    break;
+                case '0':
+                    console.log("Clique no botão 0 identificado: pausar/reproduzir")
+                    checkPlaybackStateAndToggle();
+                    break;
+                default:
+                    // outras teclas (não são tratadas)
+                    break;
+            }
+        }
+    });
+
  // Add this function to your existing code
 function handleRefreshButtonClick() {
 
@@ -175,53 +222,6 @@ function handleRefreshButtonClick() {
 
 
     refreshButton.addEventListener('click', handleRefreshButtonClick);
-
-    // CÓDIGO QUE TRATA DOS COMANDOS NUMPAD, APÓS INTEGRAÇÃO DO PLAYER O CÓDIGO DEVE PROCESSAR PELO PLAYER NATIVO E SÓ DEPOIS ENVIAR REQUEST AO SPOTIFY
-    document.addEventListener('keydown', function(event) {
-
-        // Recuperar os tokens do armazenamento local do navegador
-        const accessToken = localStorage.getItem('accessToken');
-        const refreshToken = localStorage.getItem('refreshToken');
-
-        // Verificar se os tokens estão em cache
-        if (!accessToken || !refreshToken) {
-            return; // sair da função porque não há tokens do Spotify
-        }
-
-        var numericKeys = ['0', '1', '3', '4', '5', '6'];
-
-        // verifica se a tecla pressionada está no numpad
-        var isNumpadKey = (event.location === KeyboardEvent.DOM_KEY_LOCATION_NUMPAD);
-    
-        if (numericKeys.includes(event.key) && isNumpadKey) {
-            switch (event.key) {
-                case '1':
-                    console.log("Clique no botão 1 identificado: voltar 3s")
-                    skipBackward();
-                    break;
-                case '3':
-                    console.log("Clique no botão 3 identificado: avançar 3s")
-                    skipForward();
-                    break;
-                case '4':
-                    console.log("Clique no botão 4 identificado: voltar para estrofe anterior")
-                    break;
-                case '5':
-                    console.log("Clique no botão 5 identificado: reproduzir estrofe atual novamente")
-                    break;
-                case '6':
-                    console.log("Clique no botão 6 identificado: pular para próxima estrofe")
-                    break;
-                case '0':
-                    console.log("Clique no botão 0 identificado: pausar/reproduzir")
-                    checkPlaybackStateAndToggle();
-                    break;
-                default:
-                    // outras teclas (não são tratadas)
-                    break;
-            }
-        }
-    });
 
     // Função para lidar com a pesquisa
     const handleSearch = () => {
@@ -1288,7 +1288,7 @@ function openSpotifyAuthorization() {
         window.serverPath = 'https://datamatch-backend.onrender.com';
     }
 
-    var spotifyAuthorizationUrl = `https://accounts.spotify.com/pt-BR/authorize?client_id=51a45f01c96645e386611edf4a345b50&redirect_uri=${window.serverPath}/formatter/sp_callback&response_type=code&scope=user-read-playback-state%20user-modify-playback-state%20user-modify-playback-state%20user-read-currently-playing%20user-read-email%20user-read-playback-state`;
+    var spotifyAuthorizationUrl = `https://accounts.spotify.com/pt-BR/authorize?client_id=51a45f01c96645e386611edf4a345b50&redirect_uri=${window.serverPath}/formatter/sp_callback&response_type=code&scope=user-read-playback-state%20user-modify-playback-state%20user-read-currently-playing%20user-read-email%20user-read-playback-state%20streaming%20app-remote-control%20user-follow-modify%20user-follow-read%20user-read-playback-position%20user-top-read%20user-read-recently-played%20user-library-read%20user-read-private&show_dialog=true`;
 
     // Redirecionar para a URL de autorização do Spotify na mesma aba
     window.location.href = spotifyAuthorizationUrl;
@@ -1485,11 +1485,6 @@ function disconnectSpotify() {
     document.getElementById('user_profile').style.display = 'none';
 }
 
-function loadSpotifyData() {
-    fetchUserData();
-    fetchCurrentlyPlayingData();
-}
-
 
 async function fetchUserData() {
     try {
@@ -1611,13 +1606,13 @@ async function fetchCurrentlyPlayingData() {
         });
 
         // Verificar se a resposta indica que não há música sendo reproduzida (código 204)
-        if (response.status === 200) {
-            document.getElementById('sp_player_div').style.display = ''; // Exibir elemento
-            document.getElementsByClassName('improvements_box').style = 'max-height: calc(90% - 100px);'; // diminuir improvements box
-        } else {
+        if (response.status === 204) {
             document.getElementById('sp_player_div').style.display = 'none'; // Ocultar elemento
-            document.getElementsByClassName('improvements_box').style = 'height: calc(90% - 100px)'; // aumentar improvements box
+            document.getElementsByClassName('improvements_box')[0].style.height = 'calc(90% - 100px)'; // aumentar improvements box
             return; // Sair da função
+        } else {
+            document.getElementById('sp_player_div').style.display = ''; // Exibir elemento
+            document.getElementsByClassName('improvements_box')[0].style.maxHeight = 'calc(90% - 100px)'; // diminuir improvements box
         }
 
         // Verificar se a solicitação foi bem-sucedida
@@ -1633,6 +1628,10 @@ async function fetchCurrentlyPlayingData() {
         const titleElement = document.getElementById('sp_title');
         const albumElement = document.getElementById('sp_album');
         const artistElement = document.getElementById('sp_artist');
+        const trackerElement = document.getElementById('tracker');
+        const controlContainer = document.getElementById('play_pause');
+        const svg1 = controlContainer.querySelector('svg:nth-child(1)');
+        const svg2 = controlContainer.querySelector('svg:nth-child(2)');
 
         if (albumArtElement && currentlyPlayingData.item.album.images.length > 0) {
             albumArtElement.innerHTML = `<img src="${currentlyPlayingData.item.album.images[0].url}" alt="album art" title="${currentlyPlayingData.item.name} | ${currentlyPlayingData.item.artists[0].name}">`;
@@ -1651,10 +1650,103 @@ async function fetchCurrentlyPlayingData() {
             albumElement.innerHTML = `<a href="https://open.spotify.com/album/${currentlyPlayingData.item.album.id}" target="_blank">${currentlyPlayingData.item.album.name}</a>`;
         }
 
+        // Atualizar o estado do botão play/pause e o tracker da música
+        if (currentlyPlayingData.is_playing) {
+            const progress_ms = currentlyPlayingData.progress_ms;
+            const duration_ms = currentlyPlayingData.item.duration_ms;
+            const progressPercent = (progress_ms / duration_ms) * 100;
+            updatePlaybackState(false, progressPercent); // Atualiza o estado de reprodução como reproduzindo
+        } else {
+            const progress_ms = currentlyPlayingData.progress_ms;
+            const duration_ms = currentlyPlayingData.item.duration_ms;
+            const progressPercent = (progress_ms / duration_ms) * 100;
+            updatePlaybackState(true, 0); // Atualiza o estado de reprodução como pausado
+        }
+
+        // Adicionar event listeners para controlar a reprodução/pausa
+        controlContainer.addEventListener('click', function() {
+            if (currentlyPlayingData.is_playing) {
+                pausePlayback();
+                svg1.style.display = 'none';
+                svg2.style.display = 'block';
+            } else {
+                resumePlayback();
+                svg1.style.display = 'block';
+                svg2.style.display = 'none';
+            }
+            currentlyPlayingData.is_playing = !currentlyPlayingData.is_playing;
+        });
+
     } catch (error) {
         console.error('Error getting data from currently playing song: ', error.message);
     }
 }
+
+
+// Função para atualizar o slider da música conforme o tocador toca
+function updateTracker(positionMs, durationMs) {
+    const percentage = (positionMs / durationMs) * 100;
+    trackerElement.style.width = `${percentage}%`;
+}
+
+setInterval(() => {
+    // Substitua trackPositionMs e trackDurationMs pelos valores reais
+    updateTracker(trackPositionMs, trackDurationMs);
+}, 1000);
+
+// Atualize o estado do botão play/pause e o tracker da música
+function updatePlaybackState(isPaused, progressPercent) {
+    const controlContainer = document.getElementById('play_pause');
+    const svg1 = controlContainer.querySelector('svg:nth-child(1)');
+    const svg2 = controlContainer.querySelector('svg:nth-child(2)');
+    const trackerElement = document.getElementById('tracker');
+
+    if (isPaused) {
+        svg1.style.display = 'none';
+        svg2.style.display = 'block';
+    } else {
+        svg1.style.display = 'block';
+        svg2.style.display = 'none';
+        trackerElement.value = progressPercent; // Atualiza a posição do tracker
+    }
+}
+
+// Adicione um ouvinte de eventos para o botão play/pause
+const controlContainer = document.getElementById('play_pause');
+let isPaused = true; // Variável para rastrear o estado de reprodução
+
+controlContainer.addEventListener('click', async function() {
+    if (isPaused) {
+        await resumePlayback(); // Se estiver pausado, retome a reprodução
+        isPaused = false;
+    } else {
+        await pausePlayback(); // Se estiver reproduzindo, pause a reprodução
+        isPaused = true;
+    }
+});
+
+// Obter o estado atual do player
+player.getCurrentState().then(state => {
+    if (!state) {
+        console.error('O usuário não está reproduzindo música através do Web Playback SDK');
+        return;
+    }
+
+    const current_track = state.track_window.current_track;
+    const next_track = state.track_window.next_tracks[0];
+
+    console.log('Atualmente tocando:', current_track);
+    console.log('Próxima música:', next_track);
+
+    // Faça algo com as informações do estado atual do player, se necessário
+    // Por exemplo, você pode atualizar sua interface do usuário com essas informações
+}).catch(error => {
+    console.error('Erro ao obter estado atual do player:', error);
+});
+
+setInterval(checkPlayerState, 2000);
+
+
 
 async function pausePlayback() {
     try {
@@ -1704,6 +1796,8 @@ async function resumePlayback() {
                 'Authorization': `Bearer ${accessToken}`
             }
         });
+
+        fetchCurrentlyPlayingData()
 
         // Verificar se a solicitação foi bem-sucedida
         if (!response.ok) {
@@ -1820,6 +1914,7 @@ async function skipBackward() {
 }
 
 
+
 async function checkPlaybackStateAndToggle() {
     try {
         // Recuperar o token de acesso do armazenamento local do navegador
@@ -1856,4 +1951,5 @@ async function checkPlaybackStateAndToggle() {
     } catch (error) {
         console.error('Error checking playback state: ', error.message);
     }
+
 }

@@ -1539,6 +1539,105 @@ hr {
 
 /* MAIN - END */
 
+.player {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    height: 60px;
+    width: 100%;
+    background-color: #131313; /* você pode alterar a cor de fundo conforme desejado */
+    border-top: 1px solid #252525;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;
+    box-sizing: border-box;
+}
+
+.controls-left, .controls-right {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.control-container {
+    margin: 0 4px;
+    width: 40px; /* Largura e altura ajustáveis conforme necessário */
+    height: 40px;
+    border-radius: 50%; /* Torna a div redonda */
+    overflow: hidden; /* Garante que a imagem dentro da div não ultrapasse os limites arredondados */
+    transition: background-color 0.3s; /* Adiciona uma transição suave para a mudança de cor */
+    display: flex; /* Ativa o modelo de flexbox */
+    justify-content: center; /* Alinha os itens horizontalmente ao centro */
+    align-items: center; /* Alinha os itens verticalmente ao centro */
+    background-color: #272727; /* você pode alterar a cor de fundo conforme desejado */
+    cursor: pointer;
+}
+
+.control-container img {
+    display: block;
+    max-width: 50%;
+    max-height: 50%; /* Adicionado para garantir que a imagem não ultrapasse os limites da div */
+}
+
+.control-container:hover {
+    background-color: #3a3a3a;
+}
+
+.controls-center {
+    flex: 1;
+    margin: 0 20px;
+}
+
+input[type="range"] {
+    width: 100%;
+    height: 6px;
+    -webkit-appearance: none;
+    background: #555;
+    outline: none;
+    border-radius: 5px;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 12px;
+    height: 12px;
+    background: #ffffff;
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+
+
+#play-pause-button {
+    position: relative;
+    width: 30px;
+    height: 30px;
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+}
+
+#play-pause-button::before,
+#play-pause-button::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    width: 6px;
+    height: 30px;
+    background-color: white;
+    border-radius: 10px;
+}
+
+#play-pause-button::before {
+    left: 6px; /* Ajuste a distância da primeira barra para a direita */
+}
+
+#play-pause-button::after {
+    right: 6px; /* Ajuste a distância da segunda barra para a esquerda */
+}
+
 /* FOOTER - START */
 
 .footer {
