@@ -1265,7 +1265,6 @@ document.addEventListener('DOMContentLoaded', function () {
     fetchCreditsData();
     fetchServerInfo();
     processSpotifyTokensFromURL();
-    loadSpotifyData();
 
     // Selecionar o botão pelo ID
     var spotifyButton = document.getElementById('spotify_button');
@@ -1580,8 +1579,7 @@ async function spotifyRenewAuth() {
         localStorage.setItem('accessToken', accessToken);
 
         console.log('Spotify authorization renewed successfully!');
-
-        loadSpotifyData(); // recarrega os recursos
+        fetchCurrentlyPlayingData()
     } catch (error) {
         console.error('Error renewing Spotify authorization.', error.message);
     }
