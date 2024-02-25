@@ -1,1940 +1,1017 @@
-document.addEventListener('DOMContentLoaded', function () {
-    var returnArrow = document.querySelector('#return_arrow');
-    var lyricsBox = document.getElementById('lyrics_box');
-    var textArea = document.getElementById('editor');
-    var textarea = document.querySelector('.editor');
-    var characterCounter = document.querySelector('.character_counter');
-    const selector = document.querySelector('.language_selector');
-    const selectedLanguage = document.querySelector('.selected_language');
-    const languageList = document.querySelector('.language_list');
-    const languageArrow = document.querySelector('.lang_expand_arrow');
-    const langButtonContent = document.querySelector('.lang_selector_div');
+<!DOCTYPE html>
+<html lang="en">
 
-    var resetButton = document.getElementById('reset_button');
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="google" value="notranslate">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link rel="stylesheet" href="lyricsformatter.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="script_formatter.js"></script>
+    <link rel="icon" href="/images/favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" integrity="sha384-e3b0a8b1e4095176f4a6f42c37b4efb51337fba6c937e281a5f3800f76475893" crossorigin="anonymous">
+    <title>LyricsFormatter</title>
+</head>
 
-    var refreshButton = document.getElementById('refresh_button');
-    var loadingSpinner = document.getElementById('loading_spinner');
-
-
-    const searchBtn = document.querySelector('#search_btn');
-    const search_input = document.querySelector('#search_input');
-    const spotifyIframePreview = document.querySelector('#spotify_iframe_preview');
-
-
-    var miniMenu = document.getElementById("mini_menu");
-
-    var ignoredContainers = []; // aqui ficam guardados temporariamente os IDs ignorados, ao limpar o texto, tocar em 'Copy' ou então ao tocar no botão de lixo, esse array será resetado
-
- // Add this function to your existing code
-function handleRefreshButtonClick() {
-
-    // Auto trim (se ativo)
-    var autoTrimToggle = document.getElementById('autoTrimToggle');
-    var removeDoubleSpacesAndLinesToggle = document.getElementById('removeDoubleSpacesAndLinesToggle');
-    var autoCapTagsToggle = document.getElementById('autoCapTagsToggle');
-
-    if (autoTrimToggle.checked) {
-        autoTrim();
-    }
-    if (removeDoubleSpacesAndLinesToggle.checked) {
-        removeDuplicateSpaces();
-        removeDuplicateEmptyLines();
-    }
-    if (autoCapTagsToggle.checked) {
-        replaceSpecialTags();
-    }
-
-    resetLineIssues();
-    updateSidebar();
-    clearTimeout(typingTimer); // auto 3s
-    fetchCurrentlyPlayingData()
-
-    // Get references to the elements
-    // Hide the refresh button and show the loading spinner
-    refreshButton.style.display = 'none';
-    loadingSpinner.style.display = 'block';
-
-    // Get the language code from the selected language element
-    var selectedLanguageCode = localStorage.getItem('selectedLanguage');
-
-    // Check if a language is selected
-    if (!selectedLanguageCode) {
-        notification('Please select a language to start.', 'info');
-        // Show the refresh button and hide the loading spinner
-        refreshButton.style.display = 'block';
-        loadingSpinner.style.display = 'none';
-        return;
-    }
-
-    // Prepare the data to send to the API
-    var requestData = {
-        text: textArea.value,
-    };
-
-    // Obter o valor de localHostToggle do localStorage
-    const localHostToggle = localStorage.getItem('localHostToggle');
-
-    // Verificar o valor de localHostToggle e definir window.serverPath
-    if (localHostToggle === 'true') {
-        window.serverPath = 'http://localhost:3000'; 
-    } else {
-        window.serverPath = 'https://datamatch-backend.onrender.com';
-    }
-
-    fetch(`${window.serverPath}/formatter/${selectedLanguageCode}`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(requestData),
-    })
-        .then(response => {
-            if (!response.ok) {
-                if (response.status === 404) {
-                    // Show notification for language not selected
-                    notification("Language not supported: ", 'info');
-                } else {
-                    // Handle other errors here
-                    console.error('Error with API request. Status:', response.status);
-                    notification('We are experiencing internal issues, please try again later. 🔧');
-                }
-            }
-            return response.json();
-        })
-        .then(data => {
-            // Handle the API response here
-            console.log('API Response:', data);
-
-            // Remove existing HTML elements inside the improvements_containers
-            const improvementsContainer = document.getElementById('improvements_containers');
-            improvementsContainer.innerHTML = '';
+    <body>
+        <div class="top">
+            <div class="return">
+                <img class="return_arrow" id="return_arrow" src="images\arrow.svg" alt="Return Arrow" title="Return to Home" draggable="false" style="display:none">
+            </div>
+            <div class="page_title">LyricsFormatter</div>
+            <div class="settings">
+                <img class="options_dots" id="settings_dots" src="images\options.svg" alt="Options" title="Options" draggable="false" style="display:block">
+                <!-- Mini menu -->
+                <div id="mini_menu" class="mini-menu">
+                    <ul>
+                        <li id="settings_option" style="display:block; border-radius: 10px;">
+                            <p>Settings</p>
+                        </li>
+                        <li id="credits_option" style="display:block; border-radius: 10px;">
+                            <p>Credits</p>
+                        </li>
+                        <li id="suggest_option" style="display:none; border-radius: 10px;">
+                            <p>Suggest a Feature</p>
+                        </li>
+                        <li id="about_option" style="display:block; border-radius: 10px;">
+                            <p>About This Tool</p>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
     
-            if (data.result.issues === false) {
-                // Create and append the "No issues found" div
-                const noIssuesDiv = document.createElement('div');
-                noIssuesDiv.className = 'container_no_issues';
-                noIssuesDiv.id = 'container_no_issues';
-                noIssuesDiv.style.display = 'block';
+        <div class="main">
+            <div class="main_content">
+                <div class="main_left">
+                    <div class="lyrics_box" id="lyrics_box">
+                        <div class="editor-container">
+                            <div class="line_issues" id="line_issues"></div>
+                            <div class="character_counter"></div>
+                            <textarea class="editor" id="editor" placeholder="Paste the lyrics here..." oninput="checkContent();"></textarea>
+                        </div>
+                    </div>
+                </div>
+                <div class="main_right">
+                    <div class="language_selector">
+                        <div class="lang_selector_div" title="Tap to see list of supported languages">
+                            <div class="selected_language">Select Language</div>
+                            <div class="mobile_footer_arrow">
+                                <img class="lang_expand_arrow" id="lang_expand_arrow" src="images/expand_arrow.svg" alt="Expand Arrow" draggable="false">
+                            </div>
+                        </div>
+                        <ul class="language_list" id="language_list">
+                            <li data-lang="en-UK">English (UK)</li>
+                            <li data-lang="en-US">English (US)</li>
+                            <li data-lang="nl" style="display:none">Dutch</li>
+                            <li data-lang="fr">French<span class="new_tag">new</span></li>
+                            <li data-lang="de" style="display:none">German<span class="new_tag">new</span></li>
+                            <li data-lang="it">Italian<span class="beta_tag">beta</span></li>
+                            <li data-lang="pt-BR">Portuguese (BR)</li>
+                            <li data-lang="pt-PT">Portuguese (PT)</li>
+                            <li data-lang="es">Spanish<span class="new_tag">new</span></li>
+                            <p>More languages soon...</p>
+                        </ul>
+                    </div>
+                    <div class="improvements_box" style="height: calc(90% - 100px);">
+                        <div class="improvements_box_top">
+                            <div class="improvements_box_text">
+                                <p>Suggestions</p>
+                            </div>
+                            <div class="improvements_box_buttons" style="">
+                                <div class="reset_div">
+                                    <button class="reset_button" id="reset_button" style="display:none" title="Reset transcription" onclick="resetTranscription()">
+                                        <div class="reset_symbol"></div>
+                                    </button>
+                                </div>
+                                <div class="refresh_div">
+                                    <button class="refresh_button" id="refresh_button" style="display:none" title="Refresh suggestions" onclick="handleRefreshButtonClick()">
+                                        <div class="refresh_symbol"></div>
+                                    </button>
+                                    <div class="loading_spinner_loop" id="loading_spinner" style="display:none">
+                                        <div class="loading_spinner">
+                                          <div></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="improvements_box_content">
+                            <div class="improvements" id="improvements_containers">
+                                <div class="improvements_placeholder_div" id="improvements_placeholder_div">
+                                    <div class="improvements_placeholder" id="improvements_placeholder">Type something or paste your transcription to start...</div>
+                                </div>
+                            </div>                            
+                        </div>
+                    </div>
+                    <div class="sp_player_div" id="sp_player_div" style="display:none; margin: 0 0 0 0">
+                        <div class="sp_player_div_content">
+                            <div class="sp_search" style="display:none">
+                                <div class="search-container">
+                                    <input type="text" placeholder="Paste a Spotify track ID or URL" id="search_input">
+                                    <button type="submit" style="" id="search_btn">Search</button>
+                                    <div class="loading_spinner_loop" id="loading_spinner" style="display:none">
+                                      <div class="loading_spinner">
+                                        <div></div>
+                                      </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="sp_player">
+                                <div class="spotify_player">
+                                    <div class="sp_web_player">
+                                        <div class="sp_up">
+                                            <div class="button-container">
+                                                <div class="round-button"></div>
+                                                <div class="round-button" id="player_refresh">
+                                                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M4.39502 12.0014C4.39544 12.4156 4.73156 12.751 5.14577 12.7506C5.55998 12.7502 5.89544 12.4141 5.89502 11.9999L4.39502 12.0014ZM6.28902 8.1116L6.91916 8.51834L6.91952 8.51777L6.28902 8.1116ZM9.33502 5.5336L9.0396 4.84424L9.03866 4.84464L9.33502 5.5336ZM13.256 5.1336L13.4085 4.39927L13.4062 4.39878L13.256 5.1336ZM16.73 7.0506L16.1901 7.57114L16.1907 7.57175L16.73 7.0506ZM17.7142 10.2078C17.8286 10.6059 18.2441 10.8358 18.6422 10.7214C19.0403 10.607 19.2703 10.1915 19.1558 9.79342L17.7142 10.2078ZM17.7091 9.81196C17.6049 10.2129 17.8455 10.6223 18.2464 10.7265C18.6473 10.8307 19.0567 10.5901 19.1609 10.1892L17.7091 9.81196ZM19.8709 7.45725C19.9751 7.05635 19.7346 6.6469 19.3337 6.54272C18.9328 6.43853 18.5233 6.67906 18.4191 7.07996L19.8709 7.45725ZM18.2353 10.7235C18.6345 10.8338 19.0476 10.5996 19.1579 10.2004C19.2683 9.80111 19.034 9.38802 18.6348 9.2777L18.2353 10.7235ZM15.9858 8.5457C15.5865 8.43537 15.1734 8.66959 15.0631 9.06884C14.9528 9.46809 15.187 9.88119 15.5863 9.99151L15.9858 8.5457ZM19.895 11.9999C19.8946 11.5856 19.5585 11.2502 19.1443 11.2506C18.7301 11.251 18.3946 11.5871 18.395 12.0014L19.895 11.9999ZM18.001 15.8896L17.3709 15.4829L17.3705 15.4834L18.001 15.8896ZM14.955 18.4676L15.2505 19.157L15.2514 19.1566L14.955 18.4676ZM11.034 18.8676L10.8815 19.6019L10.8839 19.6024L11.034 18.8676ZM7.56002 16.9506L8.09997 16.4301L8.09938 16.4295L7.56002 16.9506ZM6.57584 13.7934C6.46141 13.3953 6.04593 13.1654 5.64784 13.2798C5.24974 13.3942 5.01978 13.8097 5.13421 14.2078L6.57584 13.7934ZM6.58091 14.1892C6.6851 13.7884 6.44457 13.3789 6.04367 13.2747C5.64277 13.1705 5.23332 13.4111 5.12914 13.812L6.58091 14.1892ZM4.41914 16.544C4.31495 16.9449 4.55548 17.3543 4.95638 17.4585C5.35727 17.5627 5.76672 17.3221 5.87091 16.9212L4.41914 16.544ZM6.05478 13.2777C5.65553 13.1674 5.24244 13.4016 5.13212 13.8008C5.02179 14.2001 5.25601 14.6132 5.65526 14.7235L6.05478 13.2777ZM8.30426 15.4555C8.70351 15.5658 9.11661 15.3316 9.22693 14.9324C9.33726 14.5331 9.10304 14.12 8.70378 14.0097L8.30426 15.4555ZM5.89502 11.9999C5.89379 10.7649 6.24943 9.55591 6.91916 8.51834L5.65889 7.70487C4.83239 8.98532 4.3935 10.4773 4.39502 12.0014L5.89502 11.9999ZM6.91952 8.51777C7.57513 7.50005 8.51931 6.70094 9.63139 6.22256L9.03866 4.84464C7.65253 5.4409 6.47568 6.43693 5.65852 7.70544L6.91952 8.51777ZM9.63045 6.22297C10.7258 5.75356 11.9383 5.62986 13.1059 5.86842L13.4062 4.39878C11.9392 4.09906 10.4158 4.25448 9.0396 4.84424L9.63045 6.22297ZM13.1035 5.86793C14.2803 6.11232 15.3559 6.7059 16.1901 7.57114L17.27 6.53006C16.2264 5.44761 14.8807 4.70502 13.4085 4.39927L13.1035 5.86793ZM16.1907 7.57175C16.9065 8.31258 17.4296 9.21772 17.7142 10.2078L19.1558 9.79342C18.8035 8.5675 18.1557 7.44675 17.2694 6.52945L16.1907 7.57175ZM19.1609 10.1892L19.8709 7.45725L18.4191 7.07996L17.7091 9.81196L19.1609 10.1892ZM18.6348 9.2777L15.9858 8.5457L15.5863 9.99151L18.2353 10.7235L18.6348 9.2777ZM18.395 12.0014C18.3963 13.2363 18.0406 14.4453 17.3709 15.4829L18.6312 16.2963C19.4577 15.0159 19.8965 13.5239 19.895 11.9999L18.395 12.0014ZM17.3705 15.4834C16.7149 16.5012 15.7707 17.3003 14.6587 17.7786L15.2514 19.1566C16.6375 18.5603 17.8144 17.5643 18.6315 16.2958L17.3705 15.4834ZM14.6596 17.7782C13.5643 18.2476 12.3517 18.3713 11.1842 18.1328L10.8839 19.6024C12.3508 19.9021 13.8743 19.7467 15.2505 19.157L14.6596 17.7782ZM11.1865 18.1333C10.0098 17.8889 8.93411 17.2953 8.09997 16.4301L7.02008 17.4711C8.06363 18.5536 9.40936 19.2962 10.8815 19.6019L11.1865 18.1333ZM8.09938 16.4295C7.38355 15.6886 6.86042 14.7835 6.57584 13.7934L5.13421 14.2078C5.48658 15.4337 6.13433 16.5545 7.02067 17.4718L8.09938 16.4295ZM5.12914 13.812L4.41914 16.544L5.87091 16.9212L6.58091 14.1892L5.12914 13.812ZM5.65526 14.7235L8.30426 15.4555L8.70378 14.0097L6.05478 13.2777L5.65526 14.7235Z" fill="#ffffff"></path> </g></svg>
+                                                </div>
+                                                <div class="round-button" id="sp_connect">
+                                                    <div id="sp_connect_icon_green" style="display:block">
+                                                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="#ffffff" stroke-width="0.00024000000000000003">
+                                                            <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                                                            <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round" stroke="#CCCCCC" stroke-width="0.096"></g>
+                                                            <g id="SVGRepo_iconCarrier"> 
+                                                                <path fill-rule="evenodd" clip-rule="evenodd" d="M8.93417 2L9 2L15.0658 2C15.9523 1.99995 16.7161 1.99991 17.3278 2.08215C17.9833 2.17028 18.6117 2.36902 19.1213 2.87868C19.631 3.38835 19.8297 4.0167 19.9179 4.67221C20.0001 5.28387 20.0001 6.04769 20 6.93417V17.0658C20.0001 17.9523 20.0001 18.7161 19.9179 19.3278C19.8297 19.9833 19.631 20.6117 19.1213 21.1213C18.6117 21.631 17.9833 21.8297 17.3278 21.9179C16.7161 22.0001 15.9523 22.0001 15.0658 22H8.9342C8.0477 22.0001 7.28388 22.0001 6.67221 21.9179C6.0167 21.8297 5.38835 21.631 4.87868 21.1213C4.36902 20.6117 4.17028 19.9833 4.08215 19.3278C3.99991 18.7161 3.99995 17.9523 4 17.0658L4 7L4 6.93417C3.99995 6.04769 3.99991 5.28387 4.08215 4.67221C4.17028 4.0167 4.36902 3.38835 4.87868 2.87868C5.38835 2.36902 6.0167 2.17028 6.67221 2.08215C7.28387 1.99991 8.04769 1.99995 8.93417 2ZM12 12C10.8954 12 10 12.8954 10 14C10 15.1046 10.8954 16 12 16C13.1046 16 14 15.1046 14 14C14 12.8954 13.1046 12 12 12ZM8 14C8 11.7909 9.79086 10 12 10C14.2091 10 16 11.7909 16 14C16 16.2091 14.2091 18 12 18C9.79086 18 8 16.2091 8 14ZM13 7C13 6.44772 12.5523 6 12 6C11.4477 6 11 6.44772 11 7V7.01123C11 7.56352 11.4477 8.01123 12 8.01123C12.5523 8.01123 13 7.56352 13 7.01123V7Z" fill="#1ED760"></path>
+                                                            </g>
+                                                        </svg>  
+                                                    </div>
+                                                    <div id="sp_connect_icon_white" style="display:none">
+                                                        <svg viewBox="0 0 24.00 24.00" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="#ffffff" stroke-width="0.00024000000000000003">
+                                                            <g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round" stroke="#CCCCCC" stroke-width="0.096"></g>
+                                                            <g id="SVGRepo_iconCarrier">
+                                                                <path fill-rule="evenodd" clip-rule="evenodd" d="M8.93417 2L9 2L15.0658 2C15.9523 1.99995 16.7161 1.99991 17.3278 2.08215C17.9833 2.17028 18.6117 2.36902 19.1213 2.87868C19.631 3.38835 19.8297 4.0167 19.9179 4.67221C20.0001 5.28387 20.0001 6.04769 20 6.93417V17.0658C20.0001 17.9523 20.0001 18.7161 19.9179 19.3278C19.8297 19.9833 19.631 20.6117 19.1213 21.1213C18.6117 21.631 17.9833 21.8297 17.3278 21.9179C16.7161 22.0001 15.9523 22.0001 15.0658 22H8.9342C8.0477 22.0001 7.28388 22.0001 6.67221 21.9179C6.0167 21.8297 5.38835 21.631 4.87868 21.1213C4.36902 20.6117 4.17028 19.9833 4.08215 19.3278C3.99991 18.7161 3.99995 17.9523 4 17.0658L4 7L4 6.93417C3.99995 6.04769 3.99991 5.28387 4.08215 4.67221C4.17028 4.0167 4.36902 3.38835 4.87868 2.87868C5.38835 2.36902 6.0167 2.17028 6.67221 2.08215C7.28387 1.99991 8.04769 1.99995 8.93417 2ZM12 12C10.8954 12 10 12.8954 10 14C10 15.1046 10.8954 16 12 16C13.1046 16 14 15.1046 14 14C14 12.8954 13.1046 12 12 12ZM8 14C8 11.7909 9.79086 10 12 10C14.2091 10 16 11.7909 16 14C16 16.2091 14.2091 18 12 18C9.79086 18 8 16.2091 8 14ZM13 7C13 6.44772 12.5523 6 12 6C11.4477 6 11 6.44772 11 7V7.01123C11 7.56352 11.4477 8.01123 12 8.01123C12.5523 8.01123 13 7.56352 13 7.01123V7Z" fill="#ffffff"></path> 
+                                                            </g>
+                                                        </svg>    
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="sp_main">
+                                            <div class="sp_left">
+                                                <div class="sp_album_art" id="sp_album_art"></div>
+                                            </div>
+                                            <div class="sp_right">
+                                                <div class="song-info">
+                                                    <p class="sp_title" id="sp_title"></p>
+                                                    <p class="sp_album" id="sp_album"></p>
+                                                    <p class="sp_artist" id="sp_artist"></p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="mobile_expanded_content" id="mobile_expanded_content">
+                <div class="main_right">
+                    <div class="language_selector"></div>
+                    <div class="improvements_box"></div>
+                    <div class="sp_player_div"></div>
+                </div>
+            </div>
+        </div>
+        <div id="notification" class="hidden">
+            <div class="notification-content">
+              <p id="notification-message"></p>
+            </div>
+        </div>
+        <div class="player" id="sdk_player" style="display:none">
+            <script src="https://sdk.scdn.co/spotify-player.js"></script>
+            <div class="control-container" id="play_pause">
+                <svg viewBox="0 0 24.00 24.00" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="#ffffff"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M8 5V19M16 5V19" stroke="#ffffff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path> </g></svg>
+                <svg fill="#ffffff" viewBox="0 0 32 32" version="1.1" xmlns="http://www.w3.org/2000/svg" stroke="#ffffff" stroke-width="0.00032" style="display:none; margin-left: 7px"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <title>play</title> <path d="M5.92 24.096q0 1.088 0.928 1.728 0.512 0.288 1.088 0.288 0.448 0 0.896-0.224l16.16-8.064q0.48-0.256 0.8-0.736t0.288-1.088-0.288-1.056-0.8-0.736l-16.16-8.064q-0.448-0.224-0.896-0.224-0.544 0-1.088 0.288-0.928 0.608-0.928 1.728v16.16z"></path> </g></svg>
+            </div>
+            <div class="controls-center">
+                <input type="range" id="tracker" min="0" value="0" max="100">
+            </div>
+            <div class="controls-right">
+                <div class="control-container" id="previous_section">
+                    <img src="images/backward.svg" alt="Backward">
+                </div>
+                <div class="control-container" id="3s_backward" style="position: relative;">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                        <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+                        <g id="SVGRepo_iconCarrier">
+                            <path d="M12.0016 3.47945C11.9216 3.47945 11.8416 3.48945 11.7616 3.48945L12.5816 2.46945C12.8416 2.14945 12.7916 1.66945 12.4616 1.41945C12.1316 1.16945 11.6716 1.20945 11.4116 1.53945L9.44156 3.99945C9.43156 4.00945 9.43156 4.01945 9.42156 4.03945C9.39156 4.07945 9.37156 4.12945 9.35156 4.16945C9.33156 4.21945 9.31156 4.25945 9.30156 4.29945C9.29156 4.34945 9.29156 4.38945 9.29156 4.43945C9.29156 4.48945 9.29156 4.53945 9.29156 4.58945C9.29156 4.60945 9.29156 4.61945 9.29156 4.63945C9.30156 4.66945 9.32156 4.68945 9.33156 4.71945C9.35156 4.76945 9.37156 4.80945 9.39156 4.85945C9.42156 4.89945 9.45156 4.93945 9.49156 4.96945C9.51156 4.99945 9.52156 5.02945 9.55156 5.04945C9.57156 5.05945 9.58156 5.06945 9.60156 5.07945C9.63156 5.09945 9.65156 5.10945 9.68156 5.11945C9.73156 5.14945 9.79156 5.16945 9.85156 5.17945C9.88156 5.19945 9.91156 5.19945 9.94156 5.19945C9.97156 5.19945 9.99156 5.20945 10.0216 5.20945C10.0516 5.20945 10.0716 5.19945 10.0916 5.18945C10.1216 5.18945 10.1516 5.19945 10.1816 5.18945C10.8216 5.03945 11.4216 4.96945 11.9916 4.96945C16.4816 4.96945 20.1316 8.61945 20.1316 13.1095C20.1316 17.5994 16.4816 21.2495 11.9916 21.2495C7.50156 21.2495 3.85156 17.5994 3.85156 13.1095C3.85156 11.3695 4.42156 9.68945 5.50156 8.24945C5.75156 7.91945 5.68156 7.44945 5.35156 7.19945C5.02156 6.94945 4.55156 7.01945 4.30156 7.34945C3.02156 9.04945 2.35156 11.0395 2.35156 13.1095C2.35156 18.4195 6.67156 22.7495 11.9916 22.7495C17.3116 22.7495 21.6316 18.4295 21.6316 13.1095C21.6316 7.78945 17.3116 3.47945 12.0016 3.47945Z" fill="#ffffff"></path>
+                        </g>
+                    </svg>
+                    <p style="position: absolute; top: 54%; left: 51%; color: #ffffff; font-size: small; transform: translate(-50%, -50%); z-index: 1;" id="backwardValue"></p>
+                </div>
+                </div>
+                <div class="control-container" id="3s_forward" style="position: relative;">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                        <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+                        <g id="SVGRepo_iconCarrier">
+                            <path d="M19.4791 7.09052C19.2191 6.77052 18.7491 6.72052 18.4291 6.98052C18.1091 7.24052 18.0591 7.71052 18.3191 8.03052C19.4491 9.43052 20.0791 11.0905 20.1391 12.8305C20.2991 17.3105 16.7791 21.0905 12.2891 21.2405C7.79906 21.4005 4.02906 17.8805 3.86906 13.4005C3.70906 8.92052 7.22906 5.14052 11.7191 4.99052C12.2891 4.97052 12.8891 5.02052 13.5391 5.15052C13.5791 5.16052 13.6191 5.15052 13.6591 5.15052C13.7591 5.20052 13.8791 5.23052 13.9891 5.23052C14.1591 5.23052 14.3191 5.18052 14.4591 5.06052C14.7791 4.80052 14.8291 4.33052 14.5791 4.01052L12.5991 1.54052C12.3391 1.22052 11.8691 1.16052 11.5491 1.42052C11.2291 1.68052 11.1791 2.15052 11.4291 2.47052L12.2591 3.50052C12.0691 3.49052 11.8691 3.48052 11.6791 3.49052C6.36906 3.67052 2.19906 8.15052 2.38906 13.4605C2.57906 18.7705 7.04906 22.9405 12.3591 22.7505C17.6691 22.5605 21.8391 18.0905 21.6491 12.7805C21.5591 10.7105 20.8191 8.74052 19.4791 7.09052Z" fill="#ffffff"></path>         
+                        </g>
+                    </svg>
+                    <p style="position: absolute; top: 54%; left: 49%; color: #ffffff; font-size: small; transform: translate(-50%, -50%); z-index: 1;" id="forwardValue"></p>
+                </div>
+                <div class="control-container" id="next_section">
+                    <img src="images/forward.svg" alt="Forward">
+                </div>
+            </div>
+        </div>
+        <div class="footer" id="footer">
 
-                const contentDiv = document.createElement('div');
-                contentDiv.className = 'content_ok';
+            <div class="footer_message">Please note that this tool only provides suggestions based on your current transcription. It is still essential to thoroughly review all the content before sending.</div>
+        </div>    
+        <div class="development_message">
+            <h2>Mobile Interface Under Development</h2>
+            <p>The interface for mobile devices is still under development. Please use a PC for the best experience.</p>
+        </div>
 
-                const h2 = document.createElement('h2');
-                h2.textContent = 'No issues found! ✨';
+        <div id="overlay"></div>
 
-                const copyBtn = document.createElement('div');
-                copyBtn.className = 'content_copy_btn';
-                copyBtn.textContent = 'Copy';
-                copyBtn.onclick = copyToClipboard;
+        <div id="devices_options" class="devices_options" style="display:none; bottom: 105px">
+        </div>
 
-                contentDiv.appendChild(h2);
-                contentDiv.appendChild(copyBtn);
-                noIssuesDiv.appendChild(contentDiv);
+        <div id="settings_popup" class="popup">
+            <div id="closeButton" onclick="closeSettings()">&#215;</div>
+            <div class="popup_title">
+                <h2 onclick="handleSettingsClick()">Settings</h2>
+            </div>
+            <div class="popup_content">
+                <div class="popup_option">
+                    <div class="popup_title">
+                        <p class="popup_option_title">Spotify account</p>
+                        <p class="popup_option_description">Connect your Spotify account to LyricsFormatter</p>
+                    </div>
+                    <div class="spotify_login" id="spotify_login_button" style="display:block">
+                        <button class="spotify_button" id="spotify_button">
+                            <img src="images/spotify_logo.webp" alt="Spotify Logo" class="spotify_logo">
+                            Login with Spotify
+                        </button>
+                    </div>
+                    <div class="user-profile" id="user_profile" style="display:none">
+                        <img class="user-photo" id="sp_user_pic" src="#" alt="User Photo" title="User Photo" draggable="false">
+                        <div id="user_menu" class="user-menu">
+                            <ul>
+                                <li id="disconnect_option" style="border-radius: 10px;">
+                                    <p>Disconnect account</p>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="popup_option">
+                    <div class="popup_title">
+                        <p class="popup_option_title">Autoplay</p>
+                        <p class="popup_option_description">Automatically transfer the playback to LyricsFormatter upon opening the website.</p>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="spAutoPlay" onclick="checkContent()">
+                        <span class="slider round"></span>
+                    </label>
+                </div>
+                <div class="popup_option">
+                    <div class="popup_title">
+                        <p class="popup_option_title">Backwards value</p>
+                        <p class="popup_option_description">Specify the duration in seconds to rewind during backward playback</p>
+                    </div>
+                    <div class="number_selector">
+                        <svg class="arrow left" viewBox="0 0 24 24" onclick="decreaseValue('selectedValue1')">
+                            <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"></path>
+                        </svg>
+                        <span id="selectedValue1" style="user-select: none;">3</span>
+                        <svg class="arrow right" viewBox="0 0 24 24" onclick="increaseValue('selectedValue1')">
+                            <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"></path>
+                        </svg>
+                    </div>
+                </div>
+                <div class="popup_option">
+                    <div class="popup_title">
+                        <p class="popup_option_title">Fast forward value</p>
+                        <p class="popup_option_description">Specify the duration in seconds to fast forward during playback</p>
+                    </div>
+                    <div class="number_selector">
+                        <svg class="arrow left" viewBox="0 0 24 24" onclick="decreaseValue('selectedValue2')">
+                            <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"></path>
+                        </svg>
+                        <span id="selectedValue2" style="user-select: none;">3</span>
+                        <svg class="arrow right" viewBox="0 0 24 24" onclick="increaseValue('selectedValue2')">
+                            <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"></path>
+                        </svg>
+                    </div>
+                </div>
+                <hr style="border-top: 1px solid rgb(100, 100, 100); border-right: none; border-bottom: none; border-left: none; border-image: initial;">
+                <div class="popup_option" style="display:none">
+                    <div class="popup_title">
+                        <p class="popup_option_title">Character counter</p>
+                        <p class="popup_option_description">Select this option for the character counter</p>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="characterCounterToggle" onclick="checkContent()">
+                        <span class="slider round"></span>
+                    </label>
+                </div>
+                <div class="popup_option">
+                    <div class="popup_title">
+                        <p class="popup_option_title">Auto capitalization</p>
+                        <p class="popup_option_description">Select this option to automatically capitalize the first letter of the lines</p>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="autoCapToggle" onclick="checkContent()">
+                        <span class="slider round"></span>
+                    </label>
+                </div>
+                <div class="popup_option">
+                    <div class="popup_title">
+                        <p class="popup_option_title">Auto trim lines</p>
+                        <p class="popup_option_description">Select this option to automatically trim the lines</p>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="autoTrimToggle" onclick="checkContent()">
+                        <span class="slider round"></span>
+                    </label>
+                </div>
+                <div class="popup_option">
+                    <div class="popup_title">
+                        <p class="popup_option_title">Remove duplicate lines and spaces</p>
+                        <p class="popup_option_description">Select this option to automatically remove duplicate spaces and lines</p>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="removeDoubleSpacesAndLinesToggle" onclick="checkContent()">
+                        <span class="slider round"></span>
+                    </label>
+                </div>
+                <div class="popup_option">
+                    <div class="popup_title">
+                        <p class="popup_option_title">Auto capitalize tags</p>
+                        <p class="popup_option_description">Select this option to automatically capitalize tags</p>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="autoCapTagsToggle" onclick="checkContent()">
+                        <span class="slider round"></span>
+                    </label>
+                </div>
+                <div class="popup_option">
+                    <div class="popup_title">
+                        <p class="popup_option_title">Automatic suggestions</p>
+                        <p class="popup_option_description">Select this option for automatic format suggestions</p>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="autoSuggestions" onclick="checkContent()">
+                        <span class="slider round"></span>
+                    </label>
+                </div>
+                <div class="dev_hided_div" id="dev_hided_div" style="display:none">
+                    <hr style="border-top: 1px solid rgb(100, 100, 100); border-right: none; border-bottom: none; border-left: none; border-image: initial;">
+                    <div class="popup_option">
+                        <div class="popup_title">
+                            <p class="popup_option_title">Development mode</p>
+                            <p class="popup_option_description">Select this option to switch to the local server</p>
+                        </div>
+                        <label class="switch">
+                            <input type="checkbox" id="localHostToggle" onclick="checkContent()">
+                            <span class="slider round"></span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-                improvementsContainer.appendChild(noIssuesDiv);
-            } else {
-                // Adiciona os containers HTML ao contêiner "improvements_containers"
-                for (const alertaKey in data.result.containers.alerts) {
-                    const alerta = data.result.containers.alerts[alertaKey];
-                    const container = createContainer(alerta.container);
-                    
-                    // Verifica se o container não é null antes de adicioná-lo
-                    if (container !== null) {
-                        improvementsContainer.appendChild(container);
-                    }
-                    checkAndShowPlaceholder();
-                }
-            }
+        <div id="credits_popup" class="popup">
+            <div id="closeButton" onclick="closeCredits()">&#215;</div>
+            <div class="popup_title">
+                <h2>Credits</h2>
+            </div>
+            <div class="popup_description">
+                <p></p>
+            </div>
+            <div class="popup_content" style="display: flex; align-items: center;">
+                <div class="loading_container" id="loading_container">
+                    <div class="loading_spinner_loop" id="loading_spinner_credits" style="display:block">
+                        <div class="loading_spinner">
+                            <div></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="suggest_popup" class="popup">
+            <div id="closeButton" onclick="closeSuggestions()">&#215;</div>
+            <div class="popup_title">
+                <h2>Suggest a feature</h2>
+            </div>
+            <div class="popup_description">
+                <p></p>
+            </div>
+            <div class="popup_content" style="display: flex; align-items: center;">
+                <form>
+                    <select name="select_menu" id="select_menu" onchange="updateOptions()">
+                        <option value="" disabled selected>Select an option</option>
+                        <option value="option1">Suggest word for the dictionary</option>
+                        <option value="option2">Suggest a new format alert</option>
+                        <option value="option3">Send a feedback</option>
+                        <option value="option4">Report a bug</option>
+                    </select>
+                    <br>
+                    <input type="text" name="text1" style="display: none;">
+                    <br>
+                    <input type="text" name="text2" style="display: none;">
+                    <br>
+                    <input type="text" name="text3" style="display: none;">
+                    <br>
+                    <textarea type="text" name="text4" style="display: none; word-wrap: break-word;"></textarea>
+                </form>
+            </div>
+        </div>
 
-        })
-        .catch(error => {
-            // Handle errors here
-            console.error('Error sending data to API:', error);
-            notification('We are experiencing internal issues, please try again later. 🔧');
-        })
-        .finally(() => {
-            // Show the refresh button and hide the loading spinner after the request is complete
-            refreshButton.style.display = 'block';
-            loadingSpinner.style.display = 'none';
-        });
-}
+        <div id="about_popup" class="popup">
+            <div id="closeButton" onclick="closeAboutInfo()">&#215;</div>
+            <div class="popup_title">
+                <h2>About this tool</h2>
+            </div>
+            <div class="popup_description">
+            </div>
+            <div class="popup_content" id="aboutContent" style="display: flex; align-items: center;">
+                <div class="loading_container" id="loading_container">
+                    <div class="loading_spinner_loop" id="loading_spinner_credits" style="display:block">
+                        <div class="loading_spinner">
+                            <div></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-    resetButton.addEventListener('click', function() {
+        <script>
 
-        textArea.value = ''; // apaga a transcrição
-        updateSidebar(); // reseta os contadores de caracteres e a barra lateral
-        ignoredContainers = []; // limpa a memória de alertas ignorados
-        checkContent();
-        clearTimeout(typingTimer);
-    });
+                let currentState;
 
+                window.onSpotifyWebPlaybackSDKReady = () => {
 
-    refreshButton.addEventListener('click', handleRefreshButtonClick);
+                    fetchUserData().then(() => {
 
-    // Função para lidar com a pesquisa
-    const handleSearch = () => {
+                        // Recuperar os tokens do armazenamento local do navegador
+                        const accessToken = localStorage.getItem('accessToken');
+                        const refreshToken = localStorage.getItem('refreshToken');
 
-        const inputVal = search_input.value.trim();
-        const trackUrlRegex = /^(https?:\/\/open\.spotify\.com\/(?:intl-[a-z]{2}\/)?)?track\/(.+)$/;
-        const studioUrlRegex = /(?:&|\?)player=spotify&(?:.*&)?track_id=([^&\s]+)/;
-        const idRegex = /^[a-zA-Z0-9]{22}$/;
-
-        let trackId = '';
-
-        if (trackUrlRegex.test(inputVal)) {
-            const url = new URL(inputVal);
-            search_value = url.pathname.split('/').pop();
-            trackId = search_value;
-        } else if (idRegex.test(inputVal)) {
-            search_value = inputVal;
-            trackId = search_value;
-        } else if (studioUrlRegex.test(inputVal)) {
-            const match = inputVal.match(studioUrlRegex);
-            if (match) {
-                search_value = match[1];
-                trackId = search_value;
-            } else if (idRegex.test(inputVal)) {
-                search_value = inputVal;
-                trackId = search_value;
-            } else {
-                notification("Please enter Studio or Spotify track URL");
-                search_input.value = "";
-                return;
-            }
-        } else {
-            notification("Please enter Studio or Spotify track URL");
-            search_input.value = "";
-            return;
-        }
-
-        search_input.value = "";
-        spotifyIframePreview.src = `https://open.spotify.com/embed/track/${trackId}?utm_source=generator&theme=0`;
-    }
-
-    function notification(customMessage) {
-        const notification_div = document.getElementById("notification");
-        const message = document.getElementById("notification-message");
-        message.textContent = customMessage;
-        notification_div.style.opacity = 1;
-        notification_div.classList.remove("hidden");
-        setTimeout(() => {
-        notification_div.style.opacity = 0;
-        setTimeout(() => {
-            notification_div.classList.add("hidden");
-        }, 500);
-        }, 4000); // Tempo de exibição
-    };
-
-    // Add event listener for search button
-    searchBtn.addEventListener('click', handleSearch);
-
-    // Add event listener for Enter key press
-    search_input.addEventListener('keydown', (event) => {
-        if (event.key === 'Enter') {
-        event.preventDefault();
-        handleSearch();
-        }
-    });
-
-
-    var returnArrow = document.querySelector('#return_arrow');
-
-    returnArrow.addEventListener('click', function() {
-        window.location.href = 'index.html';
-    });
-
-
-    var lyricsBox = document.getElementById('lyrics_box');
-    var textArea = document.getElementById('editor');
-
-    lyricsBox.addEventListener('click', function() {
-        textArea.focus();
-    });
-
-
-    textarea.addEventListener('input', updateSidebar);
-    textarea.addEventListener('input', checkContent);
-    textarea.addEventListener('scroll', syncScroll);
-
-    let typingTimer;
-    const doneTypingInterval = 3000;
-
-    function checkContent() {
-        var editor = document.getElementById('editor');
-        var resetButton = document.getElementById('reset_button')
-        var refreshButton = document.getElementById('refresh_button');
-        var improvementsPlaceholder = document.getElementById('improvements_placeholder');
-
-        var content = editor.value;
-
-        const checkboxIds = [
-            'characterCounterToggle',
-            'autoCapToggle',
-            'autoTrimToggle',
-            'removeDoubleSpacesAndLinesToggle',
-            'autoCapTagsToggle',
-            'autoSuggestions',
-            'localHostToggle'
-        ];
-
-        checkboxIds.forEach(function (checkboxId) {
-            const checkbox = document.getElementById(checkboxId);
-            localStorage.setItem(checkboxId, checkbox.checked);
-        });
-
-        if (content.trim() === '') {
-            resetButton.style.display = 'none';
-            refreshButton.style.display = 'none';
-            improvementsPlaceholder.textContent = 'Type something or paste your transcription to start...';
-            improvementsPlaceholder.onclick = '';
-        } else {
-
-            var autoCapToggle = document.getElementById('autoCapToggle'); 
-
-            if (autoCapToggle.checked) {
-                autoCap();
-            };
-
-            resetButton.style.display = 'block';
-            refreshButton.style.display = 'block';
-            improvementsPlaceholder.innerHTML = 'Tap the <span class="hightlight_text">Refresh</span> icon to update the suggestions.';
-        }
-
-        if (autoSuggestions.checked) {
-            // atualiza as sugestões após 3s
-            clearTimeout(typingTimer);
-            typingTimer = setTimeout(function() {
-                handleRefreshButtonClick();
-            }, doneTypingInterval);
-        };
-    }
-
-    function autoCap() {
-        var editor = document.getElementById('editor');
-        var content = editor.value;
-
-        // Split the content into lines
-        var lines = content.split('\n');
-
-        // Capitalize the first character of each line
-        for (var i = 0; i < lines.length; i++) {
-            lines[i] = lines[i].charAt(0).toUpperCase() + lines[i].slice(1);
-        }
-
-        // Join the lines back together
-        content = lines.join('\n');
-
-        // Update the editor's content
-        editor.value = content;
-    }
-
-    function autoTrim() {
-        var editor = document.getElementById('editor');
-        var content = editor.value;
-
-        // Split the content into lines
-        var lines = content.split('\n');
-
-        // Trim extra spaces at the end of each line
-        for (var i = 0; i < lines.length; i++) {
-            lines[i] = lines[i].trimRight();
-        }
-
-        // Join the lines back together
-        content = lines.join('\n');
-
-        // Update the editor's content
-        editor.value = content;
-    }
-
-    function removeDuplicateSpaces() {
-        var editor = document.getElementById('editor');
-        var content = editor.value;
-
-        // Dividir o conteúdo em linhas
-        var lines = content.split('\n');
-
-        // Iterar sobre cada linha e substituir espaços duplicados por um único espaço
-        for (var i = 0; i < lines.length; i++) {
-            lines[i] = lines[i].replace(/\s+/g, ' ');
-        }
-
-        // Juntar as linhas de volta
-        content = lines.join('\n');
-
-        // Atualizar o conteúdo do editor
-        editor.value = content;
-    }
-
-    function removeDuplicateEmptyLines() {
-        var editor = document.getElementById('editor');
-        var content = editor.value;
-
-        // Dividir o conteúdo em linhas
-        var lines = content.split('\n');
-
-        // Filtrar linhas não vazias e adicionar uma linha vazia no final
-        lines = lines.filter(function(line, index, self) {
-            return line.trim() !== '' || index === self.length - 1 || line.trim() !== self[index + 1].trim();
-        });
-
-        // Juntar as linhas de volta
-        content = lines.join('\n');
-
-        // Atualizar o conteúdo do editor
-        editor.value = content;
-    }
-
-    function replaceSpecialTags() {
-        var editor = document.getElementById('editor');
-        var content = editor.value;
-
-        // Substituir padrões específicos
-        content = content.replace(/#i\s*\/?(?=\n|$)/ig, '#INTRO ');
-        content = content.replace(/#v\s*\/?(?=\n|$)/ig, '#VERSE ');
-        content = content.replace(/#p\s*\/?(?=\n|$)/ig, '#PRE-CHORUS ');
-        content = content.replace(/#c\s*\/?(?=\n|$)/ig, '#CHORUS ');
-        content = content.replace(/#b\s*\/?(?=\n|$)/ig, '#BRIDGE ');
-        content = content.replace(/#h\s*\/?(?=\n|$)/ig, '#HOOK ');
-        content = content.replace(/#o\s*\/?(?=\n|$)/ig, '#OUTRO ');
-        content = content.replace(/##\s*\/?(?=\n|$)/ig, '#INSTRUMENTAL ');
-
-        content = content.replace(/#intro\s*\/?(?=\n|$)/ig, '#INTRO ');
-        content = content.replace(/#verse\s*\/?(?=\n|$)/ig, '#VERSE ');
-        content = content.replace(/#pre-chorus\s*\/?(?=\n|$)/ig, '#PRE-CHORUS ');
-        content = content.replace(/#chorus\s*\/?(?=\n|$)/ig, '#CHORUS ');
-        content = content.replace(/#bridge\s*\/?(?=\n|$)/ig, '#BRIDGE ');
-        content = content.replace(/#hook\s*\/?(?=\n|$)/ig, '#HOOK ');
-        content = content.replace(/#outro\s*\/?(?=\n|$)/ig, '#OUTRO ');
-        content = content.replace(/#instrumental\s*\/?(?=\n|$)/ig, '#INSTRUMENTAL ');
-
-        // Atualizar o conteúdo do editor
-        editor.value = content;
-    }
-
-    function updateSidebar() {
-
-
-        function updateCharacterCounter() {
-            var lines = textarea.value.split('\n');
-            characterCounter.innerHTML = '';
-        
-            for (var i = 0; i < lines.length; i++) {
-                var line = document.createElement('div');
-                var lowercaseLine = lines[i].trim().toLowerCase();
-                var lineLength = lines[i].trim().length;
-        
-                if (lowercaseLine === '' || /^#instrumental$/.test(lowercaseLine) || /^#intro$/.test(lowercaseLine) || /^#verse$/.test(lowercaseLine) || /^#pre-chorus$/.test(lowercaseLine) || /^#chorus$/.test(lowercaseLine) || /^#hook$/.test(lowercaseLine) || /^#bridge$/.test(lowercaseLine) || /^#outro$/.test(lowercaseLine)) {
-                    line.textContent = " ";
-                } else {
-                    line.textContent = lineLength;
-        
-                    var selectedLanguageCode = localStorage.getItem('selectedLanguage');
-                    if (selectedLanguageCode === 'pt-BR' || selectedLanguageCode === 'pt-PT') {
-                        if (lineLength > 50) {
-                            line.style.fontWeight = 'bold';
-                            line.style.color = 'yellow';
+                        // Verificar se os tokens estão em cache
+                        if (!accessToken || !refreshToken) {
+                            return; // sair da função porque não há tokens do Spotify
                         }
-                        if (lineLength > 55) {
-                            line.style.fontWeight = 'bold';
-                            line.style.color = 'red';
+
+                        // botões playpause 
+                        const controlContainer = document.getElementById('play_pause');
+                        const svg1 = controlContainer.querySelector('svg:nth-child(1)');
+                        const svg2 = controlContainer.querySelector('svg:nth-child(2)');
+
+                        // carregar possível faixa em execução
+                        fetchCurrentlyPlayingData()
+
+                        // a partir daqui, cria-se a instancia do player sdk
+                        const token = localStorage.getItem('accessToken');
+                        const player = new Spotify.Player({
+                            name: 'LyricsFormatter Player',
+                            getOAuthToken: cb => { cb(token); },
+                            volume: 1.0
+                        });
+
+                        // Ready
+                        player.addListener('ready', ({ device_id }) => {
+                            console.log('Ready with Device ID', device_id);
+                            fetchAvailableDevices()
+                        });
+
+                        // Not Ready
+                        player.addListener('not_ready', ({ device_id }) => {
+                            console.log('Device ID has gone offline', device_id);
+                            notification('Player has gone offline, please refresh the page');
+
+                        });
+
+                        player.addListener('initialization_error', ({ message }) => {
+                            console.error(message);
+                            notification('Error initializing the player, please refresh the page');
+                        });
+
+                        player.addListener('authentication_error', ({ message }) => {
+                            console.error(message);
+                            notification('Spotify authentication failed, please refresh the page');
+                        });
+
+                        player.addListener('account_error', ({ message }) => {
+                            console.error(message);
+                            notification('An unexpected error occurred, please refresh the page');
+                        });
+
+                        player.connect();
+
+                        document.getElementById('play_pause').onclick = function() {
+                            player.togglePlay();
+                            togglePlayPause()
+                            fetchCurrentlyPlayingData()
+                        };
+
+                        document.getElementById('3s_backward').onclick = function() {
+                            rewind(document.getElementById('selectedValue1').textContent)
+                        };
+
+                        document.getElementById('3s_forward').onclick = function() {
+                            fastForward(document.getElementById('selectedValue2').textContent)
+                        };;
+
+                        // CÓDIGO QUE TRATA DOS COMANDOS DO TECLADO
+                        document.addEventListener('keydown', function(event) {
+
+                            // Recuperar os tokens do armazenamento local do navegador
+                            const accessToken = localStorage.getItem('accessToken');
+                            const refreshToken = localStorage.getItem('refreshToken');
+
+                            // Verificar se os tokens estão em cache
+                            if (!accessToken || !refreshToken) {
+                                return; // sair da função porque não há tokens do Spotify
+                            }
+
+                            var numericKeys = ['0', '1', '3', '4', '5', '6'];
+
+                            // verifica se a tecla pressionada está no numpad
+                            var isNumpadKey = (event.location === KeyboardEvent.DOM_KEY_LOCATION_NUMPAD);
+
+                            if (numericKeys.includes(event.key) && isNumpadKey) {
+                                switch (event.key) {
+                                    case '1':
+                                        rewind(document.getElementById('selectedValue1').textContent)
+                                        break;
+                                    case '3':
+                                        fastForward(document.getElementById('selectedValue2').textContent)
+                                        break;
+                                    case '4':
+                                        console.log("Clique no botão 4 identificado: voltar para estrofe anterior")
+                                        break;
+                                    case '5':
+                                        console.log("Clique no botão 5 identificado: reproduzir estrofe atual novamente")
+                                        break;
+                                    case '6':
+                                        console.log("Clique no botão 6 identificado: pular para próxima estrofe")
+                                        break;
+                                    case '0':
+                                        player.togglePlay();
+                                        togglePlayPause()
+                                        break;
+                                    default:
+                                        // outras teclas (não são tratadas)
+                                        break;
+                                }
+                                event.preventDefault();
+                            }
+
+                            // Event listener para controlar quando uma música termina
+                            player.addListener('player_state_changed', state => {
+                                if (!state || !state.position) {
+                                    // Se o estado não estiver disponível ou a posição for indefinida, resete o valor do tracker
+                                    document.getElementById('tracker').value = 0;
+                                }
+                            });
+
+                        });
+
+                        // Função para atualizar a barra de progresso com base na posição atual da música
+                        function updateProgressBar(position, duration) {
+                            const tracker = document.getElementById('tracker');
+                            if (duration > 0) {
+                                const progress = (position / duration) * 100;
+                                tracker.value = progress;
+                            }
                         }
-                    } else {
-                        if (lineLength > 65) {
-                            line.style.fontWeight = 'bold';
-                            line.style.color = 'yellow';
+
+
+                        // MELHORAR (avançar ao tocar no tracker, mas está definindo a posição como 0)
+                        const tracker = document.getElementById('tracker');
+                        tracker.addEventListener('input', function() {
+                            const newPosition = tracker.value;
+                            player.seek(newPosition).then(() => {
+                                // Atualiza a posição para a música atual
+                                positions[currentState.track.id] = newPosition;
+                            }).catch((err) => {
+                                console.error('Failed to seek:', err);
+                            });
+                        });
+                        // MELHORAR
+
+
+
+                        player.addListener('player_state_changed', newState => {
+                            console.log(newState);
+                            currentState = newState; // Atualiza a variável currentState
+
+                            if (newState && newState.position && newState.duration) {
+                                const newPosition = newState.position;
+                                const duration = newState.duration;
+                                updateProgressBar(newPosition, duration);
+                            }
+
+                            if (newState && typeof newState.playback_id === 'string' && newState.playback_id.trim() !== '') {
+                                const playbackId = newState.playback_id;
+                                fetchCurrentlyPlayingData();
+                                showTracker();
+
+
+                                // Definir o botão play/pause com base no estado de reprodução
+                                if (newState.paused) {
+                                    // Se estiver pausado, mostrar o botão de play
+                                    svg1.style.display = 'none';
+                                    svg2.style.display = 'block';
+                                } else {
+                                    // Se estiver reproduzindo, mostrar o botão de pausa
+                                    svg1.style.display = 'block';
+                                    svg2.style.display = 'none';
+                                }
+                            } else {
+                                fetchCurrentlyPlayingData();
+                                hideTracker();
+                            }
+                        });
+
+                        // Função para iniciar o efeito de progresso na barra de progresso
+                        function startProgressEffect() {
+                            const interval = 0.5 * 1000; // Intervalo em milissegundos (0.5 segundos)
+                            setInterval(() => {
+                                player.getCurrentState().then(state => {
+                                    if (state) {
+                                        const newPosition = state.position;
+                                        const duration = state.duration;
+                                        updateProgressBar(newPosition, duration);
+                                    }
+                                });
+                            }, interval);
                         }
-                        if (lineLength > 70) {
-                            line.style.fontWeight = 'bold';
-                            line.style.color = 'red';
+
+                        // Chama a função para iniciar o efeito de progresso na barra de progresso
+                        startProgressEffect();
+
+                        // Objeto para armazenar as posições atuais de cada música
+                        const positions = {};
+
+                        // Função para retroceder uma quantidade específica de segundos na reprodução
+                        function rewind(seconds) {
+                            player.getCurrentState().then(state => {
+                                if (state) {
+                                    const milliseconds = seconds * 1000; // Convertendo segundos para milissegundos
+                                    const newPosition = Math.max(0, state.position - milliseconds);
+                                    player.seek(newPosition).then(() => {
+                                        positions[state.track.id] = newPosition; // Atualiza a posição para a música atual
+                                    });
+                                }
+                            });
                         }
-                    }
-                }
-        
-                // Adicione a linha ao DOM antes de calcular a altura
-                characterCounter.appendChild(line);
-        
-                // Obtenha a altura da linha após ela ter sido adicionada ao DOM
-                var lineHeight = line.getBoundingClientRect().height;
-        
-                // Ajustar a altura da linha para a altura calculada
-                line.style.height = lineHeight + 'px';
-            }
-        
-            resetLineIssues();
-            closeContainers();
-            resetImprovementsBoxes();
-            syncScroll()
-        }
-        
 
-        function resetImprovementsBoxes() {
-            // Obtém a referência ao contêiner de melhorias
-            const improvementsContainer = document.getElementById('improvements_containers');
-        
-            // Obtém a referência ao textarea com o ID 'editor'
-            const editorTextarea = document.getElementById('editor');
-        
-            // Remove todas as divs dentro do contêiner de melhorias
-            improvementsContainer.innerHTML = '';
-        
-            // Cria a div de espaço reservado para melhorias
-            const improvementsPlaceholderDiv = document.createElement('div');
-            improvementsPlaceholderDiv.className = 'improvements_placeholder_div';
-            improvementsPlaceholderDiv.id = 'improvements_placeholder_div';
-        
-            // Cria a div de espaço reservado para melhorias com base no conteúdo do textarea
-            const improvementsPlaceholder = document.createElement('div');
-            improvementsPlaceholder.className = 'improvements_placeholder';
-            improvementsPlaceholder.id = 'improvements_placeholder';
-        
-            // Verifica se o textarea está vazio
-            if (editorTextarea.value.trim() === '') {
-                improvementsPlaceholder.innerHTML = 'Type something or paste your transcription to start...';
-                ignoredContainers = []; // reseta o conteúdo ignorado
-                clearTimeout(typingTimer);
-
-            } else {
-                improvementsPlaceholder.innerHTML = 'Tap the <span class="highlight_text">Refresh</span> icon to update the suggestions.';
-            }
-        
-            // Adiciona a div de espaço reservado para melhorias ao contêiner de melhorias
-            improvementsPlaceholderDiv.appendChild(improvementsPlaceholder);
-            improvementsContainer.appendChild(improvementsPlaceholderDiv);
-        }
-
-        updateCharacterCounter();
-
-        function updateLineIssues() {
-            var textarea = document.getElementById('editor');
-            var lineIssuesContainer = document.getElementById('line_issues');
-        
-            if (!textarea || !lineIssuesContainer) {
-                console.error('Textarea or line issues container not found.');
-                return;
-            }
-        
-            // Remova todas as linhas existentes antes de recriar
-            lineIssuesContainer.innerHTML = '';
-        
-            var lines = textarea.value.split('\n');
-            var lineHeight = parseFloat(getComputedStyle(textarea).lineHeight);
-        
-            for (var i = 0; i < lines.length; i++) {
-                var lineIssueContainer = document.createElement('div');
-                lineIssueContainer.id = 'L' + (i + 1) + '_container'; // Adicionado '_container' ao ID para distinguir das linhas
-        
-                // Calcule a posição relativa dentro da div mãe
-                var topPosition = i * lineHeight;
-        
-                // Defina o tamanho da div para coincidir com o tamanho da linha do textarea
-                lineIssueContainer.style.width = '100%';
-                lineIssueContainer.style.height = lineHeight + 'px';
-        
-                // Defina a posição relativa dentro da div mãe
-                lineIssueContainer.style.top = topPosition + 'px';
-        
-                // Adicione a div ao container de line_issues
-                lineIssuesContainer.appendChild(lineIssueContainer);
-        
-                // Adicione as classes de estilo diretamente à div interna
-                var lineIssue = document.createElement('div');
-                lineIssue.className = 'status-1';
-                lineIssue.style.width = (1/3) * lineHeight + 'px';
-                lineIssue.style.height = (1/3) * lineHeight + 'px';
-                lineIssue.style.margin = 'auto'; // Centraliza horizontalmente e verticalmente
-        
-                // Adicione a div interna ao container de line_issues
-                lineIssueContainer.appendChild(lineIssue);
-            }
-        }
-        
-        // Exemplo de uso
-        updateLineIssues();
-
-    }
-    
-    updateSidebar();
-    
-
-    function syncScroll() {
-        var textarea = document.getElementById('editor'); // Substitua 'editor' pelo ID correto
-        var characterCounter = document.querySelector('.character_counter'); // Use o seletor correto
-        var lineIssues = document.querySelector('.line_issues'); // Use o seletor correto
-    
-        if (textarea && characterCounter && lineIssues) {
-            characterCounter.scrollTop = textarea.scrollTop;
-            lineIssues.scrollTop = textarea.scrollTop;
-        }
-    }
-
-
-   // Função para verificar e definir o idioma padrão ao carregar a página
-    function setDefaultLanguage() {
-        const storedLanguage = localStorage.getItem('selectedLanguage');
-
-        if (storedLanguage) {
-            // Se houver um idioma armazenado em cache, defina-o como padrão
-            selectedLanguage.textContent = getLanguageFullName(storedLanguage);
-            // Adicione integração do idioma aqui
-        }
-    }
-    
-
-    // Função para obter o nome completo do idioma com base no código
-    function getLanguageFullName(code) {
-        const languageMap = {
-            'en-UK': 'English (UK)',
-            'en-US': 'English (US)',
-            'nl': 'Dutch',
-            'fr': 'French',
-            'de': 'German',
-            'it': 'Italian',
-            'pt-BR': 'Portuguese (BR)',
-            'pt-PT': 'Portuguese (PT)',
-            'es': 'Spanish'
-                
-            // Adicione mais idiomas conforme necessário
-        };
-
-        return languageMap[code] || code; // Retorna o nome completo se estiver mapeado, senão retorna o código
-    }
-
-    // Adicione um evento de clique ao seletor de idioma
-    languageList.addEventListener('click', function (e) {
-        if (e.target.tagName === 'LI') {
-            const selected = e.target.dataset.lang;
-            selectedLanguage.textContent = getLanguageFullName(selected);
-            languageList.style.display = 'none';
-
-            // Armazene o idioma selecionado em cache
-            localStorage.setItem('selectedLanguage', selected);
-            updateSidebar() // resetar sugestões e caracteres
-            ignoredContainers = []; // limpa a memória de alertas ignorados
-        }
-    });
-
-    // Evento de clique no seletor de idiomas
-    selector.addEventListener('click', function (event) {
-        event.stopPropagation();
-
-        if (languageList.style.display === 'block') {
-            languageList.style.display = 'none';
-            languageArrow.style.transform = "rotate(180deg)";
-            langButtonContent.title = "Tap to edit the language";
-        } else {
-            languageList.style.display = 'block';
-            languageArrow.style.transform = "rotate(0)";
-            langButtonContent.title = "Tap to hide the list of supported languages";
-            miniMenu.style.display = "none";
-            
-        }
-    });
-
-    // Evento de clique em qualquer lugar no documento para ocultar a lista de idiomas
-    document.addEventListener('click', function (event) {
-        if (!selector.contains(event.target)) {
-            languageList.style.display = 'none';
-            languageArrow.style.transform = "rotate(180deg)";
-            langButtonContent.title = "Tap to edit the language";
-        }
-    });
-
-    // Configurar o idioma padrão ao carregar a página
-    setDefaultLanguage();
-    setCheckboxStates();
-    
-    // Adicione um evento de clique ao botão de cópia
-    var copyButton = document.querySelector('.content_copy_btn');
-    copyButton.addEventListener('click', copyToClipboard);
-
-    function ignoreButton(button) {
-        var container = button.closest('.container');
-        var containerId = container.id; // Obter o ID da DIV container
-        ignoredContainers.push(containerId); // Adicionar o ID ao array ignoredContainers
-        container.style.display = 'none';
-        checkAndShowPlaceholder();
-        resetLineIssues();
-    } 
-    
-    var ignoreButtons = document.querySelectorAll('.content_ignore_btn');
-    ignoreButtons.forEach(function (button) {
-        button.addEventListener('click', function (event) {
-            ignoreButton(event.target);
-        });
-    });
-
-    function fixButton(container, trigger) {
-        // Add if else para ocultar apenas se a correção for bem sucedida
-        if (typeof trigger === 'function') {
-            // Se o trigger for uma função, chame-a
-            trigger();
-        } else if (typeof trigger === 'string') {
-            // Se o trigger for uma string, interprete-a e execute a ação apropriada
-            interpretAndExecuteTrigger(trigger);
-        }
-    
-        // Oculta o container após a correção (ou tentativa de correção)
-        container.style.display = 'none';
-        checkAndShowPlaceholder();
-        resetLineIssues();
-        handleRefreshButtonClick()
-    }
-    
-    // Definindo a função para interpretar e executar o trigger
-    function interpretAndExecuteTrigger(trigger) {
-        try {
-            // Extrai os termos entre colchetes usando uma expressão regular
-            const match = trigger.match(/\[(.*?)\], \[(.*?)\]/);
-
-            // Verifica se a correspondência foi bem-sucedida
-            if (match && match.length === 3) {
-                const incorrectTerm = match[1];
-                const correction = match[2];
-
-                // Chamando a função findAndReplace com os termos extraídos
-                findAndReplace(incorrectTerm, correction);
-            } else {
-                console.error('Invalid trigger format:', trigger);
-            }
-        } catch (error) {
-            console.error('An error occurred when interpreting and executing the trigger:', error);
-        }
-    }
-    
-    var fixButtons = document.querySelectorAll('.content_fix_btn');
-    fixButtons.forEach(function (button) {
-        button.addEventListener('click', function (event) {
-            fixButton(event.target);
-        });
-    });
-
-    // Função auxiliar para criar um container HTML com base nos dados da API
-    function createContainer(containerData) {
-
-        // Verifica se o div_id já está armazenado em ignoredContainers
-        if (ignoredContainers.includes(containerData.div_id)) {
-            return null; // Retorna null se o div_id já estiver na lista de ignoredContainers
-        }
-
-        // Content
-        const container = document.createElement('div');
-        container.classList.add('container');
-        container.setAttribute('onclick', 'expandContainer(this)');
-        container.id = containerData.div_id;
-
-        // Adiciona os atributos de dados ao container
-        container.setAttribute('data-color', containerData.position.color);
-        container.setAttribute('data-lines', JSON.stringify(containerData.position.lines));
-
-        const title = document.createElement('h2');
-        title.textContent = containerData.title;
-
-        const content = document.createElement('div');
-        content.classList.add('content');
-
-        const contentText = document.createElement('p');
-        contentText.classList.add('content_text');
-        contentText.innerHTML = containerData.description;
-
-        const contentObs = document.createElement('p'); // Criando o elemento para obs_text
-        contentObs.classList.add('content_obs');
-        contentObs.innerHTML = containerData.obs_text || ''; // Verificando se obs_text está presente
-
-        const contentOptions = document.createElement('div');
-        contentOptions.classList.add('content_options');
-
-        // Learn More
-        const contentLearnMore = document.createElement(containerData.learn_more && containerData.learn_more.type === 'url' ? 'a' : 'p');
-        contentLearnMore.classList.add('content_learn_more');
-        
-        if (containerData.learn_more) {
-            if (containerData.learn_more.type === 'url') {
-                // Se o tipo for URL, adicione o atributo href ao link
-                contentLearnMore.href = containerData.learn_more.url;
-                contentLearnMore.target = '_blank'; // Abre o link em uma nova guia/janela
-                contentLearnMore.textContent = containerData.learn_more.title || 'Learn More';
-            } else {
-                // Se o tipo não for URL, use o texto como conteúdo do parágrafo
-                contentLearnMore.textContent = containerData.learn_more.title || '';
-            }
-        } else {
-            // Se learn_more não estiver presente, adicione uma string vazia como conteúdo
-            contentLearnMore.textContent = '';
-        }
-        
-        contentOptions.appendChild(contentLearnMore);
-
-
-        // Ignore and Fix buttons
-        const contentButtons = document.createElement('div');
-        contentButtons.classList.add('content_buttons');
-
-        if (containerData.placeholder_text) {
-            const placeholderText = document.createElement('p');
-            placeholderText.textContent = containerData.placeholder_text;
-            placeholderText.style.textAlign = 'center'; // Adiciona o estilo text-align: center;
-            contentButtons.appendChild(placeholderText);
-        }
-
-        if (containerData.fix_button) {
-            const contentFixBtn = document.createElement('div');
-            contentFixBtn.classList.add('content_fix_btn');
-            contentFixBtn.textContent = 'Fix';
-            contentFixBtn.onclick = function() {
-                fixButton(container, containerData.trigger);
-            };
-            contentButtons.appendChild(contentFixBtn);
-        }
-
-        if (containerData.ignore_button) {
-            const contentIgnoreBtn = document.createElement('div');
-            contentIgnoreBtn.classList.add('content_ignore_btn');
-            contentIgnoreBtn.textContent = 'Ignore';
-            contentIgnoreBtn.onclick = function() {
-                ignoreButton(container);
-            };
-            contentButtons.appendChild(contentIgnoreBtn);
-        }
-
-        contentOptions.appendChild(contentButtons);
-
-        content.appendChild(contentText);
-        content.appendChild(contentObs);
-        content.appendChild(contentOptions);
-
-        container.appendChild(title);
-        container.appendChild(content);
-
-        return container;
-    }
-
-    function copyToClipboard() {
-        if (textArea.value.trim() === '') {
-            notification("Sorry, there's no content to be copied here");
-            return;
-        }
-    
-        textArea.select();
-        
-        try {
-            // Copia o conteúdo para a área de transferência
-            var successful = document.execCommand('copy');
-            var message = successful ? 'Copied to your clipboard!' : 'Something went wrong, please try again.';
-            notification(message);
-            
-
-            textArea.value = ''; // apaga a transcrição
-            updateSidebar(); // reseta os contadores de caracteres e a barra lateral
-            ignoredContainers = []; // limpa a memória de alertas ignorados
-
-        } catch (err) {
-            console.error('An error occurred while copying the text: ', err);
-            notification('An error occurred while copying the text.');
-        }
-    
-        // Deseleciona a textarea
-        window.getSelection().removeAllRanges();
-
-    }
-
-    // Função para verificar e exibir a div placeholder
-    function checkAndShowPlaceholder() {
-        var improvementsContainers = document.getElementById('improvements_containers');
-
-        // Verificar se há containers visíveis
-        var visibleContainers = Array.from(improvementsContainers.querySelectorAll('.container')).filter(container => container.style.display !== 'none');
-
-        // Se já houver algum container visível, não faz nada
-        if (visibleContainers.length > 0) {
-            console.log('> 0');
-            return;
-        }
-
-        // Create and append the "No issues found" div
-        const noIssuesDiv = document.createElement('div');
-        noIssuesDiv.className = 'container_no_issues';
-        noIssuesDiv.id = 'container_no_issues';
-        noIssuesDiv.style.display = 'block';
-
-        const contentDiv = document.createElement('div');
-        contentDiv.className = 'content_ok';
-
-        const h2 = document.createElement('h2');
-        h2.textContent = 'No issues found! ✨';
-
-        const copyBtn = document.createElement('div');
-        copyBtn.className = 'content_copy_btn';
-        copyBtn.textContent = 'Copy';
-        copyBtn.onclick = copyToClipboard;
-
-        contentDiv.appendChild(h2);
-        contentDiv.appendChild(copyBtn);
-        noIssuesDiv.appendChild(contentDiv);
-
-        improvementsContainers.appendChild(noIssuesDiv);
-    }
-
-    checkAndShowPlaceholder();
-
-    function selectText(linesToSelect) { // SELECIONA LINHAS ESPECIFICAS
-        // Selecionar todo o texto no textarea
-        textArea.select();
-    
-        // Desfazer a seleção para que possamos selecionar apenas as linhas desejadas
-        document.execCommand('unselect', false, null);
-    
-        var lines = textArea.value.split('\n');
-        var selectedRanges = [];
-    
-        // Calcular a posição inicial e final para cada linha desejada
-        for (var i = 0; i < linesToSelect.length; i++) {
-            var lineIndex = linesToSelect[i] - 1; // Ajuste para começar do índice 0
-    
-            if (lineIndex >= 0 && lineIndex < lines.length) {
-                var start = 0;
-    
-                for (var j = 0; j < lineIndex; j++) {
-                    start += lines[j].length + 1; // +1 para a quebra de linha
-                }
-    
-                var end = start + lines[lineIndex].length;
-    
-                selectedRanges.push({ start, end });
-            }
-        }
-    
-        // Selecionar o texto no textarea para cada intervalo desejado
-        if (selectedRanges.length > 0) {
-            // Use o primeiro intervalo como o intervalo inicial
-            var initialRange = selectedRanges[0];
-            textArea.setSelectionRange(initialRange.start, initialRange.end);
-    
-            // Adicione os intervalos restantes como seleções adicionais
-            for (var i = 1; i < selectedRanges.length; i++) {
-                var range = selectedRanges[i];
-                textArea.addRange(new Range(range.start, range.end));
-            }
-        }
-    }
-});
-
-function closeContainers() {
-    const allContainers = document.querySelectorAll('.container');
-    allContainers.forEach((container) => {
-        container.classList.remove('expanded');
-        container.querySelector('.content').style.display = 'none';
-    });
-
-    resetLineIssues();
-}
-
-function expandContainer(container) {
-    const content = container.querySelector('.content');
-
-    if (container.classList.contains('expanded')) {
-    } else {
-        closeContainers(); // Fecha todos os containers antes de expandir o novo
-
-        container.classList.add('expanded');
-        content.style.display = 'block';
-
-        // Adiciona console.log para exibir 'color' e 'lines'
-        const color = container.getAttribute('data-color');
-        const lines = JSON.parse(container.getAttribute('data-lines'));
-        resetLineIssues();
-        updateLineIssues(color, lines);
-    }
-}
-
-function updateLineIssues(color, lines) {
-    // Itera sobre as linhas fornecidas
-    lines.forEach((line) => {
-        // Obtém o ID da div da linha
-        const lineId = `L${line}_container`;
-
-        // Obtém a div da linha pelo ID
-        const lineDiv = document.getElementById(lineId);
-
-        if (lineDiv) {
-            // Atualiza a classe da div da linha com base na cor fornecida
-            switch (color) {
-                case 'red':
-                    lineDiv.querySelector('.status-1').className = 'status-1 status-red';
-                    break;
-                case 'blue':
-                    lineDiv.querySelector('.status-1').className = 'status-1 status-blue';
-                    break;
-                case 'yellow':
-                    lineDiv.querySelector('.status-1').className = 'status-1 status-yellow';
-                    break;
-                default:
-                    // Se a cor não for reconhecida, mantenha a classe padrão
-                    lineDiv.querySelector('.status-1').className = 'status-1 status-blue';
-                    break;
-            }
-        }
-    });
-}
-
-
-    // Função para verificar e definir o estado dos checkboxes ao carregar a página
-    function setCheckboxStates() {
-        // Adicione IDs aos seus elementos de checkbox para tornar a manipulação mais fácil
-        const checkboxIds = [
-            'characterCounterToggle',
-            'autoCapToggle',
-            'autoTrimToggle',
-            'removeDoubleSpacesAndLinesToggle',
-            'autoCapTagsToggle',
-            'autoSuggestions',
-            'localHostToggle'
-        ];
-
-        checkboxIds.forEach(function (checkboxId) {
-            const checkbox = document.getElementById(checkboxId);
-            const checkboxState = localStorage.getItem(checkboxId);
-
-            if (checkboxState !== null) {
-                checkbox.checked = JSON.parse(checkboxState);
-            }
-        });
-    }
-
-// Definindo a função findAndReplace
-function findAndReplace(incorrectTerm, correction) {
-    // Remove os colchetes dos termos
-    const cleanIncorrectTerm = incorrectTerm.replace(/\[|\]/g, '');
-    const cleanCorrection = correction.replace(/\[|\]/g, '');
-
-    // Obtém o conteúdo do textarea com ID 'editor'
-    const editor = document.getElementById('editor');
-    let content = editor.value;
-
-    // Escapa caracteres especiais da palavra de busca
-    const escapedTerm = cleanIncorrectTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-
-    // Substitui todas as ocorrências de incorrectTerm por correction
-    const regex = new RegExp('(^|\\s|[,.;:!?\\-¿¡])' + escapedTerm + '(?=\\s|[,.;:!?\\-¿¡]|$)', 'g');
-    content = content.replace(regex, '$1' + cleanCorrection);
-
-    // Define o conteúdo do textarea como o texto modificado
-    editor.value = content;
-}
-
-
-function resetLineIssues() {
-    // Obtém todas as divs das linhas dentro do elemento com ID 'line_issues'
-    const lineDivs = document.querySelectorAll('.line_issues > div');
-
-    // Itera sobre todas as divs das linhas e redefine a classe para 'status-1 status-gray'
-    lineDivs.forEach((lineDiv) => {
-        lineDiv.querySelector('.status-1').className = 'status-1';
-    });
-}
-
-
-document.addEventListener("DOMContentLoaded", function () {
-    var optionsDots = document.getElementById("settings_dots");
-    var miniMenu = document.getElementById("mini_menu");
-    var langList = document.getElementById("language_list");
-
-    var settingsOption = document.getElementById("settings_option");
-    var creditsOption = document.getElementById("credits_option");
-    var suggestOption = document.getElementById("suggest_option");
-    var aboutOption = document.getElementById("about_option");
-
-    var settingsPopup = document.getElementById("settings_popup");
-    var creditsPopup = document.getElementById("credits_popup");
-    var suggestPopup = document.getElementById("suggest_popup");
-    var aboutPopup = document.getElementById("about_popup");
-
-    var overlay = document.getElementById("overlay");
-
-    // Exibir ou ocultar mini menu ao clicar nos 'options_dots'
-    optionsDots.addEventListener("click", function (event) {
-        event.stopPropagation();
-        if (miniMenu.style.display === "block") {
-            miniMenu.style.display = "none";
-        } else {
-            miniMenu.style.display = "block";
-            langList.style.display = "none";
-        }
-    });
-
-    // Ocultar mini menu ao clicar fora dele
-    document.addEventListener("click", function () {
-        miniMenu.style.display = "none";
-    });
-
-    // Evitar que o clique no mini menu propague para o documento
-    miniMenu.addEventListener("click", function (event) {
-        event.stopPropagation();
-    });
-
-    // Show Settings
-    settingsOption.addEventListener("click", function () {
-        miniMenu.style.display = "none";
-        settingsPopup.style.display = "block";
-        overlay.style.display = "block";
-    });
-
-    // Hide Settings
-    overlay.addEventListener("click", function () {
-        settingsPopup.style.display = "none";
-        overlay.style.display = "none";
-    });
-
-    // Show Credits
-    creditsOption.addEventListener("click", function () {
-        miniMenu.style.display = "none";
-        creditsPopup.style.display = "block";
-        overlay.style.display = "block";
-    });
-
-    // Hide Credits
-    overlay.addEventListener("click", function () {
-        creditsPopup.style.display = "none";
-        overlay.style.display = "none";
-    });
-
-    // Show Suggestions
-    suggestOption.addEventListener("click", function () {
-        miniMenu.style.display = "none";
-        suggestPopup.style.display = "block";
-        overlay.style.display = "block";
-    });
-
-    // Hide Suggestions
-    overlay.addEventListener("click", function () {
-        suggestPopup.style.display = "none";
-        overlay.style.display = "none";
-    });
-
-    // Show About Info
-    aboutOption.addEventListener("click", function () {
-        miniMenu.style.display = "none";
-        aboutPopup.style.display = "block";
-        overlay.style.display = "block";
-    });
-
-    // Hide About Info
-    overlay.addEventListener("click", function () {
-        aboutPopup.style.display = "none";
-        overlay.style.display = "none";
-    });
-});
-
-// Função para fazer uma solicitação AJAX
-function fetchCreditsData() {
-
-    // Obter o valor de localHostToggle do localStorage
-    const localHostToggle = localStorage.getItem('localHostToggle');
-
-    // Verificar o valor de localHostToggle e definir window.serverPath
-    if (localHostToggle === 'true') {
-        window.serverPath = 'http://localhost:3000'; 
-    } else {
-        window.serverPath = 'https://datamatch-backend.onrender.com';
-    }
-
-    fetch(`${window.serverPath}/formatter/credits`)
-    .then(response => response.json())
-    .then(data => updateCredits(data.credits))
-    .catch(error => console.error('Error fetching data from server:', error));
-}
-
-// Função para atualizar os elementos HTML com os novos dados
-function updateCredits(credits) {
-    const popupContent = document.querySelector('#credits_popup .popup_content'); // Seleciona o popup_content dentro de credits_popup
-    const loadingContainer = document.getElementById('loading_container')
-
-    loadingContainer.style = 'display:none'
-
-     // Define o texto de descrição
-     const popupDescription = document.querySelector('.popup_description p');
-    popupDescription.textContent = "Here's the list of contributors who made this project real in each language. 🚀";
-
-    credits.forEach(credit => {
-
-        const colaboratorElement = document.createElement('a');
-        colaboratorElement.href = credit.mxm_profile;
-        colaboratorElement.className = 'colaborator';
-        colaboratorElement.target = '_blank'; // Abre o link em uma nova aba
-
-        const colaboratorImage = document.createElement('div');
-        colaboratorImage.className = 'colaborator_image';
-
-        const imageElement = document.createElement('img');
-        imageElement.src = credit.image;
-        imageElement.alt = credit.name;
-
-        const countryElement = document.createElement('div');
-        countryElement.className = 'colaborator_country';
-        countryElement.textContent = credit.country;
-
-        colaboratorImage.appendChild(imageElement);
-        colaboratorImage.appendChild(countryElement);
-
-        const colaboratorInfo = document.createElement('div');
-        colaboratorInfo.className = 'colaborator_info';
-
-        const nameElement = document.createElement('div');
-        nameElement.className = 'colaborator_name';
-        nameElement.textContent = credit.name;
-
-        // Adicionando o nome do colaborador antes de outros elementos
-        colaboratorInfo.appendChild(nameElement);
-
-        // Criar os elementos de colaborator_role
-        credit.roles.forEach(role => {
-            const roleElement = document.createElement('div');
-            roleElement.className = 'colaborator_role';
-            roleElement.textContent = role;
-            colaboratorInfo.appendChild(roleElement);
-        });
-
-        // Criar os elementos de colaborator_languages
-        credit.languages.forEach(language => {
-            const languageElement = document.createElement('div');
-            languageElement.className = 'colaborator_languages';
-            languageElement.textContent = language;
-            colaboratorInfo.appendChild(languageElement);
-        });
-
-        colaboratorElement.appendChild(colaboratorImage);
-        colaboratorElement.appendChild(colaboratorInfo);
-
-        popupContent.appendChild(colaboratorElement);
-    });
-}
-
-document.addEventListener('DOMContentLoaded', function () {
-    // Adicionar evento de clique à div com id 'disconnect_option'
-    document.getElementById('disconnect_option').addEventListener('click', disconnectSpotify);
-    fetchCreditsData();
-    fetchServerInfo();
-    processSpotifyTokensFromURL();
-
-    // Selecionar o botão pelo ID
-    var spotifyButton = document.getElementById('spotify_button');
-
-    // Adicionar um event listener para lidar com o clique
-    spotifyButton.addEventListener('click', function() {
-        openSpotifyAuthorization();
-    });
-});
-
-// Função para abrir a autorização do Spotify na mesma aba
-function openSpotifyAuthorization() {
-    // Obter o valor de localHostToggle do localStorage
-    const localHostToggle = localStorage.getItem('localHostToggle');
-
-    // Verificar o valor de localHostToggle e definir window.serverPath
-    if (localHostToggle === 'true') {
-        window.serverPath = 'http://localhost:3000'; 
-    } else {
-        window.serverPath = 'https://datamatch-backend.onrender.com';
-    }
-
-    var spotifyAuthorizationUrl = `https://accounts.spotify.com/pt-BR/authorize?client_id=51a45f01c96645e386611edf4a345b50&redirect_uri=${window.serverPath}/formatter/sp_callback&response_type=code&scope=user-read-playback-state%20user-modify-playback-state%20user-read-currently-playing%20user-read-email%20user-read-playback-state%20streaming%20app-remote-control%20user-follow-modify%20user-follow-read%20user-read-playback-position%20user-top-read%20user-read-recently-played%20user-library-read%20user-read-private&show_dialog=true`;
-
-    // Redirecionar para a URL de autorização do Spotify na mesma aba
-    window.location.href = spotifyAuthorizationUrl;
-}
-
-
-// Função para fechar o popup de informações
-function closeAboutInfo() {
-    document.getElementById('about_popup').style.display = 'none';
-}
-
-// Função para buscar dados do servidor
-function fetchServerInfo() {
-
-    // Obter o valor de localHostToggle do localStorage
-    const localHostToggle = localStorage.getItem('localHostToggle');
-
-    // Verificar o valor de localHostToggle e definir window.serverPath
-    if (localHostToggle === 'true') {
-        window.serverPath = 'http://localhost:3000'; 
-    } else {
-        window.serverPath = 'https://datamatch-backend.onrender.com';
-    }
-
-    fetch(`${window.serverPath}/formatter/about`)
-    .then(response => response.json())
-    .then(data => updateServerInfo(data))
-    .catch(error => console.error('Error fetching data from server:', error));
-}
-
-// Função para atualizar os elementos HTML com os novos dados do servidor
-function updateServerInfo(data) {
-    // Selecione os elementos HTML onde você deseja atualizar as informações do servidor
-    const popupContent = document.querySelector('#aboutContent'); // Seleciona o popup_content dentro de about_popup
-
-    // Limpe o conteúdo antigo antes de adicionar novas informações
-    popupContent.innerHTML = '';
-
-    // Verifica se há dados do servidor
-    if (data.serverInfo) {
-        const serverInfo = data.serverInfo;
-
-        // Adiciona o título How to use acima da descrição
-        const howToUseTitleElement = document.createElement('h3');
-        howToUseTitleElement.textContent = 'How to use';
-        popupContent.appendChild(howToUseTitleElement);
-
-        // Divide o texto How to use em parágrafos usando '\n\n\n'
-        const howToUseParagraphs = serverInfo.howToUseText.split('\n\n\n');
-
-        // Adiciona cada parágrafo como um elemento <p>
-        howToUseParagraphs.forEach((paragraph, index) => {
-            const paragraphElement = document.createElement('p');
-            paragraphElement.textContent = paragraph;
-            
-            // Adiciona margem inferior de 10px entre os parágrafos, exceto para o último parágrafo
-            if (index !== howToUseParagraphs.length - 1) {
-                paragraphElement.style.marginBottom = '10px';
-            }
-            
-            popupContent.appendChild(paragraphElement);
-        });
-
-        // Adiciona uma barra fina cinza horizontal abaixo do how to use
-        const howToUseDividerElement = document.createElement('hr');
-        howToUseDividerElement.style.border = 'none';
-        howToUseDividerElement.style.borderTop = '1px solid #646464';
-        popupContent.appendChild(howToUseDividerElement);
-
-        // Adiciona o título Changelog acima da descrição
-        const changelogTitleElement = document.createElement('h3');
-        changelogTitleElement.textContent = 'Changelog';
-        popupContent.appendChild(changelogTitleElement);
-
-        // Adiciona a descrição acima das informações do servidor
-        const descriptionElement = document.createElement('p');
-        descriptionElement.textContent = serverInfo.description;
-        popupContent.appendChild(descriptionElement);
-
-        // Adiciona uma barra fina cinza horizontal abaixo da descrição
-        const dividerElement = document.createElement('hr');
-        dividerElement.style.border = 'none';
-        dividerElement.style.borderTop = '1px solid #646464';
-        popupContent.appendChild(dividerElement);
-
-        // Cria o contêiner para as informações do servidor
-        const serverInfoContainer = document.createElement('div');
-        serverInfoContainer.classList.add('server_info'); // Adiciona a classe 'server_info'
-
-        // Adiciona o título das informações do servidor
-        const titleElement = document.createElement('h3');
-        titleElement.textContent = serverInfo.title;
-        serverInfoContainer.appendChild(titleElement);
-
-        // Itera sobre os dados do servidor
-        for (const item of serverInfo.data) {
-            const itemElement = document.createElement('p');
-
-            // Adiciona a classe 'bold' apenas ao valor
-            itemElement.innerHTML = `<span>${item.label}: </span><span class="bold">${item.value}</span>`;
-            serverInfoContainer.appendChild(itemElement);
-        }
-       // Adiciona o contêiner das informações do servidor ao popupContent
-       popupContent.appendChild(serverInfoContainer);
-    }
-}
-
-// Adicionar evento de clique ao h2 com id 'settings_title'
-const settingsTitle = document.getElementById('settings_title');
-let clickCount = 0;
-
-settingsTitle.addEventListener('click', function () {
-    clickCount++;
-
-    // Se o usuário clicou 5 vezes, exibir a div e reiniciar a contagem
-    if (clickCount === 5) {
-        displayDevModeDiv();
-        clickCount = 0;
-    }
-});
-
-// Função para exibir/ocultar a div e salvar a escolha em cache
-function displayDevModeDiv() {
-    const devHidedDiv = document.getElementById('dev_hided_div');
-    const devMode = localStorage.getItem('devMode') === 'true'; // Obtém o estado atual do modo de desenvolvimento
-
-    // Alterna entre exibir e ocultar a div
-    if (devMode) {
-        devHidedDiv.style.display = 'none';
-    } else {
-        devHidedDiv.style.display = 'block';
-    }
-
-    // Salva a escolha em cache invertendo o valor atual
-    localStorage.setItem('devMode', (!devMode).toString());
-}
-
-// Carrega a escolha do modo de desenvolvimento do cache e exibe/oculta a div conforme necessário
-function loadDevMode() {
-    const devMode = localStorage.getItem('devMode') === 'true';
-    const devHidedDiv = document.getElementById('dev_hided_div');
-
-    if (devMode) {
-        devHidedDiv.style.display = 'block';
-    } else {
-        devHidedDiv.style.display = 'none';
-    }
-}
-
-// Chama a função ao carregar a página para aplicar o estado do modo de desenvolvimento
-loadDevMode();
-
-function processSpotifyTokensFromURL() {
-    // Verificar se há tokens do Spotify na URL
-    const urlParams = new URLSearchParams(window.location.search);
-    const accessToken = urlParams.get('access_token');
-    const refreshToken = urlParams.get('refresh_token');
-
-    // Se os tokens estiverem presentes, armazená-los em cache e fazer a solicitação para obter dados do usuário
-    if (accessToken && refreshToken) {
-        // Armazenar os tokens em cache
-        cacheSpotifyTokens(accessToken, refreshToken);
-
-        // Remover os parâmetros da URL
-        window.history.replaceState({}, document.title, window.location.pathname);
-
-        // Fazer a solicitação para obter dados do usuário
-        fetchUserData()
-            .then(() => {
-                player.connect();
-            })
-            .catch(error => {
-                console.error('Error processing Spotify tokens:', error);
-            });
-    }
-}
-
-// Função para armazenar os tokens do Spotify em cache
-function cacheSpotifyTokens(accessToken, refreshToken) {
-    localStorage.setItem('accessToken', accessToken);
-    localStorage.setItem('refreshToken', refreshToken);
-}
-
-
-// Função para desconectar o Spotify e atualizar a interface do usuário
-function disconnectSpotify() {
-    // Remover os tokens do armazenamento local do navegador
-    localStorage.removeItem('accessToken');
-    localStorage.removeItem('refreshToken');
-
-    // Exibir o botão de login e ocultar a foto do perfil
-    document.getElementById('spotify_login_button').style.display = 'block';
-    document.getElementById('user_profile').style.display = 'none';
-}
-
-
-async function fetchUserData() {
-    try {
-        // Recuperar os tokens do armazenamento local do navegador
-        const accessToken = localStorage.getItem('accessToken');
-        const refreshToken = localStorage.getItem('refreshToken');
-
-        // Verificar se os tokens estão em cache
-        if (!accessToken || !refreshToken) {
-            return; // sair da função porque não há tokens do Spotify
-        }
-
-        // Fazer uma solicitação fetch para a rota /user no servidor do Spotify
-        const response = await fetch('https://api.spotify.com/v1/me', {
-            method: 'GET',
-            headers: {
-                'Authorization': `Bearer ${accessToken}`
-            }
-        });
-
-        // Verificar se a solicitação foi bem-sucedida
-        if (!response.ok) {
-            if (response.status === 401) {
-                // Se o status for 401 (não autorizado), renovar a autorização do Spotify
-                await spotifyRenewAuth();
-            } else {
-                throw new Error(`An error occurred when communicating with Spotify's servers`);
-            }
-        }
-
-        // Extrair os dados do usuário da resposta
-        const userData = await response.json();
-
-        // Exibir os dados do usuário no console (você pode fazer outra coisa com eles)
-        console.log('User data from Spotify: ', userData);
-
-        // Exibir a foto de perfil do usuário e ocultar o botão de login
-        const spotifyLoginButton = document.getElementById('spotify_login_button');
-        const userProfileDiv = document.getElementById('user_profile');
-        const userProfileImage = document.getElementById('sp_user_pic');
-
-        if (userProfileImage && userData.images.length > 0) {
-            userProfileImage.src = userData.images[0].url;
-        }
-
-        if (spotifyLoginButton && userProfileDiv) {
-            spotifyLoginButton.style.display = 'none';
-            userProfileDiv.style.display = 'block';
-        }
-
-    } catch (error) {
-        disconnectSpotify()
-        notification('An error occurred, please reconnect your Spotify account');
-        console.error('Error getting user data from Spotify: ', error.message);
-    }
-}
-
-async function spotifyRenewAuth() {
-    try {
-        // Recuperar o refreshToken do armazenamento local do navegador
-        const refreshToken = localStorage.getItem('refreshToken');
-
-        // Verificar se há refreshToken em cache
-        if (!refreshToken) {
-            throw new Error('No refresh token found, please reconnect your Spotify account on the settings pop-up.');
-        }
-
-        // Obter o valor de localHostToggle do localStorage
-        const localHostToggle = localStorage.getItem('localHostToggle');
-
-        // Verificar o valor de localHostToggle e definir window.serverPath
-        if (localHostToggle === 'true') {
-            window.serverPath = 'http://localhost:3000'; 
-        } else {
-            window.serverPath = 'https://datamatch-backend.onrender.com';
-        }
-
-        // Fazer uma solicitação para a rota /reauth do seu servidor para renovar o accessToken usando refreshToken
-        const response = await fetch(`${window.serverPath}/formatter/reauth`, {
-            method: 'GET',
-            headers: {
-                'Authorization': `Bearer ${refreshToken}`
-            }
-        });
-
-        // Verificar se a solicitação foi bem-sucedida
-        if (!response.ok) {
-            throw new Error('Error renewing Spotify authorization.');
-        }
-
-        // Extrair o novo accessToken da resposta
-        const { accessToken } = await response.json();
-
-        // Atualizar o accessToken no armazenamento local do navegador
-        localStorage.setItem('accessToken', accessToken);
-
-        console.log('Spotify authorization renewed successfully!');
-        fetchCurrentlyPlayingData()
-    } catch (error) {
-        console.error('Error renewing Spotify authorization.', error.message);
-    }
-}
-
-async function fetchCurrentlyPlayingData() {
-    try {
-        // Obter o token de acesso do armazenamento local do navegador
-        const accessToken = localStorage.getItem('accessToken');
-
-        // Verificar se o token de acesso está em cache
-        if (!accessToken) {
-            return; // Sair da função porque não há token do Spotify
-        }
-
-        // Fazer uma solicitação fetch para a rota /me/player/currently-playing do Spotify
-        const response = await fetch('https://api.spotify.com/v1/me/player/currently-playing', {
-            method: 'GET',
-            headers: {
-                'Authorization': `Bearer ${accessToken}`
-            }
-        });
-
-        // Verificar se a resposta indica que não há música sendo reproduzida (código 204)
-        if (response.status === 204) {
-            document.getElementById('sp_player_div').style.display = 'none'; // Ocultar elemento
-            document.getElementsByClassName('improvements_box')[0].style.height = 'calc(90% - 100px)'; // aumentar improvements box
-            return; // Sair da função
-        } else {
-            document.getElementById('sp_player_div').style.display = ''; // Exibir elemento
-            document.getElementsByClassName('improvements_box')[0].style.maxHeight = 'calc(90% - 100px)'; // diminuir improvements box
-        }
-
-        // Verificar se a solicitação foi bem-sucedida
-        if (!response.ok) {
-            throw new Error(`An error occurred when communicating with Spotify's servers`);
-        }
-
-        // Extrair os dados da música atualmente reproduzida da resposta
-        const currentlyPlayingData = await response.json();
-
-        // Atualizar os elementos HTML com as informações da música atualmente reproduzida
-        const albumArtElement = document.getElementById('sp_album_art');
-        const titleElement = document.getElementById('sp_title');
-        const albumElement = document.getElementById('sp_album');
-        const artistElement = document.getElementById('sp_artist');
-        const trackerElement = document.getElementById('tracker');
-        const controlContainer = document.getElementById('play_pause');
-        const svg1 = controlContainer.querySelector('svg:nth-child(1)');
-        const svg2 = controlContainer.querySelector('svg:nth-child(2)');
-
-        if (albumArtElement && currentlyPlayingData.item.album.images.length > 0) {
-            albumArtElement.innerHTML = `<img src="${currentlyPlayingData.item.album.images[0].url}" alt="album art" title="${currentlyPlayingData.item.name} | ${currentlyPlayingData.item.artists[0].name}">`;
-        }
-
-        if (titleElement) {
-            titleElement.innerHTML = `<a href="https://open.spotify.com/track/${currentlyPlayingData.item.id}" target="_blank">${currentlyPlayingData.item.name}</a>`;
-        }
-
-        if (artistElement) {
-            const artistLinks = currentlyPlayingData.item.artists.map(artist => `<a href="https://open.spotify.com/artist/${artist.id}" target="_blank">${artist.name}</a>`);
-            artistElement.innerHTML = artistLinks.join(', ');
-        }
-
-        if (albumElement) {
-            albumElement.innerHTML = `<a href="https://open.spotify.com/album/${currentlyPlayingData.item.album.id}" target="_blank">${currentlyPlayingData.item.album.name}</a>`;
-        }
-
-        // Atualizar o estado do botão play/pause e o tracker da música
-        if (currentlyPlayingData.is_playing) {
-            const progress_ms = currentlyPlayingData.progress_ms;
-            const duration_ms = currentlyPlayingData.item.duration_ms;
-            const progressPercent = (progress_ms / duration_ms) * 100;
-            updatePlaybackState(false, progressPercent); // Atualiza o estado de reprodução como reproduzindo
-        } else {
-            const progress_ms = currentlyPlayingData.progress_ms;
-            const duration_ms = currentlyPlayingData.item.duration_ms;
-            const progressPercent = (progress_ms / duration_ms) * 100;
-            updatePlaybackState(true, 0); // Atualiza o estado de reprodução como pausado
-        }
-
-    } catch (error) {
-        console.error('Error getting data from currently playing song: ', error.message);
-    }
-}
-
-async function fetchAvailableDevices() {
-    try {
-        // Obter o token de acesso do armazenamento local do navegador
-        const accessToken = localStorage.getItem('accessToken');
-
-        // Verificar se o token de acesso está em cache
-        if (!accessToken) {
-            return; // Sair da função porque não há token do Spotify
-        }
-
-        // Fazer uma solicitação fetch para a rota /me/player/devices do Spotify
-        const response = await fetch('https://api.spotify.com/v1/me/player/devices', {
-            method: 'GET',
-            headers: {
-                'Authorization': `Bearer ${accessToken}`
-            }
-        });
-
-        // Verificar se a solicitação foi bem-sucedida
-        if (!response.ok) {
-            throw new Error(`An error occurred when communicating with Spotify's servers`);
-        }
-
-        // Extrair os dados dos dispositivos disponíveis da resposta
-        const devicesData = await response.json();
-
-        // Atualizar o menu com os nomes dos dispositivos disponíveis e definir o 'data-id' como o ID do dispositivo
-        const devicesOptionsElement = document.getElementById('devices_options');
-        if (devicesOptionsElement) {
-            devicesOptionsElement.innerHTML = ''; // Limpar o conteúdo atual do menu
-            devicesData.devices.forEach(device => {
-                const deviceElement = document.createElement('div');
-                deviceElement.classList.add('sp_device');
-                deviceElement.textContent = device.name;
-                deviceElement.setAttribute('data-id', device.id); // Definir o 'data-id' como o ID do dispositivo
-                devicesOptionsElement.appendChild(deviceElement);
-            });
-            devicesOptionsElement.style.display = 'none'; 
-
-            // Adicionar event listeners aos novos elementos
-            const deviceElements = devicesOptionsElement.querySelectorAll('.sp_device');
-            deviceElements.forEach(deviceElement => {
-                deviceElement.addEventListener('click', function() {
-                    devicesOptionsElement.style.display = 'none'; 
-                    const deviceID = this.getAttribute('data-id');
-                    transferPlayback(deviceID);
+                        // Função para avançar uma quantidade específica de segundos na reprodução
+                        function fastForward(seconds) {
+                            player.getCurrentState().then(state => {
+                                if (state) {
+                                    const milliseconds = seconds * 1000; // Convertendo segundos para milissegundos
+                                    const newPosition = Math.min(state.duration, state.position + milliseconds);
+                                    player.seek(newPosition).then(() => {
+                                        positions[state.track.id] = newPosition; // Atualiza a posição para a música atual
+                                    });
+                                }
+                            });
+                        }
+
+                        function showTracker() {
+                            document.getElementById('sdk_player').style = 'display:flex';
+                            document.getElementById('sp_player_div').style.margin = '0 0 45px 0';
+                            document.getElementById('sp_connect_icon_green').style.display = 'none'
+                            document.getElementById('sp_connect_icon_white').style.display = 'block'
+                            document.getElementById('devices_options').style.bottom = '150px'
+                        }
+                        function hideTracker() {
+                            document.getElementById('sdk_player').style = 'display:none';
+                            document.getElementById('sp_player_div').style.margin = '0 0 0 0';
+                            document.getElementById('sp_connect_icon_green').style.display = 'block'
+                            document.getElementById('sp_connect_icon_white').style.display = 'none'
+                            document.getElementById('devices_options').style.bottom = '105px'
+                            
+                        }
+
+                        // Quando uma nova música é reproduzida, obtenha a posição atual se estiver disponível
+                        player.on('track_change', () => {
+                            player.getCurrentState().then(state => {
+                                if (state) {
+                                    positions[state.track.id] = state.position; // Armazena a posição para a nova música
+                                }
+                            });
+                        });
+                    });     
+                };
+
+                function notification(customMessage) {
+                    const notification_div = document.getElementById("notification");
+                    const message = document.getElementById("notification-message");
+                    message.textContent = customMessage;
+                    notification_div.style.opacity = 1;
+                    notification_div.classList.remove("hidden");
+                    setTimeout(() => {
+                    notification_div.style.opacity = 0;
+                    setTimeout(() => {
+                        notification_div.classList.add("hidden");
+                    }, 500);
+                    }, 4000); // Tempo de exibição
+                };
+
+
+                document.addEventListener('DOMContentLoaded', function() {
+                    const spConnectButton = document.getElementById('sp_connect');
+                    const menuOptions = document.getElementById('devices_options');
+                    const spRefreshButton = document.getElementById('player_refresh')
+
+                    // Adiciona um evento de clique à div com ID sp_connect
+                    spConnectButton.addEventListener('click', function(e) {
+                        // Mostra ou esconde o menu de opções ao clicar no botão sp_connect
+                        if (menuOptions.style.display === 'none') {
+                            menuOptions.style.display = 'block';
+                        } else {
+                            menuOptions.style.display = 'none';
+                        }
+                        e.stopPropagation(); // Impede a propagação do evento para evitar que o menu seja fechado imediatamente
+                    });
+
+                    // Fecha o menu ao clicar fora dele
+                    document.addEventListener('click', function(e) {
+                        if (!menuOptions.contains(e.target) && e.target !== spConnectButton) {
+                            menuOptions.style.display = 'none';
+                        }
+                    });
+
+                    spRefreshButton.addEventListener('click', function(e) {
+                        fetchCurrentlyPlayingData()
+                        fetchAvailableDevices()
+                    });
                 });
-            });
-        }
-
-    } catch (error) {
-        console.error('Error fetching available devices: ', error.message);
-    }
-}
-
-// Função para transferir a reprodução para um dispositivo específico
-async function transferPlayback(deviceID) {
-    try {
-        // Obter o token de acesso do armazenamento local do navegador
-        const accessToken = localStorage.getItem('accessToken');
-
-        // Verificar se o token de acesso está em cache
-        if (!accessToken) {
-            return; // Sair da função porque não há token do Spotify
-        }
-
-        // Fazer uma solicitação fetch para o endpoint /me/player do Spotify com o dispositivo específico
-        await fetch('https://api.spotify.com/v1/me/player', {
-            method: 'PUT',
-            headers: {
-                'Authorization': `Bearer ${accessToken}`,
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                device_ids: [deviceID]
-            })
-        });
-
-        console.log('Playback transferido para o dispositivo com sucesso.');
-
-    } catch (error) {
-        console.error('Error transferring playback: ', error.message);
-    }
-}
 
 
+                function checkContent() {
 
-function togglePlayPause() {
-    const svg1 = document.getElementById('svg1'); // Botão de play
-    const svg2 = document.getElementById('svg2'); // Botão de pause
+                        const checkboxIds = [
+                            'characterCounterToggle',
+                            'autoCapToggle',
+                            'autoTrimToggle',
+                            'removeDoubleSpacesAndLinesToggle',
+                            'autoCapTagsToggle',
+                            'autoSuggestions',
+                            'localHostToggle'
+                        ];
 
-    // Verifica se o svg1 está visível, o que indica que a música está pausada
-    if (window.getComputedStyle(svg1).display === 'block') {
-        // Se o svg1 está visível, esconde ele e mostra o svg2
-        svg1.style.display = 'none';
-        svg2.style.display = 'block';
-    } else {
-        // Se o svg1 não está visível, mostra ele e esconde o svg2
-        svg1.style.display = 'block';
-        svg2.style.display = 'none';
-    }
-}
+                        checkboxIds.forEach(function (checkboxId) {
+                            const checkbox = document.getElementById(checkboxId);
+                            localStorage.setItem(checkboxId, checkbox.checked);
+                        });
+                        setCheckboxStates();
+                }
 
+                function handleSettingsClick() {
+                    clickCount++;
 
-// Função para atualizar o slider da música conforme o tocador toca
-function updateTracker(positionMs, durationMs) {
-    const percentage = (positionMs / durationMs) * 100;
-    trackerElement.style.width = `${percentage}%`;
-}
+                    // Se o usuário clicou 5 vezes, exibir a div e reiniciar a contagem
+                    if (clickCount === 5) {
+                        displayDevModeDiv();
+                        clickCount = 0;
+                    }
+                }
 
-setInterval(() => {
-    // Substitua trackPositionMs e trackDurationMs pelos valores reais
-    updateTracker(trackPositionMs, trackDurationMs);
-}, 1000);
+                // Função para exibir/ocultar a div e salvar a escolha em cache
+                function displayDevModeDiv() {
+                    const devHidedDiv = document.getElementById('dev_hided_div');
+                    const devMode = localStorage.getItem('devMode') === 'true'; // Obtém o estado atual do modo de desenvolvimento
 
-// Atualize o estado do botão play/pause e o tracker da música
-function updatePlaybackState(isPaused, progressPercent) {
-    const svg1 = controlContainer.querySelector('svg:nth-child(1)');
-    const svg2 = controlContainer.querySelector('svg:nth-child(2)');
-    const trackerElement = document.getElementById('tracker');
+                    // Alterna entre exibir e ocultar a div
+                    if (devMode) {
+                        devHidedDiv.style.display = 'none';
+                    } else {
+                        devHidedDiv.style.display = 'block';
+                    }
 
-    if (isPaused) {
-        svg1.style.display = 'none';
-        svg2.style.display = 'block';
-    } else {
-        svg1.style.display = 'block';
-        svg2.style.display = 'none';
-        trackerElement.value = progressPercent; // Atualiza a posição do tracker
-    }
-}
+                    // Salva a escolha em cache invertendo o valor atual
+                    localStorage.setItem('devMode', (!devMode).toString());
+                }
 
+                // Carrega a escolha do modo de desenvolvimento do cache e exibe/oculta a div conforme necessário
+                function loadDevMode() {
+                    const devMode = localStorage.getItem('devMode') === 'true';
+                    const devHidedDiv = document.getElementById('dev_hided_div');
 
-// Obter o estado atual do player
-player.getCurrentState().then(state => {
-    if (!state) {
-        console.error('O usuário não está reproduzindo música através do Web Playback SDK');
-        return;
-    }
-
-    const current_track = state.track_window.current_track;
-    const next_track = state.track_window.next_tracks[0];
-
-    console.log('Atualmente tocando:', current_track);
-    console.log('Próxima música:', next_track);
-
-    // Faça algo com as informações do estado atual do player, se necessário
-    // Por exemplo, você pode atualizar sua interface do usuário com essas informações
-}).catch(error => {
-    console.error('Erro ao obter estado atual do player:', error);
-});
-
-setInterval(checkPlayerState, 2000);
+                    if (devMode) {
+                        devHidedDiv.style.display = 'block';
+                    } else {
+                        devHidedDiv.style.display = 'none';
+                    }
+                }
+                loadDevMode();
 
 
+                document.addEventListener('DOMContentLoaded', function () {
+                    var expandArrow = document.getElementById('expand_arrow');
+                    var footer = document.getElementById('footer');
+                    var footerHidedContent = document.getElementById('footer_hided_content');
+                    var mobileFooterDiv = document.getElementById('mobile_footer_div');
 
-async function pausePlayback() {
-    try {
-        // Recuperar o token de acesso do armazenamento local do navegador
-        const accessToken = localStorage.getItem('accessToken');
+                    expandArrow.addEventListener('click', function (event) {
+                        event.stopPropagation(); // Impede que o clique seja propagado para o corpo/documento
+                        footer.classList.toggle('expanded');
 
-        // Verificar se o token de acesso está em cache
-        if (!accessToken) {
-            console.log('Access token not found. Cannot pause playback.');
-            return;
-        }
+                        if (footer.classList.contains('expanded')) {
+                            footerHidedContent.style.display = "block";
+                            mobileFooterDiv.style.height = "8%";
+                            expandArrow.style.transform = "rotate(180deg)";
+                        } else {
+                            footerHidedContent.style.display = "none";
+                            mobileFooterDiv.style.height = "100%";
+                            expandArrow.style.transform = "rotate(0deg)";
+                        }
+                    });
 
-        // Fazer uma solicitação fetch para pausar a reprodução
-        const response = await fetch('https://api.spotify.com/v1/me/player/pause', {
-            method: 'PUT',
-            headers: {
-                'Authorization': `Bearer ${accessToken}`
-            }
-        });
+                    // Adiciona um ouvinte de eventos ao corpo/documento para fechar o footer quando clicar fora dele
+                    document.body.addEventListener('click', function (event) {
+                        if (!footer.contains(event.target)) {
+                            // Se o clique ocorreu fora do footer, oculta o conteúdo e recolhe o footer
+                            footerHidedContent.style.display = "none";
+                            mobileFooterDiv.style.height = "100%";
+                            expandArrow.style.transform = "rotate(0deg)";
+                            footer.classList.remove('expanded');
+                        }
+                    });
+                });
+                function closeSettings() {
+                    var settingsPopup = document.getElementById("settings_popup");
+                    var overlay = document.getElementById("overlay");
+                    settingsPopup.style.display = "none";
+                    overlay.style.display = "none";
+                }
+                function closeCredits() {
+                    var creditsPopup = document.getElementById("credits_popup");
+                    var overlay = document.getElementById("overlay");
+                    creditsPopup.style.display = "none";
+                    overlay.style.display = "none";
+                }
+                function closeSuggestions() {
+                    var suggestPopup = document.getElementById("suggest_popup");
+                    var overlay = document.getElementById("overlay");
+                    suggestPopup.style.display = "none";
+                    overlay.style.display = "none";
+                }
+                function closeAboutInfo() {
+                    var aboutPopup = document.getElementById("about_popup");
+                    var overlay = document.getElementById("overlay");
+                    aboutPopup.style.display = "none";
+                    overlay.style.display = "none";
+                }
 
-        // Verificar se a solicitação foi bem-sucedida
-        if (!response.ok) {
-            throw new Error(`Failed to pause playback. Status: ${response.status}`);
-        }
+                function increaseValue(selectedId) {
+                    var selectedValue = parseInt(document.getElementById(selectedId).textContent);
+                    if (selectedValue < 15) {
+                        selectedValue++;
+                        updateSelectedValue(selectedId, selectedValue);
+                    }
+                }
 
-        console.log('Playback paused successfully.');
-    } catch (error) {
-        console.error('Error pausing playback: ', error.message);
-    }
-}
+                function decreaseValue(selectedId) {
+                    var selectedValue = parseInt(document.getElementById(selectedId).textContent);
+                    if (selectedValue > 3) {
+                        selectedValue--;
+                        updateSelectedValue(selectedId, selectedValue);
+                    }
+                }
 
-async function resumePlayback() {
-    try {
-        // Recuperar o token de acesso do armazenamento local do navegador
-        const accessToken = localStorage.getItem('accessToken');
+                 // Função para obter os valores armazenados no localStorage ou definir padrões
+                function getStoredValue(id) {
+                    return localStorage.getItem(id) || '5'; // Valor padrão é 5 segundos
+                }
 
-        // Verificar se o token de acesso está em cache
-        if (!accessToken) {
-            console.log('Access token not found. Cannot resume playback.');
-            return;
-        }
+                // Função para armazenar os valores selecionados no localStorage
+                function setStoredValue(id, value) {
+                    localStorage.setItem(id, value);
+                }
 
-        // Fazer uma solicitação fetch para retomar a reprodução
-        const response = await fetch('https://api.spotify.com/v1/me/player/play', {
-            method: 'PUT',
-            headers: {
-                'Authorization': `Bearer ${accessToken}`
-            }
-        });
+                // Função para carregar os valores armazenados e definir os elementos correspondentes
+                function loadStoredValues() {
+                    document.getElementById('selectedValue1').textContent = getStoredValue('selectedValue1');
+                    document.getElementById('selectedValue2').textContent = getStoredValue('selectedValue2');
+                    document.getElementById('backwardValue').textContent = getStoredValue('selectedValue1');
+                    document.getElementById('forwardValue').textContent = getStoredValue('selectedValue2');
+                }
 
-        fetchCurrentlyPlayingData()
+                function updateSelectedValue(id, value) {
+                    document.getElementById(id).textContent = value;
+                    setStoredValue(id, value); // Armazenar o valor selecionado no localStorage
+                    // Atualizar os elementos <p> com base nos valores selecionados
+                    if (id === 'selectedValue1') {
+                        document.getElementById('backwardValue').textContent = value;
+                    } else if (id === 'selectedValue2') {
+                        document.getElementById('forwardValue').textContent = value;
+                    }
+                    // Aqui você pode fazer qualquer outra ação necessária com o valor selecionado
+                }
 
-        // Verificar se a solicitação foi bem-sucedida
-        if (!response.ok) {
-            throw new Error(`Failed to resume playback. Status: ${response.status}`);
-        }
+                // Carregar os valores armazenados ao carregar a página
+                window.onload = function() {
+                    loadStoredValues();
+                };
 
-        console.log('Playback resumed successfully.');
-    } catch (error) {
-        console.error('Error resuming playback: ', error.message);
-    }
-}
 
-async function skipForward() {
-    try {
-        // Recuperar o token de acesso do armazenamento local do navegador
-        const accessToken = localStorage.getItem('accessToken');
+                // Função para atualizar as opções abaixo com base na seleção do menu seletor
+                function updateOptions() {
+                    var selectMenu = document.getElementById("select_menu");
+                    var text1 = document.getElementsByName("text1")[0];
+                    var text2 = document.getElementsByName("text2")[0];
+                    var text3 = document.getElementsByName("text3")[0];
+                    var text4 = document.getElementsByName("text4")[0];
 
-        // Verificar se o token de acesso está em cache
-        if (!accessToken) {
-            console.log('Access token not found. Cannot skip forward.');
-            return;
-        }
+                    // Verifica a opção selecionada
+                    var selectedOption = selectMenu.value;
 
-        // Obter a posição atual da reprodução
-        const currentPlaybackResponse = await fetch('https://api.spotify.com/v1/me/player', {
-            method: 'GET',
-            headers: {
-                'Authorization': `Bearer ${accessToken}`
-            }
-        });
+                    // Remove todas as classes dos elementos de texto
+                    text1.classList.remove("option1", "option2", "option3", "option4");
+                    text2.classList.remove("option1", "option2", "option3", "option4");
+                    text3.classList.remove("option1", "option2", "option3", "option4");
+                    text4.classList.remove("option1", "option2", "option3", "option4");
 
-        // Verificar se a solicitação foi bem-sucedida
-        if (!currentPlaybackResponse.ok) {
-            throw new Error(`Failed to get current playback. Status: ${currentPlaybackResponse.status}`);
-        }
+                    // Adiciona as classes apropriadas com base na opção selecionada
+                    switch (selectedOption) {
+                        case "option1": // Suggest word for the dictionary
+                            text1.classList.add("option1");
+                            text1.placeholder = "Digite o seu nome";
+                            text1.style.display = "block"
 
-        const currentPlaybackData = await currentPlaybackResponse.json();
-        const currentPositionMs = currentPlaybackData.progress_ms;
+                            text2.classList.add("option1");
+                            text2.placeholder = "Digite aqui as palavras incorretas (separe cada uma usando uma '/')";
+                            text2.style.display = "block"; 
 
-        // Avançar 3 segundos (3000 milissegundos) a partir da posição atual
-        const newPositionMs = currentPositionMs + 3000;
+                            text3.classList.add("option1");
+                            text3.placeholder = "Digite aqui a correção";
+                            text3.style.display = "block"; 
 
-        // Fazer uma solicitação fetch para mover a reprodução para a nova posição
-        const skipResponse = await fetch(`https://api.spotify.com/v1/me/player/seek?position_ms=${newPositionMs}`, {
-            method: 'PUT',
-            headers: {
-                'Authorization': `Bearer ${accessToken}`
-            }
-        });
+                            text4.classList.add("popup_details");
+                            text4.placeholder = "Observações";
+                            text4.style.display = "block"; 
+                            break;
+                        case "option2": // Suggest a new format alert
+                            text1.classList.add("option2");
+                            text1.placeholder = "Digite o seu nome";
+                            text1.style.display = "block"
 
-        // Verificar se a solicitação de avanço foi bem-sucedida
-        if (!skipResponse.ok) {
-            throw new Error(`Failed to skip forward. Status: ${skipResponse.status}`);
-        }
+                            text2.classList.add("option2");
+                            text2.placeholder = "Format suggestion";
+                            text2.style.display = "block"; 
 
-        console.log('Skipped forward successfully.');
-    } catch (error) {
-        console.error('Error skipping forward: ', error.message);
-    }
-}
+                            text3.classList.add("option2");
+                            text3.placeholder = "Digite aqui a correção";
+                            text3.style.display = "block"; 
 
-async function skipBackward() {
-    try {
-        // Recuperar o token de acesso do armazenamento local do navegador
-        const accessToken = localStorage.getItem('accessToken');
+                            text4.classList.add("popup_details");
+                            text4.placeholder = "Observações";
+                            text4.style.display = "block"; 
+                            break;
+                        case "option3": // Send a feedback
+                            text1.classList.add("option3");
+                            text1.placeholder = "Digite o seu nome";
+                            text1.style.display = "block"
 
-        // Verificar se o token de acesso está em cache
-        if (!accessToken) {
-            console.log('Access token not found. Cannot skip backward.');
-            return;
-        }
+                            text2.classList.add("option3");
+                            text2.placeholder = "Enter your feedback";
+                            text2.style.display = "block"; 
 
-        // Obter a posição atual da reprodução
-        const currentPlaybackResponse = await fetch('https://api.spotify.com/v1/me/player', {
-            method: 'GET',
-            headers: {
-                'Authorization': `Bearer ${accessToken}`
-            }
-        });
+                            text3.classList.add("option3");
+                            text3.placeholder = "Digite aqui a correção";
+                            text3.style.display = "none"; 
 
-        // Verificar se a solicitação foi bem-sucedida
-        if (!currentPlaybackResponse.ok) {
-            throw new Error(`Failed to get current playback. Status: ${currentPlaybackResponse.status}`);
-        }
+                            text4.classList.add("popup_details");
+                            text4.placeholder = "Observações";
+                            text4.style.display = "none"; 
+                            break;
+                        case "option4": // Report a bug
+                            text1.classList.add("option4");
+                            text1.placeholder = "Digite o seu nome";
+                            text1.style.display = "block"
 
-        const currentPlaybackData = await currentPlaybackResponse.json();
-        const currentPositionMs = currentPlaybackData.progress_ms;
+                            text2.classList.add("option4");
+                            text2.placeholder = "Enter the bug details";
+                            text2.style.display = "block"; // Exibe o segundo campo de texto
 
-        // Retroceder 3 segundos (3000 milissegundos) a partir da posição atual
-        let newPositionMs = currentPositionMs - 3000;
+                            
+                            text3.classList.add("option4");
+                            text3.placeholder = "Digite aqui a correção";
+                            text3.style.display = "none"; 
 
-        // Verificar se a nova posição é menor que zero (começo da faixa)
-        if (newPositionMs < 0) {
-            newPositionMs = 0; // Definir a nova posição como zero para evitar valores negativos
-        }
-
-        // Fazer uma solicitação fetch para mover a reprodução para a nova posição
-        const skipResponse = await fetch(`https://api.spotify.com/v1/me/player/seek?position_ms=${newPositionMs}`, {
-            method: 'PUT',
-            headers: {
-                'Authorization': `Bearer ${accessToken}`
-            }
-        });
-
-        // Verificar se a solicitação de retrocesso foi bem-sucedida
-        if (!skipResponse.ok) {
-            throw new Error(`Failed to skip backward. Status: ${skipResponse.status}`);
-        }
-
-        console.log('Skipped backward successfully.');
-    } catch (error) {
-        console.error('Error skipping backward: ', error.message);
-    }
-}
+                            text4.classList.add("popup_details");
+                            text4.placeholder = "Observações";
+                            text4.style.display = "none"; 
+                            break;
+                        default:
+                            break;
+                    }
+                }
+        </script>
+    </body>
+</html>
 
 
