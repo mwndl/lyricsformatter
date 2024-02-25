@@ -15,15 +15,11 @@ document.addEventListener('DOMContentLoaded', function () {
     var refreshButton = document.getElementById('refresh_button');
     var loadingSpinner = document.getElementById('loading_spinner');
 
-    var improvementsPlaceholder = document.getElementById('improvements_placeholder')
 
     const searchBtn = document.querySelector('#search_btn');
     const search_input = document.querySelector('#search_input');
-    const loading_spinner = document.querySelector('#loading_spinner');
     const spotifyIframePreview = document.querySelector('#spotify_iframe_preview');
 
-    const notification_div = document.getElementById("notification");
-    const message = document.getElementById("notification-message");
 
     var miniMenu = document.getElementById("mini_menu");
 
@@ -216,14 +212,16 @@ function handleRefreshButtonClick() {
     }
 
     function notification(customMessage) {
+        const notification_div = document.getElementById("notification");
+        const message = document.getElementById("notification-message");
         message.textContent = customMessage;
         notification_div.style.opacity = 1;
         notification_div.classList.remove("hidden");
         setTimeout(() => {
-          notification_div.style.opacity = 0;
-          setTimeout(() => {
+        notification_div.style.opacity = 0;
+        setTimeout(() => {
             notification_div.classList.add("hidden");
-          }, 500);
+        }, 500);
         }, 4000); // Tempo de exibição
     };
 
@@ -1488,6 +1486,8 @@ async function fetchUserData() {
         }
 
     } catch (error) {
+        disconnectSpotify()
+        notification('An error occurred, please reconnect your Spotify account');
         console.error('Error getting user data from Spotify: ', error.message);
     }
 }
@@ -1536,15 +1536,6 @@ async function spotifyRenewAuth() {
     } catch (error) {
         console.error('Error renewing Spotify authorization.', error.message);
     }
-}
-
-function loadSpotifyData() {
-    const accessToken = localStorage.getItem('accessToken');
-    if (!accessToken) {
-        return; 
-    }
-    fetchUserData();
-    fetchCurrentlyPlayingData()
 }
 
 async function fetchCurrentlyPlayingData() {
@@ -1623,42 +1614,24 @@ async function fetchCurrentlyPlayingData() {
             updatePlaybackState(true, 0); // Atualiza o estado de reprodução como pausado
         }
 
-        // Adicionar event listeners para controlar a reprodução/pausa
-        controlContainer.addEventListener('click', function() {
-            if (currentlyPlayingData.is_playing) {
-                pausePlayback();
-                svg1.style.display = 'none';
-                svg2.style.display = 'block';
-            } else {
-                resumePlayback();
-                svg1.style.display = 'block';
-                svg2.style.display = 'none';
-            }
-            currentlyPlayingData.is_playing = !currentlyPlayingData.is_playing;
-        });
-
     } catch (error) {
         console.error('Error getting data from currently playing song: ', error.message);
     }
 }
 
-// Definindo a função showTracker()
-function showTracker() {
-    var sdk_player = document.getElementById('sdk_player');
-    if (sdk_player) {
-        sdk_player.style.display = 'flex';
-    } else {
-        console.log("Elemento sdk_player não encontrado.");
-    }
-}
+function togglePlayPause() {
+    const svg1 = document.getElementById('svg1'); // Botão de play
+    const svg2 = document.getElementById('svg2'); // Botão de pause
 
-// Definindo a função hideTracker()
-function hideTracker() {
-    var sdk_player = document.getElementById('sdk_player');
-    if (sdk_player) {
-        sdk_player.style.display = 'none';
+    // Verifica se o svg1 está visível, o que indica que a música está pausada
+    if (window.getComputedStyle(svg1).display === 'block') {
+        // Se o svg1 está visível, esconde ele e mostra o svg2
+        svg1.style.display = 'none';
+        svg2.style.display = 'block';
     } else {
-        console.log("Elemento sdk_player não encontrado.");
+        // Se o svg1 não está visível, mostra ele e esconde o svg2
+        svg1.style.display = 'block';
+        svg2.style.display = 'none';
     }
 }
 
@@ -1676,7 +1649,6 @@ setInterval(() => {
 
 // Atualize o estado do botão play/pause e o tracker da música
 function updatePlaybackState(isPaused, progressPercent) {
-    const controlContainer = document.getElementById('play_pause');
     const svg1 = controlContainer.querySelector('svg:nth-child(1)');
     const svg2 = controlContainer.querySelector('svg:nth-child(2)');
     const trackerElement = document.getElementById('tracker');
