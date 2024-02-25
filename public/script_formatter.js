@@ -1407,8 +1407,7 @@ function processSpotifyTokensFromURL() {
         // Fazer a solicitação para obter dados do usuário
         fetchUserData()
             .then(() => {
-                // Atualizar os dados do site com os dados recebidos
-                updateUIWithData();
+                player.connect();
             })
             .catch(error => {
                 console.error('Error processing Spotify tokens:', error);
