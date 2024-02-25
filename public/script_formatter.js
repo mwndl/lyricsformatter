@@ -1215,7 +1215,7 @@ document.addEventListener('DOMContentLoaded', function () {
     fetchCreditsData();
     fetchServerInfo();
     processSpotifyTokensFromURL();
-    
+
     // Selecionar o botão pelo ID
     var spotifyButton = document.getElementById('spotify_button');
 
@@ -1617,6 +1617,93 @@ async function fetchCurrentlyPlayingData() {
         console.error('Error getting data from currently playing song: ', error.message);
     }
 }
+
+async function fetchAvailableDevices() {
+    try {
+        // Obter o token de acesso do armazenamento local do navegador
+        const accessToken = localStorage.getItem('accessToken');
+
+        // Verificar se o token de acesso está em cache
+        if (!accessToken) {
+            return; // Sair da função porque não há token do Spotify
+        }
+
+        // Fazer uma solicitação fetch para a rota /me/player/devices do Spotify
+        const response = await fetch('https://api.spotify.com/v1/me/player/devices', {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${accessToken}`
+            }
+        });
+
+        // Verificar se a solicitação foi bem-sucedida
+        if (!response.ok) {
+            throw new Error(`An error occurred when communicating with Spotify's servers`);
+        }
+
+        // Extrair os dados dos dispositivos disponíveis da resposta
+        const devicesData = await response.json();
+
+        // Atualizar o menu com os nomes dos dispositivos disponíveis e definir o 'data-id' como o ID do dispositivo
+        const devicesOptionsElement = document.getElementById('devices_options');
+        if (devicesOptionsElement) {
+            devicesOptionsElement.innerHTML = ''; // Limpar o conteúdo atual do menu
+            devicesData.devices.forEach(device => {
+                const deviceElement = document.createElement('div');
+                deviceElement.classList.add('sp_device');
+                deviceElement.textContent = device.name;
+                deviceElement.setAttribute('data-id', device.id); // Definir o 'data-id' como o ID do dispositivo
+                devicesOptionsElement.appendChild(deviceElement);
+            });
+            devicesOptionsElement.style.display = 'none'; 
+
+            // Adicionar event listeners aos novos elementos
+            const deviceElements = devicesOptionsElement.querySelectorAll('.sp_device');
+            deviceElements.forEach(deviceElement => {
+                deviceElement.addEventListener('click', function() {
+                    devicesOptionsElement.style.display = 'none'; 
+                    const deviceID = this.getAttribute('data-id');
+                    transferPlayback(deviceID);
+                });
+            });
+        }
+
+    } catch (error) {
+        console.error('Error fetching available devices: ', error.message);
+    }
+}
+
+// Função para transferir a reprodução para um dispositivo específico
+async function transferPlayback(deviceID) {
+    try {
+        // Obter o token de acesso do armazenamento local do navegador
+        const accessToken = localStorage.getItem('accessToken');
+
+        // Verificar se o token de acesso está em cache
+        if (!accessToken) {
+            return; // Sair da função porque não há token do Spotify
+        }
+
+        // Fazer uma solicitação fetch para o endpoint /me/player do Spotify com o dispositivo específico
+        await fetch('https://api.spotify.com/v1/me/player', {
+            method: 'PUT',
+            headers: {
+                'Authorization': `Bearer ${accessToken}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                device_ids: [deviceID]
+            })
+        });
+
+        console.log('Playback transferido para o dispositivo com sucesso.');
+
+    } catch (error) {
+        console.error('Error transferring playback: ', error.message);
+    }
+}
+
+
 
 function togglePlayPause() {
     const svg1 = document.getElementById('svg1'); // Botão de play
