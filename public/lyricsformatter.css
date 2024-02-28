@@ -651,7 +651,6 @@ hr {
 
     .main_left {
         flex-grow: 1;
-        height: 100%;
         box-sizing: border-box;
         border-right: 1px solid #252525; /* Adiciona uma borda cinza fina na lateral esquerda */
     }

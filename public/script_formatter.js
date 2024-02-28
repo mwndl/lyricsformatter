@@ -1695,9 +1695,11 @@ async function transferPlayback(deviceID) {
         });
 
         console.log('Playback transferido para o dispositivo com sucesso.');
+        fetchAvailableDevices()
 
     } catch (error) {
         console.error('Error transferring playback: ', error.message);
+        fetchAvailableDevices()
     }
 }
 

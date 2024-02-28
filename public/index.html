@@ -44,7 +44,7 @@
     
         <div class="main">
             <div class="main_content">
-                <div class="main_left">
+                <div class="main_left" id="main_left" style="margin: 0 0 0 0">
                     <div class="lyrics_box" id="lyrics_box">
                         <div class="editor-container">
                             <div class="line_issues" id="line_issues"></div>
@@ -538,6 +538,7 @@
                             var isNumpadKey = (event.location === KeyboardEvent.DOM_KEY_LOCATION_NUMPAD);
 
                             if (numericKeys.includes(event.key) && isNumpadKey) {
+                                event.preventDefault();
                                 switch (event.key) {
                                     case '1':
                                         rewind(document.getElementById('selectedValue1').textContent)
@@ -562,7 +563,6 @@
                                         // outras teclas (não são tratadas)
                                         break;
                                 }
-                                event.preventDefault();
                             }
 
                             // Event listener para controlar quando uma música termina
@@ -584,18 +584,36 @@
                             }
                         }
 
+                        // MELHORAR
 
-                        // MELHORAR (avançar ao tocar no tracker, mas está definindo a posição como 0)
-                        const tracker = document.getElementById('tracker');
-                        tracker.addEventListener('input', function() {
-                            const newPosition = tracker.value;
-                            player.seek(newPosition).then(() => {
-                                // Atualiza a posição para a música atual
-                                positions[currentState.track.id] = newPosition;
+                        document.getElementById('tracker').addEventListener('click', function(event) {
+                            const clickPosition = event.offsetX;
+                            const totalWidth = event.target.clientWidth;
+                            
+                            // Calcula a porcentagem da posição do clique
+                            const porcentagemPosicao = clickPosition / totalWidth;
+
+                            // Obtém a duração total da faixa em milissegundos
+                            player.getCurrentState().then(state => {
+                                if (state) {
+                                    const duracaoTotal = state.duration;
+
+                                    // Calcula a posição em milissegundos
+                                    const novaPosicaoMillis = porcentagemPosicao * duracaoTotal;
+
+                                    // Realiza o seek para a nova posição em milissegundos
+                                    player.seek(novaPosicaoMillis).then(() => {
+                                        // Atualiza a posição para a música atual
+                                        positions[currentState.track.id] = novaPosicaoMillis;
+                                    }).catch((err) => {
+                                        console.error('Falha ao realizar o seek:', err);
+                                    });
+                                }
                             }).catch((err) => {
-                                console.error('Failed to seek:', err);
+                                console.error('Erro ao obter o estado atual do player:', err);
                             });
                         });
+
                         // MELHORAR
 
 
@@ -684,6 +702,7 @@
                             document.getElementById('sp_connect_icon_green').style.display = 'none'
                             document.getElementById('sp_connect_icon_white').style.display = 'block'
                             document.getElementById('devices_options').style.bottom = '150px'
+                            document.getElementById('main_left').style.margin = 'margin: 0 0 30px 0'
                         }
                         function hideTracker() {
                             document.getElementById('sdk_player').style = 'display:none';
@@ -691,6 +710,7 @@
                             document.getElementById('sp_connect_icon_green').style.display = 'block'
                             document.getElementById('sp_connect_icon_white').style.display = 'none'
                             document.getElementById('devices_options').style.bottom = '105px'
+                            document.getElementById('main_left').style.margin = 'margin: 0 0 0 0'
                             
                         }
 
@@ -704,6 +724,7 @@
                         });
                     });     
                 };
+
 
                 function notification(customMessage) {
                     const notification_div = document.getElementById("notification");
