@@ -1484,8 +1484,7 @@ async function fetchUserData() {
         }
 
     } catch (error) {
-        disconnectSpotify()
-        notification('An error occurred, please reconnect your Spotify account');
+        notification('An error occurred with your Spotify account');
         console.error('Error getting user data from Spotify: ', error.message);
     }
 }
