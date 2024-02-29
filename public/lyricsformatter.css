@@ -1470,6 +1470,13 @@ hr {
         user-select: none;
     }
 
+    .playback_info {
+        display: flex;
+        flex-direction: row;
+        align-items: flex-end;
+        width: 100%;
+    }
+
     .devices_options {
         position: fixed; /* Posiciona o menu em relação à janela de visualização */
         background-color: #282828;
