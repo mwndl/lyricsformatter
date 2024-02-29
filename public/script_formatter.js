@@ -1555,12 +1555,21 @@ async function fetchCurrentlyPlayingData() {
 
         // Verificar se a resposta indica que não há música sendo reproduzida (código 204)
         if (response.status === 204) {
-            document.getElementById('sp_player_div').style.display = 'none'; // Ocultar elemento
+            document.getElementById('sp_player_div').style.display = ''; // Exibir elemento
+            document.getElementById('sp_connect').style.display = 'none'; // Ocultar elemento
+            document.getElementById('playback_info').style.display = 'none'; // Ocultar elemento
+            document.getElementById('no_playback').style.display = 'block'; // Ocultar elemento
             document.getElementsByClassName('improvements_box')[0].style.height = 'calc(90% - 100px)'; // aumentar improvements box
             return; // Sair da função
-        } else {
+        } else if (response.status === 200) {
             document.getElementById('sp_player_div').style.display = ''; // Exibir elemento
+            document.getElementById('sp_connect').style.display = 'block'; // exibir elemento
+            document.getElementById('playback_info').style.display = 'block'; // exibir elemento
+            document.getElementById('no_playback').style.display = 'none'; // exibir elemento
             document.getElementsByClassName('improvements_box')[0].style.maxHeight = 'calc(90% - 100px)'; // diminuir improvements box
+        } else {
+            document.getElementById('sp_player_div').style.display = 'none'; // ocultar elemento
+            return; // Sair da função
         }
 
         // Verificar se a solicitação foi bem-sucedida
@@ -1834,108 +1843,3 @@ async function resumePlayback() {
         console.error('Error resuming playback: ', error.message);
     }
 }
-
-async function skipForward() {
-    try {
-        // Recuperar o token de acesso do armazenamento local do navegador
-        const accessToken = localStorage.getItem('accessToken');
-
-        // Verificar se o token de acesso está em cache
-        if (!accessToken) {
-            console.log('Access token not found. Cannot skip forward.');
-            return;
-        }
-
-        // Obter a posição atual da reprodução
-        const currentPlaybackResponse = await fetch('https://api.spotify.com/v1/me/player', {
-            method: 'GET',
-            headers: {
-                'Authorization': `Bearer ${accessToken}`
-            }
-        });
-
-        // Verificar se a solicitação foi bem-sucedida
-        if (!currentPlaybackResponse.ok) {
-            throw new Error(`Failed to get current playback. Status: ${currentPlaybackResponse.status}`);
-        }
-
-        const currentPlaybackData = await currentPlaybackResponse.json();
-        const currentPositionMs = currentPlaybackData.progress_ms;
-
-        // Avançar 3 segundos (3000 milissegundos) a partir da posição atual
-        const newPositionMs = currentPositionMs + 3000;
-
-        // Fazer uma solicitação fetch para mover a reprodução para a nova posição
-        const skipResponse = await fetch(`https://api.spotify.com/v1/me/player/seek?position_ms=${newPositionMs}`, {
-            method: 'PUT',
-            headers: {
-                'Authorization': `Bearer ${accessToken}`
-            }
-        });
-
-        // Verificar se a solicitação de avanço foi bem-sucedida
-        if (!skipResponse.ok) {
-            throw new Error(`Failed to skip forward. Status: ${skipResponse.status}`);
-        }
-
-        console.log('Skipped forward successfully.');
-    } catch (error) {
-        console.error('Error skipping forward: ', error.message);
-    }
-}
-
-async function skipBackward() {
-    try {
-        // Recuperar o token de acesso do armazenamento local do navegador
-        const accessToken = localStorage.getItem('accessToken');
-
-        // Verificar se o token de acesso está em cache
-        if (!accessToken) {
-            console.log('Access token not found. Cannot skip backward.');
-            return;
-        }
-
-        // Obter a posição atual da reprodução
-        const currentPlaybackResponse = await fetch('https://api.spotify.com/v1/me/player', {
-            method: 'GET',
-            headers: {
-                'Authorization': `Bearer ${accessToken}`
-            }
-        });
-
-        // Verificar se a solicitação foi bem-sucedida
-        if (!currentPlaybackResponse.ok) {
-            throw new Error(`Failed to get current playback. Status: ${currentPlaybackResponse.status}`);
-        }
-
-        const currentPlaybackData = await currentPlaybackResponse.json();
-        const currentPositionMs = currentPlaybackData.progress_ms;
-
-        // Retroceder 3 segundos (3000 milissegundos) a partir da posição atual
-        let newPositionMs = currentPositionMs - 3000;
-
-        // Verificar se a nova posição é menor que zero (começo da faixa)
-        if (newPositionMs < 0) {
-            newPositionMs = 0; // Definir a nova posição como zero para evitar valores negativos
-        }
-
-        // Fazer uma solicitação fetch para mover a reprodução para a nova posição
-        const skipResponse = await fetch(`https://api.spotify.com/v1/me/player/seek?position_ms=${newPositionMs}`, {
-            method: 'PUT',
-            headers: {
-                'Authorization': `Bearer ${accessToken}`
-            }
-        });
-
-        // Verificar se a solicitação de retrocesso foi bem-sucedida
-        if (!skipResponse.ok) {
-            throw new Error(`Failed to skip backward. Status: ${skipResponse.status}`);
-        }
-
-        console.log('Skipped backward successfully.');
-    } catch (error) {
-        console.error('Error skipping backward: ', error.message);
-    }
-}
-
-

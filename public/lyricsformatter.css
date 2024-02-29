@@ -1377,9 +1377,8 @@ hr {
         flex-direction: column;
         justify-content: space-between;
         height: 100%;
-        background-color: #282828;
-        border-radius: 18px;
         box-sizing: border-box;
+        border-top: 2px solid #252525;;
     }
 
     .sp_search {
@@ -1394,10 +1393,8 @@ hr {
         flex-direction: column;
         justify-content: flex-end; /* Isso alinhará o item no final da div verticalmente */
         width: 100%;
-        height: 80px;
-        background-color: #282828;
-        border-radius: 18px;
     }
+
 
     /* SP PLAYER REAL */
 
@@ -1406,8 +1403,6 @@ hr {
         display: flex;
         flex-direction: column;
         justify-content: space-between;
-        background-color: #282828;
-        border-radius: 18px;
         box-sizing: border-box;
 
     }
@@ -1422,7 +1417,6 @@ hr {
         width: 100%;
         height: 100%;
         padding: 5px 8px;
-        border-radius: 18px;
         position: relative;
     }
     
@@ -1471,6 +1465,11 @@ hr {
         border-radius: 50%;
     }
 
+    .no_playback {
+        color: #fff;
+        user-select: none;
+    }
+
     .devices_options {
         position: fixed; /* Posiciona o menu em relação à janela de visualização */
         background-color: #282828;
@@ -1501,8 +1500,7 @@ hr {
     .sp_album_art, .sp_album_art img {
         width: 70px;
         height: 70px;
-        border-radius: 12px;
-        background-color: #4a4a4a;
+        background-color: #353535;
     }
 
     .sp_album_art:hover {
