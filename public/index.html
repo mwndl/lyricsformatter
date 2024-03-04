@@ -9,6 +9,8 @@
     <link rel="stylesheet" href="lyricsformatter.css">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="script_formatter.js"></script>
+    <script src="spotify_integration.js"></script>
+    <script src="langtool_integration.js"></script>
     <link rel="icon" href="/images/favicon.ico" type="image/x-icon">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" integrity="sha384-e3b0a8b1e4095176f4a6f42c37b4efb51337fba6c937e281a5f3800f76475893" crossorigin="anonymous">
     <title>LyricsFormatter</title>
@@ -44,7 +46,7 @@
     
         <div class="main">
             <div class="main_content">
-                <div class="main_left" id="main_left" style="margin: 0 0 0 0">
+                <div class="main_left" id="main_left" style="height: 100%;">
                     <div class="lyrics_box" id="lyrics_box">
                         <div class="editor-container">
                             <div class="line_issues" id="line_issues"></div>
@@ -266,10 +268,20 @@
                         </div>
                     </div>
                 </div>
-                <div class="popup_option">
+                <div class="popup_option" style="display:none">
                     <div class="popup_title">
                         <p class="popup_option_title">Autoplay</p>
                         <p class="popup_option_description">Automatically transfer the playback to LyricsFormatter upon opening the website.</p>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="spAutoPlay" onclick="checkContent()">
+                        <span class="slider round"></span>
+                    </label>
+                </div>
+                <div class="popup_option" style="display:none">
+                    <div class="popup_title">
+                        <p class="popup_option_title">Transfer playback to Studio</p>
+                        <p class="popup_option_description">Transfer the playback to Studio, if available, by tapping the copy button.</p>
                     </div>
                     <label class="switch">
                         <input type="checkbox" id="spAutoPlay" onclick="checkContent()">
@@ -501,7 +513,7 @@
 
                         player.addListener('authentication_error', ({ message }) => {
                             console.error(message);
-                            notification('Spotify authentication failed, please refresh the page');
+                            fetchUserData()
                         });
 
                         player.addListener('account_error', ({ message }) => {
@@ -579,6 +591,7 @@
                             });
 
                         });
+
 
                         // Função para atualizar a barra de progresso com base na posição atual da música
                         function updateProgressBar(position, duration) {
@@ -707,7 +720,7 @@
                             document.getElementById('sp_connect_icon_green').style.display = 'none'
                             document.getElementById('sp_connect_icon_white').style.display = 'block'
                             document.getElementById('devices_options').style.bottom = '150px'
-                            document.getElementById('main_left').style.margin = '0 0 35px 0'
+                            document.getElementById('main_left').style.height = 'calc(100% - 40px)'
                         }
                         function hideTracker() {
                             document.getElementById('sdk_player').style = 'display:none';
@@ -715,7 +728,7 @@
                             document.getElementById('sp_connect_icon_green').style.display = 'block'
                             document.getElementById('sp_connect_icon_white').style.display = 'none'
                             document.getElementById('devices_options').style.bottom = '105px'
-                            document.getElementById('main_left').style.margin = '0 0 0 0'
+                            document.getElementById('main_left').style.height = '100%'
                         }
 
                         // Quando uma nova música é reproduzida, obtenha a posição atual se estiver disponível
