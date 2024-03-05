@@ -231,6 +231,17 @@ function handleRefreshButtonClick() {
         textArea.focus();
     });
 
+    // mantem o scroll na posição atual quando há input (para ele não subir ao topo)
+    textarea.addEventListener("input", function() {
+        // salva a posição atual do scroll
+        var scrollTop = textarea.scrollTop;
+        var scrollLeft = textarea.scrollLeft;
+    
+        // restaura a posição do scroll
+        textarea.scrollTop = scrollTop;
+        textarea.scrollLeft = scrollLeft;
+    });
+
 
     textarea.addEventListener('input', updateSidebar);
     textarea.addEventListener('input', checkContent);
