@@ -1,0 +1,2253 @@
+#notification {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: white;
+    height: 40px;
+    border-radius: 8px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    transition: opacity 0.5s ease-in-out;
+    z-index: 1;
+  }
+  
+  .notification-content p {
+    width: 100%;
+    color: #2a2a2a;
+    opacity: 100;
+    margin: 15px;
+    user-select: none;
+  }
+  
+  .bold {
+    font-weight: bold;
+  }
+  
+  /* DESKTOP */
+  
+  * {
+    margin: 0;
+    padding: 0;
+  }
+  
+  body {
+    font-family: 'Exo', sans-serif;
+    background-color: #131313;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  /* Remover estilizações de links */
+  a {
+    text-decoration: none;
+    color: inherit; /* Para herdar a cor do texto pai */
+  }
+  
+  /* Adicionar sublinhado apenas ao passar o mouse (hover) */
+  a:hover {
+    text-decoration: underline;
+  }
+  
+  /* TOP - START */
+  .top {
+    width: 100%;
+    height: 60px;
+    min-height: 60px;
+    color: white;
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid #252525; /* Adiciona uma borda cinza fina na parte inferior */
+  }
+  
+  .return {
+    width: 70px;
+    height: 100%;
+    margin: auto;
+    display: flex; /* Adiciona display flex para .return */
+    align-items: center; /* Centraliza verticalmente os itens dentro de .return */
+    justify-content: center; /* Centraliza horizontalmente os itens dentro de .return */
+  }
+  
+  .return_arrow {
+    width: 30%;
+    height: 30%;
+    background-size: cover;
+    margin: auto;
+    user-select: none;
+  }
+  
+  .page_title {
+    width: 84%;
+    height: 100%;
+    flex-grow: 1;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    font-weight: bold;
+    user-select: none;
+  }
+  
+  .settings {
+    width: 70px;
+    height: 100%;
+    background-size: cover;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .options_dots {
+    width: 50%;
+    height: 50%;
+    user-select: none;
+  }
+  
+  /* Estilo para o mini menu */
+  .mini-menu {
+    user-select: none;
+    display: none;
+    position: absolute;
+    background-color: #333333; 
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+    box-shadow: 0 5px 11px rgba(0, 0, 0, 0.1); 
+    width: 250px;
+    z-index: 1;
+    top: 66px; 
+    right: 55px; 
+    color: #ffffff;
+  }
+  
+  .mini-menu ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+  }
+  
+  .mini-menu ul li {
+    padding: 12px 15px;
+    cursor: pointer;
+    font-size: 18px;
+    transition: background-color 0.3s ease;
+  }
+  
+  .mini-menu ul li:hover {
+    background-color: rgba(255, 255, 255, 0.1); /* Ajuste para destacar a cor do hover */
+  }
+  
+  /* Spotify */
+  
+  .spotify_login {
+    margin-left: 20px; /* Ajuste conforme necessário */
+    height: 20%;
+    display: flex;
+    align-items: center;
+  
+  }
+  
+  .spotify_button {
+    background-color: #1DB954;
+    color: white;
+    padding: 5px 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+  }
+  
+  .spotify_logo {
+    height: 20px;
+    width: 20px;
+    vertical-align: middle;
+    margin-right: 5px;
+  }
+  
+  /**/
+  
+  /* foto de usuario */
+  
+  .user-profile {
+    position: relative;
+    display: inline-block;
+    cursor: pointer;
+  }
+  
+  .user-menu {
+    position: absolute;
+    top: 40px; /* Adjust as needed */
+    right: 0;
+    font-size: 12px;
+    font-weight: bold;
+    background-color: #434343;
+    border-radius: 5px;
+    display: none;
+    text-align: center;
+    width: 140px;
+    z-index: 1;
+  }
+  
+  .user-menu ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+  }
+  
+  .user-menu ul li {
+    padding: 10px;
+    cursor: pointer;
+    border-radius: 5px;
+  }
+  
+  .user-menu ul li:hover {
+    background-color: #393939;
+  }
+  
+  .user-photo {
+    width: 50px; 
+    height: 50px; 
+    border-radius: 50%;
+    margin-right: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+  }
+  
+  .user-profile:hover .user-menu {
+    display: block;
+  }
+  
+  .sp_icon_prof_picture {
+    position: absolute;
+    bottom: 5px; /* Ajuste conforme necessário */
+    right: 5px; /* Ajuste conforme necessário */
+    width: 30px; /* Ajuste conforme necessário */
+    height: 30px; /* Ajuste conforme necessário */
+    z-index: 2; /* Para garantir que o ícone do Spotify esteja acima da imagem de perfil */
+    margin: 5px; /* Ajuste conforme necessário para separar a imagem do usuário e o logotipo do Spotify */
+  }
+  
+  /**/
+  
+  
+  
+  /* TOP - END */
+  
+  /* MAIN - START */
+  
+  .main {
+    display: flex;
+    width: 100%;
+    height: calc(100% - 68px);
+  }
+  
+  .main_content {
+    display: flex;
+    width: 100%;
+    height: 100%;
+    padding: 0px 5px 0 5px;
+    box-sizing: border-box;
+  }
+  
+  /* Estilos para o pop-up */
+  .popup {
+    width: 500px;
+    border-radius: 20px;
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    padding: 10px;
+    transform: translate(-50%, -50%);
+    background-color: #282828;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+    z-index: 1000;
+    color: white;
+    user-select: none;
+  }
+  
+  .popup_content {
+    max-height: 400px; /* Altura máxima do conteúdo com scroll */
+    overflow-y: auto; /* Adiciona a barra lateral de rolagem quando necessário */
+    min-height: 200px;
+    position: relative;
+  }
+  
+  /* Estilização da barra de rolagem */
+  .popup_content::-webkit-scrollbar {
+    width: 2px;
+    border-radius: 5px; /* Bordas arredondadas */
+  }
+  
+  .popup_content::-webkit-scrollbar-thumb {
+    background-color: #686868;
+    border-radius: 5px; /* Bordas arredondadas */
+  }
+  
+  /* Para navegadores Firefox */
+  .popup_content {
+    scrollbar-width: thin;
+    scrollbar-color: #383838 #282828; /* Cor da barra e do fundo */
+  }
+  
+  .popup_content::-webkit-scrollbar-track {
+    background: #131313;
+    border-radius: 5px; /* Bordas arredondadas */
+  }
+  
+  /* Estilizando o formulário dentro do popup */
+  .popup_content form {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    box-sizing: border-box;
+  }
+  
+  .popup_content select,
+  .popup_content input[type="text"] {
+    width: 100%;
+    padding: 12px;
+    border: none;
+    border-radius: 5px;
+    background-color: #444;
+    color: #fff;
+    outline: none;
+    box-sizing: border-box;
+  }
+  
+  .popup_details {
+    max-width: 100%;
+    height: 130px;
+    vertical-align: top; 
+    overflow-wrap: break-word; 
+  }
+  
+  .popup_content select {
+    /* Estilo adicional para o menu seletor */
+    appearance: none;
+  }
+  
+  .popup_content input[type="text"]::placeholder {
+    color: #ccc; /* Cor do texto do espaço reservado */
+  }
+  
+  #aboutContent {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 20px;
+  }
+  
+  .section {
+    margin-bottom: 20px;
+  }
+  
+  h3 {
+    margin-bottom: 10px;
+    text-align: left; /* Alinha o texto à esquerda */
+    width: 100%;
+  }
+  
+  hr {
+    border: 1px solid #646464;
+    width: 100%;
+    margin: 20px 0;
+  }
+  
+  .server_info {
+    text-align: left;
+    width: 100%;
+  }
+  
+  .bold {
+    font-weight: bold;
+  }
+  
+  
+  
+  
+    #closeButton {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        width: 35px;
+        height: 35px;
+        border-radius: 50%;
+        background-color: white;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+  
+    #closeButton:hover {
+        background-color: rgb(218, 218, 218);
+    }
+    
+    #closeButton:before,
+    #closeButton:after {
+        content: '';
+        position: absolute;
+        width: 3px;
+        height: 20px;
+        background-color: #282828;
+        border-radius: 5px; /* Borda arredondada para os traços */
+    }
+    
+    #closeButton:before {
+        transform: rotate(45deg);
+    }
+    
+    #closeButton:after {
+        transform: rotate(-45deg);
+    }
+  
+    /* Estilos para o fundo embaçado */
+    #overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5); /* Ajuste o último valor para tornar o fundo mais escuro e embaçado */
+        z-index: 999;
+        backdrop-filter: blur(2px); /* Adiciona o efeito de embaçamento ao fundo */
+    }
+  
+  
+  
+            /* Swith */
+  
+        /* The switch - the box around the slider */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 67px;
+            height: 34px;
+        }
+        
+        /* Hide default HTML checkbox */
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+        /* The slider */
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            -webkit-transition: .4s;
+            transition: .4s;
+        }
+        
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            -webkit-transition: .4s;
+            transition: .4s;
+        }
+        
+        input:checked + .slider {
+            background-color: #2196F3;
+        }
+        
+        input:focus + .slider {
+            box-shadow: 0 0 1px #2196F3;
+        }
+        
+        input:checked + .slider:before {
+            -webkit-transform: translateX(26px);
+            -ms-transform: translateX(26px);
+            transform: translateX(26px);
+        }
+        
+        /* Rounded sliders */
+        .slider.round {
+            border-radius: 34px;
+        }
+        
+        .slider.round:before {
+            border-radius: 50%;
+        }
+  
+        /* Swith end */
+        
+        .popup_title {
+            width: 100%;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            box-sizing: border-box;
+        }
+        
+        .popup_option_title {
+            font-weight: bold;
+        }
+        
+        .popup_option_description {
+            font-size: 12px;
+            color: #ababab;
+        }
+  
+    .popup_description {
+        height: 10%;
+        width: 100%;
+        padding: 10px;
+        display: flex;
+        text-align: start;
+        align-items: center;
+        justify-content: flex-start;
+        box-sizing: border-box;
+    }
+  
+    .popup_content {
+        height: 90%;
+        width: 100%;
+        padding: 10px;
+        display: flex;
+        flex-direction: column;
+        text-align: start;
+        align-items: center;
+        justify-content: flex-start;
+        box-sizing: border-box;
+    }
+  
+    .dev_hided_div {
+        width: 100%;
+    }
+  
+    .popup_option {
+        height: 20%;
+        width: 100%;
+        font-size: 18px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin: 5px 0 5px 0;
+    }
+  
+    .number_selector {
+        display: flex;
+        align-items: center;
+    }
+    
+    .number_selector svg {
+        width: 20px; /* Largura fixa para o SVG */
+        height: 20px; /* Altura fixa para o SVG */
+    }
+    
+    .number_selector span {
+        width: 20px; /* Largura fixa para o número */
+        text-align: center;
+    }
+  
+    .loading, .error {
+        text-align: center;
+        margin-top: 50px;
+    }
+    
+    .error {
+        color: red;
+    }
+  
+  
+    /* Credits */
+  
+    .colaborator {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        margin-bottom: 10px; /* Ajuste conforme necessário */
+        background-color: #333; /* Cor de fundo cinza escuro */
+        border-radius: 8px; /* Border radius */
+        padding: 10px;
+        box-sizing: border-box;
+        transition: background-color 0.3s; /* Transição suave de cor de fundo */
+        text-decoration: none; /* Remove o sublinhado padrão */
+        color: inherit; /* Mantém a cor do texto padrão */
+    }
+  
+    .colaborator:hover {
+        background-color: #444; /* Cor de fundo cinza mais escura no hover */
+    }
+  
+    .colaborator_image {
+        width: 50px;
+        height: 50px;
+        margin-right: 15px;
+        border-radius: 50%;
+        background-color: #666;
+        position: relative;
+        pointer-events: none; /* Impede que o elemento receba eventos do ponteiro do mouse */
+    }
+    
+    .colaborator_image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover; /* Garante que a imagem cubra totalmente o contêiner redondo */
+        border-radius: 50%; /* Mantém a imagem redonda */
+        background-color: #666;
+        overflow: hidden; /* Permite que o conteúdo do colaborator_country fique visível fora dos limites da imagem */
+    }
+    
+    .colaborator_country {
+        position: absolute;
+        bottom: -2px;
+        right: -5px;
+        font-size: 20px; /* Ajuste o tamanho do emoji conforme necessário */
+        z-index: 9999;
+    }
+  
+    .colaborator_info {
+        flex-grow: 1; /* Ocupa todo o espaço disponível restante */
+    }
+  
+    .colaborator_name {
+        font-size: 18px; /* Ajuste o tamanho da fonte conforme necessário */
+        font-weight: 525;
+        color: #fff; /* Cor do texto branca */
+        align-items:end;
+    }
+  
+    .colaborator_role {
+        font-size: 11px; /* Ajuste o tamanho da fonte conforme necessário */
+        color: #000; /* Cor do texto preta */
+        background-color: #fff; /* Cor de fundo branca */
+        padding: 1px 3px; /* Espaçamento interno */
+        border-radius: 4px; /* Border radius */
+        display: inline-block; /* Para que o elemento não ocupe toda a largura */
+        margin: 5px 1px; /* Espaçamento entre o nome e o papel (role) */
+    }
+  
+    .colaborator_languages {
+        font-size: 11px; /* Ajuste o tamanho da fonte conforme necessário */
+        color: #fff; /* Cor do texto preto */
+        background-color: #111; /* Cor de fundo cinza mais escuro */
+        padding: 1px 3px; /* Espaçamento interno */
+        border-radius: 4px; /* Border radius */
+        display: inline-block; /* Para que o elemento não ocupe toda a largura */
+        margin: 5px 1px; /* Espaçamento entre o papel (role) e as linguagens */
+        box-sizing: border-box;
+    }
+  
+  /* MAIN LEFT */
+  
+    .main_left {
+        flex-grow: 1;
+        box-sizing: border-box;
+        border-right: 1px solid #252525; /* Adiciona uma borda cinza fina na lateral esquerda */
+    }
+  
+    .lyrics_box {
+        width: 100%;
+        height: 100%;
+        box-sizing: border-box;
+        background-color: #181818;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        line-height: 21px;
+        cursor: text;
+    }
+  
+    .editor-container {
+        width: 100%;
+        height: 100%;
+        display: inline-flex;
+        gap: 10px;
+        font-family: monospace;
+        line-height: 21px;
+        overflow: auto;
+    }
+  
+    .character_counter {
+        height: 100%;
+        text-align: center;
+        width: 3%;
+        font-size: 12px;
+        color: #8a8a8a;
+        position: relative;
+        pointer-events: none;
+        line-height: 21px;
+        overflow-y: scroll;
+        height: 100%;
+        user-select: none;
+        /* Oculta a barra de rolagem, mas permite rolar */
+        scrollbar-width: none; /* Firefox */
+        -ms-overflow-style: none; /* IE and Edge */
+    }
+    
+    /* Estilização para navegadores que não suportam scrollbar-width */
+    .character_counter::-webkit-scrollbar {
+        display: none; /* Chrome, Safari, Opera */
+    }
+  
+    .editor {
+        line-height: 21px;
+        padding: 0 5px 0 0;
+        flex: 1;
+        width: 100%;
+        height: 100%;
+        border: none;
+        outline: none;
+        background-color: transparent;
+        color: white;
+        font-size: 18px;
+        resize: none;
+        overflow: auto; /* ou scroll */
+        white-space: nowrap; /* Impede a quebra de linha */
+        scrollbar-width: thin;
+        scrollbar-color: transparent transparent;
+        position: relative;
+    }
+  
+    .languagetool-suggestion {
+        background-color: #ffff00;
+        color: #000000;
+        font-size: 12px;
+        font-weight: bold;
+        padding: 2px 4px;
+        margin: 0;
+      }
+    
+    #editor .selected-line {
+        background-color: yellow; /* Altere para a cor desejada */
+        position: absolute;
+        width: 100%;
+        height: 1.2em; /* Ajuste conforme necessário para o destaque desejado */
+        pointer-events: none; /* Para permitir a interação com o textarea */
+    }
+  
+    .editor::-webkit-scrollbar {
+        width: 0; /* Largura da barra de rolagem WebKit (Chrome, Safari) */
+    }
+  
+    .editor::-webkit-scrollbar-thumb {
+        background-color: transparent; /* Cor da "thumb" da barra de rolagem WebKit */
+    }
+  
+    .editor::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 20px; /* Largura do espaço recuado */
+        height: 100%;
+    }
+  
+    .line_issues {
+        height: 100%;
+        text-align: center;
+        width: 1%;
+        font-size: 12px;
+        position: relative;
+        pointer-events: none;
+        line-height: 21px;
+        overflow-y: scroll;
+        height: 100%;
+        user-select: none;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+        display: flex;
+        flex-direction: column; /* Adicionado para empilhar as linhas verticalmente */
+        align-items: center; /* Adicionado para centralizar as linhas horizontalmente */
+    }
+  
+    /* Estilização para navegadores que não suportam scrollbar-width */
+    .line_issues::-webkit-scrollbar {
+        display: none; /* Chrome, Safari, Opera */
+    }
+  
+    .status-1 {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        display: inline-block;
+        align-items: right;
+    }
+    
+    .status-gray {
+        background-color: #393939;
+    }
+    
+    .status-blue {
+        background-color: #0077c2;
+        box-shadow: 0 0 2px #0077c2;
+    }
+    
+    .status-red {
+        background-color: red;
+        box-shadow: 0 0 2px red;
+    }
+    
+    .status-yellow {
+        background-color: #edb51a;
+        box-shadow: 0 0 2px #edb51a;
+    }
+    
+    .status-green {
+        background-color: #4CAF50;
+        box-shadow: 0 0 2px #4CAF50;
+    }
+  
+  /* MAIN RIGHT */
+  
+    .main_right {
+        padding: 0 0px 0 5px;
+        display: flex;
+        flex-direction: column;
+        width: 25%;
+        min-width: 260px;
+        max-width: 350px;
+        height: 100%;
+        box-sizing: border-box;
+    }
+  
+    .language_selector,
+    .improvements_box,
+    .sp_player_div {
+        width: 100%;
+    }
+  
+    .language_selector {
+        height: 50px;
+        background-color: #616161;
+        border-radius: 18px;
+        position: relative;
+        cursor: pointer;
+        user-select: none;
+        margin: 5px 0 15px;
+    }
+  
+    .lang_selector_div {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+    }
+    
+    .language_selector .selected_language {
+        width: 85%;
+        height: 100%;
+        padding: 18px;
+        color: white;
+        font-size: 18px;
+        font-weight: bold;
+        font-family: Arial, sans-serif;
+        display: flex;
+        align-items: center;
+        box-sizing: border-box;
+    }
+  
+    .language_selector:hover {
+        background-color: #565656; /* Cor alterada no hover */
+    }
+  
+    .lang_expand_arrow {
+        width: 100%;
+        height: 100%;
+        transform: rotate(180deg);
+    }
+    
+    .language_selector .language_list {
+        padding: 10px;
+        list-style: none;
+        padding: 10px 5px;
+        margin: 5px 0 0 0;
+        display: none;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        width: 100%;
+        background-color: #383838;
+        border-radius: 15px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        box-sizing: border-box;
+        z-index: 1;
+    }
+    
+    .language_selector .language_list li {
+        border-radius: 10px;
+        padding: 10px;
+        color: #fff;
+    }
+  
+    .language_selector .language_list p {
+        padding: 12px 10px 12px 10px;
+        color: #898989;
+        cursor: auto;
+        user-select: none;
+        font-style: italic;
+    }
+    
+    .language_selector .language_list li:hover {
+        background-color: #2b2b2b;
+    }
+  
+    /* Tag Beta */
+    .language_selector .language_list .beta_tag {
+        background-color: #ff5353;
+        color: white;
+        padding: 3px 6px;
+        border-radius: 10px;
+        margin-left: 12px;
+        font-size: 12px;
+        font-weight: 700;
+        text-align: center;
+    }
+    
+    .language_selector .language_list .beta_tag:hover {
+        background-color: #ff3333;
+    }
+  
+    /* Tag New */
+    .language_selector .language_list .new_tag {
+        background-color: #3a8cff;
+        color: white;
+        padding: 3px 6px;
+        border-radius: 10px;
+        margin-left: 12px;
+        font-size: 12px;
+        font-weight: 700;
+        text-align: center;
+    }
+    
+    .language_selector .language_list .new_tag:hover {
+        background-color: #1b7aff;
+    }
+  
+    .improvements_box {
+        /* ALTURA PADRÃO E MÁXIMA DEFINIDA VIA JS COM BASE NA PRESENÇA DO PLAYER! */
+        margin: 0 0 15px;
+        background-color: #131313;
+        box-sizing: border-box;
+        user-select: none;
+        box-sizing: border-box;
+        padding: 0 5px;
+        flex-grow: 1;
+    }
+  
+    .improvements_box_top {
+        display: flex;
+        flex-direction: row;
+        width: 100%;
+        padding: 3px;
+        box-sizing: border-box;
+    }
+  
+    .improvements_box_text {
+        display: flex;
+        color: white;
+        font-size: 18px;
+        font-weight: bold;
+        padding: 0 8px;
+        box-sizing: border-box;
+        align-items: center;
+        width: 60%;
+        overflow: hidden;
+        white-space: nowrap;
+        margin-top: 5px;
+    }
+    
+    .improvements_box_text p {
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        align-items: center;
+    }
+  
+    .improvements_menu {
+        align-items: center; /* Alinha os itens verticalmente ao centro */
+        display: flex;
+        justify-content: space-between;
+        width: 100%;
+        height: 100%;
+        box-sizing: border-box;
+        margin: 8px 0;
+    }
+  
+    .improvements_option {
+      align-items: center; /* Alinha os itens verticalmente ao centro */
+      display: flex;
+    }
+  
+    .improvement_buttons {
+      align-items: center; /* Alinha os itens verticalmente ao centro */
+      display: flex;
+    }
+  
+    .reset_div {
+        display: flex;
+        align-items: center; /* Alinha os itens verticalmente ao centro */
+        justify-content: space-between;
+        width: 30px;
+        height: 100%;
+        margin-right: 10px;
+    }
+  
+    .refresh_div {
+        display: flex;
+        align-items: center; /* Alinha os itens verticalmente ao centro */
+        justify-content: flex-end;
+        width: 30px;
+        height: 100%;
+    }
+  
+    /* Refresh icon */
+        .refresh_button {
+            width: 30px;
+            height: 30px;
+            background-color: #ffffff;
+            box-shadow: rgba(0, 0, 0, 0.494) 1px 3px 12px;
+            display: flex;
+            cursor: pointer;
+            position: absolute;
+            border-radius: 50%;
+            border-width: 0.1px;
+            border-style: solid;
+            border-color: rgba(198, 197, 197, 0.475);
+            border-image: initial;
+            display: none;
+            padding: 5px;
+        }
+        
+        .refresh_button:hover {
+            background-color: #d2d2d2;
+        }
+        
+        .refresh_symbol {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+        
+        .refresh_symbol {
+            width: 14px;
+            height: 14px;
+            background-image: url(/images/refresh_symbol.png);
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center center;
+        }
+        
+        @keyframes loading_spinner {
+            0% {
+                transform: translate(-50%,-50%) rotate(0deg);
+            }
+        
+            100% {
+                transform: translate(-50%,-50%) rotate(360deg);
+            }
+        }
+  
+        .loading_container { /* credits */
+            position: absolute;
+            top: -30px;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .loading_spinner div { 
+            position: absolute;
+            width: 14px;
+            height: 14px;
+            border: 3px solid #ffffff;
+            border-top-color: transparent;
+            border-radius: 50%;
+        }
+        
+        .loading_spinner div {
+            animation: loading_spinner 0.5291005291005291s linear infinite;
+            top: 15px;
+            left: 15px;
+        }
+        
+        .loading_spinner_loop {
+            width: 30px;
+            height: 30px;
+            display: inline-block;
+            overflow: hidden;
+        }
+        
+        .loading_spinner {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transform: translateZ(0) scale(1);
+            backface-visibility: hidden;
+            transform-origin: 0 0;
+        }
+        
+        .loading_spinner div {
+            box-sizing: content-box;
+        }
+        
+        @keyframes loading_spinner_2 {
+            0% {
+                transform: translate(-50%,-50%) rotate(0deg);
+            }
+        
+            100% {
+                transform: translate(-50%,-50%) rotate(360deg);
+            }
+        }
+        
+    /* Botão reset */
+  
+    .reset_button {
+        width: 30px;
+        height: 30px;
+        background-color: #6c6c6c;
+        box-shadow: rgba(0, 0, 0, 0.494) 1px 3px 12px;
+        display: flex;
+        cursor: pointer;
+        position: absolute;
+        border-radius: 50%;
+        border-width: 0.1px;
+        border-style: solid;
+        border-color: #6c6c6c;
+        border-image: initial;
+        display: none;
+        padding: 5px;
+    }
+    
+    .reset_button:hover {
+        background-color: #898989;
+    }
+    
+    .reset_symbol {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+    }
+    
+    .reset_symbol {
+        width: 14px;
+        height: 14px;
+        background-image: url(/images/reset.svg);
+        background-size: contain;
+        background-repeat: no-repeat;
+        background-position: center center;
+    }
+  
+    /* Menus */ 
+  
+    .improvements_box_menu {
+          display: flex;
+          flex-direction: row;
+          width: 100%;
+          height: 50px;
+          padding: 3px;
+          box-sizing: border-box;
+      }
+  
+      .improvements_box_options {
+          align-items: center; /* Alinha os itens verticalmente ao centro */
+          display: flex;
+          justify-content: space-between;
+          width: 100%;
+          height: 100%;
+          box-sizing: border-box;
+      }
+  
+      .impr_menu_true {
+          display: flex;
+          background-color: #fff;
+          padding: 0 8px;
+          border-radius: 14px;
+          font-size: 12px;
+          height: 30px;
+          text-align: center;
+          align-items: center;
+          margin: 0 5px 0 0;
+          color: #000;
+      }
+
+    .impr_menu_true:hover {
+        background-color: #d2d2d2;
+    }
+
+      .impr_menu_false {
+        display: flex;
+        background-color: #6c6c6c;
+        padding: 0 8px;
+        border-radius: 14px;
+        font-size: 12px;
+        height: 30px;
+        text-align: center;
+        align-items: center;
+        margin: 0 5px 0 0;
+        color: #ffffff;
+    }
+
+    .impr_menu_false:hover {
+        background-color: #898989;
+    }
+  
+    /**/
+    
+  
+    .improvements_box_content {
+        width: 100%;
+        height: 95%;
+        overflow: auto;
+        margin: auto;
+    }
+  
+    /* Barra de rolagem */
+            /* Para navegadores Webkit (Chrome, Safari, etc.) */
+            .improvements_box_content::-webkit-scrollbar {
+                width: 6px;
+            }
+            
+            .improvements_box_content::-webkit-scrollbar-thumb {
+                background-color: #686868;
+                border-radius: 10px;
+            }
+            
+            /* Para navegadores Firefox */
+            .improvements_box_content {
+                scrollbar-width: thin;
+                scrollbar-color: #383838 #131313; /* Cor da barra e do fundo */
+            }
+            
+            .improvements_box_content::-webkit-scrollbar-track {
+                background: #131313;
+                border-radius: 10px;
+            }
+    /**/
+  
+    .improvements {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+    }
+  
+    .improvements_placeholder_div {
+        width: 100%;
+        height: 100%;
+        padding: 5px;
+        color: white;
+        box-sizing: border-box;
+        margin-bottom: 10px;
+    }
+  
+    .improvements_placeholder {
+        width: 100%;
+        height: 100%;
+        border-radius: 15px;
+        background-color: #4a4a4a;
+        text-align: center;
+        align-items: center;
+        justify-content: center;
+        padding: 25px;
+        box-sizing: border-box;
+        color: white;
+    }
+  
+    .container_no_issues {
+        width: 100%;
+        box-sizing: border-box;
+        color: #fff;
+        background-color: #0077c2;
+        margin-bottom: 10px;
+        overflow: hidden;
+        transition: max-height 0.3s;
+        cursor: pointer;
+        border-radius: 15px;
+        padding: 5px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+  
+    .content_ok {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+    }
+    
+    .container {
+        width: 100%;
+        height: 15%;
+        color: #fff;
+        background-color: #282828;
+        margin-bottom: 10px;
+        overflow: hidden;
+        transition: max-height 0.3s;
+        cursor: pointer;
+        border-radius: 15px;
+    }
+  
+    .container:hover {
+        background-color: #212121;
+    }
+    
+    .container h2 {
+        margin: 0;
+        padding: 10px;
+        font-size: 20px;
+    }
+  
+    .container_no_issues h2 {
+        margin: 0;
+        padding: 10px;
+        font-size: 16px;
+    }
+    
+    .container .content {
+        display: none;
+        padding: 10px;
+    }
+  
+    .container .content_text {
+        margin-bottom: 10px;
+        color: #e4e4e4;
+    }
+  
+    .highlight_text {
+        font-weight: 750;
+        color: #ffffff;
+    }
+  
+    .selected-line {
+        background-color: yellow;
+        color: black;
+    }
+  
+    .container .content_obs {
+        font-size: 14px;
+        font-style: italic;
+        margin-bottom: 10px;
+        color: #d6d6d6;
+    }
+  
+    .container .content_options_grammar {
+        width: 100%;
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap; /* Esta linha é a chave para quebrar os itens para a próxima linha */
+        margin-top: 20px;
+    }
+
+    .container .grammar_replace_btn {
+        padding: 3px 5px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 8px;
+        background-color: #0091ec;
+        border: 1px solid #0075be;
+        font-size: 12px;
+        color: white;
+        margin: 0 3px 0 0;
+    }
+
+    .container .grammar_ignore_btn {
+        padding: 3px 5px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 8px;
+        background-color: rgb(20, 20, 20);
+        font-size: 14px;
+        color: white
+    }
+
+    .container .content_options {
+        width: 100%;
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        margin-top: 20px;
+    }
+  
+    .container .content_learn_more {
+        width: 25%;
+        font-size: 14px;
+        font-style: italic;
+        text-decoration: underline;
+        display: flex;
+        align-items: center;
+        color: inherit; /* ou color: transparent; ou color: initial; ou qualquer outra cor desejada */
+    }
+    
+    .container .content_buttons {
+        width: 50%;
+        display: flex;
+        flex-direction: row;
+        justify-content: flex-end; /* Para alinhar os itens à direita */
+        font-size: 12px;
+        color: red;
+    }
+  
+    .container .content_ignore_btn {
+        min-width: 80px;
+        height: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 25px;
+        background-color: rgb(20, 20, 20);
+        font-size: 14px;
+        color: white;
+    }
+  
+    .container .content_ignore_btn:hover {
+        background-color: rgb(6, 6, 6);
+    }
+  
+    .container .content_fix_btn {
+        min-width: 50px;
+        height: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 25px;
+        background-color: white;
+        font-size: 14px;
+        color: black;
+        margin: 0 0 0 8px
+    }
+  
+    .container .content_fix_btn:hover {
+        background-color: rgb(210, 210, 210);
+    }
+  
+    .content_copy_btn {
+        min-width: 70px;
+        max-width: 75px;
+        height: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 25px;
+        background-color: white;
+        font-size: 14px;
+        color: black;
+        margin: 0 5px 0 0;
+    }
+  
+    .container_no_issues .content_copy_btn:hover {
+        background-color: rgb(210, 210, 210);
+    }
+  
+  
+    .no_errors_found_div {
+        width: 100%;
+        height: 100%;
+        background-color: #ff0000;
+    }
+  
+    .sp_player_div {
+        box-sizing: border-box;
+        background-color: #131313;
+    }
+  
+    .sp_player_div_content {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        height: 100%;
+        box-sizing: border-box;
+        border-top: 2px solid #252525;
+        margin: 5px 0 0 0;
+    }
+  
+    .sp_search {
+        width: 100%;
+        height: 30%;
+        box-sizing: border-box;
+    }
+  
+  
+    .sp_player {
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end; /* Isso alinhará o item no final da div verticalmente */
+        width: 100%;
+    }
+  
+  
+    /* SP PLAYER REAL */
+  
+    .spotify_player {
+        width: 100%; 
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        box-sizing: border-box;
+  
+    }
+  
+  
+      
+    .sp_web_player {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        box-sizing: border-box;
+        width: 100%;
+        height: 100%;
+        padding: 5px 8px;
+        position: relative;
+    }
+    
+    .sp_main {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        width: 100%;
+    }
+    
+    .sp_left,
+    .sp_right {
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .sp_left {
+        margin-right: 10px;
+        justify-content: center;
+    }
+    
+    .sp_right {
+        flex-grow: 1;
+        box-sizing: border-box;
+        height: 90%;
+        justify-content: flex-end
+    }
+    
+    .sp_up {
+        position: relative;
+        width: 100%;
+        display: flex;
+        justify-content: flex-end;
+    }
+  
+  
+    .button-container {
+        display: flex;
+        justify-content: flex-end;
+        position: absolute;
+    }
+  
+    .round-button {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+    }
+  
+    .no_playback {
+        color: #fff;
+        user-select: none;
+    }
+  
+    .playback_info {
+        display: flex;
+        flex-direction: row;
+        align-items: flex-end;
+        width: 100%;
+    }
+  
+    .devices_options {
+        position: fixed; /* Posiciona o menu em relação à janela de visualização */
+        background-color: #282828;
+        padding: 5px;
+        border-radius: 5px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        display: none; /* Inicia oculto */
+        z-index: 999; /* Garante que o menu esteja acima de outros elementos */
+        bottom: 105px;
+        right: 20px;
+    }
+    
+    .devices_options div {
+        display: block;
+        padding: 8px 12px;
+        text-decoration: none;
+        color: #ffffff;
+        transition: background-color 0.3s ease;
+    }
+    
+    .devices_options a:hover {
+        background-color: #ddd;
+    }
+  
+  
+    
+    
+    .sp_album_art, .sp_album_art img {
+        width: 70px;
+        height: 70px;
+        background-color: #353535;
+    }
+  
+    .sp_album_art:hover {
+        filter: brightness(95%); /* Reduz o brilho para escurecer a imagem em hover */
+    }
+    
+    .player-controls {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    /* Adjustments for SVG icons */
+    svg {
+        fill: #ffffff;
+        cursor: pointer;
+        margin: 0 5px;
+        transition: transform 0.3s ease;
+    }
+    
+    svg:hover {
+        transform: scale(1.1);
+    }
+  
+    .sp_title,
+    .sp_album,
+    .sp_artist {
+        overflow: hidden; 
+        text-overflow: ellipsis;
+        box-sizing: border-box;
+        overflow: hidden;
+        white-space: nowrap;
+    }
+    
+    .sp_title {
+        font-size: 15px;
+        font-weight: bold;
+        color: #fff;
+        text-overflow: ellipsis;
+    }
+    
+    .sp_album,
+    .sp_artist {
+        font-size: 11px;
+        color: #cecece;
+        text-overflow: ellipsis;
+        
+        width: 100%;
+    }
+  
+  
+    
+  
+    /**/
+    
+  
+    /* Search container */
+  
+    .search-container {
+        display: flex;
+        align-items: center;
+        justify-content: space-between; /* Distribui os elementos uniformemente */
+        background-color: #282828;
+        box-sizing: border-box;
+        width: 100%;
+        padding: 10px;
+        border-radius: 12px;
+        user-select: none;
+    }
+    
+    .search-container input[type="text"] {
+        flex: 1;
+        border: none;
+        background-color: transparent;
+        font-size: 16px;
+        color: #ffffff;
+        max-width: calc(100% - 100px); /* ajuste conforme necessário */
+        text-overflow: ellipsis; /* adiciona ... quando o texto ultrapassa a largura máxima */
+        overflow: hidden; /* oculta o texto que ultrapassa a largura máxima */
+        white-space: nowrap; /* impede que o texto seja quebrado em várias linhas */
+    }
+    
+    input.search-container::-webkit-autofill {
+        background-color: #282828;
+    }
+    
+    .search-container input[type="text"]:focus {
+        outline: none;
+    }
+    
+    .search-container button[type="submit"] {
+        background-color: transparent;
+        border: none;
+        color: #f0f0f0;
+        font-size: 16px;
+        cursor: pointer;
+        white-space: nowrap; /* impede que o texto seja quebrado em várias linhas */
+    }
+    
+    .search-container input[type="text"]::placeholder {
+        color: #999;
+    }
+  
+    /* mobile_expanded_content - DESKTOP */
+  
+    .mobile_expanded_content {
+        display: none;
+    }
+  
+  
+  
+  /* MAIN - END */
+  
+  .player {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    height: 60px;
+    width: 100%;
+    background-color: #131313; /* você pode alterar a cor de fundo conforme desejado */
+    border-top: 1px solid #252525;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;
+    box-sizing: border-box;
+    user-select: none;
+  }
+  
+  .controls-left, .controls-right {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .control-container {
+    margin: 0 4px;
+    width: 40px; /* Largura e altura ajustáveis conforme necessário */
+    height: 40px;
+    border-radius: 50%; /* Torna a div redonda */
+    overflow: hidden; /* Garante que a imagem dentro da div não ultrapasse os limites arredondados */
+    transition: background-color 0.3s; /* Adiciona uma transição suave para a mudança de cor */
+    display: flex; /* Ativa o modelo de flexbox */
+    justify-content: center; /* Alinha os itens horizontalmente ao centro */
+    align-items: center; /* Alinha os itens verticalmente ao centro */
+    background-color: #272727; /* você pode alterar a cor de fundo conforme desejado */
+    cursor: pointer;
+  }
+  
+  .control-container img {
+    display: block;
+    max-width: 50%;
+    max-height: 50%; /* Adicionado para garantir que a imagem não ultrapasse os limites da div */
+  }
+  
+  .control-container:hover {
+    background-color: #3a3a3a;
+  }
+  
+  .controls-center {
+    flex: 1;
+    margin: 0 20px;
+  }
+  
+  input[type="range"] {
+    width: 100%;
+    height: 6px;
+    -webkit-appearance: none;
+    background: #555;
+    outline: none;
+    border-radius: 5px;
+  }
+  
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 12px;
+    height: 12px;
+    background: #ffffff;
+    border-radius: 50%;
+    cursor: pointer;
+  }
+  
+  
+  
+  #play-pause-button {
+    position: relative;
+    width: 30px;
+    height: 30px;
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+  }
+  
+  #play-pause-button::before,
+  #play-pause-button::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    width: 6px;
+    height: 30px;
+    background-color: white;
+    border-radius: 10px;
+  }
+  
+  #play-pause-button::before {
+    left: 6px; /* Ajuste a distância da primeira barra para a direita */
+  }
+  
+  #play-pause-button::after {
+    right: 6px; /* Ajuste a distância da segunda barra para a esquerda */
+  }
+  
+  /* FOOTER - START */
+  
+  .footer {
+    width: 100%;
+    border-top: 1px solid #252525;
+  }
+  
+  .footer_message {
+    width: 100%;
+    flex-grow: 1;
+    color: white;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 60%;
+    user-select: none;
+  }
+  
+  .mobile_footer_div {
+    display:none;
+  }
+  
+  .development_message {
+    display:none;
+  }
+  
+  
+  /* FOOTER - END */
+  
+  
+  /* Estilos para celulares */
+  @media (max-width: 768px) {
+    * {
+        margin: 0;
+        padding: 0;
+    }
+  
+    body {
+        display: block;
+        font-family: 'Exo', sans-serif;
+        background-color: #181818;
+        height: 100vh;
+    }
+  
+    .development_message {
+        position: fixed;
+        padding: 10%;
+        box-sizing: border-box;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: #181818; /* Cor de fundo */
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999; /* Para garantir que a mensagem esteja na frente de outros elementos */
+        overflow: hidden; /* Para esconder partes dos pseudo-elementos que saem da div */
+    }
+    
+    .development_message h2, .development_message p {
+        color: white; /* Cor do texto */
+        text-align: center; /* Alinhamento do texto */
+        user-select: none;
+    }
+    
+    .development_message h2 {
+        font-size: 24px;
+        margin-bottom: 20px;
+    }
+    
+    .development_message p {
+        font-size: 18px;
+        margin-bottom: 40px;
+        color: #f1f1f1;
+    }
+    
+    /* Desenhos de fundo */
+    .development_message::before, .development_message::after {
+        content: '';
+        position: absolute;
+        background-color: #0077c2; /* Cor e opacidade das faixas */
+        width: 120px; /* Largura das faixas */
+        height: 20px; /* Altura das faixas */
+        border-radius: 10px; /* Borda arredondada */
+    }
+    
+    .development_message::before {
+        top: 20%;
+        left: 10%;
+    }
+    
+    .development_message::after {
+        bottom: 20%;
+        right: 10%;
+    }
+    
+    /* Adicione mais faixas conforme necessário */
+    
+    
+    
+  
+    /* TOP - START */
+  
+    .top {
+        width: 100%;
+        height: 8%;
+        color: white;
+        display: flex;
+        align-items: center;
+        background-color: #282828;
+    }
+  
+    .return {
+        width: 20%;
+        height: 100%;
+        margin: auto;
+        display: flex; /* Adiciona display flex para .return */
+        align-items: center; /* Centraliza verticalmente os itens dentro de .return */
+        justify-content: center; /* Centraliza horizontalmente os itens dentro de .return */
+    }
+  
+    .return_arrow {
+        width: 20%;
+        height: 20%;
+        background-size: cover;
+        margin: auto;
+        user-select: none;
+    }
+  
+    .page_title {
+        width: 60%;
+        height: 100%;
+        flex-grow: 1;
+        text-align: center;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 22px;
+        font-weight: bold;
+        user-select: none;
+    }
+  
+    .settings {
+        width: 20%;
+        height: 100%;
+        background-size: cover;
+        position: relative;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    
+    .options_dots {
+        display: inline;
+        width: 50%;
+        height: 50%;
+    }
+    
+  
+    /* TOP - END */
+  
+    /* MAIN - START */
+  
+  
+    .main_content {
+        display: flex;
+        width: 100%;
+        height: 100%;
+        box-sizing: border-box;
+        padding: 0;
+    }
+  
+    /* MAIN LEFT */
+  
+        .main_left {
+            width: 100%;
+            height: 100%;
+            box-sizing: border-box;
+            background-color: purple;
+            padding: 0;
+        }
+  
+        .lyrics_box {
+            width: 100%;
+            height: 100%;
+            border: none;
+            border-radius: 0px;
+            box-sizing: border-box;
+            box-shadow: none;
+            background-color: #181818;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px;
+            line-height: 21px;
+            cursor: text;
+        }
+  
+        .editor-container {
+            width: 100%;
+            height: 100%;
+            display: inline-flex;
+            gap: 10px;
+            font-family: monospace;
+            line-height: 21px;
+            overflow: auto;
+            touch-action: manipulation;
+        }
+  
+        .character_counter {
+            height: 100%;
+            text-align: center;
+            width: 5%;
+            font-size: 12px;
+            color: #8a8a8a;
+            position: relative;
+            pointer-events: none;
+            line-height: 21px;
+            overflow-y: scroll;
+            height: 100%;
+            user-select: none;
+            /* Oculta a barra de rolagem, mas permite rolar */
+            scrollbar-width: none; /* line_numbersFirefox */
+            -ms-overflow-style: none; /* IE and Edge */
+        }
+        
+        /* Estilização para navegadores que não suportam scrollbar-width */
+        .character_counter::-webkit-scrollbar {
+            display: none; /* Chrome, Safari, Opera */
+        }
+  
+        .editor {
+            line-height: 21px;
+            padding: 0 5px 0 0;
+            flex: 1;
+            width: 100%;
+            height: 100%;
+            border: none;
+            outline: none;
+            background-color: transparent;
+            color: white;
+            font-size: 18px;
+            white-space: normal;
+            resize: none; /* Impede o redimensionamento do textarea */
+            overflow: auto; /* Permite a rolagem */
+            scrollbar-width: thin; /* Firefox */
+            
+            scrollbar-color: transparent transparent; /* Firefox */
+            position: relative;
+        }
+  
+        .editor::-webkit-scrollbar {
+            width: 0; /* Largura da barra de rolagem WebKit (Chrome, Safari) */
+        }
+  
+        .editor::-webkit-scrollbar-thumb {
+            background-color: transparent; /* Cor da "thumb" da barra de rolagem WebKit */
+        }
+  
+        .editor::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 20px; /* Largura do espaço recuado */
+            height: 100%;
+        }
+  
+        .highlight {
+            background-color: yellow; /* Selecionador de texto dos containers */
+        }
+  
+    /* MAIN RIGHT */
+  
+        .main_right {
+            display: none;
+            flex-direction: column;
+            justify-content: space-between;
+            width: 25%;
+            height: 100%;
+        }
+  
+        .language_selector,
+        .improvements_box,
+        .sp_player_div {
+            width: 100%;
+        }
+  
+        .language_selector {
+            height: 10%;
+            background-color: #616161;
+            border-radius: 20px;
+        }
+  
+  
+        .improvements_box {
+            height: 63%;
+            background-color: #131313;
+            border-radius: 20px;
+        }
+  
+        .mobile_expanded_content {
+            display: block;
+        }
+  
+    /* MAIN - END */
+  
+    /* FOOTER - START */
+  
+    .footer {
+        width: 100%;
+        background-color: #383838;
+        border-top-left-radius: 20px;
+        border-top-right-radius: 20px;
+        box-sizing: border-box;
+        position: fixed;
+        bottom: 0; /* Inicialmente na parte inferior */
+        transition: height 0.3s ease; /* Adiciona uma transição suave para a animação */
+    }
+  
+    .mobile_footer_div {
+        width: 100%;
+        display: flex;
+    }
+  
+    .status_light_div {
+        width: 10%;
+        height: 100%;
+        margin: auto;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+  
+    .status_light {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        display: inline-block;
+        align-items: center;
+        max-width: 10px;
+        background-color: #fff;
+    }
+  
+    .status-gray {
+        background-color: #7a7a7a;
+    }
+  
+    .status-blue {
+        background-color: #0077c2;
+        box-shadow: 0 0 2px #0077c2;
+    }
+    
+    .status-yellow {
+        background-color: #edb51a;
+        box-shadow: 0 0 2px #edb51a;
+    }
+  
+    .mobile_footer_text {
+        margin: 0 0 0 5px;
+        width: 75%;
+        height: 100%;
+        color: white; /* Define a cor do texto como branca */
+        font-size: 16px;
+        display: flex; /* Utiliza flexbox */
+        align-items: center; /* Centraliza verticalmente */
+    }
+  
+    .mobile_footer_arrow {
+        width: 15%;
+        height: 100%;
+        margin: auto;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .expand_arrow {
+        width: 35%;
+        height: 35%;
+        background-size: cover;
+        margin: auto;
+        user-select: none;
+    }
+  
+    .footer_message {
+        display:none;
+    }
+    
+    .footer.expanded {
+        height: 80%; /* Ajuste a altura conforme necessário */
+    }
+  
+    .footer_hided_content {
+        height: 92%;
+    }
+  
+    .hided_content {
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0 2% 2%;
+        box-sizing: border-box;
+    }
+  
+    .improvements_box {
+        height: 88%;
+    }
+  
+    .language_selector {
+        height: 10%;
+        background-color: #616161;
+        border-radius: 20px;
+    }
+  
+    .lang_expand_arrow {
+        width: 20%;
+        height: 20%;
+        transform: rotate(180deg);
+    }
+  
+    
+  
+    /* FOOTER - END */
+  }
+  
