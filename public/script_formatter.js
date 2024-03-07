@@ -15,15 +15,11 @@ document.addEventListener('DOMContentLoaded', function () {
     var refreshButton = document.getElementById('refresh_button');
     var loadingSpinner = document.getElementById('loading_spinner');
 
-    var improvementsPlaceholder = document.getElementById('improvements_placeholder')
 
     const searchBtn = document.querySelector('#search_btn');
     const search_input = document.querySelector('#search_input');
-    const loading_spinner = document.querySelector('#loading_spinner');
     const spotifyIframePreview = document.querySelector('#spotify_iframe_preview');
 
-    const notification_div = document.getElementById("notification");
-    const message = document.getElementById("notification-message");
 
     var miniMenu = document.getElementById("mini_menu");
 
@@ -51,6 +47,7 @@ function handleRefreshButtonClick() {
     resetLineIssues();
     updateSidebar();
     clearTimeout(typingTimer); // auto 3s
+    fetchCurrentlyPlayingData()
 
     // Get references to the elements
     // Hide the refresh button and show the loading spinner
@@ -73,6 +70,16 @@ function handleRefreshButtonClick() {
     var requestData = {
         text: textArea.value,
     };
+
+    // Obter o valor de localHostToggle do localStorage
+    const localHostToggle = localStorage.getItem('localHostToggle');
+
+    // Verificar o valor de localHostToggle e definir window.serverPath
+    if (localHostToggle === 'true') {
+        window.serverPath = 'http://localhost:3000'; 
+    } else {
+        window.serverPath = 'https://datamatch-backend.onrender.com';
+    }
 
     fetch(`${window.serverPath}/formatter/${selectedLanguageCode}`, {
         method: 'POST',
@@ -98,45 +105,28 @@ function handleRefreshButtonClick() {
             // Handle the API response here
             console.log('API Response:', data);
 
-            // Remove existing HTML elements inside the improvements_containers
-            const improvementsContainer = document.getElementById('improvements_containers');
-            improvementsContainer.innerHTML = '';
+            // Remove existing HTML elements inside the format_containers
+            const formatContainer = document.getElementById('format_containers');
+            const grammarContainer = document.getElementById('grammar_containers');
+
+            formatContainer.innerHTML = '';
+            grammarContainer.innerHTML = '';
     
             if (data.result.issues === false) {
-                // Create and append the "No issues found" div
-                const noIssuesDiv = document.createElement('div');
-                noIssuesDiv.className = 'container_no_issues';
-                noIssuesDiv.id = 'container_no_issues';
-                noIssuesDiv.style.display = 'block';
-
-                const contentDiv = document.createElement('div');
-                contentDiv.className = 'content_ok';
-
-                const h2 = document.createElement('h2');
-                h2.textContent = 'No issues found! ✨';
-
-                const copyBtn = document.createElement('div');
-                copyBtn.className = 'content_copy_btn';
-                copyBtn.textContent = 'Copy';
-                copyBtn.onclick = copyToClipboard;
-
-                contentDiv.appendChild(h2);
-                contentDiv.appendChild(copyBtn);
-                noIssuesDiv.appendChild(contentDiv);
-
-                improvementsContainer.appendChild(noIssuesDiv);
+                // se não houverem erros, exibe o 'no issues'
+                checkAndShowPlaceholder();
             } else {
-                // Adiciona os containers HTML ao contêiner "improvements_containers"
+                // add os containers na box "format_containers"
                 for (const alertaKey in data.result.containers.alerts) {
                     const alerta = data.result.containers.alerts[alertaKey];
                     const container = createContainer(alerta.container);
                     
-                    // Verifica se o container não é null antes de adicioná-lo
+                    // verifica se o container recebido não é null antes de adicioná-lo
                     if (container !== null) {
-                        improvementsContainer.appendChild(container);
+                        formatContainer.appendChild(container);
                     }
-                    checkAndShowPlaceholder();
                 }
+                checkAndShowPlaceholder();
             }
 
         })
@@ -153,7 +143,7 @@ function handleRefreshButtonClick() {
 }
 
     resetButton.addEventListener('click', function() {
-    
+
         textArea.value = ''; // apaga a transcrição
         updateSidebar(); // reseta os contadores de caracteres e a barra lateral
         ignoredContainers = []; // limpa a memória de alertas ignorados
@@ -164,7 +154,7 @@ function handleRefreshButtonClick() {
 
     refreshButton.addEventListener('click', handleRefreshButtonClick);
 
-    // Função para lidar com a pesquisa
+    // função para lidar com a pesquisa
     const handleSearch = () => {
 
         const inputVal = search_input.value.trim();
@@ -205,14 +195,16 @@ function handleRefreshButtonClick() {
     }
 
     function notification(customMessage) {
+        const notification_div = document.getElementById("notification");
+        const message = document.getElementById("notification-message");
         message.textContent = customMessage;
         notification_div.style.opacity = 1;
         notification_div.classList.remove("hidden");
         setTimeout(() => {
-          notification_div.style.opacity = 0;
-          setTimeout(() => {
+        notification_div.style.opacity = 0;
+        setTimeout(() => {
             notification_div.classList.add("hidden");
-          }, 500);
+        }, 500);
         }, 4000); // Tempo de exibição
     };
 
@@ -242,6 +234,17 @@ function handleRefreshButtonClick() {
         textArea.focus();
     });
 
+    // mantem o scroll na posição atual quando há input (para ele não subir ao topo)
+    textarea.addEventListener("input", function() {
+        // salva a posição atual do scroll
+        var scrollTop = textarea.scrollTop;
+        var scrollLeft = textarea.scrollLeft;
+    
+        // restaura a posição do scroll
+        textarea.scrollTop = scrollTop;
+        textarea.scrollLeft = scrollLeft;
+    });
+
 
     textarea.addEventListener('input', updateSidebar);
     textarea.addEventListener('input', checkContent);
@@ -252,10 +255,12 @@ function handleRefreshButtonClick() {
 
     function checkContent() {
         var editor = document.getElementById('editor');
+        const improvementsOptions = document.getElementById('improvements_menu')
         var resetButton = document.getElementById('reset_button')
         var refreshButton = document.getElementById('refresh_button');
-        var refreshButtonMob = document.getElementById('refresh_button_mob');
-        var improvementsPlaceholder = document.getElementById('improvements_placeholder');
+
+        var improvementsPlaceholder1 = document.getElementById('improvements_placeholder1');
+        var improvementsPlaceholder2 = document.getElementById('improvements_placeholder2');
 
         var content = editor.value;
 
@@ -265,7 +270,8 @@ function handleRefreshButtonClick() {
             'autoTrimToggle',
             'removeDoubleSpacesAndLinesToggle',
             'autoCapTagsToggle',
-            'autoSuggestions'
+            'autoSuggestions',
+            'localHostToggle'
         ];
 
         checkboxIds.forEach(function (checkboxId) {
@@ -274,10 +280,15 @@ function handleRefreshButtonClick() {
         });
 
         if (content.trim() === '') {
+            improvementsOptions.style.display = 'none'
             resetButton.style.display = 'none';
             refreshButton.style.display = 'none';
-            improvementsPlaceholder.textContent = 'Type something or paste your transcription to start...';
-            improvementsPlaceholder.onclick = '';
+
+            improvementsPlaceholder1.textContent = 'Type something or paste your current transcription to check the format...';
+            improvementsPlaceholder2.textContent = 'Type something or paste your current transcription to check the grammar...';
+
+            improvementsPlaceholder1.onclick = '';
+            improvementsPlaceholder2.onclick = '';
         } else {
 
             var autoCapToggle = document.getElementById('autoCapToggle'); 
@@ -286,9 +297,11 @@ function handleRefreshButtonClick() {
                 autoCap();
             };
 
+            improvementsOptions.style.display = 'flex'
             resetButton.style.display = 'block';
             refreshButton.style.display = 'block';
-            improvementsPlaceholder.innerHTML = 'Tap the <span class="hightlight_text">Refresh</span> icon to update the suggestions.';
+            improvementsPlaceholder1.innerHTML = 'Tap the <span class="highlight_text">Refresh</span> icon to update the format suggestions.';
+            improvementsPlaceholder2.innerHTML = 'Tap the <span class="highlight_text">Refresh</span> icon to update the grammar suggestions.';
         }
 
         if (autoSuggestions.checked) {
@@ -303,20 +316,27 @@ function handleRefreshButtonClick() {
     function autoCap() {
         var editor = document.getElementById('editor');
         var content = editor.value;
-
-        // Split the content into lines
+    
+        // salvar a posição do cursor
+        var startPos = editor.selectionStart;
+        var endPos = editor.selectionEnd;
+    
+        // separa a letra em linhas
         var lines = content.split('\n');
-
-        // Capitalize the first character of each line
+    
+        // capitaliza a primeira letra de cada linha
         for (var i = 0; i < lines.length; i++) {
             lines[i] = lines[i].charAt(0).toUpperCase() + lines[i].slice(1);
         }
-
-        // Join the lines back together
+    
+        // reune as linhas novamente
         content = lines.join('\n');
-
-        // Update the editor's content
+    
+        // atualiza o editor
         editor.value = content;
+    
+        // restaura a posição do cursor
+        editor.setSelectionRange(startPos, endPos);
     }
 
     function autoTrim() {
@@ -381,23 +401,23 @@ function handleRefreshButtonClick() {
         var content = editor.value;
 
         // Substituir padrões específicos
-        content = content.replace(/#i\s*\/?(?=\n|$)/ig, '#INTRO ');
-        content = content.replace(/#v\s*\/?(?=\n|$)/ig, '#VERSE ');
-        content = content.replace(/#p\s*\/?(?=\n|$)/ig, '#PRE-CHORUS ');
-        content = content.replace(/#c\s*\/?(?=\n|$)/ig, '#CHORUS ');
-        content = content.replace(/#b\s*\/?(?=\n|$)/ig, '#BRIDGE ');
-        content = content.replace(/#h\s*\/?(?=\n|$)/ig, '#HOOK ');
-        content = content.replace(/#o\s*\/?(?=\n|$)/ig, '#OUTRO ');
-        content = content.replace(/##\s*\/?(?=\n|$)/ig, '#INSTRUMENTAL ');
+        content = content.replace(/#i\s*\/?(?=\n|$)/ig, '#INTRO');
+        content = content.replace(/#v\s*\/?(?=\n|$)/ig, '#VERSE');
+        content = content.replace(/#p\s*\/?(?=\n|$)/ig, '#PRE-CHORUS');
+        content = content.replace(/#c\s*\/?(?=\n|$)/ig, '#CHORUS');
+        content = content.replace(/#b\s*\/?(?=\n|$)/ig, '#BRIDGE');
+        content = content.replace(/#h\s*\/?(?=\n|$)/ig, '#HOOK');
+        content = content.replace(/#o\s*\/?(?=\n|$)/ig, '#OUTRO');
+        content = content.replace(/##\s*\/?(?=\n|$)/ig, '#INSTRUMENTAL');
 
-        content = content.replace(/#intro\s*\/?(?=\n|$)/ig, '#INTRO ');
-        content = content.replace(/#verse\s*\/?(?=\n|$)/ig, '#VERSE ');
-        content = content.replace(/#pre-chorus\s*\/?(?=\n|$)/ig, '#PRE-CHORUS ');
-        content = content.replace(/#chorus\s*\/?(?=\n|$)/ig, '#CHORUS ');
-        content = content.replace(/#bridge\s*\/?(?=\n|$)/ig, '#BRIDGE ');
-        content = content.replace(/#hook\s*\/?(?=\n|$)/ig, '#HOOK ');
-        content = content.replace(/#outro\s*\/?(?=\n|$)/ig, '#OUTRO ');
-        content = content.replace(/#instrumental\s*\/?(?=\n|$)/ig, '#INSTRUMENTAL ');
+        content = content.replace(/#intro\s*\/?(?=\n|$)/ig, '#INTRO');
+        content = content.replace(/#verse\s*\/?(?=\n|$)/ig, '#VERSE');
+        content = content.replace(/#pre-chorus\s*\/?(?=\n|$)/ig, '#PRE-CHORUS');
+        content = content.replace(/#chorus\s*\/?(?=\n|$)/ig, '#CHORUS');
+        content = content.replace(/#bridge\s*\/?(?=\n|$)/ig, '#BRIDGE');
+        content = content.replace(/#hook\s*\/?(?=\n|$)/ig, '#HOOK');
+        content = content.replace(/#outro\s*\/?(?=\n|$)/ig, '#OUTRO');
+        content = content.replace(/#instrumental\s*\/?(?=\n|$)/ig, '#INSTRUMENTAL');
 
         // Atualizar o conteúdo do editor
         editor.value = content;
@@ -461,37 +481,54 @@ function handleRefreshButtonClick() {
 
         function resetImprovementsBoxes() {
             // Obtém a referência ao contêiner de melhorias
-            const improvementsContainer = document.getElementById('improvements_containers');
+            const formatContainer = document.getElementById('format_containers');
+            const grammarContainer = document.getElementById('grammar_containers');
         
             // Obtém a referência ao textarea com o ID 'editor'
             const editorTextarea = document.getElementById('editor');
         
             // Remove todas as divs dentro do contêiner de melhorias
-            improvementsContainer.innerHTML = '';
+            formatContainer.innerHTML = '';
+            grammarContainer.innerHTML = '';
         
             // Cria a div de espaço reservado para melhorias
-            const improvementsPlaceholderDiv = document.createElement('div');
-            improvementsPlaceholderDiv.className = 'improvements_placeholder_div';
-            improvementsPlaceholderDiv.id = 'improvements_placeholder_div';
+            const improvementsPlaceholderDiv1 = document.createElement('div');
+            improvementsPlaceholderDiv1.className = 'improvements_placeholder_div';
+            improvementsPlaceholderDiv1.id = 'improvements_placeholder_div1';
         
             // Cria a div de espaço reservado para melhorias com base no conteúdo do textarea
-            const improvementsPlaceholder = document.createElement('div');
-            improvementsPlaceholder.className = 'improvements_placeholder';
-            improvementsPlaceholder.id = 'improvements_placeholder';
+            const improvementsPlaceholder1 = document.createElement('div');
+            improvementsPlaceholder1.className = 'improvements_placeholder';
+            improvementsPlaceholder1.id = 'improvements_placeholder1';
+
+            // Cria a div de espaço reservado para melhorias
+            const improvementsPlaceholderDiv2 = document.createElement('div');
+            improvementsPlaceholderDiv2.className = 'improvements_placeholder_div';
+            improvementsPlaceholderDiv2.id = 'improvements_placeholder_div2';
+        
+            // Cria a div de espaço reservado para melhorias com base no conteúdo do textarea
+            const improvementsPlaceholder2 = document.createElement('div');
+            improvementsPlaceholder2.className = 'improvements_placeholder';
+            improvementsPlaceholder2.id = 'improvements_placeholder2';
         
             // Verifica se o textarea está vazio
             if (editorTextarea.value.trim() === '') {
-                improvementsPlaceholder.innerHTML = 'Type something or paste your transcription to start...';
+                improvementsPlaceholder1.innerHTML = 'Type something or paste your current transcription to check the format...';
+                improvementsPlaceholder2.innerHTML = 'Type something or paste your current transcription to check the grammar...';
                 ignoredContainers = []; // reseta o conteúdo ignorado
                 clearTimeout(typingTimer);
 
             } else {
-                improvementsPlaceholder.innerHTML = 'Tap the <span class="highlight_text">Refresh</span> icon to update the suggestions.';
+                improvementsPlaceholder1.innerHTML = 'Tap the <span class="highlight_text">Refresh</span> icon to update the format suggestions.';
+                improvementsPlaceholder1.innerHTML = 'Tap the <span class="highlight_text">Refresh</span> icon to update the grammar suggestions.';
             }
         
             // Adiciona a div de espaço reservado para melhorias ao contêiner de melhorias
-            improvementsPlaceholderDiv.appendChild(improvementsPlaceholder);
-            improvementsContainer.appendChild(improvementsPlaceholderDiv);
+            improvementsPlaceholderDiv1.appendChild(improvementsPlaceholder1);
+            formatContainer.appendChild(improvementsPlaceholderDiv1);
+
+            improvementsPlaceholderDiv2.appendChild(improvementsPlaceholder2);
+            grammarContainer.appendChild(improvementsPlaceholderDiv2);
         }
 
         updateCharacterCounter();
@@ -631,28 +668,6 @@ function handleRefreshButtonClick() {
         }
     });
 
-    // Função para verificar e definir o estado dos checkboxes ao carregar a página
-    function setCheckboxStates() {
-        // Adicione IDs aos seus elementos de checkbox para tornar a manipulação mais fácil
-        const checkboxIds = [
-            'characterCounterToggle',
-            'autoCapToggle',
-            'autoTrimToggle',
-            'removeDoubleSpacesAndLinesToggle',
-            'autoCapTagsToggle',
-            'autoSuggestions'
-        ];
-
-        checkboxIds.forEach(function (checkboxId) {
-            const checkbox = document.getElementById(checkboxId);
-            const checkboxState = localStorage.getItem(checkboxId);
-
-            if (checkboxState !== null) {
-                checkbox.checked = JSON.parse(checkboxState);
-            }
-        });
-    }
-
     // Configurar o idioma padrão ao carregar a página
     setDefaultLanguage();
     setCheckboxStates();
@@ -666,8 +681,8 @@ function handleRefreshButtonClick() {
         var containerId = container.id; // Obter o ID da DIV container
         ignoredContainers.push(containerId); // Adicionar o ID ao array ignoredContainers
         container.style.display = 'none';
-        checkAndShowPlaceholder();
         resetLineIssues();
+        handleRefreshButtonClick();
     } 
     
     var ignoreButtons = document.querySelectorAll('.content_ignore_btn');
@@ -689,9 +704,9 @@ function handleRefreshButtonClick() {
     
         // Oculta o container após a correção (ou tentativa de correção)
         container.style.display = 'none';
-        checkAndShowPlaceholder();
+        checkAndShowPlaceholder(); // verifica se há containers, se não tiver, exibe o 'copy'
         resetLineIssues();
-        handleRefreshButtonClick()
+        handleRefreshButtonClick();
     }
     
     // Definindo a função para interpretar e executar o trigger
@@ -708,10 +723,10 @@ function handleRefreshButtonClick() {
                 // Chamando a função findAndReplace com os termos extraídos
                 findAndReplace(incorrectTerm, correction);
             } else {
-                console.error('Formato de trigger inválido:', trigger);
+                console.error('Invalid trigger format:', trigger);
             }
         } catch (error) {
-            console.error('Erro ao interpretar e executar o trigger:', error);
+            console.error('An error occurred when interpreting and executing the trigger:', error);
         }
     }
     
@@ -722,105 +737,117 @@ function handleRefreshButtonClick() {
         });
     });
 
-    // Função auxiliar para criar um container HTML com base nos dados da API
-    function createContainer(containerData) {
+// Função auxiliar para criar um container HTML com base nos dados da API
+function createContainer(containerData) {
 
-        // Verifica se o div_id já está armazenado em ignoredContainers
-        if (ignoredContainers.includes(containerData.div_id)) {
-            return null; // Retorna null se o div_id já estiver na lista de ignoredContainers
-        }
-
-        // Content
-        const container = document.createElement('div');
-        container.classList.add('container');
-        container.setAttribute('onclick', 'expandContainer(this)');
-        container.id = containerData.div_id;
-
-        // Adiciona os atributos de dados ao container
-        container.setAttribute('data-color', containerData.position.color);
-        container.setAttribute('data-lines', JSON.stringify(containerData.position.lines));
-
-        const title = document.createElement('h2');
-        title.textContent = containerData.title;
-
-        const content = document.createElement('div');
-        content.classList.add('content');
-
-        const contentText = document.createElement('p');
-        contentText.classList.add('content_text');
-        contentText.innerHTML = containerData.description;
-
-        const contentObs = document.createElement('p'); // Criando o elemento para obs_text
-        contentObs.classList.add('content_obs');
-        contentObs.innerHTML = containerData.obs_text || ''; // Verificando se obs_text está presente
-
-        const contentOptions = document.createElement('div');
-        contentOptions.classList.add('content_options');
-
-        // Learn More
-        const contentLearnMore = document.createElement(containerData.learn_more && containerData.learn_more.type === 'url' ? 'a' : 'p');
-        contentLearnMore.classList.add('content_learn_more');
-        
-        if (containerData.learn_more) {
-            if (containerData.learn_more.type === 'url') {
-                // Se o tipo for URL, adicione o atributo href ao link
-                contentLearnMore.href = containerData.learn_more.url;
-                contentLearnMore.target = '_blank'; // Abre o link em uma nova guia/janela
-                contentLearnMore.textContent = containerData.learn_more.title || 'Learn More';
-            } else {
-                // Se o tipo não for URL, use o texto como conteúdo do parágrafo
-                contentLearnMore.textContent = containerData.learn_more.title || '';
-            }
-        } else {
-            // Se learn_more não estiver presente, adicione uma string vazia como conteúdo
-            contentLearnMore.textContent = '';
-        }
-        
-        contentOptions.appendChild(contentLearnMore);
-
-
-        // Ignore and Fix buttons
-        const contentButtons = document.createElement('div');
-        contentButtons.classList.add('content_buttons');
-
-        if (containerData.placeholder_text) {
-            const placeholderText = document.createElement('p');
-            placeholderText.textContent = containerData.placeholder_text;
-            placeholderText.style.textAlign = 'center'; // Adiciona o estilo text-align: center;
-            contentButtons.appendChild(placeholderText);
-        }
-
-        if (containerData.fix_button) {
-            const contentFixBtn = document.createElement('div');
-            contentFixBtn.classList.add('content_fix_btn');
-            contentFixBtn.textContent = 'Fix';
-            contentFixBtn.onclick = function() {
-                fixButton(container, containerData.trigger);
-            };
-            contentButtons.appendChild(contentFixBtn);
-        }
-
-        if (containerData.ignore_button) {
-            const contentIgnoreBtn = document.createElement('div');
-            contentIgnoreBtn.classList.add('content_ignore_btn');
-            contentIgnoreBtn.textContent = 'Ignore';
-            contentIgnoreBtn.onclick = function() {
-                ignoreButton(container);
-            };
-            contentButtons.appendChild(contentIgnoreBtn);
-        }
-
-        contentOptions.appendChild(contentButtons);
-
-        content.appendChild(contentText);
-        content.appendChild(contentObs);
-        content.appendChild(contentOptions);
-
-        container.appendChild(title);
-        container.appendChild(content);
-
-        return container;
+    // Verifica se o div_id já está armazenado em ignoredContainers
+    if (ignoredContainers.includes(containerData.div_id)) {
+        return null; // Retorna null se o div_id já estiver na lista de ignoredContainers
     }
+
+    // Content
+    const container = document.createElement('div');
+    container.classList.add('container');
+    container.setAttribute('onclick', 'expandContainer(this)');
+    container.id = containerData.div_id;
+
+    // Adiciona os atributos de dados ao container
+    container.setAttribute('data-color', containerData.position.color);
+    container.setAttribute('data-lines', JSON.stringify(containerData.position.lines));
+
+    const title = document.createElement('h2');
+    title.textContent = containerData.title;
+
+    const content = document.createElement('div');
+    content.classList.add('content');
+
+    const contentText = document.createElement('p');
+    contentText.classList.add('content_text');
+    contentText.innerHTML = containerData.description;
+
+    const contentObs = document.createElement('p'); // Criando o elemento para obs_text
+    contentObs.classList.add('content_obs');
+    contentObs.innerHTML = containerData.obs_text || ''; // Verificando se obs_text está presente
+
+    const contentOptions = document.createElement('div');
+    contentOptions.classList.add('content_options');
+
+    // Learn More
+    const contentLearnMore = document.createElement(containerData.learn_more && containerData.learn_more.type === 'url' ? 'a' : 'p');
+    contentLearnMore.classList.add('content_learn_more');
+    
+    if (containerData.learn_more) {
+        if (containerData.learn_more.type === 'url') {
+            // Se o tipo for URL, adicione o atributo href ao link
+            contentLearnMore.href = containerData.learn_more.url;
+            contentLearnMore.target = '_blank'; // Abre o link em uma nova guia/janela
+            contentLearnMore.textContent = containerData.learn_more.title || 'Learn More';
+        } else {
+            // Se o tipo não for URL, use o texto como conteúdo do parágrafo
+            contentLearnMore.textContent = containerData.learn_more.title || '';
+        }
+    } else {
+        // Se learn_more não estiver presente, adicione uma string vazia como conteúdo
+        contentLearnMore.textContent = '';
+    }
+    
+    contentOptions.appendChild(contentLearnMore);
+
+
+    // Ignore and Fix buttons
+    const contentButtons = document.createElement('div');
+    contentButtons.classList.add('content_buttons');
+
+    if (containerData.placeholder_text) {
+        const placeholderText = document.createElement('p');
+        placeholderText.textContent = containerData.placeholder_text;
+        placeholderText.style.textAlign = 'center'; // Adiciona o estilo text-align: center;
+        contentButtons.appendChild(placeholderText);
+    }
+
+    if (containerData.fix_button) {
+        const contentFixBtn = document.createElement('div');
+        contentFixBtn.classList.add('content_fix_btn');
+        contentFixBtn.textContent = 'Fix';
+        contentFixBtn.onclick = function() {
+            fixButton(container, containerData.trigger);
+        };
+        contentButtons.appendChild(contentFixBtn);
+    }
+
+    if (containerData.ignore_button) {
+        const contentIgnoreBtn = document.createElement('div');
+        contentIgnoreBtn.classList.add('content_ignore_btn');
+        contentIgnoreBtn.textContent = 'Ignore';
+        contentIgnoreBtn.onclick = function() {
+            ignoreButton(container);
+        };
+        contentButtons.appendChild(contentIgnoreBtn);
+    }
+
+    contentOptions.appendChild(contentButtons);
+
+    content.appendChild(contentText);
+    content.appendChild(contentObs);
+    content.appendChild(contentOptions);
+
+    container.appendChild(title);
+    container.appendChild(content);
+
+    return container;
+}
+
+// Função para adicionar os containers à div pai 'format_containers'
+function addContainersToParent(containersData) {
+    const formatContainers = document.getElementById('format_containers');
+    
+    containersData.forEach(containerData => {
+        const container = createContainer(containerData);
+        if (container) {
+            formatContainers.appendChild(container);
+        }
+    });
+}
 
     function copyToClipboard() {
         if (textArea.value.trim() === '') {
@@ -853,10 +880,10 @@ function handleRefreshButtonClick() {
 
     // Função para verificar e exibir a div placeholder
     function checkAndShowPlaceholder() {
-        var improvementsContainers = document.getElementById('improvements_containers');
+        var formatContainer = document.getElementById('format_containers');
 
         // Verificar se há containers visíveis
-        var visibleContainers = Array.from(improvementsContainers.querySelectorAll('.container')).filter(container => container.style.display !== 'none');
+        var visibleContainers = Array.from(formatContainer.querySelectorAll('.container')).filter(container => container.style.display !== 'none');
 
         // Se já houver algum container visível, não faz nada
         if (visibleContainers.length > 0) {
@@ -868,13 +895,13 @@ function handleRefreshButtonClick() {
         const noIssuesDiv = document.createElement('div');
         noIssuesDiv.className = 'container_no_issues';
         noIssuesDiv.id = 'container_no_issues';
-        noIssuesDiv.style.display = 'block';
+        noIssuesDiv.style.display = 'flex';
 
         const contentDiv = document.createElement('div');
         contentDiv.className = 'content_ok';
 
         const h2 = document.createElement('h2');
-        h2.textContent = 'No issues found! ✨';
+        h2.textContent = 'No format issues found! ✨';
 
         const copyBtn = document.createElement('div');
         copyBtn.className = 'content_copy_btn';
@@ -885,7 +912,7 @@ function handleRefreshButtonClick() {
         contentDiv.appendChild(copyBtn);
         noIssuesDiv.appendChild(contentDiv);
 
-        improvementsContainers.appendChild(noIssuesDiv);
+        formatContainer.appendChild(noIssuesDiv);
     }
 
     checkAndShowPlaceholder();
@@ -989,6 +1016,30 @@ function updateLineIssues(color, lines) {
         }
     });
 }
+
+
+    // Função para verificar e definir o estado dos checkboxes ao carregar a página
+    function setCheckboxStates() {
+        // Adicione IDs aos seus elementos de checkbox para tornar a manipulação mais fácil
+        const checkboxIds = [
+            'characterCounterToggle',
+            'autoCapToggle',
+            'autoTrimToggle',
+            'removeDoubleSpacesAndLinesToggle',
+            'autoCapTagsToggle',
+            'autoSuggestions',
+            'localHostToggle'
+        ];
+
+        checkboxIds.forEach(function (checkboxId) {
+            const checkbox = document.getElementById(checkboxId);
+            const checkboxState = localStorage.getItem(checkboxId);
+
+            if (checkboxState !== null) {
+                checkbox.checked = JSON.parse(checkboxState);
+            }
+        });
+    }
 
 // Definindo a função findAndReplace
 function findAndReplace(incorrectTerm, correction) {
@@ -1112,20 +1163,58 @@ document.addEventListener("DOMContentLoaded", function () {
         aboutPopup.style.display = "none";
         overlay.style.display = "none";
     });
-});
-/* 
-window.serverPath = 'http://localhost:3000'; 
-window.serverPath = 'https://datamatch-backend.onrender.com';
-*/
 
-window.serverPath = 'https://datamatch-backend.onrender.com';
+
+    const formatButton = document.getElementById('lf_option');
+    const grammarButton = document.getElementById('lt_option');
+
+    const formatContainer = document.getElementById('format_containers');
+    const grammarContainer = document.getElementById('grammar_containers');
+
+    formatButton.addEventListener("click", function (event) {
+        formatButton.className = 'impr_menu_true'
+        grammarButton.className = 'impr_menu_false'
+        formatButton.title = ''
+        grammarButton.title = 'Show grammar suggestions'
+
+        formatContainer.style = 'display:flex'
+        grammarContainer.style = 'display:none'
+        resetLineIssues();
+        closeContainers();
+
+    });
+
+    grammarButton.addEventListener("click", function (event) {
+        grammarButton.className = 'impr_menu_true'
+        formatButton.className = 'impr_menu_false'
+        grammarButton.title = ''
+        formatButton.title = 'Show format suggestions'
+
+        grammarContainer.style = 'display:flex'
+        formatContainer.style = 'display:none'
+        resetLineIssues();
+        closeContainers();
+
+    });
+});
 
 // Função para fazer uma solicitação AJAX
 function fetchCreditsData() {
+
+    // Obter o valor de localHostToggle do localStorage
+    const localHostToggle = localStorage.getItem('localHostToggle');
+
+    // Verificar o valor de localHostToggle e definir window.serverPath
+    if (localHostToggle === 'true') {
+        window.serverPath = 'http://localhost:3000'; 
+    } else {
+        window.serverPath = 'https://datamatch-backend.onrender.com';
+    }
+
     fetch(`${window.serverPath}/formatter/credits`)
     .then(response => response.json())
     .then(data => updateCredits(data.credits))
-    .catch(error => console.error('Erro ao buscar dados da API:', error));
+    .catch(error => console.error('Error fetching data from server:', error));
 }
 
 // Função para atualizar os elementos HTML com os novos dados
@@ -1193,8 +1282,29 @@ function updateCredits(credits) {
     });
 }
 
-// Chama a função para buscar dados da API quando o documento estiver pronto
-document.addEventListener('DOMContentLoaded', fetchCreditsData);
+document.addEventListener('DOMContentLoaded', function () {
+    fetchCreditsData();
+    fetchServerInfo();
+});
+
+// Função para abrir a autorização do Spotify na mesma aba
+function openSpotifyAuthorization() {
+    // Obter o valor de localHostToggle do localStorage
+    const localHostToggle = localStorage.getItem('localHostToggle');
+
+    // Verificar o valor de localHostToggle e definir window.serverPath
+    if (localHostToggle === 'true') {
+        window.serverPath = 'http://localhost:3000'; 
+    } else {
+        window.serverPath = 'https://datamatch-backend.onrender.com';
+    }
+
+    var spotifyAuthorizationUrl = `https://accounts.spotify.com/pt-BR/authorize?client_id=51a45f01c96645e386611edf4a345b50&redirect_uri=${window.serverPath}/formatter/sp_callback&response_type=code&scope=user-read-playback-state%20user-modify-playback-state%20user-read-currently-playing%20user-read-email%20user-read-playback-state%20streaming%20app-remote-control%20user-follow-modify%20user-follow-read%20user-read-playback-position%20user-top-read%20user-read-recently-played%20user-library-read%20user-library-modify%20user-read-private&show_dialog=true`;
+
+    // Redirecionar para a URL de autorização do Spotify na mesma aba
+    window.location.href = spotifyAuthorizationUrl;
+}
+
 
 // Função para fechar o popup de informações
 function closeAboutInfo() {
@@ -1203,10 +1313,21 @@ function closeAboutInfo() {
 
 // Função para buscar dados do servidor
 function fetchServerInfo() {
+
+    // Obter o valor de localHostToggle do localStorage
+    const localHostToggle = localStorage.getItem('localHostToggle');
+
+    // Verificar o valor de localHostToggle e definir window.serverPath
+    if (localHostToggle === 'true') {
+        window.serverPath = 'http://localhost:3000'; 
+    } else {
+        window.serverPath = 'https://datamatch-backend.onrender.com';
+    }
+
     fetch(`${window.serverPath}/formatter/about`)
-        .then(response => response.json())
-        .then(data => updateServerInfo(data))
-        .catch(error => console.error('Erro ao buscar dados do servidor:', error));
+    .then(response => response.json())
+    .then(data => updateServerInfo(data))
+    .catch(error => console.error('Error fetching data from server:', error));
 }
 
 // Função para atualizar os elementos HTML com os novos dados do servidor
@@ -1253,10 +1374,21 @@ function updateServerInfo(data) {
         changelogTitleElement.textContent = 'Changelog';
         popupContent.appendChild(changelogTitleElement);
 
-        // Adiciona a descrição acima das informações do servidor
-        const descriptionElement = document.createElement('p');
-        descriptionElement.textContent = serverInfo.description;
-        popupContent.appendChild(descriptionElement);
+        // Divide o texto Changelog em parágrafos usando '\n\n\n'
+        const changelogParagraphs = serverInfo.description.split('\n\n\n');
+
+        // Adiciona cada parágrafo como um elemento <p>
+        changelogParagraphs.forEach((paragraph, index) => {
+            const paragraphElement = document.createElement('p');
+            paragraphElement.textContent = paragraph;
+            
+            // Adiciona margem inferior de 10px entre os parágrafos, exceto para o último parágrafo
+            if (index !== changelogParagraphs.length - 1) {
+                paragraphElement.style.marginBottom = '10px';
+            }
+            
+            popupContent.appendChild(paragraphElement);
+        });
 
         // Adiciona uma barra fina cinza horizontal abaixo da descrição
         const dividerElement = document.createElement('hr');
@@ -1281,13 +1413,53 @@ function updateServerInfo(data) {
             itemElement.innerHTML = `<span>${item.label}: </span><span class="bold">${item.value}</span>`;
             serverInfoContainer.appendChild(itemElement);
         }
-
-        // Adiciona o contêiner das informações do servidor ao popupContent
-        popupContent.appendChild(serverInfoContainer);
+       // Adiciona o contêiner das informações do servidor ao popupContent
+       popupContent.appendChild(serverInfoContainer);
     }
-
-    
 }
 
-// Chama a função para buscar dados do servidor quando o documento estiver pronto
-document.addEventListener('DOMContentLoaded', fetchServerInfo);
+// Adicionar evento de clique ao h2 com id 'settings_title'
+const settingsTitle = document.getElementById('settings_title');
+let clickCount = 0;
+
+settingsTitle.addEventListener('click', function () {
+    clickCount++;
+
+    // Se o usuário clicou 5 vezes, exibir a div e reiniciar a contagem
+    if (clickCount === 5) {
+        displayDevModeDiv();
+        clickCount = 0;
+    }
+});
+
+// Função para exibir/ocultar a div e salvar a escolha em cache
+function displayDevModeDiv() {
+    const devHidedDiv = document.getElementById('dev_hided_div');
+    const devMode = localStorage.getItem('devMode') === 'true'; // Obtém o estado atual do modo de desenvolvimento
+
+    // Alterna entre exibir e ocultar a div
+    if (devMode) {
+        devHidedDiv.style.display = 'none';
+    } else {
+        devHidedDiv.style.display = 'block';
+    }
+
+    // Salva a escolha em cache invertendo o valor atual
+    localStorage.setItem('devMode', (!devMode).toString());
+}
+
+// Carrega a escolha do modo de desenvolvimento do cache e exibe/oculta a div conforme necessário
+function loadDevMode() {
+    const devMode = localStorage.getItem('devMode') === 'true';
+    const devHidedDiv = document.getElementById('dev_hided_div');
+
+    if (devMode) {
+        devHidedDiv.style.display = 'block';
+    } else {
+        devHidedDiv.style.display = 'none';
+    }
+}
+
+// Chama a função ao carregar a página para aplicar o estado do modo de desenvolvimento
+loadDevMode();
+
