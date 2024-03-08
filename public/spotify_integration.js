@@ -222,10 +222,6 @@ async function fetchCurrentlyPlayingData() {
         const titleElement = document.getElementById('sp_title');
         const albumElement = document.getElementById('sp_album');
         const artistElement = document.getElementById('sp_artist');
-        const trackerElement = document.getElementById('tracker');
-        const controlContainer = document.getElementById('play_pause');
-        const svg1 = controlContainer.querySelector('svg:nth-child(1)');
-        const svg2 = controlContainer.querySelector('svg:nth-child(2)');
 
         if (albumArtElement && currentlyPlayingData.item.album.images.length > 0) {
             albumArtElement.innerHTML = `<img src="${currentlyPlayingData.item.album.images[0].url}" alt="album art" title="${currentlyPlayingData.item.name} | ${currentlyPlayingData.item.artists[0].name}">`;
@@ -454,6 +450,7 @@ function updateTracker(positionMs, durationMs) {
 
 // Atualize o estado do botão play/pause e o tracker da música
 function updatePlaybackState(isPaused, progressPercent) {
+    
     const svg1 = controlContainer.querySelector('svg:nth-child(1)');
     const svg2 = controlContainer.querySelector('svg:nth-child(2)');
     const trackerElement = document.getElementById('tracker');
