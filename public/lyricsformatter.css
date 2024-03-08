@@ -1637,18 +1637,24 @@
         overflow: hidden; 
         text-overflow: ellipsis;
         box-sizing: border-box;
+        overflow: hidden;
+        white-space: nowrap;
     }
     
     .sp_title {
-        font-size: 12px;
+        font-size: 15px;
         font-weight: bold;
         color: #fff;
+        text-overflow: ellipsis;
     }
     
     .sp_album,
     .sp_artist {
-        font-size: 10px;
+        font-size: 11px;
         color: #cecece;
+        text-overflow: ellipsis;
+        
+        width: 100%;
     }
   
   
