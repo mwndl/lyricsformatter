@@ -47,7 +47,8 @@ function handleRefreshButtonClick() {
     resetLineIssues();
     updateSidebar();
     clearTimeout(typingTimer); // auto 3s
-    fetchCurrentlyPlayingData()
+    fetchCurrentlyPlayingData();
+    checkLanguage();
 
     // Get references to the elements
     // Hide the refresh button and show the loading spinner
