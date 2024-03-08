@@ -5,7 +5,7 @@ function checkLanguage() {
     var selectedLanguage = localStorage.getItem('selectedLanguage')
     
     if (!selectedLanguage) {
-        console.error('Nenhum idioma selecionado.');
+        console.error('No selected language.');
         return;
     }
 
@@ -27,12 +27,14 @@ function checkLanguage() {
 }
 
 function createMatchContainers(matches) {
+    var grammarContainer = document.getElementById('grammar_containers');
+    grammarContainer.innerHTML = '';
     // Verifica se o div_id já está armazenado em ignoredContainers
     if (ignoredContainers.includes(matches.div_id)) {
         return null; // Retorna null se o div_id já estiver na lista de ignoredContainers
     }
 
-    var container = document.getElementById('improvements_containers');
+    var container = document.getElementById('grammar_containers');
 
     matches.forEach(function(match, index) {
         if (ignoredContainers.includes(match.div_id)) return;
