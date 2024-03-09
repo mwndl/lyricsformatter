@@ -51,7 +51,7 @@
         <div class="main_content">
             <div class="main_left" id="main_left" style="height: 100%;">
                 <div class="lyrics_box" id="lyrics_box">
-                    <div class="editor-container">
+                    <div class="editor-container" id="editor-container">
                         <div class="line_issues" id="line_issues"></div>
                         <div class="character_counter"></div>
                         <textarea class="editor" id="editor" placeholder="Paste the lyrics here..." oninput="checkContent();"></textarea>
@@ -68,15 +68,15 @@
                         </div>
                     </div>
                     <ul class="language_list" id="language_list">
-                        <li data-lang="en-UK">English (UK)</li>
+                        <li data-lang="en-G">English (UK)</li>
                         <li data-lang="en-US">English (US)</li>
                         <li data-lang="nl" style="display:none">Dutch</li>
-                        <li data-lang="fr">French<span class="new_tag">new</span></li>
+                        <li data-lang="fr">French</li>
                         <li data-lang="de" style="display:none">German<span class="new_tag">new</span></li>
-                        <li data-lang="it">Italian<span class="beta_tag">beta</span></li>
+                        <li data-lang="it">Italian</li>
                         <li data-lang="pt-BR">Portuguese (BR)</li>
                         <li data-lang="pt-PT">Portuguese (PT)</li>
-                        <li data-lang="es">Spanish<span class="new_tag">new</span></li>
+                        <li data-lang="es">Spanish</li>
                         <p>More languages soon...</p>
                     </ul>
                 </div>
@@ -96,8 +96,7 @@
                             </div>
                             <div class="improvement_buttons">
                                 <div class="reset_div">
-                                    <button class="reset_button" id="reset_button" title="Reset transcription"
-                                        onclick="resetTranscription()">
+                                    <button class="reset_button" id="reset_button" title="Reset transcription">
                                         <div class="reset_symbol"></div>
                                     </button>
                                 </div>
@@ -534,6 +533,15 @@
     </div>
 
     <script>
+
+        function ignoreButton(button) {
+            var container = button.closest('.container');
+            var containerId = container.id; // Obter o ID da DIV container
+            ignoredContainers.push(containerId); // Adicionar o ID ao array ignoredContainers
+            container.style.display = 'none';
+            resetLineIssues();
+            handleRefreshButtonClick();
+        } 
 
         let currentState;
 

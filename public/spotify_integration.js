@@ -466,24 +466,28 @@ function updatePlaybackState(isPaused, progressPercent) {
 }
 
 
-// Obter o estado atual do player
-player.getCurrentState().then(state => {
-    if (!state) {
-        console.error('O usuário não está reproduzindo música através do Web Playback SDK');
-        return;
-    }
+document.addEventListener('DOMContentLoaded', function () {
+    
+    // Obter o estado atual do player
+    player.getCurrentState().then(state => {
+        if (!state) {
+            console.error('O usuário não está reproduzindo música através do Web Playback SDK');
+            return;
+        }
 
-    const current_track = state.track_window.current_track;
-    const next_track = state.track_window.next_tracks[0];
+        const current_track = state.track_window.current_track;
+        const next_track = state.track_window.next_tracks[0];
 
-    console.log('Atualmente tocando:', current_track);
-    console.log('Próxima música:', next_track);
+        console.log('Atualmente tocando:', current_track);
+        console.log('Próxima música:', next_track);
 
-}).catch(error => {
-    console.error('Erro ao obter estado atual do player:', error);
+    }).catch(error => {
+        console.error('Erro ao obter estado atual do player:', error);
+    });
+
+    setInterval(checkPlayerState, 2000);
+
 });
-
-setInterval(checkPlayerState, 2000);
 
 
 

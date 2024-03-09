@@ -1,9 +1,10 @@
+
+var typingTimer;
 document.addEventListener('DOMContentLoaded', function () {
     var returnArrow = document.querySelector('#return_arrow');
     var lyricsBox = document.getElementById('lyrics_box');
     var textArea = document.getElementById('editor');
     var textarea = document.querySelector('.editor');
-    var characterCounter = document.querySelector('.character_counter');
     const selector = document.querySelector('.language_selector');
     const selectedLanguage = document.querySelector('.selected_language');
     const languageList = document.querySelector('.language_list');
@@ -11,137 +12,19 @@ document.addEventListener('DOMContentLoaded', function () {
     const langButtonContent = document.querySelector('.lang_selector_div');
 
     var resetButton = document.getElementById('reset_button');
-
     var refreshButton = document.getElementById('refresh_button');
-    var loadingSpinner = document.getElementById('loading_spinner');
-
-
-    const searchBtn = document.querySelector('#search_btn');
-    const search_input = document.querySelector('#search_input');
-    const spotifyIframePreview = document.querySelector('#spotify_iframe_preview');
-
 
     var miniMenu = document.getElementById("mini_menu");
 
     var ignoredContainers = []; // aqui ficam guardados temporariamente os IDs ignorados, ao limpar o texto, tocar em 'Copy' ou então ao tocar no botão de lixo, esse array será resetado
 
- // Add this function to your existing code
-function handleRefreshButtonClick() {
 
-    // Auto trim (se ativo)
-    var autoTrimToggle = document.getElementById('autoTrimToggle');
-    var removeDoubleSpacesAndLinesToggle = document.getElementById('removeDoubleSpacesAndLinesToggle');
-    var autoCapTagsToggle = document.getElementById('autoCapTagsToggle');
-
-    if (autoTrimToggle.checked) {
-        autoTrim();
-    }
-    if (removeDoubleSpacesAndLinesToggle.checked) {
-        removeDuplicateSpaces();
-        removeDuplicateEmptyLines();
-    }
-    if (autoCapTagsToggle.checked) {
-        replaceSpecialTags();
-    }
-
-    resetLineIssues();
-    updateSidebar();
-    clearTimeout(typingTimer); // auto 3s
-    fetchCurrentlyPlayingData();
-    checkLanguage();
-
-    // Get references to the elements
-    // Hide the refresh button and show the loading spinner
-    refreshButton.style.display = 'none';
-    loadingSpinner.style.display = 'block';
-
-    // Get the language code from the selected language element
-    var selectedLanguageCode = localStorage.getItem('selectedLanguage');
-
-    // Check if a language is selected
-    if (!selectedLanguageCode) {
-        notification('Please select a language to start.', 'info');
-        // Show the refresh button and hide the loading spinner
-        refreshButton.style.display = 'block';
-        loadingSpinner.style.display = 'none';
-        return;
-    }
-
-    // Prepare the data to send to the API
-    var requestData = {
-        text: textArea.value,
-    };
-
-    // Obter o valor de localHostToggle do localStorage
-    const localHostToggle = localStorage.getItem('localHostToggle');
-
-    // Verificar o valor de localHostToggle e definir window.serverPath
-    if (localHostToggle === 'true') {
-        window.serverPath = 'http://localhost:3000'; 
-    } else {
-        window.serverPath = 'https://datamatch-backend.onrender.com';
-    }
-
-    fetch(`${window.serverPath}/formatter/${selectedLanguageCode}`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(requestData),
-    })
-        .then(response => {
-            if (!response.ok) {
-                if (response.status === 404) {
-                    // Show notification for language not selected
-                    notification("Language not supported: ", 'info');
-                } else {
-                    // Handle other errors here
-                    console.error('Error with API request. Status:', response.status);
-                    notification('We are experiencing internal issues, please try again later. 🔧');
-                }
-            }
-            return response.json();
-        })
-        .then(data => {
-            // Handle the API response here
-            console.log('API Response:', data);
-
-            // Remove existing HTML elements inside the format_containers
-            const formatContainer = document.getElementById('format_containers');
-            const grammarContainer = document.getElementById('grammar_containers');
-
-            formatContainer.innerHTML = '';
-            grammarContainer.innerHTML = '';
-    
-            if (data.result.issues === false) {
-                // se não houverem erros, exibe o 'no issues'
-                checkAndShowPlaceholder();
-            } else {
-                // add os containers na box "format_containers"
-                for (const alertaKey in data.result.containers.alerts) {
-                    const alerta = data.result.containers.alerts[alertaKey];
-                    const container = createContainer(alerta.container);
-                    
-                    // verifica se o container recebido não é null antes de adicioná-lo
-                    if (container !== null) {
-                        formatContainer.appendChild(container);
-                    }
-                }
-                checkAndShowPlaceholder();
-            }
-
-        })
-        .catch(error => {
-            // Handle errors here
-            console.error('Error sending data to API:', error);
-            notification('We are experiencing internal issues, please try again later. 🔧');
-        })
-        .finally(() => {
-            // Show the refresh button and hide the loading spinner after the request is complete
-            refreshButton.style.display = 'block';
-            loadingSpinner.style.display = 'none';
-        });
-}
+    // config inicial
+    setDefaultLanguage();
+    setCheckboxStates();
+    loadDevMode();
+    fetchCreditsData();
+    fetchServerInfo();
 
     resetButton.addEventListener('click', function() {
 
@@ -154,71 +37,6 @@ function handleRefreshButtonClick() {
 
 
     refreshButton.addEventListener('click', handleRefreshButtonClick);
-
-    // função para lidar com a pesquisa
-    const handleSearch = () => {
-
-        const inputVal = search_input.value.trim();
-        const trackUrlRegex = /^(https?:\/\/open\.spotify\.com\/(?:intl-[a-z]{2}\/)?)?track\/(.+)$/;
-        const studioUrlRegex = /(?:&|\?)player=spotify&(?:.*&)?track_id=([^&\s]+)/;
-        const idRegex = /^[a-zA-Z0-9]{22}$/;
-
-        let trackId = '';
-
-        if (trackUrlRegex.test(inputVal)) {
-            const url = new URL(inputVal);
-            search_value = url.pathname.split('/').pop();
-            trackId = search_value;
-        } else if (idRegex.test(inputVal)) {
-            search_value = inputVal;
-            trackId = search_value;
-        } else if (studioUrlRegex.test(inputVal)) {
-            const match = inputVal.match(studioUrlRegex);
-            if (match) {
-                search_value = match[1];
-                trackId = search_value;
-            } else if (idRegex.test(inputVal)) {
-                search_value = inputVal;
-                trackId = search_value;
-            } else {
-                notification("Please enter Studio or Spotify track URL");
-                search_input.value = "";
-                return;
-            }
-        } else {
-            notification("Please enter Studio or Spotify track URL");
-            search_input.value = "";
-            return;
-        }
-
-        search_input.value = "";
-        spotifyIframePreview.src = `https://open.spotify.com/embed/track/${trackId}?utm_source=generator&theme=0`;
-    }
-
-    function notification(customMessage) {
-        const notification_div = document.getElementById("notification");
-        const message = document.getElementById("notification-message");
-        message.textContent = customMessage;
-        notification_div.style.opacity = 1;
-        notification_div.classList.remove("hidden");
-        setTimeout(() => {
-        notification_div.style.opacity = 0;
-        setTimeout(() => {
-            notification_div.classList.add("hidden");
-        }, 500);
-        }, 4000); // Tempo de exibição
-    };
-
-    // Add event listener for search button
-    searchBtn.addEventListener('click', handleSearch);
-
-    // Add event listener for Enter key press
-    search_input.addEventListener('keydown', (event) => {
-        if (event.key === 'Enter') {
-        event.preventDefault();
-        handleSearch();
-        }
-    });
 
 
     var returnArrow = document.querySelector('#return_arrow');
@@ -251,20 +69,12 @@ function handleRefreshButtonClick() {
     textarea.addEventListener('input', checkContent);
     textarea.addEventListener('scroll', syncScroll);
 
-    let typingTimer;
-    const doneTypingInterval = 3000;
-
+    
     function checkContent() {
-        var editor = document.getElementById('editor');
-        const improvementsOptions = document.getElementById('improvements_menu')
-        var resetButton = document.getElementById('reset_button')
-        var refreshButton = document.getElementById('refresh_button');
-
-        var improvementsPlaceholder1 = document.getElementById('improvements_placeholder1');
-        var improvementsPlaceholder2 = document.getElementById('improvements_placeholder2');
-
-        var content = editor.value;
-
+        const doneTypingInterval = 3000;
+        const editor = document.getElementById('editor');
+        const content = editor.value;
+    
         const checkboxIds = [
             'characterCounterToggle',
             'autoCapToggle',
@@ -274,328 +84,27 @@ function handleRefreshButtonClick() {
             'autoSuggestions',
             'localHostToggle'
         ];
-
+    
         checkboxIds.forEach(function (checkboxId) {
             const checkbox = document.getElementById(checkboxId);
             localStorage.setItem(checkboxId, checkbox.checked);
         });
-
+    
         if (content.trim() === '') {
-            improvementsOptions.style.display = 'none'
-            resetButton.style.display = 'none';
-            refreshButton.style.display = 'none';
-
-            improvementsPlaceholder1.textContent = 'Type something or paste your current transcription to check the format...';
-            improvementsPlaceholder2.textContent = 'Type something or paste your current transcription to check the grammar...';
-
-            improvementsPlaceholder1.onclick = '';
-            improvementsPlaceholder2.onclick = '';
+            hideOptionsAndButtons();
         } else {
-
-            var autoCapToggle = document.getElementById('autoCapToggle'); 
-
-            if (autoCapToggle.checked) {
+            showOptionsAndButtons();
+            if (isAutoCapChecked()) {
                 autoCap();
-            };
-
-            improvementsOptions.style.display = 'flex'
-            resetButton.style.display = 'block';
-            refreshButton.style.display = 'block';
-            improvementsPlaceholder1.innerHTML = 'Tap the <span class="highlight_text">Refresh</span> icon to update the format suggestions.';
-            improvementsPlaceholder2.innerHTML = 'Tap the <span class="highlight_text">Refresh</span> icon to update the grammar suggestions.';
+            }
         }
-
-        if (autoSuggestions.checked) {
-            // atualiza as sugestões após 3s
+    
+        if (isAutoSuggestionsChecked()) {
             clearTimeout(typingTimer);
-            typingTimer = setTimeout(function() {
-                handleRefreshButtonClick();
-            }, doneTypingInterval);
-        };
-    }
-
-    function autoCap() {
-        var editor = document.getElementById('editor');
-        var content = editor.value;
-    
-        // salvar a posição do cursor
-        var startPos = editor.selectionStart;
-        var endPos = editor.selectionEnd;
-    
-        // separa a letra em linhas
-        var lines = content.split('\n');
-    
-        // capitaliza a primeira letra de cada linha
-        for (var i = 0; i < lines.length; i++) {
-            lines[i] = lines[i].charAt(0).toUpperCase() + lines[i].slice(1);
-        }
-    
-        // reune as linhas novamente
-        content = lines.join('\n');
-    
-        // atualiza o editor
-        editor.value = content;
-    
-        // restaura a posição do cursor
-        editor.setSelectionRange(startPos, endPos);
-    }
-
-    function autoTrim() {
-        var editor = document.getElementById('editor');
-        var content = editor.value;
-
-        // Split the content into lines
-        var lines = content.split('\n');
-
-        // Trim extra spaces at the end of each line
-        for (var i = 0; i < lines.length; i++) {
-            lines[i] = lines[i].trimRight();
-        }
-
-        // Join the lines back together
-        content = lines.join('\n');
-
-        // Update the editor's content
-        editor.value = content;
-    }
-
-    function removeDuplicateSpaces() {
-        var editor = document.getElementById('editor');
-        var content = editor.value;
-
-        // Dividir o conteúdo em linhas
-        var lines = content.split('\n');
-
-        // Iterar sobre cada linha e substituir espaços duplicados por um único espaço
-        for (var i = 0; i < lines.length; i++) {
-            lines[i] = lines[i].replace(/\s+/g, ' ');
-        }
-
-        // Juntar as linhas de volta
-        content = lines.join('\n');
-
-        // Atualizar o conteúdo do editor
-        editor.value = content;
-    }
-
-    function removeDuplicateEmptyLines() {
-        var editor = document.getElementById('editor');
-        var content = editor.value;
-
-        // Dividir o conteúdo em linhas
-        var lines = content.split('\n');
-
-        // Filtrar linhas não vazias e adicionar uma linha vazia no final
-        lines = lines.filter(function(line, index, self) {
-            return line.trim() !== '' || index === self.length - 1 || line.trim() !== self[index + 1].trim();
-        });
-
-        // Juntar as linhas de volta
-        content = lines.join('\n');
-
-        // Atualizar o conteúdo do editor
-        editor.value = content;
-    }
-
-    function replaceSpecialTags() {
-        var editor = document.getElementById('editor');
-        var content = editor.value;
-
-        // Substituir padrões específicos
-        content = content.replace(/#i\s*\/?(?=\n|$)/ig, '#INTRO');
-        content = content.replace(/#v\s*\/?(?=\n|$)/ig, '#VERSE');
-        content = content.replace(/#p\s*\/?(?=\n|$)/ig, '#PRE-CHORUS');
-        content = content.replace(/#c\s*\/?(?=\n|$)/ig, '#CHORUS');
-        content = content.replace(/#b\s*\/?(?=\n|$)/ig, '#BRIDGE');
-        content = content.replace(/#h\s*\/?(?=\n|$)/ig, '#HOOK');
-        content = content.replace(/#o\s*\/?(?=\n|$)/ig, '#OUTRO');
-        content = content.replace(/##\s*\/?(?=\n|$)/ig, '#INSTRUMENTAL');
-
-        content = content.replace(/#intro\s*\/?(?=\n|$)/ig, '#INTRO');
-        content = content.replace(/#verse\s*\/?(?=\n|$)/ig, '#VERSE');
-        content = content.replace(/#pre-chorus\s*\/?(?=\n|$)/ig, '#PRE-CHORUS');
-        content = content.replace(/#chorus\s*\/?(?=\n|$)/ig, '#CHORUS');
-        content = content.replace(/#bridge\s*\/?(?=\n|$)/ig, '#BRIDGE');
-        content = content.replace(/#hook\s*\/?(?=\n|$)/ig, '#HOOK');
-        content = content.replace(/#outro\s*\/?(?=\n|$)/ig, '#OUTRO');
-        content = content.replace(/#instrumental\s*\/?(?=\n|$)/ig, '#INSTRUMENTAL');
-
-        // Atualizar o conteúdo do editor
-        editor.value = content;
-    }
-
-    function updateSidebar() {
-
-
-        function updateCharacterCounter() {
-            var lines = textarea.value.split('\n');
-            characterCounter.innerHTML = '';
-        
-            for (var i = 0; i < lines.length; i++) {
-                var line = document.createElement('div');
-                var lowercaseLine = lines[i].trim().toLowerCase();
-                var lineLength = lines[i].trim().length;
-        
-                if (lowercaseLine === '' || /^#instrumental$/.test(lowercaseLine) || /^#intro$/.test(lowercaseLine) || /^#verse$/.test(lowercaseLine) || /^#pre-chorus$/.test(lowercaseLine) || /^#chorus$/.test(lowercaseLine) || /^#hook$/.test(lowercaseLine) || /^#bridge$/.test(lowercaseLine) || /^#outro$/.test(lowercaseLine)) {
-                    line.textContent = " ";
-                } else {
-                    line.textContent = lineLength;
-        
-                    var selectedLanguageCode = localStorage.getItem('selectedLanguage');
-                    if (selectedLanguageCode === 'pt-BR' || selectedLanguageCode === 'pt-PT') {
-                        if (lineLength > 50) {
-                            line.style.fontWeight = 'bold';
-                            line.style.color = 'yellow';
-                        }
-                        if (lineLength > 55) {
-                            line.style.fontWeight = 'bold';
-                            line.style.color = 'red';
-                        }
-                    } else {
-                        if (lineLength > 65) {
-                            line.style.fontWeight = 'bold';
-                            line.style.color = 'yellow';
-                        }
-                        if (lineLength > 70) {
-                            line.style.fontWeight = 'bold';
-                            line.style.color = 'red';
-                        }
-                    }
-                }
-        
-                // Adicione a linha ao DOM antes de calcular a altura
-                characterCounter.appendChild(line);
-        
-                // Obtenha a altura da linha após ela ter sido adicionada ao DOM
-                var lineHeight = line.getBoundingClientRect().height;
-        
-                // Ajustar a altura da linha para a altura calculada
-                line.style.height = lineHeight + 'px';
-            }
-        
-            resetLineIssues();
-            closeContainers();
-            resetImprovementsBoxes();
-            syncScroll()
-        }
-        
-
-        function resetImprovementsBoxes() {
-            // Obtém a referência ao contêiner de melhorias
-            const formatContainer = document.getElementById('format_containers');
-            const grammarContainer = document.getElementById('grammar_containers');
-        
-            // Obtém a referência ao textarea com o ID 'editor'
-            const editorTextarea = document.getElementById('editor');
-        
-            // Remove todas as divs dentro do contêiner de melhorias
-            formatContainer.innerHTML = '';
-            grammarContainer.innerHTML = '';
-        
-            // Cria a div de espaço reservado para melhorias
-            const improvementsPlaceholderDiv1 = document.createElement('div');
-            improvementsPlaceholderDiv1.className = 'improvements_placeholder_div';
-            improvementsPlaceholderDiv1.id = 'improvements_placeholder_div1';
-        
-            // Cria a div de espaço reservado para melhorias com base no conteúdo do textarea
-            const improvementsPlaceholder1 = document.createElement('div');
-            improvementsPlaceholder1.className = 'improvements_placeholder';
-            improvementsPlaceholder1.id = 'improvements_placeholder1';
-
-            // Cria a div de espaço reservado para melhorias
-            const improvementsPlaceholderDiv2 = document.createElement('div');
-            improvementsPlaceholderDiv2.className = 'improvements_placeholder_div';
-            improvementsPlaceholderDiv2.id = 'improvements_placeholder_div2';
-        
-            // Cria a div de espaço reservado para melhorias com base no conteúdo do textarea
-            const improvementsPlaceholder2 = document.createElement('div');
-            improvementsPlaceholder2.className = 'improvements_placeholder';
-            improvementsPlaceholder2.id = 'improvements_placeholder2';
-        
-            // Verifica se o textarea está vazio
-            if (editorTextarea.value.trim() === '') {
-                improvementsPlaceholder1.innerHTML = 'Type something or paste your current transcription to check the format...';
-                improvementsPlaceholder2.innerHTML = 'Type something or paste your current transcription to check the grammar...';
-                ignoredContainers = []; // reseta o conteúdo ignorado
-                clearTimeout(typingTimer);
-
-            } else {
-                improvementsPlaceholder1.innerHTML = 'Tap the <span class="highlight_text">Refresh</span> icon to update the format suggestions.';
-                improvementsPlaceholder1.innerHTML = 'Tap the <span class="highlight_text">Refresh</span> icon to update the grammar suggestions.';
-            }
-        
-            // Adiciona a div de espaço reservado para melhorias ao contêiner de melhorias
-            improvementsPlaceholderDiv1.appendChild(improvementsPlaceholder1);
-            formatContainer.appendChild(improvementsPlaceholderDiv1);
-
-            improvementsPlaceholderDiv2.appendChild(improvementsPlaceholder2);
-            grammarContainer.appendChild(improvementsPlaceholderDiv2);
-        }
-
-        updateCharacterCounter();
-
-        function updateLineIssues() {
-            var textarea = document.getElementById('editor');
-            var lineIssuesContainer = document.getElementById('line_issues');
-        
-            if (!textarea || !lineIssuesContainer) {
-                console.error('Textarea or line issues container not found.');
-                return;
-            }
-        
-            // Remova todas as linhas existentes antes de recriar
-            lineIssuesContainer.innerHTML = '';
-        
-            var lines = textarea.value.split('\n');
-            var lineHeight = parseFloat(getComputedStyle(textarea).lineHeight);
-        
-            for (var i = 0; i < lines.length; i++) {
-                var lineIssueContainer = document.createElement('div');
-                lineIssueContainer.id = 'L' + (i + 1) + '_container'; // Adicionado '_container' ao ID para distinguir das linhas
-        
-                // Calcule a posição relativa dentro da div mãe
-                var topPosition = i * lineHeight;
-        
-                // Defina o tamanho da div para coincidir com o tamanho da linha do textarea
-                lineIssueContainer.style.width = '100%';
-                lineIssueContainer.style.height = lineHeight + 'px';
-        
-                // Defina a posição relativa dentro da div mãe
-                lineIssueContainer.style.top = topPosition + 'px';
-        
-                // Adicione a div ao container de line_issues
-                lineIssuesContainer.appendChild(lineIssueContainer);
-        
-                // Adicione as classes de estilo diretamente à div interna
-                var lineIssue = document.createElement('div');
-                lineIssue.className = 'status-1';
-                lineIssue.style.width = (1/3) * lineHeight + 'px';
-                lineIssue.style.height = (1/3) * lineHeight + 'px';
-                lineIssue.style.margin = 'auto'; // Centraliza horizontalmente e verticalmente
-        
-                // Adicione a div interna ao container de line_issues
-                lineIssueContainer.appendChild(lineIssue);
-            }
-        }
-        
-        // Exemplo de uso
-        updateLineIssues();
-
-    }
-    
-    updateSidebar();
-    
-
-    function syncScroll() {
-        var textarea = document.getElementById('editor'); // Substitua 'editor' pelo ID correto
-        var characterCounter = document.querySelector('.character_counter'); // Use o seletor correto
-        var lineIssues = document.querySelector('.line_issues'); // Use o seletor correto
-    
-        if (textarea && characterCounter && lineIssues) {
-            characterCounter.scrollTop = textarea.scrollTop;
-            lineIssues.scrollTop = textarea.scrollTop;
+            typingTimer = setTimeout(handleRefreshButtonClick, doneTypingInterval);
         }
     }
+
 
 
    // Função para verificar e definir o idioma padrão ao carregar a página
@@ -613,7 +122,7 @@ function handleRefreshButtonClick() {
     // Função para obter o nome completo do idioma com base no código
     function getLanguageFullName(code) {
         const languageMap = {
-            'en-UK': 'English (UK)',
+            'en-GB': 'English (UK)',
             'en-US': 'English (US)',
             'nl': 'Dutch',
             'fr': 'French',
@@ -668,23 +177,10 @@ function handleRefreshButtonClick() {
             langButtonContent.title = "Tap to edit the language";
         }
     });
-
-    // Configurar o idioma padrão ao carregar a página
-    setDefaultLanguage();
-    setCheckboxStates();
     
     // Adicione um evento de clique ao botão de cópia
     var copyButton = document.querySelector('.content_copy_btn');
     copyButton.addEventListener('click', copyToClipboard);
-
-    function ignoreButton(button) {
-        var container = button.closest('.container');
-        var containerId = container.id; // Obter o ID da DIV container
-        ignoredContainers.push(containerId); // Adicionar o ID ao array ignoredContainers
-        container.style.display = 'none';
-        resetLineIssues();
-        handleRefreshButtonClick();
-    } 
     
     var ignoreButtons = document.querySelectorAll('.content_ignore_btn');
     ignoreButtons.forEach(function (button) {
@@ -692,44 +188,6 @@ function handleRefreshButtonClick() {
             ignoreButton(event.target);
         });
     });
-
-    function fixButton(container, trigger) {
-        // Add if else para ocultar apenas se a correção for bem sucedida
-        if (typeof trigger === 'function') {
-            // Se o trigger for uma função, chame-a
-            trigger();
-        } else if (typeof trigger === 'string') {
-            // Se o trigger for uma string, interprete-a e execute a ação apropriada
-            interpretAndExecuteTrigger(trigger);
-        }
-    
-        // Oculta o container após a correção (ou tentativa de correção)
-        container.style.display = 'none';
-        checkAndShowPlaceholder(); // verifica se há containers, se não tiver, exibe o 'copy'
-        resetLineIssues();
-        handleRefreshButtonClick();
-    }
-    
-    // Definindo a função para interpretar e executar o trigger
-    function interpretAndExecuteTrigger(trigger) {
-        try {
-            // Extrai os termos entre colchetes usando uma expressão regular
-            const match = trigger.match(/\[(.*?)\], \[(.*?)\]/);
-
-            // Verifica se a correspondência foi bem-sucedida
-            if (match && match.length === 3) {
-                const incorrectTerm = match[1];
-                const correction = match[2];
-
-                // Chamando a função findAndReplace com os termos extraídos
-                findAndReplace(incorrectTerm, correction);
-            } else {
-                console.error('Invalid trigger format:', trigger);
-            }
-        } catch (error) {
-            console.error('An error occurred when interpreting and executing the trigger:', error);
-        }
-    }
     
     var fixButtons = document.querySelectorAll('.content_fix_btn');
     fixButtons.forEach(function (button) {
@@ -737,6 +195,505 @@ function handleRefreshButtonClick() {
             fixButton(event.target);
         });
     });
+});
+
+
+
+
+
+
+
+// Add this function to your existing code
+function handleRefreshButtonClick() {
+    var refreshButton = document.getElementById('refresh_button');
+    var loadingSpinner = document.getElementById('loading_spinner');
+    var textArea = document.getElementById('editor');
+    var autoTrimToggle = document.getElementById('autoTrimToggle');
+    var removeDoubleSpacesAndLinesToggle = document.getElementById('removeDoubleSpacesAndLinesToggle');
+    var autoCapTagsToggle = document.getElementById('autoCapTagsToggle');
+
+
+    if (autoTrimToggle.checked) {
+        autoTrim();
+    }
+    if (removeDoubleSpacesAndLinesToggle.checked) {
+        removeDuplicateSpaces();
+        removeDuplicateEmptyLines();
+    }
+    if (autoCapTagsToggle.checked) {
+        replaceSpecialTags();
+    }
+
+    resetLineIssues();
+    updateSidebar();
+    clearTimeout(typingTimer); // auto 3s
+    fetchCurrentlyPlayingData();
+    checkLanguage();
+    
+
+    // Get references to the elements
+    // Hide the refresh button and show the loading spinner
+    refreshButton.style.display = 'none';
+    loadingSpinner.style.display = 'block';
+
+    // Get the language code from the selected language element
+    var selectedLanguageCode = localStorage.getItem('selectedLanguage');
+
+    // Check if a language is selected
+    if (!selectedLanguageCode) {
+        notification('Please select a language to start.', 'info');
+        // Show the refresh button and hide the loading spinner
+        refreshButton.style.display = 'block';
+        loadingSpinner.style.display = 'none';
+        return;
+    }
+
+    // Prepare the data to send to the API
+    var requestData = {
+        text: textArea.value,
+    };
+
+    // Obter o valor de localHostToggle do localStorage
+    const localHostToggle = localStorage.getItem('localHostToggle');
+
+    // Verificar o valor de localHostToggle e definir window.serverPath
+    if (localHostToggle === 'true') {
+        window.serverPath = 'http://localhost:3000'; 
+    } else {
+        window.serverPath = 'https://datamatch-backend.onrender.com';
+    }
+
+    fetch(`${window.serverPath}/formatter/${selectedLanguageCode}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestData),
+    })
+        .then(response => {
+            if (!response.ok) {
+                if (response.status === 404) {
+                    // Show notification for language not selected
+                    notification("An error occurred, please select the language again");
+                    localStorage.removeItem('selectedLanguage');
+                    document.querySelector('.selected_language').textContent = 'Select Language';
+                } else {
+                    // Handle other errors here
+                    console.error('Error with API request. Status:', response.status);
+                    errorPlaceholder("We are experiencing internal issues, please try again later.", 'format_containers');
+                }
+            }
+            return response.json();
+        })
+        .then(data => {
+            // Handle the API response here
+            // Remove existing HTML elements inside the format_containers
+            const formatContainer = document.getElementById('format_containers');
+            const grammarContainer = document.getElementById('grammar_containers');
+
+            formatContainer.innerHTML = '';
+            grammarContainer.innerHTML = '';
+    
+            if (data.result.issues === false) {
+                // se não houverem erros, exibe o 'no issues'
+                CheckFormatPlaceholder();
+            } else {
+                // add os containers na box "format_containers"
+                for (const alertaKey in data.result.containers.alerts) {
+                    const alerta = data.result.containers.alerts[alertaKey];
+                    const container = createContainer(alerta.container);
+                    
+                    // verifica se o container recebido não é null antes de adicioná-lo
+                    if (container !== null) {
+                        formatContainer.appendChild(container);
+                    }
+                }
+                CheckFormatPlaceholder();
+            }
+
+        })
+        .catch(error => {
+            // Handle errors here
+            const formatContainer = document.getElementById('format_containers');
+            const grammarContainer = document.getElementById('grammar_containers');
+            
+            formatContainer.innerHTML = '';
+            grammarContainer.innerHTML = '';
+
+            console.error('Error sending data to API:', error);
+            errorPlaceholder("Something went wrong, please try again in a few seconds.", 'format_containers');
+        })
+        .finally(() => {
+            // Show the refresh button and hide the loading spinner after the request is complete
+            refreshButton.style.display = 'block';
+            loadingSpinner.style.display = 'none';
+        });
+}
+
+
+function selectText(offset, length) {
+    var textArea = document.getElementById('editor'); // Substitua 'seuTextAreaId' pelo ID do seu textarea
+
+    // Selecionar todo o texto no textarea
+    textArea.select();
+
+    // Desfazer a seleção para que possamos selecionar apenas as linhas desejadas
+    document.execCommand('unselect', false, null);
+
+    var text = textArea.value;
+
+    // Validar offset e length para garantir que não ultrapassem os limites do texto
+    if (offset < 0) {
+        offset = 0;
+    }
+    if (length < 0) {
+        length = 0;
+    }
+    if (offset + length > text.length) {
+        length = text.length - offset;
+    }
+
+    // Selecionar o texto no textarea usando offset e length
+    textArea.setSelectionRange(offset, offset + length);
+
+}
+
+
+function hideOptionsAndButtons() {
+    const improvementsOptions = document.getElementById('improvements_menu');
+    const resetButton = document.getElementById('reset_button');
+    const refreshButton = document.getElementById('refresh_button');
+    const improvementsPlaceholder1 = document.getElementById('improvements_placeholder1');
+    const improvementsPlaceholder2 = document.getElementById('improvements_placeholder2');
+
+    improvementsOptions.style.display = 'none';
+    resetButton.style.display = 'none';
+    refreshButton.style.display = 'none';
+    improvementsPlaceholder1.textContent = 'Type something or paste your current transcription to check the format...';
+    improvementsPlaceholder2.textContent = 'Type something or paste your current transcription to check the grammar...';
+    improvementsPlaceholder1.onclick = '';
+    improvementsPlaceholder2.onclick = '';
+}
+
+function showOptionsAndButtons() {
+    const improvementsOptions = document.getElementById('improvements_menu');
+    const resetButton = document.getElementById('reset_button');
+    const refreshButton = document.getElementById('refresh_button');
+    const improvementsPlaceholder1 = document.getElementById('improvements_placeholder1');
+    const improvementsPlaceholder2 = document.getElementById('improvements_placeholder2');
+
+    improvementsOptions.style.display = 'flex';
+    resetButton.style.display = 'block';
+    refreshButton.style.display = 'block';
+    improvementsPlaceholder1.innerHTML = 'Tap the <span class="highlight_text">Refresh</span> icon to update the format suggestions.';
+    improvementsPlaceholder2.innerHTML = 'Tap the <span class="highlight_text">Refresh</span> icon to update the grammar suggestions.';
+}
+
+function isAutoCapChecked() {
+    const autoCapToggle = document.getElementById('autoCapToggle');
+    return autoCapToggle.checked;
+}
+
+function isAutoSuggestionsChecked() {
+    const autoSuggestions = document.getElementById('autoSuggestions');
+    return autoSuggestions.checked;
+}
+
+function autoCap() {
+    var editor = document.getElementById('editor');
+    var content = editor.value;
+
+    // salvar a posição do cursor
+    var startPos = editor.selectionStart;
+    var endPos = editor.selectionEnd;
+
+    // separa a letra em linhas
+    var lines = content.split('\n');
+
+    // capitaliza a primeira letra de cada linha
+    for (var i = 0; i < lines.length; i++) {
+        lines[i] = lines[i].charAt(0).toUpperCase() + lines[i].slice(1);
+    }
+
+    // reune as linhas novamente
+    content = lines.join('\n');
+
+    // atualiza o editor
+    editor.value = content;
+
+    // restaura a posição do cursor
+    editor.setSelectionRange(startPos, endPos);
+}
+
+function autoTrim() {
+    var editor = document.getElementById('editor');
+    var content = editor.value;
+
+    // Split the content into lines
+    var lines = content.split('\n');
+
+    // Trim extra spaces at the end of each line
+    for (var i = 0; i < lines.length; i++) {
+        lines[i] = lines[i].trimRight();
+    }
+
+    // Join the lines back together
+    content = lines.join('\n');
+
+    // Update the editor's content
+    editor.value = content;
+}
+
+function removeDuplicateSpaces() {
+    var editor = document.getElementById('editor');
+    var content = editor.value;
+
+    // Dividir o conteúdo em linhas
+    var lines = content.split('\n');
+
+    // Iterar sobre cada linha e substituir espaços duplicados por um único espaço
+    for (var i = 0; i < lines.length; i++) {
+        lines[i] = lines[i].replace(/\s+/g, ' ');
+    }
+
+    // Juntar as linhas de volta
+    content = lines.join('\n');
+
+    // Atualizar o conteúdo do editor
+    editor.value = content;
+}
+
+function removeDuplicateEmptyLines() {
+    var editor = document.getElementById('editor');
+    var content = editor.value;
+
+    // Dividir o conteúdo em linhas
+    var lines = content.split('\n');
+
+    // Filtrar linhas não vazias e adicionar uma linha vazia no final
+    lines = lines.filter(function(line, index, self) {
+        return line.trim() !== '' || index === self.length - 1 || line.trim() !== self[index + 1].trim();
+    });
+
+    // Juntar as linhas de volta
+    content = lines.join('\n');
+
+    // Atualizar o conteúdo do editor
+    editor.value = content;
+}
+
+function replaceSpecialTags() {
+    var editor = document.getElementById('editor');
+    var content = editor.value;
+
+    // Substituir padrões específicos
+    content = content.replace(/#i\s*\/?(?=\n|$)/ig, '#INTRO');
+    content = content.replace(/#v\s*\/?(?=\n|$)/ig, '#VERSE');
+    content = content.replace(/#p\s*\/?(?=\n|$)/ig, '#PRE-CHORUS');
+    content = content.replace(/#c\s*\/?(?=\n|$)/ig, '#CHORUS');
+    content = content.replace(/#b\s*\/?(?=\n|$)/ig, '#BRIDGE');
+    content = content.replace(/#h\s*\/?(?=\n|$)/ig, '#HOOK');
+    content = content.replace(/#o\s*\/?(?=\n|$)/ig, '#OUTRO');
+    content = content.replace(/##\s*\/?(?=\n|$)/ig, '#INSTRUMENTAL');
+
+    content = content.replace(/#intro\s*\/?(?=\n|$)/ig, '#INTRO');
+    content = content.replace(/#verse\s*\/?(?=\n|$)/ig, '#VERSE');
+    content = content.replace(/#pre-chorus\s*\/?(?=\n|$)/ig, '#PRE-CHORUS');
+    content = content.replace(/#chorus\s*\/?(?=\n|$)/ig, '#CHORUS');
+    content = content.replace(/#bridge\s*\/?(?=\n|$)/ig, '#BRIDGE');
+    content = content.replace(/#hook\s*\/?(?=\n|$)/ig, '#HOOK');
+    content = content.replace(/#outro\s*\/?(?=\n|$)/ig, '#OUTRO');
+    content = content.replace(/#instrumental\s*\/?(?=\n|$)/ig, '#INSTRUMENTAL');
+
+    // Atualizar o conteúdo do editor
+    editor.value = content;
+}
+
+
+function notification(customMessage) {
+    const notification_div = document.getElementById("notification");
+    const message = document.getElementById("notification-message");
+    message.textContent = customMessage;
+    notification_div.style.opacity = 1;
+    notification_div.classList.remove("hidden");
+    setTimeout(() => {
+    notification_div.style.opacity = 0;
+    setTimeout(() => {
+        notification_div.classList.add("hidden");
+    }, 500);
+    }, 4000); // Tempo de exibição
+};
+
+function updateSidebar() {
+    updateCharacterCounter();
+    updateLineIssues();
+}
+
+
+function updateLineIssues() {
+    var textarea = document.getElementById('editor');
+    var lineIssuesContainer = document.getElementById('line_issues');
+
+    if (!textarea || !lineIssuesContainer) {
+        console.error('Textarea or line issues container not found.');
+        return;
+    }
+
+    // Remova todas as linhas existentes antes de recriar
+    lineIssuesContainer.innerHTML = '';
+
+    var lines = textarea.value.split('\n');
+    var lineHeight = parseFloat(getComputedStyle(textarea).lineHeight);
+
+    for (var i = 0; i < lines.length; i++) {
+        var lineIssueContainer = document.createElement('div');
+        lineIssueContainer.id = 'L' + (i + 1) + '_container'; // Adicionado '_container' ao ID para distinguir das linhas
+
+        // Calcule a posição relativa dentro da div mãe
+        var topPosition = i * lineHeight;
+
+        // Defina o tamanho da div para coincidir com o tamanho da linha do textarea
+        lineIssueContainer.style.width = '100%';
+        lineIssueContainer.style.height = lineHeight + 'px';
+
+        // Defina a posição relativa dentro da div mãe
+        lineIssueContainer.style.top = topPosition + 'px';
+
+        // Adicione a div ao container de line_issues
+        lineIssuesContainer.appendChild(lineIssueContainer);
+
+        // Adicione as classes de estilo diretamente à div interna
+        var lineIssue = document.createElement('div');
+        lineIssue.className = 'status-1';
+        lineIssue.style.width = (1/3) * lineHeight + 'px';
+        lineIssue.style.height = (1/3) * lineHeight + 'px';
+        lineIssue.style.margin = 'auto'; // Centraliza horizontalmente e verticalmente
+
+        // Adicione a div interna ao container de line_issues
+        lineIssueContainer.appendChild(lineIssue);
+    }
+}
+
+
+function resetImprovementsBoxes() {
+    // Obtém a referência ao contêiner de melhorias
+    const formatContainer = document.getElementById('format_containers');
+    const grammarContainer = document.getElementById('grammar_containers');
+
+    // Obtém a referência ao textarea com o ID 'editor'
+    const editorTextarea = document.getElementById('editor');
+
+    // Remove todas as divs dentro do contêiner de melhorias
+    formatContainer.innerHTML = '';
+    grammarContainer.innerHTML = '';
+
+    // Cria a div de espaço reservado para melhorias
+    const improvementsPlaceholderDiv1 = document.createElement('div');
+    improvementsPlaceholderDiv1.className = 'improvements_placeholder_div';
+    improvementsPlaceholderDiv1.id = 'improvements_placeholder_div1';
+
+    // Cria a div de espaço reservado para melhorias com base no conteúdo do textarea
+    const improvementsPlaceholder1 = document.createElement('div');
+    improvementsPlaceholder1.className = 'improvements_placeholder';
+    improvementsPlaceholder1.id = 'improvements_placeholder1';
+
+    // Cria a div de espaço reservado para melhorias
+    const improvementsPlaceholderDiv2 = document.createElement('div');
+    improvementsPlaceholderDiv2.className = 'improvements_placeholder_div';
+    improvementsPlaceholderDiv2.id = 'improvements_placeholder_div2';
+
+    // Cria a div de espaço reservado para melhorias com base no conteúdo do textarea
+    const improvementsPlaceholder2 = document.createElement('div');
+    improvementsPlaceholder2.className = 'improvements_placeholder';
+    improvementsPlaceholder2.id = 'improvements_placeholder2';
+
+    // Verifica se o textarea está vazio
+    if (editorTextarea.value.trim() === '') {
+        improvementsPlaceholder1.innerHTML = 'Type something or paste your current transcription to check the format...';
+        improvementsPlaceholder2.innerHTML = 'Type something or paste your current transcription to check the grammar...';
+        ignoredContainers = []; // reseta o conteúdo ignorado
+        clearTimeout(typingTimer);
+
+    } else {
+        improvementsPlaceholder1.innerHTML = 'Tap the <span class="highlight_text">Refresh</span> icon to update the format suggestions.';
+        improvementsPlaceholder2.innerHTML = 'Tap the <span class="highlight_text">Refresh</span> icon to update the grammar suggestions.';
+    }
+
+    // Adiciona a div de espaço reservado para melhorias ao contêiner de melhorias
+    improvementsPlaceholderDiv1.appendChild(improvementsPlaceholder1);
+    formatContainer.appendChild(improvementsPlaceholderDiv1);
+
+    improvementsPlaceholderDiv2.appendChild(improvementsPlaceholder2);
+    grammarContainer.appendChild(improvementsPlaceholderDiv2);
+}
+
+function updateCharacterCounter() {
+    var textarea = document.getElementById('editor');
+    var characterCounter = document.querySelector('.character_counter');
+    
+    var lines = textarea.value.split('\n');
+    characterCounter.innerHTML = '';
+
+    for (var i = 0; i < lines.length; i++) {
+        var line = document.createElement('div');
+        var lowercaseLine = lines[i].trim().toLowerCase();
+        var lineLength = lines[i].trim().length;
+
+        if (lowercaseLine === '' || /^#instrumental$/.test(lowercaseLine) || /^#intro$/.test(lowercaseLine) || /^#verse$/.test(lowercaseLine) || /^#pre-chorus$/.test(lowercaseLine) || /^#chorus$/.test(lowercaseLine) || /^#hook$/.test(lowercaseLine) || /^#bridge$/.test(lowercaseLine) || /^#outro$/.test(lowercaseLine)) {
+            line.textContent = " ";
+        } else {
+            line.textContent = lineLength;
+
+            var selectedLanguageCode = localStorage.getItem('selectedLanguage');
+            if (selectedLanguageCode === 'pt-BR' || selectedLanguageCode === 'pt-PT') {
+                if (lineLength > 50) {
+                    line.style.fontWeight = 'bold';
+                    line.style.color = 'yellow';
+                }
+                if (lineLength > 55) {
+                    line.style.fontWeight = 'bold';
+                    line.style.color = 'red';
+                }
+            } else {
+                if (lineLength > 65) {
+                    line.style.fontWeight = 'bold';
+                    line.style.color = 'yellow';
+                }
+                if (lineLength > 70) {
+                    line.style.fontWeight = 'bold';
+                    line.style.color = 'red';
+                }
+            }
+        }
+
+        // Adicione a linha ao DOM antes de calcular a altura
+        characterCounter.appendChild(line);
+
+        // Obtenha a altura da linha após ela ter sido adicionada ao DOM
+        var lineHeight = line.getBoundingClientRect().height;
+
+        // Ajustar a altura da linha para a altura calculada
+        line.style.height = lineHeight + 'px';
+    }
+
+    resetLineIssues();
+    closeContainers();
+    resetImprovementsBoxes();
+    syncScroll()
+}
+
+function syncScroll() {
+    var textarea = document.getElementById('editor'); // Substitua 'editor' pelo ID correto
+    var characterCounter = document.querySelector('.character_counter'); // Use o seletor correto
+    var lineIssues = document.querySelector('.line_issues'); // Use o seletor correto
+
+    if (textarea && characterCounter && lineIssues) {
+        characterCounter.scrollTop = textarea.scrollTop;
+        lineIssues.scrollTop = textarea.scrollTop;
+    }
+}
+
+
 
 // Função auxiliar para criar um container HTML com base nos dados da API
 function createContainer(containerData) {
@@ -838,127 +795,9 @@ function createContainer(containerData) {
     return container;
 }
 
-// Função para adicionar os containers à div pai 'format_containers'
-function addContainersToParent(containersData) {
-    const formatContainers = document.getElementById('format_containers');
-    
-    containersData.forEach(containerData => {
-        const container = createContainer(containerData);
-        if (container) {
-            formatContainers.appendChild(container);
-        }
-    });
-}
 
-    function copyToClipboard() {
-        if (textArea.value.trim() === '') {
-            notification("Sorry, there's no content to be copied here");
-            return;
-        }
-    
-        textArea.select();
-        
-        try {
-            // Copia o conteúdo para a área de transferência
-            var successful = document.execCommand('copy');
-            var message = successful ? 'Copied to your clipboard!' : 'Something went wrong, please try again.';
-            notification(message);
-            
 
-            textArea.value = ''; // apaga a transcrição
-            updateSidebar(); // reseta os contadores de caracteres e a barra lateral
-            ignoredContainers = []; // limpa a memória de alertas ignorados
 
-        } catch (err) {
-            console.error('An error occurred while copying the text: ', err);
-            notification('An error occurred while copying the text.');
-        }
-    
-        // Deseleciona a textarea
-        window.getSelection().removeAllRanges();
-
-    }
-
-    // Função para verificar e exibir a div placeholder
-    function checkAndShowPlaceholder() {
-        var formatContainer = document.getElementById('format_containers');
-
-        // Verificar se há containers visíveis
-        var visibleContainers = Array.from(formatContainer.querySelectorAll('.container')).filter(container => container.style.display !== 'none');
-
-        // Se já houver algum container visível, não faz nada
-        if (visibleContainers.length > 0) {
-            console.log('> 0');
-            return;
-        }
-
-        // Create and append the "No issues found" div
-        const noIssuesDiv = document.createElement('div');
-        noIssuesDiv.className = 'container_no_issues';
-        noIssuesDiv.id = 'container_no_issues';
-        noIssuesDiv.style.display = 'flex';
-
-        const contentDiv = document.createElement('div');
-        contentDiv.className = 'content_ok';
-
-        const h2 = document.createElement('h2');
-        h2.textContent = 'No format issues found! ✨';
-
-        const copyBtn = document.createElement('div');
-        copyBtn.className = 'content_copy_btn';
-        copyBtn.textContent = 'Copy';
-        copyBtn.onclick = copyToClipboard;
-
-        contentDiv.appendChild(h2);
-        contentDiv.appendChild(copyBtn);
-        noIssuesDiv.appendChild(contentDiv);
-
-        formatContainer.appendChild(noIssuesDiv);
-    }
-
-    checkAndShowPlaceholder();
-
-    function selectText(linesToSelect) { // SELECIONA LINHAS ESPECIFICAS
-        // Selecionar todo o texto no textarea
-        textArea.select();
-    
-        // Desfazer a seleção para que possamos selecionar apenas as linhas desejadas
-        document.execCommand('unselect', false, null);
-    
-        var lines = textArea.value.split('\n');
-        var selectedRanges = [];
-    
-        // Calcular a posição inicial e final para cada linha desejada
-        for (var i = 0; i < linesToSelect.length; i++) {
-            var lineIndex = linesToSelect[i] - 1; // Ajuste para começar do índice 0
-    
-            if (lineIndex >= 0 && lineIndex < lines.length) {
-                var start = 0;
-    
-                for (var j = 0; j < lineIndex; j++) {
-                    start += lines[j].length + 1; // +1 para a quebra de linha
-                }
-    
-                var end = start + lines[lineIndex].length;
-    
-                selectedRanges.push({ start, end });
-            }
-        }
-    
-        // Selecionar o texto no textarea para cada intervalo desejado
-        if (selectedRanges.length > 0) {
-            // Use o primeiro intervalo como o intervalo inicial
-            var initialRange = selectedRanges[0];
-            textArea.setSelectionRange(initialRange.start, initialRange.end);
-    
-            // Adicione os intervalos restantes como seleções adicionais
-            for (var i = 1; i < selectedRanges.length; i++) {
-                var range = selectedRanges[i];
-                textArea.addRange(new Range(range.start, range.end));
-            }
-        }
-    }
-});
 
 function closeContainers() {
     const allContainers = document.querySelectorAll('.container');
@@ -985,11 +824,25 @@ function expandContainer(container) {
         const lines = JSON.parse(container.getAttribute('data-lines'));
         resetLineIssues();
         updateLineIssues(color, lines);
+
+        // Verifica se o atributo lt-position está presente no container
+        const ltPosition = container.getAttribute('lt-position');
+        if (ltPosition) {
+            // Extrai offset e length do atributo lt-position
+            const [offset, length] = ltPosition.split(':').map(Number);
+            // Aciona a função selectText com os parâmetros offset e length
+            selectText(offset, length);
+        }
     }
 }
 
 function updateLineIssues(color, lines) {
     // Itera sobre as linhas fornecidas
+
+    var editor = document.getElementById('editor');
+    let content = editor.value;
+    var lines = content.split('\n');
+
     lines.forEach((line) => {
         // Obtém o ID da div da linha
         const lineId = `L${line}_container`;
@@ -1199,6 +1052,192 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 });
 
+function ignoreButton(button) {
+    var container = button.closest('.container');
+    var containerId = container.id; // Obter o ID da DIV container
+    ignoredContainers.push(containerId); // Adicionar o ID ao array ignoredContainers
+    container.style.display = 'none';
+    resetLineIssues();
+    handleRefreshButtonClick();
+} 
+
+function fixButton(container, trigger) {
+    // Add if else para ocultar apenas se a correção for bem sucedida
+    if (typeof trigger === 'function') {
+        // Se o trigger for uma função, chame-a
+        trigger();
+    } else if (typeof trigger === 'string') {
+        // Se o trigger for uma string, interprete-a e execute a ação apropriada
+        interpretAndExecuteTrigger(trigger);
+    }
+
+    // Oculta o container após a correção (ou tentativa de correção)
+    container.style.display = 'none';
+    CheckFormatPlaceholder(); // verifica se há containers, se não tiver, exibe o 'copy'
+    resetLineIssues();
+    handleRefreshButtonClick();
+}
+
+// Definindo a função para interpretar e executar o trigger
+function interpretAndExecuteTrigger(trigger) {
+    try {
+        // Extrai os termos entre colchetes usando uma expressão regular
+        const match = trigger.match(/\[(.*?)\], \[(.*?)\]/);
+
+        // Verifica se a correspondência foi bem-sucedida
+        if (match && match.length === 3) {
+            const incorrectTerm = match[1];
+            const correction = match[2];
+
+            // Chamando a função findAndReplace com os termos extraídos
+            findAndReplace(incorrectTerm, correction);
+        } else {
+            console.error('Invalid trigger format:', trigger);
+        }
+    } catch (error) {
+        console.error('An error occurred when interpreting and executing the trigger:', error);
+    }
+}
+
+
+function copyToClipboard() {
+    const textArea = document.getElementById('editor');
+    if (textArea.value.trim() === '') {
+        notification("Sorry, there's no content to be copied here");
+        return;
+    }
+
+    textArea.select();
+    
+    try {
+        // Copia o conteúdo para a área de transferência
+        var successful = document.execCommand('copy');
+        var message = successful ? 'Copied to your clipboard!' : 'Something went wrong, please try again.';
+        notification(message);
+        
+
+        textArea.value = ''; // apaga a transcrição
+        updateSidebar(); // reseta os contadores de caracteres e a barra lateral
+        hideOptionsAndButtons() // oculta os menus já que não há mais texto
+        ignoredContainers = []; // limpa a memória de alertas ignorados
+
+    } catch (err) {
+        console.error('An error occurred while copying the text: ', err);
+        notification('An error occurred while copying the text.');
+    }
+
+    // Deseleciona a textarea
+    window.getSelection().removeAllRanges();
+
+}
+
+// Função para verificar e exibir a div placeholder
+function CheckFormatPlaceholder() {
+    var formatContainer = document.getElementById('format_containers');
+
+    // Verificar se há containers visíveis
+    var visibleContainers = Array.from(formatContainer.querySelectorAll('.container')).filter(container => container.style.display !== 'none');
+
+    // Se já houver algum container visível, não faz nada
+    if (visibleContainers.length > 0) {
+        return;
+    }
+
+    // Create and append the "No issues found" div
+    const noIssuesDiv = document.createElement('div');
+    noIssuesDiv.className = 'container_no_issues';
+    noIssuesDiv.id = 'container_no_issues';
+    noIssuesDiv.style.display = 'flex';
+
+    const contentDiv = document.createElement('div');
+    contentDiv.className = 'content_ok';
+
+    const h2 = document.createElement('h2');
+    h2.textContent = 'No format issues found! ✨';
+
+    const copyBtn = document.createElement('div');
+    copyBtn.className = 'content_copy_btn';
+    copyBtn.textContent = 'Copy';
+    copyBtn.onclick = copyToClipboard;
+
+    contentDiv.appendChild(h2);
+    contentDiv.appendChild(copyBtn);
+    noIssuesDiv.appendChild(contentDiv);
+
+    formatContainer.appendChild(noIssuesDiv);
+}
+
+// Função para verificar e exibir a div placeholder
+function checkGrammarPlaceholder() {
+    var formatContainer = document.getElementById('grammar_containers');
+
+    // Verificar se há containers visíveis
+    var visibleContainers = Array.from(formatContainer.querySelectorAll('.container')).filter(container => container.style.display !== 'none');
+
+    // Se já houver algum container visível, não faz nada
+    if (visibleContainers.length > 0) {
+        console.log('> 0');
+        return;
+    }
+
+    // Create and append the "No issues found" div
+    const noIssuesDiv = document.createElement('div');
+    noIssuesDiv.className = 'container_no_issues';
+    noIssuesDiv.id = 'container_no_issues';
+    noIssuesDiv.style.display = 'flex';
+
+    const contentDiv = document.createElement('div');
+    contentDiv.className = 'content_ok';
+
+    const h2 = document.createElement('h2');
+    h2.textContent = 'No grammar issues found! ✨';
+
+    const copyBtn = document.createElement('div');
+    copyBtn.className = 'content_copy_btn';
+    copyBtn.textContent = 'Copy';
+    copyBtn.onclick = copyToClipboard;
+
+    contentDiv.appendChild(h2);
+    contentDiv.appendChild(copyBtn);
+    noIssuesDiv.appendChild(contentDiv);
+
+    formatContainer.appendChild(noIssuesDiv);
+}
+
+// Função para verificar e exibir a div placeholder
+function errorPlaceholder(message, destContainer) {
+    var formatContainer = document.getElementById(destContainer);
+
+    // Verificar se há containers visíveis
+    var visibleContainers = Array.from(formatContainer.querySelectorAll('.container')).filter(container => container.style.display !== 'none');
+
+    // Se já houver algum container visível, não faz nada
+    if (visibleContainers.length > 0) {
+        console.log('> 0');
+        return;
+    }
+
+    // Create and append the "No issues found" div
+    const noIssuesDiv = document.createElement('div');
+    noIssuesDiv.className = 'improvements_placeholder_div';
+    noIssuesDiv.id = 'error_placeholder';
+    noIssuesDiv.style.display = 'flex';
+
+    const contentDiv = document.createElement('div');
+    contentDiv.className = 'improvements_placeholder';
+
+    const h2 = document.createElement('p');
+    h2.textContent = message;
+
+    contentDiv.appendChild(h2);
+    noIssuesDiv.appendChild(contentDiv);
+
+    formatContainer.appendChild(noIssuesDiv);
+}
+
+
+
+
 // Função para fazer uma solicitação AJAX
 function fetchCreditsData() {
 
@@ -1283,10 +1322,6 @@ function updateCredits(credits) {
     });
 }
 
-document.addEventListener('DOMContentLoaded', function () {
-    fetchCreditsData();
-    fetchServerInfo();
-});
 
 // Função para abrir a autorização do Spotify na mesma aba
 function openSpotifyAuthorization() {
@@ -1419,18 +1454,23 @@ function updateServerInfo(data) {
     }
 }
 
-// Adicionar evento de clique ao h2 com id 'settings_title'
-const settingsTitle = document.getElementById('settings_title');
-let clickCount = 0;
 
-settingsTitle.addEventListener('click', function () {
-    clickCount++;
+document.addEventListener('DOMContentLoaded', function () { 
 
-    // Se o usuário clicou 5 vezes, exibir a div e reiniciar a contagem
-    if (clickCount === 5) {
-        displayDevModeDiv();
-        clickCount = 0;
-    }
+    // Adicionar evento de clique ao h2 com id 'settings_title'
+    const settingsTitle = document.getElementById('settings_title');
+    let clickCount = 0;
+
+    settingsTitle.addEventListener('click', function () {
+        clickCount++;
+
+        // Se o usuário clicou 5 vezes, exibir a div e reiniciar a contagem
+        if (clickCount === 5) {
+            displayDevModeDiv();
+            clickCount = 0;
+        }
+    });
+
 });
 
 // Função para exibir/ocultar a div e salvar a escolha em cache
@@ -1460,7 +1500,3 @@ function loadDevMode() {
         devHidedDiv.style.display = 'none';
     }
 }
-
-// Chama a função ao carregar a página para aplicar o estado do modo de desenvolvimento
-loadDevMode();
-
