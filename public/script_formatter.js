@@ -116,7 +116,6 @@ document.addEventListener('DOMContentLoaded', function () {
         if (storedLanguage) {
             // Se houver um idioma armazenado em cache, defina-o como padrão
             selectedLanguage.textContent = getLanguageFullName(storedLanguage);
-            // Adicione integração do idioma aqui
         }
     }
     
@@ -813,7 +812,11 @@ function expandContainer(container) {
         const color = container.getAttribute('data-color');
         const lines = JSON.parse(container.getAttribute('data-lines'));
         resetLineIssues();
-        updateLineIssues(color, lines);
+
+        // Verifica se o ID do elemento se inicia com 'lt_'
+        if (!container.id.startsWith('lt_')) {
+            updateLineIssues(color, lines);
+        }
 
         // Verifica se o atributo lt-position está presente no container
         const ltPosition = container.getAttribute('lt-position');
