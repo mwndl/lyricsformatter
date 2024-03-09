@@ -20,6 +20,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
     // config inicial
+    updateSidebar()
     setDefaultLanguage();
     setCheckboxStates();
     loadDevMode();
@@ -62,6 +63,7 @@ document.addEventListener('DOMContentLoaded', function () {
         // restaura a posição do scroll
         textarea.scrollTop = scrollTop;
         textarea.scrollLeft = scrollLeft;
+        resetLineIssues()
     });
 
 
@@ -224,7 +226,6 @@ function handleRefreshButtonClick() {
         replaceSpecialTags();
     }
 
-    resetLineIssues();
     updateSidebar();
     clearTimeout(typingTimer); // auto 3s
     fetchCurrentlyPlayingData();
@@ -289,10 +290,7 @@ function handleRefreshButtonClick() {
             // Handle the API response here
             // Remove existing HTML elements inside the format_containers
             const formatContainer = document.getElementById('format_containers');
-            const grammarContainer = document.getElementById('grammar_containers');
-
             formatContainer.innerHTML = '';
-            grammarContainer.innerHTML = '';
     
             if (data.result.issues === false) {
                 // se não houverem erros, exibe o 'no issues'
@@ -315,10 +313,7 @@ function handleRefreshButtonClick() {
         .catch(error => {
             // Handle errors here
             const formatContainer = document.getElementById('format_containers');
-            const grammarContainer = document.getElementById('grammar_containers');
-            
             formatContainer.innerHTML = '';
-            grammarContainer.innerHTML = '';
 
             console.error('Error sending data to API:', error);
             errorPlaceholder("Something went wrong, please try again in a few seconds.", 'format_containers');
@@ -526,52 +521,47 @@ function notification(customMessage) {
 
 function updateSidebar() {
     updateCharacterCounter();
-    updateLineIssues();
-}
+    resetLineIssues();
 
-
-function updateLineIssues() {
-    var textarea = document.getElementById('editor');
-    var lineIssuesContainer = document.getElementById('line_issues');
-
-    if (!textarea || !lineIssuesContainer) {
-        console.error('Textarea or line issues container not found.');
-        return;
+    function resetLineIssues() {
+        var textarea = document.getElementById('editor');
+        var lineIssuesContainer = document.getElementById('line_issues');
+    
+        // Remova todas as linhas existentes antes de recriar
+        lineIssuesContainer.innerHTML = '';
+    
+        var lines = textarea.value.split('\n');
+        var lineHeight = parseFloat(getComputedStyle(textarea).lineHeight);
+    
+        for (var i = 0; i < lines.length; i++) {
+            var lineIssueContainer = document.createElement('div');
+            lineIssueContainer.id = 'L' + (i + 1) + '_container'; // Adicionado '_container' ao ID para distinguir das linhas
+    
+            // Calcule a posição relativa dentro da div mãe
+            var topPosition = i * lineHeight;
+    
+            // Defina o tamanho da div para coincidir com o tamanho da linha do textarea
+            lineIssueContainer.style.width = '100%';
+            lineIssueContainer.style.height = lineHeight + 'px';
+    
+            // Defina a posição relativa dentro da div mãe
+            lineIssueContainer.style.top = topPosition + 'px';
+    
+            // Adicione a div ao container de line_issues
+            lineIssuesContainer.appendChild(lineIssueContainer);
+    
+            // Adicione as classes de estilo diretamente à div interna
+            var lineIssue = document.createElement('div');
+            lineIssue.className = 'status-1';
+            lineIssue.style.width = (1/3) * lineHeight + 'px';
+            lineIssue.style.height = (1/3) * lineHeight + 'px';
+            lineIssue.style.margin = 'auto'; // Centraliza horizontalmente e verticalmente
+    
+            // Adicione a div interna ao container de line_issues
+            lineIssueContainer.appendChild(lineIssue);
+        }
     }
 
-    // Remova todas as linhas existentes antes de recriar
-    lineIssuesContainer.innerHTML = '';
-
-    var lines = textarea.value.split('\n');
-    var lineHeight = parseFloat(getComputedStyle(textarea).lineHeight);
-
-    for (var i = 0; i < lines.length; i++) {
-        var lineIssueContainer = document.createElement('div');
-        lineIssueContainer.id = 'L' + (i + 1) + '_container'; // Adicionado '_container' ao ID para distinguir das linhas
-
-        // Calcule a posição relativa dentro da div mãe
-        var topPosition = i * lineHeight;
-
-        // Defina o tamanho da div para coincidir com o tamanho da linha do textarea
-        lineIssueContainer.style.width = '100%';
-        lineIssueContainer.style.height = lineHeight + 'px';
-
-        // Defina a posição relativa dentro da div mãe
-        lineIssueContainer.style.top = topPosition + 'px';
-
-        // Adicione a div ao container de line_issues
-        lineIssuesContainer.appendChild(lineIssueContainer);
-
-        // Adicione as classes de estilo diretamente à div interna
-        var lineIssue = document.createElement('div');
-        lineIssue.className = 'status-1';
-        lineIssue.style.width = (1/3) * lineHeight + 'px';
-        lineIssue.style.height = (1/3) * lineHeight + 'px';
-        lineIssue.style.margin = 'auto'; // Centraliza horizontalmente e verticalmente
-
-        // Adicione a div interna ao container de line_issues
-        lineIssueContainer.appendChild(lineIssue);
-    }
 }
 
 
@@ -838,11 +828,6 @@ function expandContainer(container) {
 
 function updateLineIssues(color, lines) {
     // Itera sobre as linhas fornecidas
-
-    var editor = document.getElementById('editor');
-    let content = editor.value;
-    var lines = content.split('\n');
-
     lines.forEach((line) => {
         // Obtém o ID da div da linha
         const lineId = `L${line}_container`;
@@ -1455,22 +1440,19 @@ function updateServerInfo(data) {
 }
 
 
-document.addEventListener('DOMContentLoaded', function () { 
 
-    // Adicionar evento de clique ao h2 com id 'settings_title'
-    const settingsTitle = document.getElementById('settings_title');
-    let clickCount = 0;
+// Adicionar evento de clique ao h2 com id 'settings_title'
+const settingsTitle = document.getElementById('settings_title');
+let clickCount = 0;
 
-    settingsTitle.addEventListener('click', function () {
-        clickCount++;
+settingsTitle.addEventListener('click', function () {
+    clickCount++;
 
-        // Se o usuário clicou 5 vezes, exibir a div e reiniciar a contagem
-        if (clickCount === 5) {
-            displayDevModeDiv();
-            clickCount = 0;
-        }
-    });
-
+    // Se o usuário clicou 5 vezes, exibir a div e reiniciar a contagem
+    if (clickCount === 5) {
+        displayDevModeDiv();
+        clickCount = 0;
+    }
 });
 
 // Função para exibir/ocultar a div e salvar a escolha em cache

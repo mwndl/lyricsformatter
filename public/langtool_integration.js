@@ -2,12 +2,16 @@ var ignoredContainers = [];
 
 function checkLanguage() {
     var text = document.getElementById('editor').value;
+    const grammarContainer = document.getElementById('grammar_containers');
     var selectedLanguage = localStorage.getItem('selectedLanguage')
     
     if (!selectedLanguage) {
         console.error('No selected language.');
         return;
     }
+
+    grammarContainer.innerHTML = '';
+    errorPlaceholder("Loading...", 'grammar_containers');
 
     fetch('https://api.languagetool.org/v2/check', {
         method: 'POST',
@@ -17,6 +21,9 @@ function checkLanguage() {
         body: 'text=' + encodeURIComponent(text) + '&language=' + selectedLanguage
     })
     .then(response => {
+        const grammarContainer = document.getElementById('grammar_containers');
+        grammarContainer.innerHTML = '';
+
         if (!response.ok) {
             if (response.status === 400) {
                 errorPlaceholder("It looks like the transcription is in a different language than the one selected, please verify the selected language and try again.", 'grammar_containers');
@@ -41,6 +48,10 @@ function checkLanguage() {
         }
     })
     .catch(error => {
+        const grammarContainer = document.getElementById('grammar_containers');
+        grammarContainer.innerHTML = '';
+
+        errorPlaceholder("LanguageTool returned an unknown error, please try again later.", 'grammar_containers');
         console.error('Error:', error.message);
     });
 }
