@@ -227,16 +227,19 @@ function handleRefreshButtonClick() {
     var removeDoubleSpacesAndLinesToggle = document.getElementById('removeDoubleSpacesAndLinesToggle');
     var autoCapTagsToggle = document.getElementById('autoCapTagsToggle');
 
-
+    if (autoCapTagsToggle.checked) {
+        replaceSpecialTags();
+        addSpaceAboveTags();
+        removeSpacesAroundInstrumental();
+        trimEditorContent();
+    }
     if (autoTrimToggle.checked) {
         autoTrim();
+        trimEditorContent(); // linhas vazias antes ou depois da letra
     }
     if (removeDoubleSpacesAndLinesToggle.checked) {
         removeDuplicateSpaces();
         removeDuplicateEmptyLines();
-    }
-    if (autoCapTagsToggle.checked) {
-        replaceSpecialTags();
     }
 
     updateSidebar();
@@ -494,7 +497,7 @@ function replaceSpecialTags() {
     var editor = document.getElementById('editor');
     var content = editor.value;
 
-    // Substituir padrões específicos
+    // substituir atalhos
     content = content.replace(/#i\s*\/?(?=\n|$)/ig, '#INTRO');
     content = content.replace(/#v\s*\/?(?=\n|$)/ig, '#VERSE');
     content = content.replace(/#p\s*\/?(?=\n|$)/ig, '#PRE-CHORUS');
@@ -504,6 +507,7 @@ function replaceSpecialTags() {
     content = content.replace(/#o\s*\/?(?=\n|$)/ig, '#OUTRO');
     content = content.replace(/##\s*\/?(?=\n|$)/ig, '#INSTRUMENTAL');
 
+    // capitalizar tags
     content = content.replace(/#intro\s*\/?(?=\n|$)/ig, '#INTRO');
     content = content.replace(/#verse\s*\/?(?=\n|$)/ig, '#VERSE');
     content = content.replace(/#pre-chorus\s*\/?(?=\n|$)/ig, '#PRE-CHORUS');
@@ -512,6 +516,65 @@ function replaceSpecialTags() {
     content = content.replace(/#hook\s*\/?(?=\n|$)/ig, '#HOOK');
     content = content.replace(/#outro\s*\/?(?=\n|$)/ig, '#OUTRO');
     content = content.replace(/#instrumental\s*\/?(?=\n|$)/ig, '#INSTRUMENTAL');
+
+    // substituir linhas como 'intro' pela tag (website)
+    content = content.replace(/^verse\s*\/?(?=\n|$)/igm, '#VERSE');
+    content = content.replace(/^intro\s*\/?(?=\n|$)/igm, '#INTRO');
+    content = content.replace(/^pre-chorus\s*\/?(?=\n|$)/igm, '#PRE-CHORUS');
+    content = content.replace(/^chorus\s*\/?(?=\n|$)/igm, '#CHORUS');
+    content = content.replace(/^bridge\s*\/?(?=\n|$)/igm, '#BRIDGE');
+    content = content.replace(/^hook\s*\/?(?=\n|$)/igm, '#HOOK');
+    content = content.replace(/^outro\s*\/?(?=\n|$)/igm, '#OUTRO');
+
+
+    // substituir linhas como 'Intro' pela tag (website) - autocap ativado
+    content = content.replace(/^Verse\s*\/?(?=\n|$)/igm, '#VERSE');
+    content = content.replace(/^Intro\s*\/?(?=\n|$)/igm, '#INTRO');
+    content = content.replace(/^Pre-chorus\s*\/?(?=\n|$)/igm, '#PRE-CHORUS');
+    content = content.replace(/^Chorus\s*\/?(?=\n|$)/igm, '#CHORUS');
+    content = content.replace(/^Bridge\s*\/?(?=\n|$)/igm, '#BRIDGE');
+    content = content.replace(/^Hook\s*\/?(?=\n|$)/igm, '#HOOK');
+    content = content.replace(/^Outro\s*\/?(?=\n|$)/igm, '#OUTRO');
+    
+
+    // atualiza o conteúdo
+    editor.value = content;
+}
+
+function addSpaceAboveTags() {
+    var editor = document.getElementById('editor');
+    var content = editor.value;
+
+    // Adicionar espaço acima das tags de estrofes se não existir
+    content = content.replace(/\n*(#INTRO|#VERSE|#PRE-CHORUS|#CHORUS|#BRIDGE|#HOOK|#OUTRO)/ig, '\n\n$1');
+
+    // Atualizar o conteúdo do editor
+    editor.value = content;
+}
+
+function trimEditorContent() {
+    var editor = document.getElementById('editor');
+    var content = editor.value;
+
+    // Remover linhas em branco no início do conteúdo
+    content = content.replace(/^\s+/, '');
+
+    // Remover linhas em branco no final do conteúdo
+    content = content.replace(/\s+$/, '');
+
+    // Atualizar o conteúdo do editor
+    editor.value = content;
+}
+
+function removeSpacesAroundInstrumental() {
+    var editor = document.getElementById('editor');
+    var content = editor.value;
+
+    // Remover espaços em branco abaixo das tags #INSTRUMENTAL
+    content = content.replace(/#INSTRUMENTAL\s*\n+\s*/ig, '#INSTRUMENTAL\n');
+
+    // Remover espaços em branco acima das tags #INSTRUMENTAL
+    content = content.replace(/\s*\n+\s*#INSTRUMENTAL/ig, '\n#INSTRUMENTAL');
 
     // Atualizar o conteúdo do editor
     editor.value = content;
@@ -800,8 +863,6 @@ function createContainer(containerData) {
 
 
 
-
-
 function closeContainers() {
     const allContainers = document.querySelectorAll('.container');
     allContainers.forEach((container) => {
@@ -874,28 +935,28 @@ function updateLineIssues(color, lines) {
 }
 
 
-    // Função para verificar e definir o estado dos checkboxes ao carregar a página
-    function setCheckboxStates() {
-        // Adicione IDs aos seus elementos de checkbox para tornar a manipulação mais fácil
-        const checkboxIds = [
-            'characterCounterToggle',
-            'autoCapToggle',
-            'autoTrimToggle',
-            'removeDoubleSpacesAndLinesToggle',
-            'autoCapTagsToggle',
-            'autoSuggestions',
-            'localHostToggle'
-        ];
+// Função para verificar e definir o estado dos checkboxes ao carregar a página
+function setCheckboxStates() {
+    // Adicione IDs aos seus elementos de checkbox para tornar a manipulação mais fácil
+    const checkboxIds = [
+        'characterCounterToggle',
+        'autoCapToggle',
+        'autoTrimToggle',
+        'removeDoubleSpacesAndLinesToggle',
+        'autoCapTagsToggle',
+        'autoSuggestions',
+        'localHostToggle'
+    ];
 
-        checkboxIds.forEach(function (checkboxId) {
-            const checkbox = document.getElementById(checkboxId);
-            const checkboxState = localStorage.getItem(checkboxId);
+    checkboxIds.forEach(function (checkboxId) {
+        const checkbox = document.getElementById(checkboxId);
+        const checkboxState = localStorage.getItem(checkboxId);
 
-            if (checkboxState !== null) {
-                checkbox.checked = JSON.parse(checkboxState);
-            }
-        });
-    }
+        if (checkboxState !== null) {
+            checkbox.checked = JSON.parse(checkboxState);
+        }
+    });
+}
 
 // Definindo a função findAndReplace
 function findAndReplace(incorrectTerm, correction) {
