@@ -1,5 +1,5 @@
-
 var typingTimer;
+
 document.addEventListener('DOMContentLoaded', function () {
     var returnArrow = document.querySelector('#return_arrow');
     var lyricsBox = document.getElementById('lyrics_box');
@@ -93,6 +93,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     
         if (content.trim() === '') {
+            clearTimeout(typingTimer);
             hideOptionsAndButtons();
         } else {
             showOptionsAndButtons();
@@ -103,10 +104,9 @@ document.addEventListener('DOMContentLoaded', function () {
     
         if (isAutoSuggestionsChecked()) {
             clearTimeout(typingTimer);
-            typingTimer = setTimeout(handleRefreshButtonClick, doneTypingInterval);
+            typingTimer = setTimeout(autoSuggestion, doneTypingInterval);
         }
     }
-
 
 
    // Função para verificar e definir o idioma padrão ao carregar a página
@@ -123,20 +123,25 @@ document.addEventListener('DOMContentLoaded', function () {
     // Função para obter o nome completo do idioma com base no código
     function getLanguageFullName(code) {
         const languageMap = {
+            
+            'en-AU': 'English (Australian)',
+            'en-CA': 'English (Canadian)',
+            'en-NZ': 'English (New Zealand)',
             'en-GB': 'English (UK)',
             'en-US': 'English (US)',
             'nl': 'Dutch',
             'fr': 'French',
-            'de': 'German',
+            'fr-CA': 'French (Canada)',
+            'de-AT': 'German (Austria)',
+            'de-DE': 'German (Germany)',
+            'de-CH': 'German (Swiss)',
             'it': 'Italian',
             'pt-BR': 'Portuguese (BR)',
             'pt-PT': 'Portuguese (PT)',
-            'es': 'Spanish'
-                
-            // Adicione mais idiomas conforme necessário
-        };
+            'es': 'Spanish',
+        }
 
-        return languageMap[code] || code; // Retorna o nome completo se estiver mapeado, senão retorna o código
+        return languageMap[code] || code; // retorna o nome do idioma, se estiver mapeado... senão retorna o código
     }
 
     // Adicione um evento de clique ao seletor de idioma
@@ -199,9 +204,18 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 
+/* após o timer de 3s, ele verifica se há mesmo conteúdo pra verificar
+(evita do usuário apagar a transcrição e ele verificar 3s depois) */
+function autoSuggestion() {
+    const editor = document.getElementById('editor');
+    const content = editor.value;
 
-
-
+    if (content.trim() === '') {
+        return;
+    } else {
+        handleRefreshButtonClick();
+    }
+}
 
 
 // Add this function to your existing code
