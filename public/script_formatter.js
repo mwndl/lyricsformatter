@@ -1405,10 +1405,10 @@ function openSpotifyAuthorization() {
     var match = currentDomain.match(/lyricsformatter-(\w+)\.onrender\.com/);
     
     if (match && match[1]) {
-        callbackPath = '/sp_callback_' + match[1];
+        callbackPath = 'sp_callback_' + match[1];
     } else {
         // padrão
-        callbackPath = '/sp_callback_production';
+        callbackPath = 'sp_callback_production';
     }
     
     console.log('Callback Path:', callbackPath);
