@@ -1399,13 +1399,16 @@ function openSpotifyAuthorization() {
     }
 
     var currentDomain = window.location.hostname;
-    console.log('Current Domain:', currentDomain);
-    
+
     // Extrai o prefixo após 'lyricsformatter' usando uma expressão regular
     var match = currentDomain.match(/lyricsformatter-(\w+)\.onrender\.com/);
     
     if (match && match[1]) {
-        callbackPath = 'sp_callback_' + match[1];
+        if (localHostToggle === 'true') {
+            callbackPath = 'sp_callback_local_' + match[1];
+        } else {
+            callbackPath = 'sp_callback_' + match[1];
+        }
     } else {
         // padrão
         callbackPath = 'sp_callback_production';
