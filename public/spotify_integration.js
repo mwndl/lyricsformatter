@@ -242,15 +242,9 @@ async function fetchCurrentlyPlayingData() {
 
         // Atualizar o estado do botão play/pause e o tracker da música
         if (currentlyPlayingData.is_playing) {
-            const progress_ms = currentlyPlayingData.progress_ms;
-            const duration_ms = currentlyPlayingData.item.duration_ms;
-            const progressPercent = (progress_ms / duration_ms) * 100;
-            updatePlaybackState(false, progressPercent); // Atualiza o estado de reprodução como reproduzindo
+            // reproduzindo
         } else {
-            const progress_ms = currentlyPlayingData.progress_ms;
-            const duration_ms = currentlyPlayingData.item.duration_ms;
-            const progressPercent = (progress_ms / duration_ms) * 100;
-            updatePlaybackState(true, 0); // Atualiza o estado de reprodução como pausado
+           // pausado
         }
 
     } catch (error) {
@@ -447,23 +441,6 @@ function updateTracker(positionMs, durationMs) {
     }, 1000);
 }
 
-
-// Atualize o estado do botão play/pause e o tracker da música
-function updatePlaybackState(isPaused, progressPercent) {
-    
-    const svg1 = controlContainer.querySelector('svg:nth-child(1)');
-    const svg2 = controlContainer.querySelector('svg:nth-child(2)');
-    const trackerElement = document.getElementById('tracker');
-
-    if (isPaused) {
-        svg1.style.display = 'none';
-        svg2.style.display = 'block';
-    } else {
-        svg1.style.display = 'block';
-        svg2.style.display = 'none';
-        trackerElement.value = progressPercent; // Atualiza a posição do tracker
-    }
-}
 
 
 document.addEventListener('DOMContentLoaded', function () {
