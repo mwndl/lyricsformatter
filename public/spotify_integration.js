@@ -164,6 +164,8 @@ async function spotifyRenewAuth() {
     }
 }
 
+let currentSongId = '';
+
 async function fetchCurrentlyPlayingData() {
     try {
         // Obter o token de acesso do armazenamento local do navegador
@@ -188,6 +190,7 @@ async function fetchCurrentlyPlayingData() {
             document.getElementById('sp_connect').style.display = 'none'; // Ocultar elemento
             document.getElementById('playback_info').style.display = 'none'; // Ocultar elemento
             document.getElementById('no_playback').style.display = 'block'; // Ocultar elemento
+            currentSongId = '';
             return; // Sair da função
         } else if (response.status === 200) {
             document.getElementById('sp_player_div').style.display = ''; // Exibir elemento
@@ -196,6 +199,7 @@ async function fetchCurrentlyPlayingData() {
             document.getElementById('no_playback').style.display = 'none'; // exibir elemento
         } else if (response.status === 401) {
             spotifyRenewAuth()
+            currentSongId = '';
         } else {
             document.getElementById('sp_player_div').style.display = 'none'; // ocultar elemento
             return; // Sair da função
@@ -209,15 +213,15 @@ async function fetchCurrentlyPlayingData() {
         // Extrair os dados da música atualmente reproduzida da resposta
         const currentlyPlayingData = await response.json();
 
+        // definir o ID na variável
+        currentSongId = currentlyPlayingData.item.id;
+        console.log(`ID da faixa: ${currentSongId}`)
+
         // Atualizar os elementos HTML com as informações da música atualmente reproduzida
         const albumArtElement = document.getElementById('sp_album_art');
         const titleElement = document.getElementById('sp_title');
         const albumElement = document.getElementById('sp_album');
         const artistElement = document.getElementById('sp_artist');
-        const trackerElement = document.getElementById('tracker');
-        const controlContainer = document.getElementById('play_pause');
-        const svg1 = controlContainer.querySelector('svg:nth-child(1)');
-        const svg2 = controlContainer.querySelector('svg:nth-child(2)');
 
         if (albumArtElement && currentlyPlayingData.item.album.images.length > 0) {
             albumArtElement.innerHTML = `<img src="${currentlyPlayingData.item.album.images[0].url}" alt="album art" title="${currentlyPlayingData.item.name} | ${currentlyPlayingData.item.artists[0].name}">`;
@@ -251,6 +255,79 @@ async function fetchCurrentlyPlayingData() {
 
     } catch (error) {
         console.error('Error getting data from currently playing song: ', error.message);
+    }
+}
+
+// Função para curtir/descurtir uma música com base no ID da música
+async function toggleLikeSong() {
+    try {
+        // Obter o token de acesso do armazenamento local do navegador
+        const accessToken = localStorage.getItem('accessToken');
+
+        // Verificar se o token de acesso está em cache
+        if (!accessToken) {
+            return; // Sair da função porque não há token do Spotify
+        }
+
+        // Verificar se o ID da música atual está na biblioteca do usuário
+        const isSongInLibrary = await checkIfSongInLibrary(accessToken, currentSongId);
+
+        // URL da API do Spotify para adicionar ou remover músicas da biblioteca
+        const apiURL = isSongInLibrary
+            ? `https://api.spotify.com/v1/me/tracks?ids=${currentSongId}`
+            : `https://api.spotify.com/v1/me/tracks?ids=${currentSongId}`;
+
+        // Método HTTP para adicionar ou remover músicas da biblioteca
+        const method = isSongInLibrary ? 'DELETE' : 'PUT';
+
+        // Fazer a solicitação fetch para adicionar ou remover a música da biblioteca
+        const response = await fetch(apiURL, {
+            method: method,
+            headers: {
+                'Authorization': `Bearer ${accessToken}`
+            }
+        });
+
+        // Verificar se a solicitação foi bem-sucedida
+        if (!response.ok) {
+            throw new Error(`An error occurred when updating user's library`);
+        }
+
+        // Atualizar o estado da curtida/descurtida conforme necessário
+        if (isSongInLibrary) {
+            console.log(`Música com ID ${currentSongId} removida da biblioteca.`);
+        } else {
+            console.log(`Música com ID ${currentSongId} adicionada à biblioteca.`);
+        }
+
+    } catch (error) {
+        console.error('Error toggling like for the current song: ', error.message);
+    }
+}
+
+// Função para verificar se uma música está na biblioteca do usuário
+async function checkIfSongInLibrary(accessToken, songId) {
+    try {
+        // Fazer a solicitação fetch para verificar se a música está na biblioteca
+        const response = await fetch(`https://api.spotify.com/v1/me/tracks/contains?ids=${songId}`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${accessToken}`
+            }
+        });
+
+        // Verificar se a solicitação foi bem-sucedida
+        if (!response.ok) {
+            throw new Error(`An error occurred when checking if the song is in the user's library`);
+        }
+
+        // Extrair e retornar o resultado (true se a música estiver na biblioteca, false se não estiver)
+        const result = await response.json();
+        return result[0];
+
+    } catch (error) {
+        console.error('Error checking if the song is in the user\'s library: ', error.message);
+        return false; // Retornar false em caso de erro
     }
 }
 
@@ -373,6 +450,7 @@ function updateTracker(positionMs, durationMs) {
 
 // Atualize o estado do botão play/pause e o tracker da música
 function updatePlaybackState(isPaused, progressPercent) {
+    
     const svg1 = controlContainer.querySelector('svg:nth-child(1)');
     const svg2 = controlContainer.querySelector('svg:nth-child(2)');
     const trackerElement = document.getElementById('tracker');
@@ -388,24 +466,28 @@ function updatePlaybackState(isPaused, progressPercent) {
 }
 
 
-// Obter o estado atual do player
-player.getCurrentState().then(state => {
-    if (!state) {
-        console.error('O usuário não está reproduzindo música através do Web Playback SDK');
-        return;
-    }
+document.addEventListener('DOMContentLoaded', function () {
+    
+    // Obter o estado atual do player
+    player.getCurrentState().then(state => {
+        if (!state) {
+            console.error('O usuário não está reproduzindo música através do Web Playback SDK');
+            return;
+        }
 
-    const current_track = state.track_window.current_track;
-    const next_track = state.track_window.next_tracks[0];
+        const current_track = state.track_window.current_track;
+        const next_track = state.track_window.next_tracks[0];
 
-    console.log('Atualmente tocando:', current_track);
-    console.log('Próxima música:', next_track);
+        console.log('Atualmente tocando:', current_track);
+        console.log('Próxima música:', next_track);
 
-}).catch(error => {
-    console.error('Erro ao obter estado atual do player:', error);
+    }).catch(error => {
+        console.error('Erro ao obter estado atual do player:', error);
+    });
+
+    setInterval(checkPlayerState, 2000);
+
 });
-
-setInterval(checkPlayerState, 2000);
 
 
 
