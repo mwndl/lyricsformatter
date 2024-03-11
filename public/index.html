@@ -566,10 +566,23 @@
                 // carregar possível faixa em execução
                 fetchCurrentlyPlayingData()
 
+                // Definir nome do player com base no domínio
+                var currentDomain = window.location.hostname;
+                var match = currentDomain.match(/lyricsformatter-(\w+)\.onrender\.com/);
+
+                if (match && match[1]) {
+                    // Capitalizar a primeira letra de match[1]
+                    var capitalizedMatch = match[1].charAt(0).toUpperCase() + match[1].slice(1);
+
+                    playerName = `LyricsFormatter Player (${capitalizedMatch})`;
+                } else {
+                    playerName = `LyricsFormatter Player`;
+                }
+
                 // a partir daqui, cria-se a instancia do player sdk
                 const token = localStorage.getItem('accessToken');
                 const player = new Spotify.Player({
-                    name: 'LyricsFormatter Player',
+                    name: playerName,
                     getOAuthToken: cb => { cb(token); },
                     volume: 1.0
                 });
