@@ -714,7 +714,7 @@
         font-family: BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         resize: none;
         overflow: auto; /* ou scroll */
-        white-space: nowrap; /* Impede a quebra de linha */
+        white-space: pre;
         scrollbar-width: thin;
         scrollbar-color: transparent transparent;
         position: relative;
