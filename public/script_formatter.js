@@ -78,11 +78,8 @@ document.addEventListener('DOMContentLoaded', function () {
         const content = editor.value;
     
         const checkboxIds = [
-            'characterCounterToggle',
             'autoCapToggle',
-            'autoTrimToggle',
-            'removeDoubleSpacesAndLinesToggle',
-            'autoCapTagsToggle',
+            'autoFormatToggle',
             'autoSuggestions',
             'localHostToggle'
         ];
@@ -223,21 +220,14 @@ function handleRefreshButtonClick() {
     var refreshButton = document.getElementById('refresh_button');
     var loadingSpinner = document.getElementById('loading_spinner');
     var textArea = document.getElementById('editor');
-    var autoTrimToggle = document.getElementById('autoTrimToggle');
-    var removeDoubleSpacesAndLinesToggle = document.getElementById('removeDoubleSpacesAndLinesToggle');
-    var autoCapTagsToggle = document.getElementById('autoCapTagsToggle');
+    var autoFormatToggle = document.getElementById('autoFormatToggle');
 
-    if (autoCapTagsToggle.checked) {
+    if (autoFormatToggle.checked) {
         replaceSpecialTags();
         addSpaceAboveTags();
         removeSpacesAroundInstrumental();
         trimEditorContent();
-    }
-    if (autoTrimToggle.checked) {
         autoTrim();
-        trimEditorContent(); // linhas vazias antes ou depois da letra
-    }
-    if (removeDoubleSpacesAndLinesToggle.checked) {
         removeDuplicateSpaces();
         removeDuplicateEmptyLines();
     }
@@ -939,11 +929,8 @@ function updateLineIssues(color, lines) {
 function setCheckboxStates() {
     // Adicione IDs aos seus elementos de checkbox para tornar a manipulação mais fácil
     const checkboxIds = [
-        'characterCounterToggle',
         'autoCapToggle',
-        'autoTrimToggle',
-        'removeDoubleSpacesAndLinesToggle',
-        'autoCapTagsToggle',
+        'autoFormatToggle',
         'autoSuggestions',
         'localHostToggle'
     ];
