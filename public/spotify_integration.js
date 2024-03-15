@@ -215,9 +215,9 @@ async function fetchCurrentlyPlayingData() {
 
         // definir o ID na variável
         currentSongId = currentlyPlayingData.item.id;
-
+/*
         loadAudioAnalysis(accessToken, currentSongId)
-
+*/
         // Atualizar os elementos HTML com as informações da música atualmente reproduzida
         const albumArtElement = document.getElementById('sp_album_art');
         const titleElement = document.getElementById('sp_title');
