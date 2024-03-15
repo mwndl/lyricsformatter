@@ -1,7 +1,7 @@
 var typingTimer;
 
 document.addEventListener('DOMContentLoaded', function () {
-    var returnArrow = document.querySelector('#return_arrow');
+    var returnArrow = document.getElementById('return_arrow');
     var lyricsBox = document.getElementById('lyrics_box');
     var textArea = document.getElementById('editor');
     var textarea = document.querySelector('.editor');
@@ -27,8 +27,14 @@ document.addEventListener('DOMContentLoaded', function () {
     fetchCreditsData();
     fetchServerInfo();
 
-    resetButton.addEventListener('click', function() {
+    // verificar parametro de autoplay
+    var referrer = getParameterByName('referrer');
+    if (referrer !== null) {
+        referrerUrlValue = referrer;
+        returnArrow.style.display = 'flex'
+    }
 
+    resetButton.addEventListener('click', function() {
         textArea.value = ''; // apaga a transcrição
         updateSidebar(); // reseta os contadores de caracteres e a barra lateral
         ignoredContainers = []; // limpa a memória de alertas ignorados
@@ -36,14 +42,17 @@ document.addEventListener('DOMContentLoaded', function () {
         clearTimeout(typingTimer);
     });
 
-
     refreshButton.addEventListener('click', handleRefreshButtonClick);
-
 
     var returnArrow = document.querySelector('#return_arrow');
 
     returnArrow.addEventListener('click', function() {
-        window.location.href = 'index.html';
+        // Verificar se referrerUrlValue começa com "http://" ou "https://"
+        if (!referrerUrlValue.startsWith('http://') && !referrerUrlValue.startsWith('https://')) {
+            // Se não começar com um protocolo, acrescente "http://" como padrão
+            referrerUrlValue = 'http://' + referrerUrlValue;
+        }
+        window.location.replace(referrerUrlValue);
     });
 
 
@@ -106,40 +115,52 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
 
-   // Função para verificar e definir o idioma padrão ao carregar a página
-    function setDefaultLanguage() {
-        const storedLanguage = localStorage.getItem('selectedLanguage');
+// Função para verificar e definir o idioma padrão ao carregar a página
+function setDefaultLanguage() {
+    const storedLanguage = localStorage.getItem('selectedLanguage');
+    const languageParam = getParameterByName('language');
+    let languageToDisplay = null;
 
+    if (languageParam) {
+        languageToDisplay = getLanguageFullName(languageParam);
+    } else if (storedLanguage) {
+        languageToDisplay = getLanguageFullName(storedLanguage);
+        addParamToURL('language', storedLanguage)
+    }
+
+    if (languageToDisplay) {
+        selectedLanguage.textContent = languageToDisplay;
+        localStorage.setItem('selectedLanguage', languageToDisplay); // Corrigido: armazenar o idioma, não o elemento DOM
+    } else {
+        selectedLanguage.textContent = 'Select Language';
         if (storedLanguage) {
-            // Se houver um idioma armazenado em cache, defina-o como padrão
-            selectedLanguage.textContent = getLanguageFullName(storedLanguage);
+            localStorage.removeItem('selectedLanguage');
         }
     }
-    
+}
 
-    // Função para obter o nome completo do idioma com base no código
-    function getLanguageFullName(code) {
-        const languageMap = {
-            
-            'en-AU': 'English (Australian)',
-            'en-CA': 'English (Canadian)',
-            'en-NZ': 'English (New Zealand)',
-            'en-GB': 'English (UK)',
-            'en-US': 'English (US)',
-            'nl': 'Dutch',
-            'fr': 'French',
-            'fr-CA': 'French (Canada)',
-            'de-AT': 'German (Austria)',
-            'de-DE': 'German (Germany)',
-            'de-CH': 'German (Swiss)',
-            'it': 'Italian',
-            'pt-BR': 'Portuguese (BR)',
-            'pt-PT': 'Portuguese (PT)',
-            'es': 'Spanish',
-        }
+// Função para obter o nome completo do idioma com base no código
+function getLanguageFullName(code) {
+    const languageMap = {
+        'en-AU': 'English (Australian)',
+        'en-CA': 'English (Canadian)',
+        'en-NZ': 'English (New Zealand)',
+        'en-GB': 'English (UK)',
+        'en-US': 'English (US)',
+        'nl': 'Dutch',
+        'fr': 'French',
+        'fr-CA': 'French (Canada)',
+        'de-AT': 'German (Austria)',
+        'de-DE': 'German (Germany)',
+        'de-CH': 'German (Swiss)',
+        'it': 'Italian',
+        'pt-BR': 'Portuguese (BR)',
+        'pt-PT': 'Portuguese (PT)',
+        'es': 'Spanish',
+    };
 
-        return languageMap[code] || code; // retorna o nome do idioma, se estiver mapeado... senão retorna o código
-    }
+    return languageMap[code];
+}
 
     // Adicione um evento de clique ao seletor de idioma
     languageList.addEventListener('click', function (e) {
@@ -150,6 +171,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
             // Armazene o idioma selecionado em cache
             localStorage.setItem('selectedLanguage', selected);
+            addParamToURL('language', selected)
             updateSidebar() // resetar sugestões e caracteres
             ignoredContainers = []; // limpa a memória de alertas ignorados
         }
@@ -223,13 +245,13 @@ function handleRefreshButtonClick() {
     var autoFormatToggle = document.getElementById('autoFormatToggle');
 
     if (autoFormatToggle.checked) {
-        replaceSpecialTags();
-        addSpaceAboveTags();
-        removeSpacesAroundInstrumental();
-        trimEditorContent();
-        autoTrim();
-        removeDuplicateSpaces();
-        removeDuplicateEmptyLines();
+        replaceSpecialTags(); // auto replace tags
+        addSpaceAboveTags(); // add (caso não haja) espaços acima de todas as tags
+        removeSpacesAroundInstrumental(); // espaços ao redor de tags instrumentais
+        trimEditorContent(); // linhas antes ou depois da letra
+        autoTrim(); // espaços extras após o fim da linha
+        removeDuplicateSpaces(); // espaços duplos entre palavras
+        removeDuplicateEmptyLines(); // linhas vazias duplicadas entre estrofes
     }
 
     updateSidebar();
@@ -1564,4 +1586,59 @@ function loadDevMode() {
     } else {
         devHidedDiv.style.display = 'none';
     }
+}
+
+
+/* parametros na url */
+
+// Função para obter parâmetros da URL
+function getParameterByName(name, url) {
+    if (!url) url = window.location.href;
+    name = name.replace(/[\[\]]/g, "\\$&");
+    var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
+        results = regex.exec(url);
+    if (!results) return null;
+    if (!results[2]) return '';
+    return decodeURIComponent(results[2].replace(/\+/g, " "));
+}
+
+function addParamToURL(paramName, paramValue) {
+    var url = window.location.href;
+    var newUrl;
+    
+    // Verificar se o parâmetro já existe na URL
+    if (url.indexOf(paramName + '=') !== -1) {
+        // Substituir o valor do parâmetro
+        var regex = new RegExp('(' + encodeURIComponent(paramName) + '=)[^&]*');
+        newUrl = url.replace(regex, '$1' + encodeURIComponent(paramValue));
+    } else {
+        // Adicionar o parâmetro à URL
+        var separator = url.indexOf('?') !== -1 ? '&' : '?';
+        newUrl = url + separator + encodeURIComponent(paramName) + '=' + encodeURIComponent(paramValue);
+    }
+    
+    history.pushState(null, '', newUrl);
+}
+
+// Função para remover um parâmetro da URL
+function removeParameterFromURL(parameterKey) {
+    var url = window.location.href;
+    var urlParts = url.split('?');
+
+    if (urlParts.length >= 2) {
+        var prefix = encodeURIComponent(parameterKey) + '=';
+        var parts = urlParts[1].split(/[&;]/g);
+
+        // Percorrer todos os parâmetros
+        for (var i = parts.length; i-- > 0;) {
+            // Se encontrar o parâmetro a ser removido, removê-lo da lista de parâmetros
+            if (parts[i].lastIndexOf(prefix, 0) !== -1) {
+                parts.splice(i, 1);
+            }
+        }
+
+        // Reconstituir a URL sem o parâmetro removido
+        url = urlParts[0] + (parts.length > 0 ? '?' + parts.join('&') : '');
+    }
+    return url;
 }

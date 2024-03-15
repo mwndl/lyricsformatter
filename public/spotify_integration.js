@@ -215,7 +215,6 @@ async function fetchCurrentlyPlayingData() {
 
         // definir o ID na variável
         currentSongId = currentlyPlayingData.item.id;
-        console.log(`ID da faixa: ${currentSongId}`)
 
         // Atualizar os elementos HTML com as informações da música atualmente reproduzida
         const albumArtElement = document.getElementById('sp_album_art');
@@ -251,6 +250,92 @@ async function fetchCurrentlyPlayingData() {
         console.error('Error getting data from currently playing song: ', error.message);
     }
 }
+
+// Função para obter os dados de análise de áudio uma vez quando a música é carregada
+async function loadAudioAnalysis(accessToken, songId) {
+    try {
+        const response = await fetch(`https://api.spotify.com/v1/audio-analysis/${songId}`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${accessToken}`
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error(`An error occurred when fetching audio analysis`);
+        }
+
+        const audioAnalysisData = await response.json();
+        const starts = audioAnalysisData.sections.map(section => section.start);
+        return starts;
+
+    } catch (error) {
+        console.error('Error loading audio analysis: ', error.message);
+        return null; // Return null if there's an error
+    }
+}
+
+// Função para obter a posição da próxima seção de áudio em MS
+function nextSection(currentPosition, sectionStartTimes) {
+    if (!currentPosition || !Array.isArray(sectionStartTimes)) {
+        console.error('Invalid position or audio analysis data');
+        return null;
+    }
+
+    const nextSection = sectionStartTimes.find(section => section > currentPosition);
+    
+    if (nextSection !== undefined) {
+        return nextSection * 1000;
+    } else {
+        return null;
+    }
+}
+
+// Função para obter a posição da última seção de áudio em MS
+function repeatSection(currentPosition, sectionStartTimes) {
+    if (!currentPosition || !Array.isArray(sectionStartTimes)) {
+        console.error('Invalid position or audio analysis data');
+        return null;
+    }
+
+    const reversedSectionStartTimes = sectionStartTimes.slice().reverse(); // Inverte o array
+    const lastSection = reversedSectionStartTimes.find(section => section < currentPosition);
+
+    if (lastSection !== undefined) {
+        return lastSection * 1000;
+    } else {
+        return null;
+    }
+}
+
+// Função para obter a posição da seção antes da última de áudio em MS
+function beforeLastSection(currentPosition, sectionStartTimes) {
+    if (!currentPosition || !Array.isArray(sectionStartTimes) || sectionStartTimes.length < 2) {
+        console.error('Invalid position or audio analysis data');
+        return null;
+    }
+
+    let beforeLastSectionTime = null;
+
+    for (let i = sectionStartTimes.length - 1; i >= 0; i--) {
+        if (sectionStartTimes[i] < currentPosition) {
+            if (i > 0) {
+                beforeLastSectionTime = sectionStartTimes[i - 1];
+            }
+            break;
+        }
+    }
+
+    if (beforeLastSectionTime !== null) {
+        return beforeLastSectionTime * 1000;
+    } else {
+        return 0;
+    }
+}
+
+
+
+
 
 // Função para curtir/descurtir uma música com base no ID da música
 async function toggleLikeSong() {
@@ -370,7 +455,8 @@ async function fetchAvailableDevices() {
                 deviceElement.addEventListener('click', function() {
                     devicesOptionsElement.style.display = 'none'; 
                     const deviceID = this.getAttribute('data-id');
-                    transferPlayback(deviceID);
+                    const accessToken = localStorage.getItem('accessToken');
+                    transferPlayback(accessToken, deviceID);
                 });
             });
         }
@@ -380,18 +466,10 @@ async function fetchAvailableDevices() {
     }
 }
 
-// Função para transferir a reprodução para um dispositivo específico
-async function transferPlayback(deviceID) {
+// Function to transfer playback between available devices
+async function transferPlayback(accessToken, deviceID) {
     try {
-        // Obter o token de acesso do armazenamento local do navegador
-        const accessToken = localStorage.getItem('accessToken');
 
-        // Verificar se o token de acesso está em cache
-        if (!accessToken) {
-            return; // Sair da função porque não há token do Spotify
-        }
-
-        // Fazer uma solicitação fetch para o endpoint /me/player do Spotify com o dispositivo específico
         await fetch('https://api.spotify.com/v1/me/player', {
             method: 'PUT',
             headers: {
@@ -403,12 +481,46 @@ async function transferPlayback(deviceID) {
             })
         });
 
-        console.log('Playback transferido para o dispositivo com sucesso.');
-        fetchAvailableDevices()
+        console.log('Playback transferred successfully.');
+        fetchAvailableDevices(); // Update the list of available devices
 
     } catch (error) {
         console.error('Error transferring playback: ', error.message);
-        fetchAvailableDevices()
+        fetchAvailableDevices(); // Update the list of available devices
+    }
+}
+
+async function playTrack(trackId, deviceId) {
+    try {
+        // Recuperar o token de acesso do armazenamento local do navegador
+        const accessToken = localStorage.getItem('accessToken');
+
+        // Verificar se o token de acesso está em cache
+        if (!accessToken) {
+            console.log('Access token not found. Cannot play track.');
+            return;
+        }
+
+        // Fazer uma solicitação fetch para reproduzir a faixa
+        const response = await fetch(`https://api.spotify.com/v1/me/player/play?device_id=${deviceId}`, {
+            method: 'PUT',
+            headers: {
+                'Authorization': `Bearer ${accessToken}`,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                uris: [`spotify:track:${trackId}`]
+            })
+        });
+
+        // Verificar se a solicitação foi bem-sucedida
+        if (!response.ok) {
+            throw new Error(`Failed to play track. Status: ${response.status}`);
+        }
+
+        console.log(`Track ${trackId} playback started successfully.`);
+    } catch (error) {
+        console.error('Error playing track: ', error.message);
     }
 }
 
@@ -427,18 +539,6 @@ function togglePlayPause() {
         svg1.style.display = 'block';
         svg2.style.display = 'none';
     }
-}
-
-
-// Função para atualizar o slider da música conforme o tocador toca
-function updateTracker(positionMs, durationMs) {
-    const percentage = (positionMs / durationMs) * 100;
-    trackerElement.style.width = `${percentage}%`;
-
-    setInterval(() => {
-        // Substitua trackPositionMs e trackDurationMs pelos valores reais
-        updateTracker(trackPositionMs, trackDurationMs);
-    }, 1000);
 }
 
 

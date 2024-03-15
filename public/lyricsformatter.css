@@ -106,6 +106,7 @@
     width: 50%;
     height: 50%;
     user-select: none;
+    cursor: pointer;
   }
   
   /* Estilo para o mini menu */
@@ -986,6 +987,7 @@
         overflow: hidden;
         white-space: nowrap;
         margin-top: 5px;
+        user-select: none;
     }
     
     .improvements_box_text p {
@@ -1776,9 +1778,14 @@
     display: flex; /* Ativa o modelo de flexbox */
     justify-content: center; /* Alinha os itens horizontalmente ao centro */
     align-items: center; /* Alinha os itens verticalmente ao centro */
-    background-color: #272727; /* você pode alterar a cor de fundo conforme desejado */
     cursor: pointer;
   }
+  
+
+  .control-container svg:hover {
+    transform: none; /* Remover a transformação de escala ao passar o mouse */
+    transition: none; /* Remover a transição suave */
+    }
   
   .control-container img {
     display: block;
@@ -1791,9 +1798,40 @@
   }
   
   .controls-center {
+    display: flex;
+    align-items: center;
+    flex-direction: row;
     flex: 1;
-    margin: 0 20px;
   }
+
+  .tracker_container {
+    position: relative;
+    width: 100%; 
+    align-items: center;
+    display: flex;
+  }
+
+  .tracker {
+    cursor: pointer; 
+  }
+
+  .hover_time_display {
+    position: absolute;
+    top: -35px; /* Posição ajustável conforme necessário */
+    left: 0;
+    background-color: white;
+    color: black;
+    padding: 5px 10px;
+    border-radius: 5px;
+    display: none; /* Inicialmente oculto */
+  }
+
+  .track_position, .track_duration {
+    color: white;
+    padding: 0 15px;
+  }
+
+
   
   input[type="range"] {
     width: 100%;
@@ -2003,6 +2041,7 @@
         display: inline;
         width: 50%;
         height: 50%;
+        cursor: pointer;
     }
     
   
