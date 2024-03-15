@@ -329,7 +329,7 @@ function beforeLastSection(currentPosition, sectionStartTimes) {
     if (beforeLastSectionTime !== null) {
         return beforeLastSectionTime * 1000;
     } else {
-        return null;
+        return 0;
     }
 }
 
