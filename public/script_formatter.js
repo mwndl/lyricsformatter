@@ -1,7 +1,7 @@
 var typingTimer;
 
 document.addEventListener('DOMContentLoaded', function () {
-    var returnArrow = document.querySelector('#return_arrow');
+    var returnArrow = document.getElementById('return_arrow');
     var lyricsBox = document.getElementById('lyrics_box');
     var textArea = document.getElementById('editor');
     var textarea = document.querySelector('.editor');
@@ -27,6 +27,13 @@ document.addEventListener('DOMContentLoaded', function () {
     fetchCreditsData();
     fetchServerInfo();
 
+    // verificar parametro de autoplay
+    var refer = getParameterByName('refer');
+    if (refer !== null) {
+        referUrl = refer;
+        returnArrow.style.display = 'flex'
+    }
+
     resetButton.addEventListener('click', function() {
 
         textArea.value = ''; // apaga a transcrição
@@ -36,14 +43,17 @@ document.addEventListener('DOMContentLoaded', function () {
         clearTimeout(typingTimer);
     });
 
-
     refreshButton.addEventListener('click', handleRefreshButtonClick);
-
 
     var returnArrow = document.querySelector('#return_arrow');
 
     returnArrow.addEventListener('click', function() {
-        window.location.href = 'index.html';
+        // Verificar se referUrl começa com "http://" ou "https://"
+        if (!referUrl.startsWith('http://') && !referUrl.startsWith('https://')) {
+            // Se não começar com um protocolo, acrescente "http://" como padrão
+            referUrl = 'http://' + referUrl;
+        }
+        window.location.replace(referUrl);
     });
 
 
