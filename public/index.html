@@ -624,6 +624,7 @@
                 player.addListener('authentication_error', ({ message }) => {
                     console.error(message);
                     fetchUserData()
+                    hideTracker();
                 });
 
                 player.addListener('account_error', ({ message }) => {
