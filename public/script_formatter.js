@@ -19,14 +19,6 @@ document.addEventListener('DOMContentLoaded', function () {
     var ignoredContainers = []; // aqui ficam guardados temporariamente os IDs ignorados, ao limpar o texto, tocar em 'Copy' ou então ao tocar no botão de lixo, esse array será resetado
 
 
-    // config inicial
-    updateSidebar()
-    setDefaultLanguage();
-    setCheckboxStates();
-    loadDevMode();
-    fetchCreditsData();
-    fetchServerInfo();
-
     // verificar parametro de autoplay
     var referrer = getParameterByName('referrer');
     if (referrer !== null) {
@@ -114,53 +106,61 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
+    // Função para verificar e definir o idioma padrão ao carregar a página
+    function setDefaultLanguage() {
+        const storedLanguage = localStorage.getItem('selectedLanguage');
+        const languageParam = getParameterByName('language');
+        let languageToDisplay = null;
 
-// Função para verificar e definir o idioma padrão ao carregar a página
-function setDefaultLanguage() {
-    const storedLanguage = localStorage.getItem('selectedLanguage');
-    const languageParam = getParameterByName('language');
-    let languageToDisplay = null;
+        if (languageParam) {
+            languageToDisplay = getLanguageFullName(languageParam);
+        } else if (storedLanguage) {
+            languageToDisplay = getLanguageFullName(storedLanguage);
+            addParamToURL('language', storedLanguage)
+        }
 
-    if (languageParam) {
-        languageToDisplay = getLanguageFullName(languageParam);
-    } else if (storedLanguage) {
-        languageToDisplay = getLanguageFullName(storedLanguage);
-        addParamToURL('language', storedLanguage)
-    }
-
-    if (languageToDisplay) {
-        selectedLanguage.textContent = languageToDisplay;
-        localStorage.setItem('selectedLanguage', languageToDisplay); // Corrigido: armazenar o idioma, não o elemento DOM
-    } else {
-        selectedLanguage.textContent = 'Select Language';
-        if (storedLanguage) {
-            localStorage.removeItem('selectedLanguage');
+        if (languageToDisplay) {
+            selectedLanguage.textContent = languageToDisplay;
+            localStorage.setItem('selectedLanguage', languageParam); // Corrigido: armazenar o idioma, não o elemento DOM
+        } else {
+            selectedLanguage.textContent = 'Select Language';
+            if (storedLanguage) {
+                localStorage.removeItem('selectedLanguage');
+            }
         }
     }
-}
 
-// Função para obter o nome completo do idioma com base no código
-function getLanguageFullName(code) {
-    const languageMap = {
-        'en-AU': 'English (Australian)',
-        'en-CA': 'English (Canadian)',
-        'en-NZ': 'English (New Zealand)',
-        'en-GB': 'English (UK)',
-        'en-US': 'English (US)',
-        'nl': 'Dutch',
-        'fr': 'French',
-        'fr-CA': 'French (Canada)',
-        'de-AT': 'German (Austria)',
-        'de-DE': 'German (Germany)',
-        'de-CH': 'German (Swiss)',
-        'it': 'Italian',
-        'pt-BR': 'Portuguese (BR)',
-        'pt-PT': 'Portuguese (PT)',
-        'es': 'Spanish',
-    };
+    // Função para obter o nome completo do idioma com base no código
+    function getLanguageFullName(code) {
+        const languageMap = {
+            'en-AU': 'English (Australian)',
+            'en-CA': 'English (Canadian)',
+            'en-NZ': 'English (New Zealand)',
+            'en-GB': 'English (UK)',
+            'en-US': 'English (US)',
+            'nl': 'Dutch',
+            'fr': 'French',
+            'fr-CA': 'French (Canada)',
+            'de-AT': 'German (Austria)',
+            'de-DE': 'German (Germany)',
+            'de-CH': 'German (Swiss)',
+            'it': 'Italian',
+            'pt-BR': 'Portuguese (BR)',
+            'pt-PT': 'Portuguese (PT)',
+            'es': 'Spanish',
+        };
 
-    return languageMap[code];
-}
+        return languageMap[code];
+    }
+
+
+        // config inicial
+        updateSidebar()
+        setDefaultLanguage();
+        setCheckboxStates();
+        loadDevMode();
+        fetchCreditsData();
+        fetchServerInfo();
 
     // Adicione um evento de clique ao seletor de idioma
     languageList.addEventListener('click', function (e) {
