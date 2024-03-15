@@ -1579,3 +1579,44 @@ function getParameterByName(name, url) {
     if (!results[2]) return '';
     return decodeURIComponent(results[2].replace(/\+/g, " "));
 }
+
+function addParamToURL(paramName, paramValue) {
+    var url = window.location.href;
+    var newUrl;
+    
+    // Verificar se o parâmetro já existe na URL
+    if (url.indexOf(paramName + '=') !== -1) {
+        // Substituir o valor do parâmetro
+        var regex = new RegExp('(' + encodeURIComponent(paramName) + '=)[^&]*');
+        newUrl = url.replace(regex, '$1' + encodeURIComponent(paramValue));
+    } else {
+        // Adicionar o parâmetro à URL
+        var separator = url.indexOf('?') !== -1 ? '&' : '?';
+        newUrl = url + separator + encodeURIComponent(paramName) + '=' + encodeURIComponent(paramValue);
+    }
+    
+    history.pushState(null, '', newUrl);
+}
+
+// Função para remover um parâmetro da URL
+function removeParameterFromURL(parameterKey) {
+    var url = window.location.href;
+    var urlParts = url.split('?');
+
+    if (urlParts.length >= 2) {
+        var prefix = encodeURIComponent(parameterKey) + '=';
+        var parts = urlParts[1].split(/[&;]/g);
+
+        // Percorrer todos os parâmetros
+        for (var i = parts.length; i-- > 0;) {
+            // Se encontrar o parâmetro a ser removido, removê-lo da lista de parâmetros
+            if (parts[i].lastIndexOf(prefix, 0) !== -1) {
+                parts.splice(i, 1);
+            }
+        }
+
+        // Reconstituir a URL sem o parâmetro removido
+        url = urlParts[0] + (parts.length > 0 ? '?' + parts.join('&') : '');
+    }
+    return url;
+}

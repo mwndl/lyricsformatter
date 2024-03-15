@@ -824,7 +824,6 @@
                     if (newState && typeof newState.playback_id === 'string' && newState.playback_id.trim() !== '') {
                         currentTrackId = newState.track_window.current_track.id;
                         currentPlaybackId = newState.playback_id;
-                        showTracker();
 
 
                         if (trackId === '') { // primeira faixa a ser reproduzida
@@ -834,6 +833,7 @@
 
                             // carregar estrofes
                             storeSections(accessToken, trackId)
+                            showTracker();
 
                         }
                         if (trackId !== currentTrackId) { // próximas faixas
@@ -843,6 +843,7 @@
 
                             // carregar estrofes
                             storeSections(accessToken, trackId)
+                            showTracker();
                         }
 
                         fetchCurrentlyPlayingData()
@@ -964,6 +965,11 @@
                     document.getElementById('devices_options').style.bottom = '150px'
                     document.getElementById('main').style.height = 'calc(100% - 120px)'
                     document.getElementById('footer').style.height = '60px'
+                    // Adicionar o parâmetro 'track_id' à URL, se o trackId não for nulo
+                    if (trackId) {
+                        addParamToURL('track_id', trackId);
+                    }
+                    console.log("oi")
 
                 }
                 function hideTracker() {
@@ -973,6 +979,10 @@
                     document.getElementById('devices_options').style.bottom = '105px'
                     document.getElementById('main').style.height = ''
                     document.getElementById('footer').style.height = ''
+
+                    // Remover o parâmetro 'track_id' da URL
+                    var urlWithoutTrackId = removeParameterFromURL('track_id');
+                    history.replaceState(null, '', urlWithoutTrackId);
                 }
 
             });
