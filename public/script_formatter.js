@@ -115,40 +115,52 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
 
-   // Função para verificar e definir o idioma padrão ao carregar a página
-    function setDefaultLanguage() {
-        const storedLanguage = localStorage.getItem('selectedLanguage');
+// Função para verificar e definir o idioma padrão ao carregar a página
+function setDefaultLanguage() {
+    const storedLanguage = localStorage.getItem('selectedLanguage');
+    const languageParam = getParameterByName('language');
+    let languageToDisplay = null;
 
+    if (languageParam) {
+        languageToDisplay = getLanguageFullName(languageParam);
+    } else if (storedLanguage) {
+        languageToDisplay = getLanguageFullName(storedLanguage);
+        addParamToURL('language', storedLanguage)
+    }
+
+    if (languageToDisplay) {
+        selectedLanguage.textContent = languageToDisplay;
+        localStorage.setItem('selectedLanguage', languageToDisplay); // Corrigido: armazenar o idioma, não o elemento DOM
+    } else {
+        selectedLanguage.textContent = 'Select Language';
         if (storedLanguage) {
-            // Se houver um idioma armazenado em cache, defina-o como padrão
-            selectedLanguage.textContent = getLanguageFullName(storedLanguage);
+            localStorage.removeItem('selectedLanguage');
         }
     }
-    
+}
 
-    // Função para obter o nome completo do idioma com base no código
-    function getLanguageFullName(code) {
-        const languageMap = {
-            
-            'en-AU': 'English (Australian)',
-            'en-CA': 'English (Canadian)',
-            'en-NZ': 'English (New Zealand)',
-            'en-GB': 'English (UK)',
-            'en-US': 'English (US)',
-            'nl': 'Dutch',
-            'fr': 'French',
-            'fr-CA': 'French (Canada)',
-            'de-AT': 'German (Austria)',
-            'de-DE': 'German (Germany)',
-            'de-CH': 'German (Swiss)',
-            'it': 'Italian',
-            'pt-BR': 'Portuguese (BR)',
-            'pt-PT': 'Portuguese (PT)',
-            'es': 'Spanish',
-        }
+// Função para obter o nome completo do idioma com base no código
+function getLanguageFullName(code) {
+    const languageMap = {
+        'en-AU': 'English (Australian)',
+        'en-CA': 'English (Canadian)',
+        'en-NZ': 'English (New Zealand)',
+        'en-GB': 'English (UK)',
+        'en-US': 'English (US)',
+        'nl': 'Dutch',
+        'fr': 'French',
+        'fr-CA': 'French (Canada)',
+        'de-AT': 'German (Austria)',
+        'de-DE': 'German (Germany)',
+        'de-CH': 'German (Swiss)',
+        'it': 'Italian',
+        'pt-BR': 'Portuguese (BR)',
+        'pt-PT': 'Portuguese (PT)',
+        'es': 'Spanish',
+    };
 
-        return languageMap[code] || code; // retorna o nome do idioma, se estiver mapeado... senão retorna o código
-    }
+    return languageMap[code];
+}
 
     // Adicione um evento de clique ao seletor de idioma
     languageList.addEventListener('click', function (e) {
@@ -159,6 +171,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
             // Armazene o idioma selecionado em cache
             localStorage.setItem('selectedLanguage', selected);
+            addParamToURL('language', selected)
             updateSidebar() // resetar sugestões e caracteres
             ignoredContainers = []; // limpa a memória de alertas ignorados
         }
