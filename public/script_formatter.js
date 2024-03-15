@@ -28,14 +28,13 @@ document.addEventListener('DOMContentLoaded', function () {
     fetchServerInfo();
 
     // verificar parametro de autoplay
-    var refer = getParameterByName('refer');
-    if (refer !== null) {
-        referUrl = refer;
+    var referrer = getParameterByName('referrer');
+    if (referrer !== null) {
+        referrerUrlValue = referrer;
         returnArrow.style.display = 'flex'
     }
 
     resetButton.addEventListener('click', function() {
-
         textArea.value = ''; // apaga a transcrição
         updateSidebar(); // reseta os contadores de caracteres e a barra lateral
         ignoredContainers = []; // limpa a memória de alertas ignorados
@@ -48,12 +47,12 @@ document.addEventListener('DOMContentLoaded', function () {
     var returnArrow = document.querySelector('#return_arrow');
 
     returnArrow.addEventListener('click', function() {
-        // Verificar se referUrl começa com "http://" ou "https://"
-        if (!referUrl.startsWith('http://') && !referUrl.startsWith('https://')) {
+        // Verificar se referrerUrlValue começa com "http://" ou "https://"
+        if (!referrerUrlValue.startsWith('http://') && !referrerUrlValue.startsWith('https://')) {
             // Se não começar com um protocolo, acrescente "http://" como padrão
-            referUrl = 'http://' + referUrl;
+            referrerUrlValue = 'http://' + referrerUrlValue;
         }
-        window.location.replace(referUrl);
+        window.location.replace(referrerUrlValue);
     });
 
 
