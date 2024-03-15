@@ -54,7 +54,8 @@
                     <div class="editor-container" id="editor-container">
                         <div class="line_issues" id="line_issues"></div>
                         <div class="character_counter"></div>
-                        <textarea class="editor" id="editor" placeholder="Paste the lyrics here..." oninput="checkContent();"></textarea>
+                        <textarea class="editor" id="editor" placeholder="Paste the lyrics here..."
+                            oninput="checkContent();"></textarea>
                     </div>
                 </div>
             </div>
@@ -117,12 +118,14 @@
                     <div class="improvements_box_content">
                         <div class="improvements" id="format_containers" style="display:flex">
                             <div class="improvements_placeholder_div" id="improvements_placeholder_div1">
-                                <div class="improvements_placeholder" id="improvements_placeholder1">Type something or paste your current transcription to check the format...</div>
+                                <div class="improvements_placeholder" id="improvements_placeholder1">Type something or
+                                    paste your current transcription to check the format...</div>
                             </div>
                         </div>
                         <div class="improvements" id="grammar_containers" style="display:none">
                             <div class="improvements_placeholder_div" id="improvements_placeholder_div2">
-                                <div class="improvements_placeholder" id="improvements_placeholder2">Type something or paste your current transcription to check the grammar...</div>
+                                <div class="improvements_placeholder" id="improvements_placeholder2">Type something or
+                                    paste your current transcription to check the grammar...</div>
                             </div>
                         </div>
                     </div>
@@ -254,7 +257,12 @@
                 </svg>
             </div>
             <div class="controls-center">
-                <input type="range" id="tracker" min="0" value="0" max="100">
+                <div id="track_position" class="track_position">0:00</div>
+                <div class="tracker_container">
+                    <input type="range" id="tracker" min="0" value="0" max="100">
+                    <div id="hoverTimeDisplay" class="hover_time_display">00:00</div>
+                </div>
+                <div id="track_duration" class="track_duration">0:00</div>
             </div>
             <div class="controls-right">
                 <div class="control-container" id="previous_section">
@@ -273,22 +281,23 @@
                     <p style="position: absolute; top: 54%; left: 51%; color: #ffffff; font-size: small; transform: translate(-50%, -50%); z-index: 1;"
                         id="backwardValue"></p>
                 </div>
-            </div>
-            <div class="control-container" id="3s_forward" style="position: relative;">
-                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
-                    <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
-                    <g id="SVGRepo_iconCarrier">
-                        <path
-                            d="M19.4791 7.09052C19.2191 6.77052 18.7491 6.72052 18.4291 6.98052C18.1091 7.24052 18.0591 7.71052 18.3191 8.03052C19.4491 9.43052 20.0791 11.0905 20.1391 12.8305C20.2991 17.3105 16.7791 21.0905 12.2891 21.2405C7.79906 21.4005 4.02906 17.8805 3.86906 13.4005C3.70906 8.92052 7.22906 5.14052 11.7191 4.99052C12.2891 4.97052 12.8891 5.02052 13.5391 5.15052C13.5791 5.16052 13.6191 5.15052 13.6591 5.15052C13.7591 5.20052 13.8791 5.23052 13.9891 5.23052C14.1591 5.23052 14.3191 5.18052 14.4591 5.06052C14.7791 4.80052 14.8291 4.33052 14.5791 4.01052L12.5991 1.54052C12.3391 1.22052 11.8691 1.16052 11.5491 1.42052C11.2291 1.68052 11.1791 2.15052 11.4291 2.47052L12.2591 3.50052C12.0691 3.49052 11.8691 3.48052 11.6791 3.49052C6.36906 3.67052 2.19906 8.15052 2.38906 13.4605C2.57906 18.7705 7.04906 22.9405 12.3591 22.7505C17.6691 22.5605 21.8391 18.0905 21.6491 12.7805C21.5591 10.7105 20.8191 8.74052 19.4791 7.09052Z"
-                            fill="#ffffff"></path>
-                    </g>
-                </svg>
-                <p style="position: absolute; top: 54%; left: 49%; color: #ffffff; font-size: small; transform: translate(-50%, -50%); z-index: 1;"
-                    id="forwardValue"></p>
-            </div>
-            <div class="control-container" id="next_section">
-                <img src="images/forward.svg" alt="Forward">
+
+                <div class="control-container" id="3s_forward" style="position: relative;">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                        <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+                        <g id="SVGRepo_iconCarrier">
+                            <path
+                                d="M19.4791 7.09052C19.2191 6.77052 18.7491 6.72052 18.4291 6.98052C18.1091 7.24052 18.0591 7.71052 18.3191 8.03052C19.4491 9.43052 20.0791 11.0905 20.1391 12.8305C20.2991 17.3105 16.7791 21.0905 12.2891 21.2405C7.79906 21.4005 4.02906 17.8805 3.86906 13.4005C3.70906 8.92052 7.22906 5.14052 11.7191 4.99052C12.2891 4.97052 12.8891 5.02052 13.5391 5.15052C13.5791 5.16052 13.6191 5.15052 13.6591 5.15052C13.7591 5.20052 13.8791 5.23052 13.9891 5.23052C14.1591 5.23052 14.3191 5.18052 14.4591 5.06052C14.7791 4.80052 14.8291 4.33052 14.5791 4.01052L12.5991 1.54052C12.3391 1.22052 11.8691 1.16052 11.5491 1.42052C11.2291 1.68052 11.1791 2.15052 11.4291 2.47052L12.2591 3.50052C12.0691 3.49052 11.8691 3.48052 11.6791 3.49052C6.36906 3.67052 2.19906 8.15052 2.38906 13.4605C2.57906 18.7705 7.04906 22.9405 12.3591 22.7505C17.6691 22.5605 21.8391 18.0905 21.6491 12.7805C21.5591 10.7105 20.8191 8.74052 19.4791 7.09052Z"
+                                fill="#ffffff"></path>
+                        </g>
+                    </svg>
+                    <p style="position: absolute; top: 54%; left: 49%; color: #ffffff; font-size: small; transform: translate(-50%, -50%); z-index: 1;"
+                        id="forwardValue"></p>
+                </div>
+                <div class="control-container" id="next_section">
+                    <img src="images/forward.svg" alt="Forward">
+                </div>
             </div>
         </div>
     </div>
@@ -412,7 +421,8 @@
             <div class="popup_option">
                 <div class="popup_title">
                     <p class="popup_option_title">Auto format lyrics</p>
-                    <p class="popup_option_description">Enable this option to automatically fix the sections format and remove unnecessary spaces and empty lines</p>
+                    <p class="popup_option_description">Enable this option to automatically fix the sections format and
+                        remove unnecessary spaces and empty lines</p>
                 </div>
                 <label class="switch">
                     <input type="checkbox" id="autoFormatToggle" onclick="checkContent()">
@@ -422,7 +432,8 @@
             <div class="popup_option">
                 <div class="popup_title">
                     <p class="popup_option_title">Automatic suggestions</p>
-                    <p class="popup_option_description">Enable this option to receive automatic suggestions as you transcribe the lyrics</p>
+                    <p class="popup_option_description">Enable this option to receive automatic suggestions as you
+                        transcribe the lyrics</p>
                 </div>
                 <label class="switch">
                     <input type="checkbox" id="autoSuggestions" onclick="checkContent()">
@@ -515,14 +526,18 @@
 
         function ignoreButton(button) {
             var container = button.closest('.container');
-            var containerId = container.id; // Obter o ID da DIV container
-            ignoredContainers.push(containerId); // Adicionar o ID ao array ignoredContainers
+            var containerId = container.id; /* Obter o ID da DIV container */
+            ignoredContainers.push(containerId); /* Adicionar o ID ao array ignoredContainers */
             container.style.display = 'none';
             resetLineIssues();
             handleRefreshButtonClick();
-        } 
+        }
 
         let currentState;
+        let deviceId;
+        let playbackId = '';
+        let currentPlaybackId = '';
+        let trackId = '';
 
         window.onSpotifyWebPlaybackSDKReady = () => {
 
@@ -569,6 +584,7 @@
                 // Ready
                 player.addListener('ready', ({ device_id }) => {
                     console.log('Ready with Device ID', device_id);
+                    deviceId = device_id;
                     fetchAvailableDevices()
                 });
 
@@ -599,7 +615,6 @@
                 document.getElementById('play_pause').onclick = function () {
                     player.togglePlay();
                     togglePlayPause()
-                    fetchCurrentlyPlayingData()
                 };
 
                 document.getElementById('3s_backward').onclick = function () {
@@ -655,25 +670,33 @@
                         }
                     }
 
-                    // Event listener para controlar quando uma música termina
-                    player.addListener('player_state_changed', state => {
-                        if (!state || !state.position) {
-                            // Se o estado não estiver disponível ou a posição for indefinida, resete o valor do tracker
-                            document.getElementById('tracker').value = 0;
-                        }
-                    });
-
                 });
 
 
                 // Função para atualizar a barra de progresso com base na posição atual da música
                 function updateProgressBar(position, duration) {
                     const tracker = document.getElementById('tracker');
+                    const trackPosition = document.getElementById('track_position');
+                    const trackDuration = document.getElementById('track_duration');
+
                     if (duration > 0) {
                         const progress = (position / duration) * 100;
                         tracker.value = progress;
                     }
+
+                    // Atualizar contadores de posição e duração
+                    trackPosition.textContent = formatTime(position);
+                    trackDuration.textContent = formatTime(duration);
                 }
+
+                // Função para formatar os milissegundos em minutos:segundos
+                function formatTime(milliseconds) {
+                    const totalSeconds = Math.floor(milliseconds / 1000);
+                    const mins = Math.floor(totalSeconds / 60);
+                    const secs = Math.floor(totalSeconds % 60);
+                    return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+                }
+
 
                 // MELHORAR
 
@@ -695,7 +718,8 @@
                             // Realiza o seek para a nova posição em milissegundos
                             player.seek(novaPosicaoMillis).then(() => {
                                 // Atualiza a posição para a música atual
-                                positions[currentState.track.id] = novaPosicaoMillis;
+                                console.log('log!', state)
+                                positions[state.track_window.current_track.id] = novaPosicaoMillis;
                             }).catch((err) => {
                                 console.error('Falha ao realizar o seek:', err);
                             });
@@ -705,12 +729,61 @@
                     });
                 });
 
+
+
+                // Exibir o hover do tracker
+                document.getElementById('tracker').addEventListener('mousemove', function (event) {
+                    const hoverPosition = event.offsetX;
+                    const totalWidth = event.target.clientWidth;
+
+                    // Calcula a porcentagem da posição do hover
+                    const porcentagemPosicao = hoverPosition / totalWidth;
+
+                    // Obtém a duração total da faixa em segundos
+                    player.getCurrentState().then(state => {
+                        if (state) {
+                            const duracaoTotal = state.duration / 1000; // em segundos
+
+                            // Calcula a posição em segundos
+                            const novaPosicaoSeconds = porcentagemPosicao * duracaoTotal;
+
+                            // Converte segundos para mm:ss
+                            const minutos = Math.floor(novaPosicaoSeconds / 60);
+                            const segundos = Math.floor(novaPosicaoSeconds % 60);
+
+                            // Formata o tempo
+                            const tempoFormatado = `${minutos}:${segundos < 10 ? '0' : ''}${segundos}`;
+
+                            // Atualiza o texto do elemento de exibição de tempo
+                            const hoverTimeDisplay = document.getElementById('hoverTimeDisplay');
+                            hoverTimeDisplay.innerText = tempoFormatado;
+
+                            // Calcula a posição do elemento de exibição de tempo
+                            const containerWidth = event.target.parentNode.clientWidth;
+                            const displayWidth = hoverTimeDisplay.clientWidth;
+                            const leftOffset = (porcentagemPosicao * containerWidth) - (displayWidth / 2);
+
+                            // Define a posição do elemento de exibição de tempo
+                            hoverTimeDisplay.style.left = leftOffset + 'px';
+
+                            // Exibe o elemento de exibição de tempo
+                            hoverTimeDisplay.style.display = 'block';
+                        }
+                    }).catch((err) => {
+                        console.error('Erro ao obter o estado atual do player:', err);
+                    });
+                });
+
+                // Esconde o elemento de exibição de tempo quando o mouse sai do controle deslizante
+                document.getElementById('tracker').addEventListener('mouseleave', function () {
+                    document.getElementById('hoverTimeDisplay').style.display = 'none';
+                });
+
                 // MELHORAR
 
 
 
                 player.addListener('player_state_changed', newState => {
-                    console.log(newState);
                     currentState = newState; // Atualiza a variável currentState
 
                     if (newState && newState.position && newState.duration) {
@@ -720,10 +793,11 @@
                     }
 
                     if (newState && typeof newState.playback_id === 'string' && newState.playback_id.trim() !== '') {
-                        const playbackId = newState.playback_id;
-                        fetchCurrentlyPlayingData();
+                        // playback está no site
+                        currentTrackId = newState.track_window.current_track.id;
+                        currentPlaybackId = newState.playback_id;
                         showTracker();
-
+                        fetchCurrentlyPlayingData()
 
                         // Definir o botão play/pause com base no estado de reprodução
                         if (newState.paused) {
@@ -768,7 +842,7 @@
                             const milliseconds = seconds * 1000; // Convertendo segundos para milissegundos
                             const newPosition = Math.max(0, state.position - milliseconds);
                             player.seek(newPosition).then(() => {
-                                positions[state.track.id] = newPosition; // Atualiza a posição para a música atual
+                                positions[state.track_window.current_track.id] = newPosition; // Atualiza a posição para a música atual
                             });
                         }
                     });
@@ -781,7 +855,7 @@
                             const milliseconds = seconds * 1000; // Convertendo segundos para milissegundos
                             const newPosition = Math.min(state.duration, state.position + milliseconds);
                             player.seek(newPosition).then(() => {
-                                positions[state.track.id] = newPosition; // Atualiza a posição para a música atual
+                                positions[state.track_window.current_track.id] = newPosition; // Atualiza a posição para a música atual
                             });
                         }
                     });
@@ -805,14 +879,6 @@
                     document.getElementById('footer').style.height = ''
                 }
 
-                // Quando uma nova música é reproduzida, obtenha a posição atual se estiver disponível
-                player.on('track_change', () => {
-                    player.getCurrentState().then(state => {
-                        if (state) {
-                            positions[state.track.id] = state.position; // Armazena a posição para a nova música
-                        }
-                    });
-                });
             });
         };
 

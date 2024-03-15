@@ -223,13 +223,13 @@ function handleRefreshButtonClick() {
     var autoFormatToggle = document.getElementById('autoFormatToggle');
 
     if (autoFormatToggle.checked) {
-        replaceSpecialTags();
-        addSpaceAboveTags();
-        removeSpacesAroundInstrumental();
-        trimEditorContent();
-        autoTrim();
-        removeDuplicateSpaces();
-        removeDuplicateEmptyLines();
+        replaceSpecialTags(); // auto replace tags
+        addSpaceAboveTags(); // add (caso não haja) espaços acima de todas as tags
+        removeSpacesAroundInstrumental(); // espaços ao redor de tags instrumentais
+        trimEditorContent(); // linhas antes ou depois da letra
+        autoTrim(); // espaços extras após o fim da linha
+        removeDuplicateSpaces(); // espaços duplos entre palavras
+        removeDuplicateEmptyLines(); // linhas vazias duplicadas entre estrofes
     }
 
     updateSidebar();

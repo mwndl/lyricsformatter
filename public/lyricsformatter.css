@@ -1791,9 +1791,34 @@
   }
   
   .controls-center {
+    display: flex;
+    align-items: center;
+    flex-direction: row;
     flex: 1;
-    margin: 0 20px;
   }
+
+  .tracker_container {
+    position: relative;
+    width: 100%; 
+  }
+
+  .hover_time_display {
+    position: absolute;
+    top: -25px; /* Posição ajustável conforme necessário */
+    left: 0;
+    background-color: white;
+    color: black;
+    padding: 5px 10px;
+    border-radius: 5px;
+    display: none; /* Inicialmente oculto */
+  }
+
+  .track_position, .track_duration {
+    color: white;
+    padding: 0 15px;
+  }
+
+
   
   input[type="range"] {
     width: 100%;
