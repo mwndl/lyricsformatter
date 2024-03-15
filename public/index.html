@@ -845,6 +845,15 @@
                             storeSections(accessToken, trackId)
                             showTracker();
                         }
+                        if (trackId === currentTrackId && currentPlaybackId  !== playbackId) { // mudanças de player
+
+                            trackId = currentTrackId;
+                            playbackId = currentPlaybackId;
+
+                            // carregar estrofes
+                            storeSections(accessToken, trackId)
+                            showTracker();
+                        }
 
                         fetchCurrentlyPlayingData()
 
