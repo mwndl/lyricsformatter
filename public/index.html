@@ -236,12 +236,25 @@
         <div class="player" id="sdk_player" style="display:none">
             <script src="https://sdk.scdn.co/spotify-player.js"></script>
             <div class="control-container" id="play_pause">
-                <svg viewBox="0 0 24.00 24.00" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="#ffffff">
+                <svg width="20px" height="20px" viewBox="-1 0 8 8" version="1.1" xmlns="http://www.w3.org/2000/svg"
+                    xmlns:xlink="http://www.w3.org/1999/xlink" fill="#ffffff" stroke="#ffffff" style="display:none">
                     <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
-                    <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+                    <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round" stroke="#CCCCCC"
+                        stroke-width="0.33599999999999997"></g>
                     <g id="SVGRepo_iconCarrier">
-                        <path d="M8 5V19M16 5V19" stroke="#ffffff" stroke-width="2.4" stroke-linecap="round"
-                            stroke-linejoin="round"></path>
+                        <title>pause [#ffffff]</title>
+                        <desc>Created with Sketch.</desc>
+                        <defs> </defs>
+                        <g id="Page-1" stroke-width="0.00008" fill="none" fill-rule="evenodd">
+                            <g id="Dribbble-Light-Preview" transform="translate(-227.000000, -3765.000000)"
+                                fill="#ffffff">
+                                <g id="icons" transform="translate(56.000000, 160.000000)">
+                                    <path
+                                        d="M172,3605 C171.448,3605 171,3605.448 171,3606 L171,3612 C171,3612.552 171.448,3613 172,3613 C172.552,3613 173,3612.552 173,3612 L173,3606 C173,3605.448 172.552,3605 172,3605 M177,3606 L177,3612 C177,3612.552 176.552,3613 176,3613 C175.448,3613 175,3612.552 175,3612 L175,3606 C175,3605.448 175.448,3605 176,3605 C176.552,3605 177,3605.448 177,3606"
+                                        id="pause-[#ffffff]"> </path>
+                                </g>
+                            </g>
+                        </g>
                     </g>
                 </svg>
                 <svg fill="#ffffff" viewBox="0 0 32 32" version="1.1" xmlns="http://www.w3.org/2000/svg"
@@ -259,7 +272,7 @@
             <div class="controls-center">
                 <div id="track_position" class="track_position">0:00</div>
                 <div class="tracker_container">
-                    <input type="range" id="tracker" min="0" value="0" max="100">
+                    <input type="range" id="tracker" class="tracker" min="0" value="0" max="100">
                     <div id="hoverTimeDisplay" class="hover_time_display">00:00</div>
                 </div>
                 <div id="track_duration" class="track_duration">0:00</div>
@@ -534,6 +547,8 @@
         }
 
         let currentState;
+        let currentPosition;
+        let sectionStartTimes;
         let deviceId;
         let playbackId = '';
         let currentPlaybackId = '';
@@ -586,6 +601,12 @@
                     console.log('Ready with Device ID', device_id);
                     deviceId = device_id;
                     fetchAvailableDevices()
+
+                    // verificar parametro de autoplay
+                    var trackId = getParameterByName('track_id');
+                    if (trackId !== null) {
+                        playTrack(trackId, device_id);
+                    }
                 });
 
                 // Not Ready
@@ -625,6 +646,14 @@
                     fastForward(document.getElementById('selectedValue2').textContent)
                 };;
 
+                document.getElementById('previous_section').onclick = function () {
+                    lastSectionButton()
+                };;
+
+                document.getElementById('next_section').onclick = function () {
+                    nextSectionButton()
+                };;
+
                 // CÓDIGO QUE TRATA DOS COMANDOS DO TECLADO
                 document.addEventListener('keydown', function (event) {
 
@@ -652,13 +681,13 @@
                                 fastForward(document.getElementById('selectedValue2').textContent)
                                 break;
                             case '4':
-                                console.log("Clique no botão 4 identificado: voltar para estrofe anterior")
+                                lastSectionButton()
                                 break;
                             case '5':
-                                console.log("Clique no botão 5 identificado: reproduzir estrofe atual novamente")
+                                repeatSectionButton()
                                 break;
                             case '6':
-                                console.log("Clique no botão 6 identificado: pular para próxima estrofe")
+                                nextSectionButton()
                                 break;
                             case '0':
                                 player.togglePlay();
@@ -718,7 +747,6 @@
                             // Realiza o seek para a nova posição em milissegundos
                             player.seek(novaPosicaoMillis).then(() => {
                                 // Atualiza a posição para a música atual
-                                console.log('log!', state)
                                 positions[state.track_window.current_track.id] = novaPosicaoMillis;
                             }).catch((err) => {
                                 console.error('Falha ao realizar o seek:', err);
@@ -792,11 +820,31 @@
                         updateProgressBar(newPosition, duration);
                     }
 
+                    // música está sendo reproduzida no SDK (e não em outros dispositivos)
                     if (newState && typeof newState.playback_id === 'string' && newState.playback_id.trim() !== '') {
-                        // playback está no site
                         currentTrackId = newState.track_window.current_track.id;
                         currentPlaybackId = newState.playback_id;
                         showTracker();
+
+
+                        if (trackId === '') { // primeira faixa a ser reproduzida
+
+                            trackId = currentTrackId;
+                            playbackId = currentPlaybackId;
+
+                            // carregar estrofes
+                            storeSections(accessToken, trackId)
+
+                        }
+                        if (trackId !== currentTrackId) { // próximas faixas
+
+                            trackId = currentTrackId;
+                            playbackId = currentPlaybackId;
+
+                            // carregar estrofes
+                            storeSections(accessToken, trackId)
+                        }
+
                         fetchCurrentlyPlayingData()
 
                         // Definir o botão play/pause com base no estado de reprodução
@@ -821,6 +869,7 @@
                     setInterval(() => {
                         player.getCurrentState().then(state => {
                             if (state) {
+                                currentPosition = state.position;
                                 const newPosition = state.position;
                                 const duration = state.duration;
                                 updateProgressBar(newPosition, duration);
@@ -860,6 +909,53 @@
                         }
                     });
                 }
+
+                // Função para mover o player para a próxima seção de áudio
+                function lastSectionButton() {
+                    const position = currentPosition / 1000; // Convertendo a posição atual para segundos
+                    const lastSectionTime = beforeLastSection(position, sectionStartTimes); // Obtendo o tempo da próxima seção em MS
+
+                    if (lastSectionTime !== null) {
+                        player.seek(lastSectionTime); // Movendo o player para a próxima seção de áudio
+                    }
+                }
+
+                // Função para mover o player para a próxima seção de áudio
+                function repeatSectionButton() {
+                    const position = currentPosition / 1000; // Convertendo a posição atual para segundos
+                    const repeatSectionTime = repeatSection(position, sectionStartTimes); // Obtendo o tempo da próxima seção em MS
+
+                    if (repeatSectionTime !== null) {
+                        player.seek(repeatSectionTime); // Movendo o player para a próxima seção de áudio
+                    }
+                }
+
+                // Função para mover o player para a próxima seção de áudio
+                function nextSectionButton() {
+                    const position = currentPosition / 1000; // Convertendo a posição atual para segundos
+                    const nextSectionTime = nextSection(position, sectionStartTimes); // Obtendo o tempo da próxima seção em MS
+
+                    if (nextSectionTime !== null) {
+                        player.seek(nextSectionTime); // Movendo o player para a próxima seção de áudio
+                    }
+                }
+
+                function storeSections(accessToken, currentSongId) {
+                    // Chamada para carregar a análise de áudio
+                    loadAudioAnalysis(accessToken, currentSongId)
+                        .then(data => {
+                            if (data) {
+                                // Atribui diretamente o array retornado às variáveis
+                                sectionStartTimes = data;
+                            } else {
+                                sectionStartTimes = [];
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Erro:', error);
+                        });
+                }
+
 
                 function showTracker() {
                     document.getElementById('sdk_player').style = 'display:flex';

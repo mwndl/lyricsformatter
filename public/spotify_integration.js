@@ -215,9 +215,7 @@ async function fetchCurrentlyPlayingData() {
 
         // definir o ID na variável
         currentSongId = currentlyPlayingData.item.id;
-/*
-        loadAudioAnalysis(accessToken, currentSongId)
-*/
+
         // Atualizar os elementos HTML com as informações da música atualmente reproduzida
         const albumArtElement = document.getElementById('sp_album_art');
         const titleElement = document.getElementById('sp_title');
@@ -253,9 +251,6 @@ async function fetchCurrentlyPlayingData() {
     }
 }
 
-// Variável para armazenar os dados de análise de áudio
-let audioAnalysisData = {};
-
 // Função para obter os dados de análise de áudio uma vez quando a música é carregada
 async function loadAudioAnalysis(accessToken, songId) {
     try {
@@ -271,8 +266,8 @@ async function loadAudioAnalysis(accessToken, songId) {
         }
 
         const audioAnalysisData = await response.json();
-        console.log(audioAnalysisData.sections)
-        return audioAnalysisData.sections;
+        const starts = audioAnalysisData.sections.map(section => section.start);
+        return starts;
 
     } catch (error) {
         console.error('Error loading audio analysis: ', error.message);
@@ -280,73 +275,63 @@ async function loadAudioAnalysis(accessToken, songId) {
     }
 }
 
-// Função para mover para a seção anterior
-function moveToPreviousSection() {
-    const player = getPlayer();
-    const currentTrackId = state.track.id;
-    const currentPosition = positions[currentTrackId];
-    const analysis = audioAnalysisData[currentTrackId]?.sections;
-    
-    if (!analysis || analysis.length === 0) {
-        console.warn('No audio analysis available for the current track.');
-        return;
+// Função para obter a posição da próxima seção de áudio em MS
+function nextSection(currentPosition, sectionStartTimes) {
+    if (!currentPosition || !Array.isArray(sectionStartTimes)) {
+        console.error('Invalid position or audio analysis data');
+        return null;
     }
 
-    // Encontrar a seção atual
-    let currentSectionIndex = 0;
-    for (let i = 0; i < analysis.length; i++) {
-        if (analysis[i].start <= currentPosition) {
-            currentSectionIndex = i;
-        } else {
+    const nextSection = sectionStartTimes.find(section => section > currentPosition);
+    
+    if (nextSection !== undefined) {
+        return nextSection * 1000;
+    } else {
+        return null;
+    }
+}
+
+// Função para obter a posição da última seção de áudio em MS
+function repeatSection(currentPosition, sectionStartTimes) {
+    if (!currentPosition || !Array.isArray(sectionStartTimes)) {
+        console.error('Invalid position or audio analysis data');
+        return null;
+    }
+
+    const reversedSectionStartTimes = sectionStartTimes.slice().reverse(); // Inverte o array
+    const lastSection = reversedSectionStartTimes.find(section => section < currentPosition);
+
+    if (lastSection !== undefined) {
+        return lastSection * 1000;
+    } else {
+        return null;
+    }
+}
+
+// Função para obter a posição da seção antes da última de áudio em MS
+function beforeLastSection(currentPosition, sectionStartTimes) {
+    if (!currentPosition || !Array.isArray(sectionStartTimes) || sectionStartTimes.length < 2) {
+        console.error('Invalid position or audio analysis data');
+        return null;
+    }
+
+    let beforeLastSectionTime = null;
+
+    for (let i = sectionStartTimes.length - 1; i >= 0; i--) {
+        if (sectionStartTimes[i] < currentPosition) {
+            if (i > 0) {
+                beforeLastSectionTime = sectionStartTimes[i - 1];
+            }
             break;
         }
     }
 
-    // Mover para a seção anterior, se possível
-    if (currentSectionIndex > 0) {
-        const newPosition = analysis[currentSectionIndex - 1].start;
-        player.seek(newPosition).then(() => {
-            positions[currentTrackId] = newPosition;
-        });
+    if (beforeLastSectionTime !== null) {
+        return beforeLastSectionTime * 1000;
     } else {
-        console.warn('No previous section available.');
+        return null;
     }
 }
-
-// Função para mover para a próxima seção
-function moveToNextSection() {
-    const player = getPlayer();
-    const currentTrackId = state.track.id;
-    const currentPosition = positions[currentTrackId];
-    const analysis = audioAnalysisData[currentTrackId]?.sections;
-    
-    if (!analysis || analysis.length === 0) {
-        console.warn('No audio analysis available for the current track.');
-        return;
-    }
-
-    // Encontrar a seção atual
-    let currentSectionIndex = 0;
-    for (let i = 0; i < analysis.length; i++) {
-        if (analysis[i].start <= currentPosition) {
-            currentSectionIndex = i;
-        } else {
-            break;
-        }
-    }
-
-    // Mover para a próxima seção, se possível
-    if (currentSectionIndex < analysis.length - 1) {
-        const newPosition = analysis[currentSectionIndex + 1].start;
-        player.seek(newPosition).then(() => {
-            positions[currentTrackId] = newPosition;
-        });
-    } else {
-        console.warn('No next section available.');
-    }
-}
-
-
 
 
 
