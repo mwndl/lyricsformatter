@@ -19,6 +19,42 @@ document.addEventListener('visibilitychange', function() {
     }
 });
 
+// Função para abrir a autorização do Spotify na mesma aba
+function openSpotifyAuthorization() {
+    // Obter o valor de localHostToggle do localStorage
+    const localHostToggle = localStorage.getItem('localHostToggle');
+
+    // Verificar o valor de localHostToggle e definir window.serverPath
+    if (localHostToggle === 'true') {
+        window.serverPath = 'http://localhost:3000'; 
+    } else {
+        window.serverPath = 'https://datamatch-backend.onrender.com';
+    }
+
+    var currentDomain = window.location.hostname;
+
+    // Extrai o prefixo após 'lyricsformatter' usando uma expressão regular
+    var match = currentDomain.match(/lyricsformatter-(\w+)\.onrender\.com/);
+    
+    if (match && match[1]) {
+        if (localHostToggle === 'true') {
+            callbackPath = 'sp_callback_local_' + match[1];
+        } else {
+            callbackPath = 'sp_callback_' + match[1];
+        }
+    } else {
+        // padrão
+        callbackPath = 'sp_callback_production';
+    }
+    
+    console.log('Callback Path:', callbackPath);
+
+    var spotifyAuthorizationUrl = `https://accounts.spotify.com/pt-BR/authorize?client_id=51a45f01c96645e386611edf4a345b50&redirect_uri=${window.serverPath}/formatter/${callbackPath}&response_type=code&scope=user-read-playback-state%20user-modify-playback-state%20user-read-currently-playing%20user-read-email%20user-read-playback-state%20streaming%20app-remote-control%20user-follow-modify%20user-follow-read%20user-read-playback-position%20user-top-read%20user-read-recently-played%20user-library-read%20user-library-modify%20user-read-private&show_dialog=true&current_domain=${currentDomain}`;
+
+    // Redirecionar para a URL de autorização do Spotify na mesma aba
+    window.location.href = spotifyAuthorizationUrl;
+}
+
 function processSpotifyTokensFromURL() {
     // Verificar se há tokens do Spotify na URL
     const urlParams = new URLSearchParams(window.location.search);
@@ -70,6 +106,19 @@ function disconnectSpotify() {
 
 async function fetchUserData() {
     try {
+        // Verificar se é necessário renovar o token
+        const tokenRenewalTime = localStorage.getItem('tokenRenewal');
+        if (tokenRenewalTime) {
+            const currentTime = new Date();
+            const lastRenewalTime = new Date(tokenRenewalTime);
+            const timeDifferenceMinutes = (currentTime - lastRenewalTime) / (1000 * 60);
+
+            // Se o tempo desde a última renovação for maior que 55 minutos, renovar o token
+            if (timeDifferenceMinutes > 55) {
+                await spotifyRenewAuth();
+            }
+        }
+
         // Recuperar os tokens do armazenamento local do navegador
         const accessToken = localStorage.getItem('accessToken');
         const refreshToken = localStorage.getItem('refreshToken');
@@ -99,9 +148,6 @@ async function fetchUserData() {
 
         // Extrair os dados do usuário da resposta
         const userData = await response.json();
-
-        // Exibir os dados do usuário no console (você pode fazer outra coisa com eles)
-        console.log('User data from Spotify: ', userData);
 
         // Exibir a foto de perfil do usuário e ocultar o botão de login
         const spotifyLoginButton = document.getElementById('spotify_login_button');
@@ -161,8 +207,12 @@ async function spotifyRenewAuth() {
         // Atualizar o accessToken no armazenamento local do navegador
         localStorage.setItem('accessToken', accessToken);
 
+        // Definir o item 'tokenRenewal' com a data e hora atual
+        const tokenRenewalTime = new Date().toISOString();
+        localStorage.setItem('tokenRenewal', tokenRenewalTime);
+
         console.log('Spotify authorization renewed successfully!');
-        fetchCurrentlyPlayingData()
+        fetchCurrentlyPlayingData();
     } catch (error) {
         notification('Spotify authentication failed, please refresh the page');
         console.error('Error renewing Spotify authorization.', error.message);
@@ -173,6 +223,19 @@ let currentSongId = '';
 
 async function fetchCurrentlyPlayingData() {
     try {
+        // Verificar se é necessário renovar o token
+        const tokenRenewalTime = localStorage.getItem('tokenRenewal');
+        if (tokenRenewalTime) {
+            const currentTime = new Date();
+            const lastRenewalTime = new Date(tokenRenewalTime);
+            const timeDifferenceMinutes = (currentTime - lastRenewalTime) / (1000 * 60);
+
+            // Se o tempo desde a última renovação for maior que 55 minutos, renovar o token
+            if (timeDifferenceMinutes > 55) {
+                await spotifyRenewAuth();
+            }
+        }
+
         // Obter o token de acesso do armazenamento local do navegador
         const accessToken = localStorage.getItem('accessToken');
 
@@ -545,31 +608,6 @@ function togglePlayPause() {
         svg2.style.display = 'none';
     }
 }
-
-
-
-document.addEventListener('DOMContentLoaded', function () {
-    
-    // Obter o estado atual do player
-    player.getCurrentState().then(state => {
-        if (!state) {
-            console.error('O usuário não está reproduzindo música através do Web Playback SDK');
-            return;
-        }
-
-        const current_track = state.track_window.current_track;
-        const next_track = state.track_window.next_tracks[0];
-
-        console.log('Atualmente tocando:', current_track);
-        console.log('Próxima música:', next_track);
-
-    }).catch(error => {
-        console.error('Erro ao obter estado atual do player:', error);
-    });
-
-    setInterval(checkPlayerState, 2000);
-
-});
 
 
 

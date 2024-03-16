@@ -13,7 +13,7 @@
     <script src="langtool_integration.js"></script>
     <link rel="icon" href="/images/favicon.ico" type="image/x-icon">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
-        integrity="sha384-e3b0a8b1e4095176f4a6f42c37b4efb51337fba6c937e281a5f3800f76475893" crossorigin="anonymous">
+    integrity="sha384-e3b0a8b1e4095176f4a6f42c37b4efb51337fba6c937e281a5f3800f76475893" crossorigin="anonymous">
     <title>LyricsFormatter</title>
 </head>
 
@@ -331,85 +331,86 @@
             <h2 onclick="handleSettingsClick()">Settings</h2>
         </div>
         <div class="popup_content">
-            <div class="popup_option">
-                <div class="popup_title">
-                    <p class="popup_option_title">Spotify account</p>
-                    <p class="popup_option_description">Connect your Spotify account to LyricsFormatter</p>
-                </div>
-                <div class="spotify_login" id="spotify_login_button" style="display:block">
-                    <button class="spotify_button" id="spotify_button">
-                        <img src="images/spotify_logo.webp" alt="Spotify Logo" class="spotify_logo">
-                        Login with Spotify
-                    </button>
-                </div>
-                <div class="user-profile" id="user_profile" style="display:none">
-                    <img class="user-photo" id="sp_user_pic" src="#" alt="User Photo" title="User Photo"
-                        draggable="false">
-                    <div id="user_menu" class="user-menu">
-                        <ul>
-                            <li id="disconnect_option" style="border-radius: 10px;">
-                                <p>Disconnect account</p>
-                            </li>
-                        </ul>
+            <div class="settings_hided_div" id="sp_hided_div" style="display:none">
+                <div class="popup_option">
+                    <div class="popup_title">
+                        <p class="popup_option_title">Spotify account</p>
+                        <p class="popup_option_description">Connect your Spotify account to LyricsFormatter</p>
+                    </div>
+                    <div class="spotify_login" id="spotify_login_button" style="display:block">
+                        <button class="spotify_button" id="spotify_button">
+                            <img src="images/spotify_logo.webp" alt="Spotify Logo" class="spotify_logo">
+                            Login with Spotify
+                        </button>
+                    </div>
+                    <div class="user-profile" id="user_profile" style="display:none">
+                        <img class="user-photo" id="sp_user_pic" src="#" alt="User Photo" title="User Photo"
+                            draggable="false">
+                        <div id="user_menu" class="user-menu">
+                            <ul>
+                                <li id="disconnect_option" style="border-radius: 10px;">
+                                    <p>Disconnect account</p>
+                                </li>
+                            </ul>
+                        </div>
                     </div>
                 </div>
+                <div class="popup_option" style="display:none">
+                    <div class="popup_title">
+                        <p class="popup_option_title">Autoplay</p>
+                        <p class="popup_option_description">Automatically transfer the playback to LyricsFormatter upon
+                            opening the website.</p>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="spAutoPlay" onclick="checkContent()">
+                        <span class="slider round"></span>
+                    </label>
+                </div>
+                <div class="popup_option" style="display:none">
+                    <div class="popup_title">
+                        <p class="popup_option_title">Transfer playback to Studio</p>
+                        <p class="popup_option_description">Transfer the playback to Studio, if available, by tapping the
+                            copy button.</p>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="spAutoPlay" onclick="checkContent()">
+                        <span class="slider round"></span>
+                    </label>
+                </div>
+                <div class="popup_option">
+                    <div class="popup_title">
+                        <p class="popup_option_title">Backwards value</p>
+                        <p class="popup_option_description">Specify the duration in seconds to rewind during backward
+                            playback</p>
+                    </div>
+                    <div class="number_selector">
+                        <svg class="arrow left" viewBox="0 0 24 24" onclick="decreaseValue('selectedValue1')">
+                            <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"></path>
+                        </svg>
+                        <span id="selectedValue1" style="user-select: none;">3</span>
+                        <svg class="arrow right" viewBox="0 0 24 24" onclick="increaseValue('selectedValue1')">
+                            <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"></path>
+                        </svg>
+                    </div>
+                </div>
+                <div class="popup_option">
+                    <div class="popup_title">
+                        <p class="popup_option_title">Fast forward value</p>
+                        <p class="popup_option_description">Specify the duration in seconds to fast forward during playback
+                        </p>
+                    </div>
+                    <div class="number_selector">
+                        <svg class="arrow left" viewBox="0 0 24 24" onclick="decreaseValue('selectedValue2')">
+                            <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"></path>
+                        </svg>
+                        <span id="selectedValue2" style="user-select: none;">3</span>
+                        <svg class="arrow right" viewBox="0 0 24 24" onclick="increaseValue('selectedValue2')">
+                            <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"></path>
+                        </svg>
+                    </div>
+                </div>
+                <hr style="border-top: 1px solid rgb(100, 100, 100); border-right: none; border-bottom: none; border-left: none; border-image: initial;">
             </div>
-            <div class="popup_option" style="display:none">
-                <div class="popup_title">
-                    <p class="popup_option_title">Autoplay</p>
-                    <p class="popup_option_description">Automatically transfer the playback to LyricsFormatter upon
-                        opening the website.</p>
-                </div>
-                <label class="switch">
-                    <input type="checkbox" id="spAutoPlay" onclick="checkContent()">
-                    <span class="slider round"></span>
-                </label>
-            </div>
-            <div class="popup_option" style="display:none">
-                <div class="popup_title">
-                    <p class="popup_option_title">Transfer playback to Studio</p>
-                    <p class="popup_option_description">Transfer the playback to Studio, if available, by tapping the
-                        copy button.</p>
-                </div>
-                <label class="switch">
-                    <input type="checkbox" id="spAutoPlay" onclick="checkContent()">
-                    <span class="slider round"></span>
-                </label>
-            </div>
-            <div class="popup_option">
-                <div class="popup_title">
-                    <p class="popup_option_title">Backwards value</p>
-                    <p class="popup_option_description">Specify the duration in seconds to rewind during backward
-                        playback</p>
-                </div>
-                <div class="number_selector">
-                    <svg class="arrow left" viewBox="0 0 24 24" onclick="decreaseValue('selectedValue1')">
-                        <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"></path>
-                    </svg>
-                    <span id="selectedValue1" style="user-select: none;">3</span>
-                    <svg class="arrow right" viewBox="0 0 24 24" onclick="increaseValue('selectedValue1')">
-                        <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"></path>
-                    </svg>
-                </div>
-            </div>
-            <div class="popup_option">
-                <div class="popup_title">
-                    <p class="popup_option_title">Fast forward value</p>
-                    <p class="popup_option_description">Specify the duration in seconds to fast forward during playback
-                    </p>
-                </div>
-                <div class="number_selector">
-                    <svg class="arrow left" viewBox="0 0 24 24" onclick="decreaseValue('selectedValue2')">
-                        <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"></path>
-                    </svg>
-                    <span id="selectedValue2" style="user-select: none;">3</span>
-                    <svg class="arrow right" viewBox="0 0 24 24" onclick="increaseValue('selectedValue2')">
-                        <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"></path>
-                    </svg>
-                </div>
-            </div>
-            <hr
-                style="border-top: 1px solid rgb(100, 100, 100); border-right: none; border-bottom: none; border-left: none; border-image: initial;">
             <div class="popup_option" style="display:none">
                 <div class="popup_title">
                     <p class="popup_option_title">Character counter</p>
@@ -453,9 +454,8 @@
                     <span class="slider round"></span>
                 </label>
             </div>
-            <div class="dev_hided_div" id="dev_hided_div" style="display:none">
-                <hr
-                    style="border-top: 1px solid rgb(100, 100, 100); border-right: none; border-bottom: none; border-left: none; border-image: initial;">
+            <div class="settings_hided_div" id="dev_hided_div" style="display:none">
+                <hr style="border-top: 1px solid rgb(100, 100, 100); border-right: none; border-bottom: none; border-left: none; border-image: initial;">
                 <div class="popup_option">
                     <div class="popup_title">
                         <p class="popup_option_title">Development mode</p>
@@ -598,7 +598,6 @@
 
                 // Ready
                 player.addListener('ready', ({ device_id }) => {
-                    console.log('Ready with Device ID', device_id);
                     deviceId = device_id;
                     fetchAvailableDevices()
 
@@ -1097,6 +1096,7 @@
         }
         loadDevMode();
 
+        /*
 
         document.addEventListener('DOMContentLoaded', function () {
             var expandArrow = document.getElementById('expand_arrow');
@@ -1104,24 +1104,27 @@
             var footerHidedContent = document.getElementById('footer_hided_content');
             var mobileFooterDiv = document.getElementById('mobile_footer_div');
 
-            expandArrow.addEventListener('click', function (event) {
-                event.stopPropagation(); // Impede que o clique seja propagado para o corpo/documento
-                footer.classList.toggle('expanded');
+            // Verificar se todos os elementos existem
+            if (expandArrow && footer && footerHidedContent && mobileFooterDiv) {
+                expandArrow.addEventListener('click', function (event) {
+                    event.stopPropagation(); // Impede que o clique seja propagado para o corpo/documento
+                    footer.classList.toggle('expanded');
 
-                if (footer.classList.contains('expanded')) {
-                    footerHidedContent.style.display = "block";
-                    mobileFooterDiv.style.height = "8%";
-                    expandArrow.style.transform = "rotate(180deg)";
-                } else {
-                    footerHidedContent.style.display = "none";
-                    mobileFooterDiv.style.height = "100%";
-                    expandArrow.style.transform = "rotate(0deg)";
-                }
-            });
+                    if (footer.classList.contains('expanded')) {
+                        footerHidedContent.style.display = "block";
+                        mobileFooterDiv.style.height = "8%";
+                        expandArrow.style.transform = "rotate(180deg)";
+                    } else {
+                        footerHidedContent.style.display = "none";
+                        mobileFooterDiv.style.height = "100%";
+                        expandArrow.style.transform = "rotate(0deg)";
+                    }
+                });
+            }
 
             // Adiciona um ouvinte de eventos ao corpo/documento para fechar o footer quando clicar fora dele
             document.body.addEventListener('click', function (event) {
-                if (!footer.contains(event.target)) {
+                if (footer && !footer.contains(event.target)) {
                     // Se o clique ocorreu fora do footer, oculta o conteúdo e recolhe o footer
                     footerHidedContent.style.display = "none";
                     mobileFooterDiv.style.height = "100%";
@@ -1130,6 +1133,9 @@
                 }
             });
         });
+
+        */
+        
         function closeSettings() {
             var settingsPopup = document.getElementById("settings_popup");
             var overlay = document.getElementById("overlay");
