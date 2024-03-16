@@ -103,6 +103,13 @@ function disconnectSpotify() {
     // Exibir o botão de login e ocultar a foto do perfil
     document.getElementById('spotify_login_button').style.display = 'block';
     document.getElementById('user_profile').style.display = 'none';
+
+    // Remover o listener 'ready' do player atual, se houver
+    if (player) {
+        player.removeListener('ready');
+        player.disconnect();
+    }
+
 }
 
 
