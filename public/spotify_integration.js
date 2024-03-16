@@ -64,7 +64,8 @@ function processSpotifyTokensFromURL() {
     // Se os tokens estiverem presentes, armazená-los em cache e fazer a solicitação para obter dados do usuário
     if (accessToken && refreshToken) {
         // Armazenar os tokens em cache
-        cacheSpotifyTokens(accessToken, refreshToken);
+        const tokenRenewal = new Date().toISOString();
+        cacheSpotifyTokens(accessToken, refreshToken, tokenRenewal);
 
         // Remover apenas os parâmetros 'access_token' e 'refresh_token' da URL
         urlParams.delete('access_token');
@@ -86,9 +87,10 @@ function processSpotifyTokensFromURL() {
 }
 
 // Função para armazenar os tokens do Spotify em cache
-function cacheSpotifyTokens(accessToken, refreshToken) {
+function cacheSpotifyTokens(accessToken, refreshToken, tokenRenewal) {
     localStorage.setItem('accessToken', accessToken);
     localStorage.setItem('refreshToken', refreshToken);
+    localStorage.setItem('tokenRenewal', tokenRenewal);
 }
 
 
@@ -106,6 +108,7 @@ function disconnectSpotify() {
 
 async function fetchUserData() {
     try {
+        showSpMenuDiv() // exibir o menu de configs do spotify
         // Verificar se é necessário renovar o token
         const tokenRenewalTime = localStorage.getItem('tokenRenewal');
         if (tokenRenewalTime) {
