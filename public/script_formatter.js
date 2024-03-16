@@ -1625,19 +1625,17 @@ function updateLineIssues(color, lines) {
         function hideSpMenuDiv() {
             const spHidedDiv = document.getElementById('sp_hided_div');
             spHidedDiv.style.display = 'none';
-            localStorage.removeItem('spMenu');
+            localStorage.setItem('spMenu', 'false');
         }
 
         // exibe / oculta o menu do spotify
         function loadSpMenu() {
-            const spMenu = localStorage.getItem('spMenu') === 'true';
-            const spHidedDiv = document.getElementById('sp_hided_div');
+            const spMenu = localStorage.getItem('spMenu');
 
-            if (spMenu) {
-                spHidedDiv.style.display = 'block';
-                showSpMenuDiv()
-            } else {
-                spHidedDiv.style.display = 'none';
+            if (spMenu === 'true') {
+                showSpMenuDiv();
+            } else if (spMenu === 'false') {
+                hideSpMenuDiv();
             }
         }
 

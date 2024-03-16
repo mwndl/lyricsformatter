@@ -115,7 +115,6 @@ function disconnectSpotify() {
 
 async function fetchUserData() {
     try {
-        showSpMenuDiv() // exibir o menu de configs do spotify
         // Verificar se é necessário renovar o token
         const tokenRenewalTime = localStorage.getItem('tokenRenewal');
         if (tokenRenewalTime) {
@@ -137,6 +136,8 @@ async function fetchUserData() {
         if (!accessToken || !refreshToken) {
             return; // sair da função porque não há tokens do Spotify
         }
+
+        showSpMenuDiv() // exibir o menu de configs do spotify
 
         // Fazer uma solicitação fetch para a rota /user no servidor do Spotify
         const response = await fetch('https://api.spotify.com/v1/me', {
