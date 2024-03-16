@@ -106,53 +106,6 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    // Função para verificar e definir o idioma padrão ao carregar a página
-    function setDefaultLanguage() {
-        const storedLanguage = localStorage.getItem('selectedLanguage');
-        const languageParam = getParameterByName('language');
-        let languageToDisplay = null;
-
-        if (languageParam) {
-            languageToDisplay = getLanguageFullName(languageParam);
-        } else if (storedLanguage) {
-            languageToDisplay = getLanguageFullName(storedLanguage);
-            addParamToURL('language', storedLanguage)
-        }
-
-        if (languageToDisplay) {
-            selectedLanguage.textContent = languageToDisplay;
-            localStorage.setItem('selectedLanguage', languageParam); // Corrigido: armazenar o idioma, não o elemento DOM
-        } else {
-            selectedLanguage.textContent = 'Select Language';
-            if (storedLanguage) {
-                localStorage.removeItem('selectedLanguage');
-            }
-        }
-    }
-
-    // Função para obter o nome completo do idioma com base no código
-    function getLanguageFullName(code) {
-        const languageMap = {
-            'en-AU': 'English (Australian)',
-            'en-CA': 'English (Canadian)',
-            'en-NZ': 'English (New Zealand)',
-            'en-GB': 'English (UK)',
-            'en-US': 'English (US)',
-            'nl': 'Dutch',
-            'fr': 'French',
-            'fr-CA': 'French (Canada)',
-            'de-AT': 'German (Austria)',
-            'de-DE': 'German (Germany)',
-            'de-CH': 'German (Swiss)',
-            'it': 'Italian',
-            'pt-BR': 'Portuguese (BR)',
-            'pt-PT': 'Portuguese (PT)',
-            'es': 'Spanish',
-        };
-
-        return languageMap[code];
-    }
-
 
         // config inicial
         updateSidebar()
@@ -222,6 +175,63 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 });
 
+function resetLocalStorage() {
+    for (var i = 0; i < localStorage.length; i++) {
+        var key = localStorage.key(i);
+        localStorage.removeItem(key);
+    }
+    console.log('LocalStorage limpo com sucesso!');
+}
+
+// Função para verificar e definir o idioma padrão ao carregar a página
+function setDefaultLanguage() {
+
+    const selectedLanguage = document.querySelector('.selected_language');
+    const storedLanguage = localStorage.getItem('selectedLanguage');
+    const languageParam = getParameterByName('language');
+    let languageToDisplay = null;
+
+    if (languageParam) {
+        languageToDisplay = getLanguageFullName(languageParam);
+    } else if (storedLanguage) {
+        languageToDisplay = getLanguageFullName(storedLanguage);
+        addParamToURL('language', storedLanguage)
+    }
+
+    if (languageToDisplay) {
+        selectedLanguage.textContent = languageToDisplay;
+        localStorage.setItem('selectedLanguage', languageParam); // Corrigido: armazenar o idioma, não o elemento DOM
+    } else {
+        selectedLanguage.textContent = 'Select Language';
+        if (storedLanguage) {
+            localStorage.removeItem('selectedLanguage');
+        }
+    }
+}
+
+// Função para obter o nome completo do idioma com base no código
+function getLanguageFullName(code) {
+    const languageMap = {
+        'en-AU': 'English (Australian)',
+        'en-CA': 'English (Canadian)',
+        'en-NZ': 'English (New Zealand)',
+        'en-GB': 'English (UK)',
+        'en-US': 'English (US)',
+        'nl': 'Dutch',
+        'fr': 'French',
+        'fr-CA': 'French (Canada)',
+        'de-AT': 'German (Austria)',
+        'de-DE': 'German (Germany)',
+        'de-CH': 'German (Swiss)',
+        'it': 'Italian',
+        'pt-BR': 'Portuguese (BR)',
+        'pt-PT': 'Portuguese (PT)',
+        'es': 'Spanish',
+    };
+
+    return languageMap[code];
+}
+
 
 /* após o timer de 3s, ele verifica se há mesmo conteúdo pra verificar
 (evita do usuário apagar a transcrição e ele verificar 3s depois) */
@@ -249,7 +259,7 @@ function handleRefreshButtonClick() {
         addSpaceAboveTags(); // add (caso não haja) espaços acima de todas as tags
         removeSpacesAroundInstrumental(); // espaços ao redor de tags instrumentais
         trimEditorContent(); // linhas antes ou depois da letra
-        autoTrim(); // espaços extras após o fim da linha
+        autoTrim(); // espaços extras no início ou fim
         removeDuplicateSpaces(); // espaços duplos entre palavras
         removeDuplicateEmptyLines(); // linhas vazias duplicadas entre estrofes
     }
@@ -455,9 +465,9 @@ function autoTrim() {
     // Split the content into lines
     var lines = content.split('\n');
 
-    // Trim extra spaces at the end of each line
+    // Trim extra spaces at the beginning and end of each line
     for (var i = 0; i < lines.length; i++) {
-        lines[i] = lines[i].trimRight();
+        lines[i] = lines[i].trim();
     }
 
     // Join the lines back together
@@ -466,6 +476,7 @@ function autoTrim() {
     // Update the editor's content
     editor.value = content;
 }
+
 
 function removeDuplicateSpaces() {
     var editor = document.getElementById('editor');

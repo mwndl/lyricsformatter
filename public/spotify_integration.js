@@ -31,7 +31,8 @@ function processSpotifyTokensFromURL() {
         cacheSpotifyTokens(accessToken, refreshToken);
 
         // Remover os parâmetros da URL
-        window.history.replaceState({}, document.title, window.location.pathname);
+        removeParameterFromURL('access_token');
+        removeParameterFromURL('refresh_token');
 
         // Fazer a solicitação para obter dados do usuário
         fetchUserData()
