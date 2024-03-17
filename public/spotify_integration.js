@@ -21,19 +21,6 @@ document.addEventListener('visibilitychange', function() {
 
 window.addEventListener('message', receiveMessage, false);
 
-function receiveMessage(event) {
-    // Verificar se os dados da mensagem estão presentes
-    if (event.data && event.data.accessToken && event.data.refreshToken) {
-        // Processar os tokens recebidos
-        var accessToken = event.data.accessToken;
-        var refreshToken = event.data.refreshToken;
-        console.log('Access Token recebido:', accessToken);
-        console.log('Refresh Token recebido:', refreshToken);
-        
-        // Faça o que for necessário com os tokens, como armazená-los ou utilizá-los para autenticação
-    }
-}
-
 function openSpotifyAuthorization() {
     // Obter o valor de localHostToggle do localStorage
     const localHostToggle = localStorage.getItem('localHostToggle');
@@ -93,35 +80,39 @@ function openSpotifyAuthorization() {
     }
 }
 
-function processSpotifyTokensFromURL() {
-    // Verificar se há tokens do Spotify na URL
-    const urlParams = new URLSearchParams(window.location.search);
-    const accessToken = urlParams.get('access_token');
-    const refreshToken = urlParams.get('refresh_token');
-
-    // Se os tokens estiverem presentes, armazená-los em cache e fazer a solicitação para obter dados do usuário
-    if (accessToken && refreshToken) {
-        // Armazenar os tokens em cache
-        const tokenRenewal = new Date().toISOString();
-        cacheSpotifyTokens(accessToken, refreshToken, tokenRenewal);
-
-        // Remover apenas os parâmetros 'access_token' e 'refresh_token' da URL
-        urlParams.delete('access_token');
-        urlParams.delete('refresh_token');
-
-        // Atualizar a URL sem os parâmetros
-        const newUrl = window.location.pathname + '?' + urlParams.toString();
-        window.history.replaceState({}, document.title, newUrl);
-
-        // Fazer a solicitação para obter dados do usuário
-        fetchUserData()
-            .then(() => {
-                player.connect();
-            })
-            .catch(error => {
-                console.error('Error processing Spotify tokens:', error);
-            });
+function receiveMessage(event) {
+    // Verificar a origem da mensagem
+    if (event.origin !== 'URL_DO_POPUP') {
+        return;
     }
+
+    // Verificar se os dados da mensagem estão presentes
+    if (event.data && event.data.accessToken && event.data.refreshToken) {
+        // Processar os tokens recebidos
+        var accessToken = event.data.accessToken;
+        var refreshToken = event.data.refreshToken;
+        console.log('Access Token recebido:', accessToken);
+        console.log('Refresh Token recebido:', refreshToken);
+
+        // Chamar a função para processar os tokens (adaptada para a janela principal)
+        processSpotifyTokens(accessToken, refreshToken);
+    }
+}
+
+// Função para processar os tokens do Spotify (adaptada para a janela principal)
+function processSpotifyTokens(accessToken, refreshToken) {
+    // Armazenar os tokens em cache
+    const tokenRenewal = new Date().toISOString();
+    cacheSpotifyTokens(accessToken, refreshToken, tokenRenewal);
+
+    // Fazer a solicitação para obter dados do usuário
+    fetchUserData()
+        .then(() => {
+            player.connect();
+        })
+        .catch(error => {
+            console.error('Error processing Spotify tokens:', error);
+        });
 }
 
 // Função para armazenar os tokens do Spotify em cache
