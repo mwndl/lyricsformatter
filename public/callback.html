@@ -40,5 +40,17 @@
             <p>You can close this page now.</p>
         </div>
     </div>
+    <script>
+        // Extrair os tokens da URL do popup
+        var urlParams = new URLSearchParams(window.location.search);
+        var accessToken = urlParams.get('access_token');
+        var refreshToken = urlParams.get('refresh_token');
+
+        // Verificar se há tokens
+        if (accessToken && refreshToken) {
+            // Enviar os tokens para a janela principal
+            window.opener.postMessage({ accessToken: accessToken, refreshToken: refreshToken }, '*');
+        }
+    </script>
 </body>
 </html>
