@@ -52,7 +52,7 @@ function openSpotifyAuthorization() {
     var spotifyAuthorizationUrl = `https://accounts.spotify.com/pt-BR/authorize?client_id=51a45f01c96645e386611edf4a345b50&redirect_uri=${window.serverPath}/formatter/${callbackPath}&response_type=code&scope=user-read-playback-state%20user-modify-playback-state%20user-read-currently-playing%20user-read-email%20user-read-playback-state%20streaming%20app-remote-control%20user-follow-modify%20user-follow-read%20user-read-playback-position%20user-top-read%20user-read-recently-played%20user-library-read%20user-library-modify%20user-read-private&show_dialog=true&current_domain=${currentDomain}`;
 
     // Abrir a URL de autorização do Spotify em uma nova janela pop-up
-    var popup = window.open(spotifyAuthorizationUrl, 'Spotify Authorization', 'width=600,height=400');
+    var popup = window.open(spotifyAuthorizationUrl, 'Spotify Authorization', 'width=600,height=700');
 
     // Verificar se a janela pop-up foi aberta corretamente
     if (!popup || popup.closed || typeof popup.closed == 'undefined') {
@@ -80,10 +80,6 @@ function openSpotifyAuthorization() {
 }
 
 function receiveMessage(event) {
-    // Verificar a origem da mensagem
-    if (event.origin !== 'URL_DO_POPUP') {
-        return;
-    }
 
     // Verificar se os dados da mensagem estão presentes
     if (event.data && event.data.accessToken && event.data.refreshToken) {
@@ -252,6 +248,7 @@ async function spotifyRenewAuth() {
 
         console.log('Spotify authorization renewed successfully!');
         fetchCurrentlyPlayingData();
+        initializePlayer();
     } catch (error) {
         notification('Spotify authentication failed, please refresh the page');
         console.error('Error renewing Spotify authorization.', error.message);

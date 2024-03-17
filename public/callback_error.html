@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spotify Authorization</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            padding: 0 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #000;
+            color: #fff;
+            font-family: Arial, sans-serif;
+            user-select: none;
+        }
+
+        .container {
+            text-align: center;
+            position: relative;
+        }
+
+        .success-message {
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+
+        .close-message {
+            font-size: 18px;
+        }
+
+        svg {
+            top: calc(50% - 60px); 
+            left: calc(50% - 10px);
+            width: 120px;
+            height: 120px; 
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <svg fill="#ff0000" viewBox="-3.5 0 19 19" xmlns="http://www.w3.org/2000/svg" class="cf-icon-svg" stroke="#ff0000"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"><path d="M11.383 13.644A1.03 1.03 0 0 1 9.928 15.1L6 11.172 2.072 15.1a1.03 1.03 0 1 1-1.455-1.456l3.928-3.928L.617 5.79a1.03 1.03 0 1 1 1.455-1.456L6 8.261l3.928-3.928a1.03 1.03 0 0 1 1.455 1.456L7.455 9.716z"></path></g></svg>
+        <div class="success-message">
+            <p>Something went wrong</p> 
+        </div>
+        <div class="close-message">
+            <p>We were unable to authenticate your account, please close this page and try again later.</p>
+        </div>
+    </div>
+
+    <script>
+        function closePopup() {
+            window.close(); // Fechar a janela
+        }
+    </script>
+</body>
+</html>

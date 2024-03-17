@@ -544,7 +544,7 @@
         let trackId = '';
         let clickCount = 0;
 
-        window.onSpotifyWebPlaybackSDKReady = () => {
+        function initializePlayer() {
 
             fetchUserData().then(() => {
 
@@ -614,7 +614,6 @@
                 player.addListener('authentication_error', ({ message }) => {
                     console.error(message);
                     fetchUserData()
-                    reconnectPlayer();
                 });
 
                 player.addListener('account_error', ({ message }) => {
@@ -692,64 +691,6 @@
                     }
 
                 });
-
-                // Função para reconectar o player em caso de erro de autenticação
-                function reconnectPlayer() {
-                    // Desconectar o player
-                    player.disconnect();
-
-                    // Recuperar os tokens do armazenamento local do navegador
-                    const accessToken = localStorage.getItem('accessToken');
-                    const refreshToken = localStorage.getItem('refreshToken');
-
-                    // Verificar se os tokens estão em cache
-                    if (!accessToken || !refreshToken) {
-                        return; // sair da função porque não há tokens do Spotify
-                    }
-                    
-                    // Criar uma nova instância do player
-                    const newPlayer = new Spotify.Player({
-                        name: playerName,
-                        getOAuthToken: cb => { cb(localStorage.getItem('accessToken')); },
-                        volume: 1.0
-                    });
-
-                    // Adicionar ouvintes ao novo player
-                    newPlayer.addListener('ready', ({ device_id }) => {
-                        console.log('Device ID: ', device_id);
-                        deviceId = device_id;
-                        fetchAvailableDevices();
-                        // Verificar se há parâmetro de autoplay
-                        const trackId = getParameterByName('track_id');
-                        if (trackId !== null) {
-                            playTrack(trackId, device_id);
-                        }
-                    });
-
-                    newPlayer.addListener('not_ready', ({ device_id }) => {
-                        console.log('Device ID has gone offline', device_id);
-                        notification('Player has gone offline, please refresh the page');
-                    });
-
-                    newPlayer.addListener('initialization_error', ({ message }) => {
-                        console.error(message);
-                        notification('Error initializing the player, please refresh the page');
-                    });
-
-                    newPlayer.addListener('authentication_error', ({ message }) => {
-                        console.error(message);
-                        fetchUserData();
-                        hideTracker();
-                    });
-
-                    newPlayer.addListener('account_error', ({ message }) => {
-                        console.error(message);
-                        notification('An unexpected error occurred, please refresh the page');
-                    });
-
-                    // Conectar o novo player
-                    newPlayer.connect();
-                }
 
                 // Função para atualizar a barra de progresso com base na posição atual da música
                 function updateProgressBar(position, duration) {
