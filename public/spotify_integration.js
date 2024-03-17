@@ -19,7 +19,6 @@ document.addEventListener('visibilitychange', function() {
     }
 });
 
-// Função para abrir a autorização do Spotify na mesma aba
 function openSpotifyAuthorization() {
     // Obter o valor de localHostToggle do localStorage
     const localHostToggle = localStorage.getItem('localHostToggle');
@@ -51,38 +50,59 @@ function openSpotifyAuthorization() {
 
     var spotifyAuthorizationUrl = `https://accounts.spotify.com/pt-BR/authorize?client_id=51a45f01c96645e386611edf4a345b50&redirect_uri=${window.serverPath}/formatter/${callbackPath}&response_type=code&scope=user-read-playback-state%20user-modify-playback-state%20user-read-currently-playing%20user-read-email%20user-read-playback-state%20streaming%20app-remote-control%20user-follow-modify%20user-follow-read%20user-read-playback-position%20user-top-read%20user-read-recently-played%20user-library-read%20user-library-modify%20user-read-private&show_dialog=true&current_domain=${currentDomain}`;
 
-    // Redirecionar para a URL de autorização do Spotify na mesma aba
-    window.location.href = spotifyAuthorizationUrl;
+    // Abrir a URL de autorização do Spotify em uma nova janela pop-up
+    var popup = window.open(spotifyAuthorizationUrl, 'Spotify Authorization', 'width=600,height=400');
+
+    // Verificar se a janela pop-up foi aberta corretamente
+    if (!popup || popup.closed || typeof popup.closed == 'undefined') {
+        alert('Por favor, permita janelas pop-up para continuar.');
+    } else {
+        // Adicionar um intervalo para verificar a URL do popup
+        var interval = setInterval(function() {
+            try {
+                if (popup.location.href.includes('access_token') && popup.location.href.includes('refresh_token')) {
+                    clearInterval(interval);
+                    // Extrair os tokens da URL do popup
+                    var urlParams = new URLSearchParams(popup.location.search);
+                    var accessToken = urlParams.get('access_token');
+                    var refreshToken = urlParams.get('refresh_token');
+                    // Enviar os tokens para a função que os processará
+                    processSpotifyTokens(accessToken, refreshToken);
+                    // Fechar a janela pop-up
+                    popup.close();
+                }
+            } catch (error) {
+                // Ignorar erros de segurança devido à política de mesma origem
+            }
+        }, 1000);
+    }
 }
 
-function processSpotifyTokensFromURL() {
-    // Verificar se há tokens do Spotify na URL
+// Função para enviar os tokens para a janela principal
+function sendSpotifyTokensToParent() {
+    // Verificar se há tokens do Spotify na URL do popup
     const urlParams = new URLSearchParams(window.location.search);
     const accessToken = urlParams.get('access_token');
     const refreshToken = urlParams.get('refresh_token');
 
-    // Se os tokens estiverem presentes, armazená-los em cache e fazer a solicitação para obter dados do usuário
+    // Se os tokens estiverem presentes e a janela pai estiver acessível
+    if (accessToken && refreshToken && window.opener) {
+        // Enviar os tokens para a janela principal
+        window.opener.receiveSpotifyTokens({ accessToken, refreshToken });
+    }
+}
+
+// Função para processar tokens do Spotify da URL do popup e enviá-los para a janela principal
+function processSpotifyTokensFromURL() {
+    // Verificar se há tokens do Spotify na URL do popup
+    const urlParams = new URLSearchParams(window.location.search);
+    const accessToken = urlParams.get('access_token');
+    const refreshToken = urlParams.get('refresh_token');
+
+    // Se os tokens estiverem presentes, enviar os tokens para a janela principal
     if (accessToken && refreshToken) {
-        // Armazenar os tokens em cache
-        const tokenRenewal = new Date().toISOString();
-        cacheSpotifyTokens(accessToken, refreshToken, tokenRenewal);
-
-        // Remover apenas os parâmetros 'access_token' e 'refresh_token' da URL
-        urlParams.delete('access_token');
-        urlParams.delete('refresh_token');
-
-        // Atualizar a URL sem os parâmetros
-        const newUrl = window.location.pathname + '?' + urlParams.toString();
-        window.history.replaceState({}, document.title, newUrl);
-
-        // Fazer a solicitação para obter dados do usuário
-        fetchUserData()
-            .then(() => {
-                player.connect();
-            })
-            .catch(error => {
-                console.error('Error processing Spotify tokens:', error);
-            });
+        // Enviar os tokens para a janela principal
+        window.opener.postMessage({ accessToken, refreshToken }, window.origin);
     }
 }
 
@@ -99,6 +119,7 @@ function disconnectSpotify() {
     // Remover os tokens do armazenamento local do navegador
     localStorage.removeItem('accessToken');
     localStorage.removeItem('refreshToken');
+    localStorage.removeItem('tokenRenewal');
 
     // Exibir o botão de login e ocultar a foto do perfil
     document.getElementById('spotify_login_button').style.display = 'block';

@@ -113,6 +113,7 @@ document.addEventListener('DOMContentLoaded', function () {
     setCheckboxStates();
     loadDevMode();
     loadSpMenu();
+    checkTrackIdParams()
     checkSpotifyParams();
     fetchCreditsData();
     fetchServerInfo();
@@ -1599,6 +1600,22 @@ function updateLineIssues(color, lines) {
 
 /* ****************************************** */
 
+/* REDIRECTIONAR O USUÁRIO AUTOMATICAMENTE PARA A ATENTICAÇÃO NO CASO DE PARAMETROS TRACK ID NA URL */
+
+        // Função para redirecionar o usuário para a página de autorização caso haja um track id sem autenticação
+        function checkTrackIdParams() {
+            const trackIdParam = getParameterByName('track_id');
+            const accessToken = localStorage.getItem('accessToken');
+
+            if (trackIdParam !== null) {
+                if (!accessToken) {
+                    openSpotifyAuthorization()
+                }
+            }
+        }
+
+/* ****************************************** */
+
 /* EXIBIR OU OCULTAR CONFIGURAÇÕES DO SPOTIFY */
 
         // Função para verificar os parâmetros da URL e acionar a função correspondente
@@ -1608,8 +1625,10 @@ function updateLineIssues(color, lines) {
             if (spMenuParam !== null) {
                 if (spMenuParam === '1') {
                     showSpMenuDiv();
+                    removeParameterFromURL('sp_menu')
                 } else if (spMenuParam === '0') {
                     hideSpMenuDiv();
+                    removeParameterFromURL('sp_menu')
                 }
             }
         }
