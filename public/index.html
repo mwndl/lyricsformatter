@@ -561,6 +561,17 @@
                     return; // sair da função porque não há tokens do Spotify
                 }
 
+                // Verifica se existe um player já conectado
+                if (player) {
+                    player.disconnect().then(() => {
+                        // Inicializa o novo player
+                        // Aqui você pode criar um novo player ou realizar outras ações necessárias
+                    }).catch(error => {
+                        console.error('Erro ao desconectar o player:', error);
+                        // Aqui você pode lidar com o erro, se necessário
+                    });
+                }
+
                 // botões playpause 
                 const controlContainer = document.getElementById('play_pause');
                 const svg1 = controlContainer.querySelector('svg:nth-child(1)');
