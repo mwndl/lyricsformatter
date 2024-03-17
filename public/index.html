@@ -544,6 +544,10 @@
         let trackId = '';
         let clickCount = 0;
 
+        window.onSpotifyWebPlaybackSDKReady = () => {
+            initializePlayer()
+        }
+
         function initializePlayer() {
 
             fetchUserData().then(() => {
