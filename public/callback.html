@@ -50,6 +50,9 @@
         if (accessToken && refreshToken) {
             // Enviar os tokens para a janela principal
             window.opener.postMessage({ accessToken: accessToken, refreshToken: refreshToken }, '*');
+               // Imprimir os tokens no console
+            console.log('Access Token:', accessToken);
+            console.log('Refresh Token:', refreshToken);
         }
     </script>
 </body>
