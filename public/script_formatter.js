@@ -113,7 +113,7 @@ document.addEventListener('DOMContentLoaded', function () {
     setCheckboxStates();
     loadDevMode();
     loadSpMenu();
-    checkTrackIdParams()
+    checkTrackIdParams();
     checkSpotifyParams();
     initializePlayer();
     fetchCreditsData();
