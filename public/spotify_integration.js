@@ -101,15 +101,9 @@ function processSpotifyTokens(accessToken, refreshToken) {
     cacheSpotifyTokens(accessToken, refreshToken, tokenRenewal);
 
     // Fazer a solicitação para obter dados do usuário
-    fetchUserData()
-        .then(() => {
-            player.connect();
-            checkTrackIdParams();
-        })
-        .catch(error => {
-            console.error('Error processing Spotify tokens:', error);
-        });
-
+    fetchUserData();
+    initializePlayer();
+    checkTrackIdParams();
 }
 
 // Função para armazenar os tokens do Spotify em cache
