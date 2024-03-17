@@ -1,7 +1,6 @@
 document.addEventListener('DOMContentLoaded', function () {
     // Adicionar evento de clique à div com id 'disconnect_option'
     document.getElementById('disconnect_option').addEventListener('click', disconnectSpotify);
-    processSpotifyTokensFromURL();
 
     // Selecionar o botão pelo ID
     var spotifyButton = document.getElementById('spotify_button');
