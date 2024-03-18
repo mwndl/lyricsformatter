@@ -139,6 +139,15 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
+    // Evento de clique em qualquer lugar no documento para ocultar a lista de idiomas
+    document.addEventListener('click', function (event) {
+        if (!selector.contains(event.target)) {
+            languageList.style.display = 'none';
+            languageArrow.style.transform = "rotate(180deg)";
+            langButtonContent.title = "Tap to edit the language";
+        }
+    });
+
         // config inicial
         updateSidebar();
         setDefaultLanguage();
@@ -151,14 +160,6 @@ document.addEventListener('DOMContentLoaded', function () {
         fetchCreditsData();
         fetchServerInfo();
 
-    // Evento de clique em qualquer lugar no documento para ocultar a lista de idiomas
-    document.addEventListener('click', function (event) {
-        if (!selector.contains(event.target)) {
-            languageList.style.display = 'none';
-            languageArrow.style.transform = "rotate(180deg)";
-            langButtonContent.title = "Tap to edit the language";
-        }
-    });
     
     // Adicione um evento de clique ao botão de cópia
     var copyButton = document.querySelector('.content_copy_btn');
