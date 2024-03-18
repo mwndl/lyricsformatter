@@ -625,24 +625,6 @@ async function playTrack(trackId, deviceId) {
 }
 
 
-function togglePlayPause() {
-    const svg1 = document.getElementById('svg1'); // Botão de play
-    const svg2 = document.getElementById('svg2'); // Botão de pause
-
-    // Verifica se o svg1 está visível, o que indica que a música está pausada
-    if (window.getComputedStyle(svg1).display === 'block') {
-        // Se o svg1 está visível, esconde ele e mostra o svg2
-        svg1.style.display = 'none';
-        svg2.style.display = 'block';
-    } else {
-        // Se o svg1 não está visível, mostra ele e esconde o svg2
-        svg1.style.display = 'block';
-        svg2.style.display = 'none';
-    }
-}
-
-
-
 async function pausePlayback() {
     try {
         // Recuperar o token de acesso do armazenamento local do navegador
