@@ -2315,8 +2315,9 @@
     /* FOOTER - END */
 
 
-      .popup {
+    .popup {
         width: 90%;
+        max-width: 500px;
         border-radius: 20px;
         display: none;
         position: fixed;
