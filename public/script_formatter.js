@@ -156,7 +156,6 @@ document.addEventListener('DOMContentLoaded', function () {
         loadSpMenu();
         checkTrackIdParams();
         checkSpotifyParams();
-        initializePlayer();
         fetchCreditsData();
         fetchServerInfo();
 
