@@ -107,33 +107,6 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
 
-    // config inicial
-    updateSidebar();
-    setDefaultLanguage();
-    setCheckboxStates();
-    loadDevMode();
-    loadSpMenu();
-    checkTrackIdParams();
-    checkSpotifyParams();
-    initializePlayer();
-    fetchCreditsData();
-    fetchServerInfo();
-
-    // Adicione um evento de clique ao seletor de idioma
-    languageList.addEventListener('click', function (e) {
-        if (e.target.tagName === 'LI') {
-            const selected = e.target.dataset.lang;
-            selectedLanguage.textContent = getLanguageFullName(selected);
-            languageList.style.display = 'none';
-
-            // Armazene o idioma selecionado em cache
-            localStorage.setItem('selectedLanguage', selected);
-            addParamToURL('language', selected)
-            updateSidebar() // resetar sugestões e caracteres
-            ignoredContainers = []; // limpa a memória de alertas ignorados
-        }
-    });
-
     // Evento de clique no seletor de idiomas
     selector.addEventListener('click', function (event) {
         event.stopPropagation();
@@ -150,6 +123,33 @@ document.addEventListener('DOMContentLoaded', function () {
             
         }
     });
+
+    // Adicione um evento de clique ao seletor de idioma
+    languageList.addEventListener('click', function (e) {
+        if (e.target.tagName === 'LI') {
+            const selected = e.target.dataset.lang;
+            selectedLanguage.textContent = getLanguageFullName(selected);
+            languageList.style.display = 'none';
+
+            // Armazene o idioma selecionado em cache
+            localStorage.setItem('selectedLanguage', selected);
+            addParamToURL('language', selected)
+            updateSidebar() // resetar sugestões e caracteres
+            ignoredContainers = []; // limpa a memória de alertas ignorados
+        }
+    });
+
+        // config inicial
+        updateSidebar();
+        setDefaultLanguage();
+        setCheckboxStates();
+        loadDevMode();
+        loadSpMenu();
+        checkTrackIdParams();
+        checkSpotifyParams();
+        initializePlayer();
+        fetchCreditsData();
+        fetchServerInfo();
 
     // Evento de clique em qualquer lugar no documento para ocultar a lista de idiomas
     document.addEventListener('click', function (event) {
