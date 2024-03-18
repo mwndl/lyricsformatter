@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spotify Authorization</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            padding: 0 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #000;
+            color: #fff;
+            font-family: Arial, sans-serif;
+            user-select: none;
+        }
+
+        .container {
+            text-align: center;
+            position: relative;
+        }
+
+        .success-message {
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+
+        .close-message {
+            font-size: 18px;
+        }
+
+        svg {
+            top: calc(50% - 60px); 
+            left: calc(50% - 10px);
+            width: 120px;
+            height: 120px; 
+            fill: #1ed760;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <svg viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#000000" stroke-width="0.0002">
+            <path fill="#1ed760" fill-rule="evenodd" d="M3 10a7 7 0 019.307-6.611 1 1 0 00.658-1.889 9 9 0 105.98 7.501 1 1 0 00-1.988.22A7 7 0 113 10zm14.75-5.338a1 1 0 00-1.5-1.324l-6.435 7.28-3.183-2.593a1 1 0 00-1.264 1.55l3.929 3.2a1 1 0 001.38-.113l7.072-8z"></path>
+        </svg>
+        <div class="success-message">
+            <p>Authorization successful!</p> 
+        </div>
+        <div class="close-message">
+            <p>You can close this page now.</p>
+        </div>
+    </div>
+    <script>
+        // Extrair os tokens da URL do popup
+        var urlParams = new URLSearchParams(window.location.search);
+        var accessToken = urlParams.get('access_token');
+        var refreshToken = urlParams.get('refresh_token');
+
+        // Verificar se há tokens
+        if (accessToken && refreshToken) {
+            // Enviar os tokens para a janela principal
+            window.opener.postMessage({ accessToken: accessToken, refreshToken: refreshToken }, '*');
+            // Imprimir os tokens no console
+            console.log('Access Token:', accessToken);
+            console.log('Refresh Token:', refreshToken);
+            // Fechar o popup
+            window.close();
+        }
+    </script>
+</body>
+</html>
