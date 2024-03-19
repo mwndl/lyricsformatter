@@ -286,7 +286,6 @@ async function fetchCurrentlyPlayingData() {
         if (response.status === 204) {
             document.getElementById('sp_player_div').style.display = ''; // Exibir elemento
             document.getElementById('sp_connect').style.display = 'none'; // Ocultar elemento
-            document.getElementById('sp_connect_icon_green').style.display = 'none'
             document.getElementById('sp_fast_transfer').style.display = 'none'
             document.getElementById('playback_info').style.display = 'none'; // Ocultar elemento
             document.getElementById('no_playback').style.display = 'block'; // Ocultar elemento
