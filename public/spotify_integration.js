@@ -620,6 +620,7 @@ async function transferPlayback(accessToken, deviceID) {
         });
         const urlWithoutAltDevice = removeParameterFromURL('alt_device_id');
         history.replaceState(null, '', urlWithoutAltDevice);
+        notification("Unable to switch playback, your other device is unavailable")
     }
 }
 
