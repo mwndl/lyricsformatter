@@ -3,7 +3,7 @@ var ignoredContainers = [];
 function checkLanguage() {
     var text = document.getElementById('editor').value;
     const grammarContainer = document.getElementById('grammar_containers');
-    var selectedLanguage = localStorage.getItem('selectedLanguage')
+    var selectedLanguage = getParameterByName('language')
     
     if (!selectedLanguage) {
         console.error('No selected language.');

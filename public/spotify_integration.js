@@ -102,7 +102,6 @@ function processSpotifyTokens(accessToken, refreshToken) {
 
     // Fazer a solicitação para obter dados do usuário
     fetchUserData();
-    initializePlayer();
     checkTrackIdParams();
 }
 
@@ -244,7 +243,6 @@ async function spotifyRenewAuth() {
 
         console.log('Spotify authorization renewed successfully!');
         fetchCurrentlyPlayingData();
-        initializePlayer();
     } catch (error) {
         notification('Spotify authentication failed, please refresh the page');
         console.error('Error renewing Spotify authorization.', error.message);
@@ -277,7 +275,7 @@ async function fetchCurrentlyPlayingData() {
         }
 
         // Fazer uma solicitação fetch para a rota /me/player/currently-playing do Spotify
-        const response = await fetch('https://api.spotify.com/v1/me/player/currently-playing', {
+        const response = await fetch('https://api.spotify.com/v1/me/player', {
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${accessToken}`
@@ -288,15 +286,18 @@ async function fetchCurrentlyPlayingData() {
         if (response.status === 204) {
             document.getElementById('sp_player_div').style.display = ''; // Exibir elemento
             document.getElementById('sp_connect').style.display = 'none'; // Ocultar elemento
+            document.getElementById('sp_fast_transfer').style.display = 'none'
             document.getElementById('playback_info').style.display = 'none'; // Ocultar elemento
             document.getElementById('no_playback').style.display = 'block'; // Ocultar elemento
             currentSongId = '';
             return; // Sair da função
+
         } else if (response.status === 200) {
             document.getElementById('sp_player_div').style.display = ''; // Exibir elemento
             document.getElementById('sp_connect').style.display = 'block'; // exibir elemento
             document.getElementById('playback_info').style.display = 'flex'; // exibir elemento
             document.getElementById('no_playback').style.display = 'none'; // exibir elemento
+
         } else if (response.status === 401) {
             spotifyRenewAuth()
             currentSongId = '';
@@ -315,6 +316,30 @@ async function fetchCurrentlyPlayingData() {
 
         // definir o ID na variável
         currentSongId = currentlyPlayingData.item.id;
+
+        /*  quick transfer */
+
+                spTransferIcon = document.getElementById('sp_fast_transfer');
+                altDeviceId = getParameterByName('alt_device_id')
+
+                if (currentlyPlayingData.device.id === deviceId && altDeviceId === null) {
+                    spTransferIcon.style.display = 'none'
+                } else {
+
+                    if (currentlyPlayingData.device.id === deviceId) {
+                        spTransferIcon.title = `Transfer the song back`;
+                    } else {
+                        addParamToURL('alt_device_id', currentlyPlayingData.device.id);
+                        spTransferIcon.style.display = '';
+                        spTransferIcon.title = 'Transfer the song to LyricsFormatter';
+                    }
+                }
+
+                if (altDeviceId) {
+                    spTransferIcon.style.display = 'block'
+                }
+
+        /*  quick transfer */
 
         // Atualizar os elementos HTML com as informações da música atualmente reproduzida
         const albumArtElement = document.getElementById('sp_album_art');
@@ -345,6 +370,8 @@ async function fetchCurrentlyPlayingData() {
         } else {
            // pausado
         }
+
+        return currentlyPlayingData;
 
     } catch (error) {
         console.error('Error getting data from currently playing song: ', error.message);
@@ -432,9 +459,6 @@ function beforeLastSection(currentPosition, sectionStartTimes) {
         return 0;
     }
 }
-
-
-
 
 
 // Função para curtir/descurtir uma música com base no ID da música
@@ -538,6 +562,7 @@ async function fetchAvailableDevices() {
 
         // Atualizar o menu com os nomes dos dispositivos disponíveis e definir o 'data-id' como o ID do dispositivo
         const devicesOptionsElement = document.getElementById('devices_options');
+        
         if (devicesOptionsElement) {
             devicesOptionsElement.innerHTML = ''; // Limpar o conteúdo atual do menu
             devicesData.devices.forEach(device => {
@@ -570,7 +595,7 @@ async function fetchAvailableDevices() {
 async function transferPlayback(accessToken, deviceID) {
     try {
 
-        await fetch('https://api.spotify.com/v1/me/player', {
+        const response = await fetch('https://api.spotify.com/v1/me/player', {
             method: 'PUT',
             headers: {
                 'Authorization': `Bearer ${accessToken}`,
@@ -580,13 +605,21 @@ async function transferPlayback(accessToken, deviceID) {
                 device_ids: [deviceID]
             })
         });
+        
+        if (!response.ok) {
+            throw new Error('response not ok');
+        }
 
         console.log('Playback transferred successfully.');
-        fetchAvailableDevices(); // Update the list of available devices
 
     } catch (error) {
         console.error('Error transferring playback: ', error.message);
-        fetchAvailableDevices(); // Update the list of available devices
+        fetchAvailableDevices().then(() => {
+            fetchCurrentlyPlayingData()
+        });
+        const urlWithoutAltDevice = removeParameterFromURL('alt_device_id');
+        history.replaceState(null, '', urlWithoutAltDevice);
+        notification("Unable to switch playback, the device is unavailable")
     }
 }
 
