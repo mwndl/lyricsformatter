@@ -79,7 +79,6 @@ document.addEventListener('DOMContentLoaded', function () {
         const content = editor.value;
     
         const checkboxIds = [
-            'spAutoPlay',
             'autoCapToggle',
             'autoFormatToggle',
             'autoSuggestions',
@@ -822,7 +821,6 @@ document.addEventListener('DOMContentLoaded', function () {
         function setCheckboxStates() {
             // Adicione IDs aos seus elementos de checkbox para tornar a manipulação mais fácil
             const checkboxIds = [
-                'spAutoPlay',
                 'autoCapToggle',
                 'autoFormatToggle',
                 'autoSuggestions',
