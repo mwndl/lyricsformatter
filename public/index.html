@@ -675,7 +675,6 @@
                     nextSectionButton()
                 };;
 
-                // CÓDIGO QUE TRATA DOS COMANDOS DO TECLADO
                 document.addEventListener('keydown', function (event) {
 
                     // Recuperar os tokens do armazenamento local do navegador
@@ -717,9 +716,24 @@
                                 // outras teclas (não são tratadas)
                                 break;
                         }
+                    } else if (event.key === 'Tab' && event.shiftKey) { // Shift + Tab
+                        event.preventDefault();
+                        rewind(document.getElementById('selectedValue1').textContent);
+                    } else if (event.key === 'Tab') { // Tab
+                        event.preventDefault();
+                        player.togglePlay();
+                    } else if (event.key === 'ArrowLeft') { // Setar Esquerda
+                        event.preventDefault();
+                        lastSectionButton();
+                    } else if (event.key === 'ArrowRight') { // Setar Direita
+                        event.preventDefault();
+                        nextSectionButton()
+                    } else if (event.key === 'Q' && event.shiftKey) { // Shift + Q
+                        event.preventDefault();
+                        fastForward(document.getElementById('selectedValue2').textContent);
                     }
 
-                });
+                    });
 
                 // Função para atualizar a barra de progresso com base na posição atual da música
                 function updateProgressBar(position, duration) {
