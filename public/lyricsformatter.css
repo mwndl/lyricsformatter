@@ -2332,7 +2332,7 @@
         user-select: none;
     }
 
-      .mini-menu {
+    .mini-menu {
         user-select: none;
         display: none;
         position: absolute;
@@ -2347,11 +2347,12 @@
         color: #ffffff;
     }
 
-      input:checked + .slider:before {
+    input:checked + .slider:before {
         -webkit-transform: translateX(26px);
         -ms-transform: translateX(26px);
         transform: translateX(24px);
     }
+
     .slider:before {
         position: absolute;
         content: "";

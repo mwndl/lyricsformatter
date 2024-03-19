@@ -79,6 +79,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const content = editor.value;
     
         const checkboxIds = [
+            'spAutoPlay',
             'autoCapToggle',
             'autoFormatToggle',
             'autoSuggestions',
@@ -158,6 +159,7 @@ document.addEventListener('DOMContentLoaded', function () {
         checkSpotifyParams();
         fetchCreditsData();
         fetchServerInfo();
+        checkMobileTestingParams();
 
     
     // Adicione um evento de clique ao botão de cópia
@@ -266,7 +268,7 @@ document.addEventListener('DOMContentLoaded', function () {
             loadingSpinner.style.display = 'block';
 
             // Get the language code from the selected language element
-            var selectedLanguageCode = localStorage.getItem('selectedLanguage');
+            var selectedLanguageCode = getParameterByName('language')
 
             // Check if a language is selected
             if (!selectedLanguageCode) {
@@ -322,7 +324,7 @@ document.addEventListener('DOMContentLoaded', function () {
             
                     if (data.result.issues === false) {
                         // se não houverem erros, exibe o 'no issues'
-                        CheckFormatPlaceholder();
+                        checkFormatPlaceholder();
                     } else {
                         // add os containers na box "format_containers"
                         for (const alertaKey in data.result.containers.alerts) {
@@ -334,7 +336,7 @@ document.addEventListener('DOMContentLoaded', function () {
                                 formatContainer.appendChild(container);
                             }
                         }
-                        CheckFormatPlaceholder();
+                        checkFormatPlaceholder();
                     }
 
                 })
@@ -759,7 +761,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 } else {
                     line.textContent = lineLength;
 
-                    var selectedLanguageCode = localStorage.getItem('selectedLanguage');
+                    var selectedLanguageCode = getParameterByName('language')
                     if (selectedLanguageCode === 'pt-BR' || selectedLanguageCode === 'pt-PT') {
                         if (lineLength > 50) {
                             line.style.fontWeight = 'bold';
@@ -820,6 +822,7 @@ document.addEventListener('DOMContentLoaded', function () {
         function setCheckboxStates() {
             // Adicione IDs aos seus elementos de checkbox para tornar a manipulação mais fácil
             const checkboxIds = [
+                'spAutoPlay',
                 'autoCapToggle',
                 'autoFormatToggle',
                 'autoSuggestions',
@@ -1198,7 +1201,7 @@ function updateLineIssues(color, lines) {
 
             // Oculta o container após a correção (ou tentativa de correção)
             container.style.display = 'none';
-            CheckFormatPlaceholder(); // verifica se há containers, se não tiver, exibe o 'copy'
+            checkFormatPlaceholder(); // verifica se há containers, se não tiver, exibe o 'copy'
             resetLineIssues();
             handleRefreshButtonClick();
         }
@@ -1257,7 +1260,7 @@ function updateLineIssues(color, lines) {
         }
 
         // Função para verificar e exibir a div placeholder
-        function CheckFormatPlaceholder() {
+        function checkFormatPlaceholder() {
             var formatContainer = document.getElementById('format_containers');
 
             // Verificar se há containers visíveis
@@ -1616,6 +1619,17 @@ function updateLineIssues(color, lines) {
         }
 
 /* ****************************************** */
+
+        // Função para redirecionar o usuário para a página de autorização caso haja um track id sem autenticação
+        function checkMobileTestingParams() {
+            const mobileTestingParam = getParameterByName('mobile_ui');
+            if (mobileTestingParam === '1') {
+                var element = document.getElementById('development_message');
+                if (element) {
+                    element.remove();
+                }
+            }
+        }
 
 /* EXIBIR OU OCULTAR CONFIGURAÇÕES DO SPOTIFY */
 

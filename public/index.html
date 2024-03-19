@@ -13,7 +13,7 @@
     <script src="langtool_integration.js"></script>
     <link rel="icon" href="/images/favicon.ico" type="image/x-icon">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
-    integrity="sha384-e3b0a8b1e4095176f4a6f42c37b4efb51337fba6c937e281a5f3800f76475893" crossorigin="anonymous">
+        integrity="sha384-e3b0a8b1e4095176f4a6f42c37b4efb51337fba6c937e281a5f3800f76475893" crossorigin="anonymous">
     <title>LyricsFormatter</title>
 </head>
 
@@ -149,7 +149,7 @@
                                     <div class="sp_up">
                                         <div class="button-container">
                                             <div class="round-button"></div>
-                                            <div class="round-button" id="player_refresh" style="display:block">
+                                            <div class="round-button" id="player_refresh" style="display:block" title="Refresh">
                                                 <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                                     <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
                                                     <g id="SVGRepo_tracerCarrier" stroke-linecap="round"
@@ -161,7 +161,38 @@
                                                     </g>
                                                 </svg>
                                             </div>
-                                            <div class="round-button" id="sp_connect" style="display:none">
+                                            <div class="round-button" id="sp_fast_transfer" style="display:none" onclick="togglePlayer()" title="">
+                                                <div id="sp_fast_transfer_icon" style="display:block">
+                                                    <svg viewBox="0 0 24 24" version="1.1"
+                                                    xmlns="http://www.w3.org/2000/svg"
+                                                    xmlns:xlink="http://www.w3.org/1999/xlink" fill="#ffffff">
+                                                    <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                                                    <g id="SVGRepo_tracerCarrier" stroke-linecap="round"
+                                                        stroke-linejoin="round"></g>
+                                                    <g id="SVGRepo_iconCarrier">
+                                                        <g id="Page-1" stroke="none" stroke-width="1" fill="none"
+                                                            fill-rule="evenodd">
+                                                            <g id="Transfer">
+                                                                <rect id="Rectangle" fill-rule="nonzero" x="0" y="0"
+                                                                    width="24" height="24"> </rect>
+                                                                <path d="M19,7 L5,7 M20,17 L5,17" id="Shape"
+                                                                    stroke="#ffffff" stroke-width="2"
+                                                                    stroke-linecap="round"> </path>
+                                                                <path
+                                                                    d="M16,3 L19.2929,6.29289 C19.6834,6.68342 19.6834,7.31658 19.2929,7.70711 L16,11"
+                                                                    id="Path" stroke="#ffffff" stroke-width="2"
+                                                                    stroke-linecap="round"> </path>
+                                                                <path
+                                                                    d="M8,13 L4.70711,16.2929 C4.31658,16.6834 4.31658,17.3166 4.70711,17.7071 L8,21"
+                                                                    id="Path" stroke="#ffffff" stroke-width="2"
+                                                                    stroke-linecap="round"> </path>
+                                                            </g>
+                                                        </g>
+                                                    </g>
+                                                </svg>
+                                                </div>
+                                            </div>
+                                            <div class="round-button" id="sp_connect" style="display:none" title="See available devices">
                                                 <div id="sp_connect_icon_green" style="display:block">
                                                     <svg viewBox="0 0 24 24" fill="none"
                                                         xmlns="http://www.w3.org/2000/svg" stroke="#ffffff"
@@ -315,7 +346,7 @@
         </div>
     </div>
     </div>
-    <div class="development_message">
+    <div class="development_message" id="development_message">
         <h2>Mobile Interface Under Development</h2>
         <p>The interface for mobile devices is still under development. Please use a PC for the best experience.</p>
     </div>
@@ -355,16 +386,6 @@
                         </div>
                     </div>
                 </div>
-                <div class="popup_option" style="display:none">
-                    <div class="popup_title">
-                        <p class="popup_option_title">Smart playback transfer</p>
-                        <p class="popup_option_description">Automatically switch playback to LyricsFormatter when pasting a transcription, then revert back to original device after tapping 'Copy'</p>
-                    </div>
-                    <label class="switch">
-                        <input type="checkbox" id="spAutoPlay" onclick="checkContent()">
-                        <span class="slider round"></span>
-                    </label>
-                </div>
                 <div class="popup_option">
                     <div class="popup_title">
                         <p class="popup_option_title">Backwards value</p>
@@ -384,7 +405,8 @@
                 <div class="popup_option">
                     <div class="popup_title">
                         <p class="popup_option_title">Fast forward value</p>
-                        <p class="popup_option_description">Specify the duration in seconds to fast forward during playback
+                        <p class="popup_option_description">Specify the duration in seconds to fast forward during
+                            playback
                         </p>
                     </div>
                     <div class="number_selector">
@@ -397,7 +419,8 @@
                         </svg>
                     </div>
                 </div>
-                <hr style="border-top: 1px solid rgb(100, 100, 100); border-right: none; border-bottom: none; border-left: none; border-image: initial;">
+                <hr
+                    style="border-top: 1px solid rgb(100, 100, 100); border-right: none; border-bottom: none; border-left: none; border-image: initial;">
             </div>
             <div class="popup_option" style="display:none">
                 <div class="popup_title">
@@ -443,7 +466,8 @@
                 </label>
             </div>
             <div class="settings_hided_div" id="dev_hided_div" style="display:none">
-                <hr style="border-top: 1px solid rgb(100, 100, 100); border-right: none; border-bottom: none; border-left: none; border-image: initial;">
+                <hr
+                    style="border-top: 1px solid rgb(100, 100, 100); border-right: none; border-bottom: none; border-left: none; border-image: initial;">
                 <div class="popup_option">
                     <div class="popup_title">
                         <p class="popup_option_title">Development mode</p>
@@ -544,6 +568,10 @@
         let trackId = '';
         let clickCount = 0;
 
+        //quick transfer button
+        let newDeviceId;
+        let mxmDeviceId;
+
         window.onSpotifyWebPlaybackSDKReady = () => {
 
             fetchUserData().then(() => {
@@ -603,26 +631,29 @@
                 player.addListener('not_ready', ({ device_id }) => {
                     console.log('Device ID has gone offline', device_id);
                     notification('Player has gone offline, please refresh the page');
-
+                    player.disconnect();
                 });
 
                 player.addListener('initialization_error', ({ message }) => {
                     console.error(message);
                     notification('Error initializing the player, please refresh the page');
+                    player.disconnect();
                 });
 
                 player.addListener('authentication_error', ({ message }) => {
                     console.error(message);
                     fetchUserData();
+                    player.disconnect();
                 });
 
                 player.addListener('account_error', ({ message }) => {
                     console.error(message);
                     notification('An unexpected error occurred, please refresh the page');
+                    player.disconnect();
                 });
 
                 player.connect();
-                
+
 
                 document.getElementById('play_pause').onclick = function () {
                     player.togglePlay();
@@ -833,7 +864,7 @@
                             storeSections(accessToken, trackId)
                             showTracker();
                         }
-                        if (trackId === currentTrackId && currentPlaybackId  !== playbackId) { // mudanças de player
+                        if (trackId === currentTrackId && currentPlaybackId !== playbackId) { // mudanças de player
 
                             trackId = currentTrackId;
                             playbackId = currentPlaybackId;
@@ -1027,11 +1058,27 @@
                 fetchAvailableDevices()
             });
         });
+        
+        // Função para alternar entre o player do site e o dispositivo atualmente em reprodução
+        async function togglePlayer() {
 
+            const currentlyPlayingData = await fetchCurrentlyPlayingData();
+            if (currentlyPlayingData.device.id === deviceId) {
+                newDeviceId = getParameterByName('alt_device_id')
+            } else if (currentlyPlayingData.device.id !== deviceId) {
+                newDeviceId = deviceId;
+            }
+
+
+            // Transferir a reprodução para o novo dispositivo
+            const accessToken = localStorage.getItem('accessToken');
+            transferPlayback(accessToken, newDeviceId);
+        }
 
         function checkContent() {
 
             const checkboxIds = [
+                'spAutoPlay',
                 'autoCapToggle',
                 'autoFormatToggle',
                 'autoSuggestions',
@@ -1123,7 +1170,7 @@
         });
 
         */
-        
+
         function closeSettings() {
             var settingsPopup = document.getElementById("settings_popup");
             var overlay = document.getElementById("overlay");
