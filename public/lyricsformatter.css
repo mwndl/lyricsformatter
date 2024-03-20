@@ -1343,6 +1343,11 @@
         margin: 0;
         padding: 10px;
         font-size: 16px;
+        align-items: center;
+        display: flex;
+        pointer-events: none;
+        transform: none;
+        transition: none;
     }
     
     .container .content {

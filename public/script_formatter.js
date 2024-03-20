@@ -1277,15 +1277,26 @@ function updateLineIssues(color, lines) {
 
             const contentDiv = document.createElement('div');
             contentDiv.className = 'content_ok';
+            contentDiv.style.display = 'flex';
+            contentDiv.style.alignItems = 'center'; // Align items vertically
 
             const h2 = document.createElement('h2');
-            h2.textContent = 'No format issues found! ✨';
 
             const copyBtn = document.createElement('div');
             copyBtn.className = 'content_copy_btn';
             copyBtn.textContent = 'Copy';
             copyBtn.onclick = copyToClipboard;
 
+            // Create a span for the SVG
+            const svgSpan = document.createElement('span');
+            svgSpan.innerHTML = `
+            <svg fill="#ffffff" width="18px" height="18px" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
+                <path d="M208.8584,144a15.85626,15.85626,0,0,1-10.46778,15.01367l-52.16015,19.2168-19.2168,52.16015a16.00075,16.00075,0,0,1-30.02734,0l-19.2168-52.16015-52.16015-19.2168a16.00075,16.00075,0,0,1,0-30.02734l52.16015-19.2168,19.2168-52.16015a16.00075,16.00075,0,0,1,30.02734,0l19.2168,52.16015,52.16015,19.2168A15.85626,15.85626,0,0,1,208.8584,144ZM152,48h16V64a8,8,0,0,0,16,0V48h16a8,8,0,0,0,0-16H184V16a8,8,0,0,0-16,0V32H152a8,8,0,0,0,0,16Zm88,32h-8V72a8,8,0,0,0-16,0v8h-8a8,8,0,0,0,0,16h8v8a8,8,0,0,0,16,0V96h8a8,8,0,0,0,0-16Z"></path>
+            </svg>
+            `;
+
+            h2.textContent = 'No format issues!'; // Add the text to h2
+            h2.appendChild(svgSpan); // Append the span containing the SVG after the text
             contentDiv.appendChild(h2);
             contentDiv.appendChild(copyBtn);
             noIssuesDiv.appendChild(contentDiv);
@@ -1314,14 +1325,24 @@ function updateLineIssues(color, lines) {
 
             const contentDiv = document.createElement('div');
             contentDiv.className = 'content_ok';
+            contentDiv.style.display = 'flex';
+            contentDiv.style.alignItems = 'center'; // Align items vertically
 
             const h2 = document.createElement('h2');
-            h2.textContent = 'No grammar issues found! ✨';
 
             const copyBtn = document.createElement('div');
             copyBtn.className = 'content_copy_btn';
             copyBtn.textContent = 'Copy';
             copyBtn.onclick = copyToClipboard;
+            const svgSpan = document.createElement('span');
+            svgSpan.innerHTML = `
+            <svg fill="#ffffff" width="18px" height="18px" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
+                <path d="M208.8584,144a15.85626,15.85626,0,0,1-10.46778,15.01367l-52.16015,19.2168-19.2168,52.16015a16.00075,16.00075,0,0,1-30.02734,0l-19.2168-52.16015-52.16015-19.2168a16.00075,16.00075,0,0,1,0-30.02734l52.16015-19.2168,19.2168-52.16015a16.00075,16.00075,0,0,1,30.02734,0l19.2168,52.16015,52.16015,19.2168A15.85626,15.85626,0,0,1,208.8584,144ZM152,48h16V64a8,8,0,0,0,16,0V48h16a8,8,0,0,0,0-16H184V16a8,8,0,0,0-16,0V32H152a8,8,0,0,0,0,16Zm88,32h-8V72a8,8,0,0,0-16,0v8h-8a8,8,0,0,0,0,16h8v8a8,8,0,0,0,16,0V96h8a8,8,0,0,0,0-16Z"></path>
+            </svg>
+            `;
+
+            h2.textContent = 'No grammar issues!';
+            h2.appendChild(svgSpan);
 
             contentDiv.appendChild(h2);
             contentDiv.appendChild(copyBtn);
