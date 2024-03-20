@@ -343,6 +343,14 @@
                     <img src="images/forward.svg" alt="Forward">
                 </div>
             </div>
+            <div class="control-container" id="toggle_options">
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M12 6V18M12 6L7 11M12 6L17 11" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path> </g></svg>
+            </div>
+            <div class="extended-options">
+                <div class="option">Opção 1</div>
+                <div class="option">Opção 2</div>
+                <!-- Adicione outras opções conforme necessário -->
+            </div>
         </div>
     </div>
     </div>
@@ -722,12 +730,6 @@
                     } else if (event.key === 'Tab') { // Tab
                         event.preventDefault();
                         player.togglePlay();
-                    } else if (event.key === 'ArrowLeft') { // Setar Esquerda
-                        event.preventDefault();
-                        lastSectionButton();
-                    } else if (event.key === 'ArrowRight') { // Setar Direita
-                        event.preventDefault();
-                        nextSectionButton()
                     } else if (event.key === 'Q' && event.shiftKey) { // Shift + Q
                         event.preventDefault();
                         fastForward(document.getElementById('selectedValue2').textContent);
@@ -1002,8 +1004,8 @@
 
                 function showTracker() {
                     document.getElementById('sdk_player').style = 'display:flex';
-                    document.getElementById('sp_connect_icon_green').style.display = 'none'
                     document.getElementById('sp_connect_icon_white').style.display = 'block'
+                    document.getElementById('sp_connect_icon_green').style.display = 'none'
                     document.getElementById('devices_options').style.bottom = '150px'
                     document.getElementById('main').style.height = 'calc(100% - 120px)'
                     document.getElementById('footer').style.height = '60px'
