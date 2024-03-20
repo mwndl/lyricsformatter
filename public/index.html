@@ -265,6 +265,7 @@
     </div>
     <div class="footer" id="footer">
         <div class="player" id="sdk_player" style="display:none">
+            <div id="timer">0:00</div>
             <script src="https://sdk.scdn.co/spotify-player.js"></script>
             <div class="control-container" id="play_pause">
                 <svg width="20px" height="20px" viewBox="-1 0 8 8" version="1.1" xmlns="http://www.w3.org/2000/svg"
@@ -580,6 +581,10 @@
         let newDeviceId;
         let mxmDeviceId;
 
+        let startTime;
+        let intervalId;
+        let timerRunning = false;
+
         window.onSpotifyWebPlaybackSDKReady = () => {
 
             fetchUserData().then(() => {
@@ -694,7 +699,7 @@
                         return; // sair da função porque não há tokens do Spotify
                     }
 
-                    var numericKeys = ['0', '1', '3', '4', '5', '6'];
+                    var numericKeys = ['0', '1', '3', '4', '5', '6', '7', '8', '9'];
 
                     // verifica se a tecla pressionada está no numpad
                     var isNumpadKey = (event.location === KeyboardEvent.DOM_KEY_LOCATION_NUMPAD);
@@ -703,22 +708,32 @@
                         event.preventDefault();
                         switch (event.key) {
                             case '1':
-                                rewind(document.getElementById('selectedValue1').textContent)
+                                rewind(document.getElementById('selectedValue1').textContent);
                                 break;
                             case '3':
-                                fastForward(document.getElementById('selectedValue2').textContent)
+                                fastForward(document.getElementById('selectedValue2').textContent);
                                 break;
                             case '4':
-                                lastSectionButton()
+                                lastSectionButton();
                                 break;
                             case '5':
-                                repeatSectionButton()
+                                repeatSectionButton();
                                 break;
                             case '6':
-                                nextSectionButton()
+                                nextSectionButton();
+                                break;
+                            case '7':
+                                toggleTimer()
+                                break;
+                            case '8':
+                                togglePlayer();
+                                break;
+                            case '9':
+                                handleRefreshButtonClick()
                                 break;
                             case '0':
                                 player.togglePlay();
+                                stopTimer()
                                 break;
                             default:
                                 // outras teclas (não são tratadas)
@@ -730,9 +745,13 @@
                     } else if (event.key === 'Tab') { // Tab
                         event.preventDefault();
                         player.togglePlay();
+                        stopTimer()
                     } else if (event.key === 'Q' && event.shiftKey) { // Shift + Q
                         event.preventDefault();
                         fastForward(document.getElementById('selectedValue2').textContent);
+                    } else if (event.key === 'A' && event.shiftKey) { // Shift + Q
+                        event.preventDefault();
+                        togglePlayer();
                     }
 
                     });
@@ -765,6 +784,8 @@
                 // MELHORAR
 
                 document.getElementById('tracker').addEventListener('click', function (event) {
+
+                    stopTimer()
                     const clickPosition = event.offsetX;
                     const totalWidth = event.target.clientWidth;
 
@@ -791,6 +812,49 @@
                         console.error('Erro ao obter o estado atual do player:', err);
                     });
                 });
+
+                function toggleTimer() {
+                    if (timerRunning) {
+                        stopTimer(); // Se o cronômetro estiver em execução, pare-o
+                    } else {
+                        startTimer(); // Se o cronômetro não estiver em execução, inicie-o
+                    }
+                }
+
+                // Função para iniciar o cronômetro
+                function startTimer() {
+                    startTime = Date.now(); // Armazena o tempo de início
+                    intervalId = setInterval(updateTimerDisplay, 50); // Atualiza o display do cronômetro a cada 100ms
+                    timerRunning = true;
+
+                    const timerElement = document.getElementById("timer")
+                    setTimeout(() => {
+                        timerElement.style.opacity = "1";
+                    }, 50);
+                }
+
+                // Função para parar o cronômetro
+                function stopTimer() {
+                    clearInterval(intervalId); // Limpa o intervalo de atualização do display
+                    timerRunning = false;
+
+                    const timerElement = document.getElementById("timer")
+                    setTimeout(() => {
+                        timerElement.style.opacity = "0";
+                    }, 2000);
+                }
+
+                // Função para atualizar o display do cronômetro
+                function updateTimerDisplay() {
+                    const elapsed = Date.now() - startTime; // Calcula o tempo decorrido desde o início
+                    const seconds = Math.floor(elapsed / 1000); // Converte milissegundos para segundos
+                    const milliseconds = Math.floor((elapsed % 1000) / 10); // Calcula os milissegundos restantes
+                    const timeFormatted = `${seconds}:${milliseconds < 10 ? '0' : ''}${milliseconds}`; // Formata o tempo
+
+                    // Atualiza o display do cronômetro
+                    const timer = document.getElementById("timer");
+                    timer.textContent = timeFormatted;
+                }
 
 
 
@@ -940,6 +1004,7 @@
                             });
                         }
                     });
+                    stopTimer()
                 }
 
                 // Função para avançar uma quantidade específica de segundos na reprodução
@@ -953,6 +1018,7 @@
                             });
                         }
                     });
+                    stopTimer()
                 }
 
                 // Função para mover o player para a próxima seção de áudio
@@ -963,6 +1029,7 @@
                     if (lastSectionTime !== null) {
                         player.seek(lastSectionTime); // Movendo o player para a próxima seção de áudio
                     }
+                    stopTimer()
                 }
 
                 // Função para mover o player para a próxima seção de áudio
@@ -973,6 +1040,7 @@
                     if (repeatSectionTime !== null) {
                         player.seek(repeatSectionTime); // Movendo o player para a próxima seção de áudio
                     }
+                    stopTimer()
                 }
 
                 // Função para mover o player para a próxima seção de áudio
@@ -983,6 +1051,7 @@
                     if (nextSectionTime !== null) {
                         player.seek(nextSectionTime); // Movendo o player para a próxima seção de áudio
                     }
+                    stopTimer()
                 }
 
                 function storeSections(accessToken, currentSongId) {
@@ -1025,24 +1094,10 @@
                     // Remover o parâmetro 'track_id' da URL
                     var urlWithoutTrackId = removeParameterFromURL('track_id');
                     history.replaceState(null, '', urlWithoutTrackId);
+                    stopTimer()
                 }
 
             });
-        };
-
-
-        function notification(customMessage) {
-            const notification_div = document.getElementById("notification");
-            const message = document.getElementById("notification-message");
-            message.textContent = customMessage;
-            notification_div.style.opacity = 1;
-            notification_div.classList.remove("hidden");
-            setTimeout(() => {
-                notification_div.style.opacity = 0;
-                setTimeout(() => {
-                    notification_div.classList.add("hidden");
-                }, 500);
-            }, 4000); // Tempo de exibição
         };
 
 
@@ -1077,6 +1132,11 @@
         
         // Função para alternar entre o player do site e o dispositivo atualmente em reprodução
         async function togglePlayer() {
+
+            if (document.getElementById('sp_fast_transfer').style.display === 'none') {
+                notification('No default alternative player, try moving the song manually')
+                return;
+            }
 
             const currentlyPlayingData = await fetchCurrentlyPlayingData();
             if (currentlyPlayingData.device.id === deviceId) {

@@ -244,7 +244,16 @@ document.addEventListener('DOMContentLoaded', function () {
             var loadingSpinner = document.getElementById('loading_spinner');
             var textArea = document.getElementById('editor');
             var autoFormatToggle = document.getElementById('autoFormatToggle');
+            var selectedLanguageCode = getParameterByName('language')
 
+            if (textArea.value === '') {
+                fetchCurrentlyPlayingData();
+                notification("The editor is empty, there's nothing to be checked here");
+                return;
+            }
+
+
+            // EXECUTAR AUTO FORMAT
             if (autoFormatToggle.checked) {
                 replaceSpecialTags(); // auto replace tags
                 addSpaceAboveTags(); // add (caso não haja) espaços acima de todas as tags
@@ -253,6 +262,11 @@ document.addEventListener('DOMContentLoaded', function () {
                 autoTrim(); // espaços extras no início ou fim
                 removeDuplicateSpaces(); // espaços duplos entre palavras
                 removeDuplicateEmptyLines(); // linhas vazias duplicadas entre estrofes
+
+                if (selectedLanguageCode === 'pt-BR' || selectedLanguageCode === 'pt-PT') {
+                    fixPunctuation();
+                    replaceX();
+                }
             }
 
             updateSidebar();
@@ -265,9 +279,6 @@ document.addEventListener('DOMContentLoaded', function () {
             // Hide the refresh button and show the loading spinner
             refreshButton.style.display = 'none';
             loadingSpinner.style.display = 'block';
-
-            // Get the language code from the selected language element
-            var selectedLanguageCode = getParameterByName('language')
 
             // Check if a language is selected
             if (!selectedLanguageCode) {
@@ -615,22 +626,50 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         }
 
+        function fixPunctuation() {
+            var editor = document.getElementById('editor');
+            var content = editor.value;
+        
+            // Adicionar espaço após pontuações e antes de '(' e depois de ')', se não houver
+            content = content.replace(/([:;,?!)])(?=[^\s])/g, '$1 ');
+            content = content.replace(/(?<=[^\s])(\()/g, ' $1');
+        
+            // Atualizar o conteúdo do editor
+            editor.value = content;
+        }
+
+        function replaceX() {
+            var editor = document.getElementById('editor');
+            var content = editor.value;
+        
+            // Substituir termos número + x + número por número + × + número
+            content = content.replace(/(\d+)\s*x\s*(\d+)/gi, '$1×$2');
+        
+            // Atualizar o conteúdo do editor
+            editor.value = content;
+        }
+
+
 /* ****************************************** */
 
 /* NOTIFICAÇÕES TEMPORÁRIAS */
 
-        function notification(customMessage) {
+        function notification(customMessage, hide = false) {
+            console.log('chamada!)')
             const notification_div = document.getElementById("notification");
             const message = document.getElementById("notification-message");
             message.textContent = customMessage;
             notification_div.style.opacity = 1;
             notification_div.classList.remove("hidden");
-            setTimeout(() => {
-            notification_div.style.opacity = 0;
-            setTimeout(() => {
-                notification_div.classList.add("hidden");
-            }, 500);
-            }, 4000); // Tempo de exibição
+
+            if (!hide) {
+                setTimeout(() => {
+                    notification_div.style.opacity = 0;
+                    setTimeout(() => {
+                        notification_div.classList.add("hidden");
+                    }, 500);
+                }, 4000); // Tempo de exibição
+            }
         };
 
 /* ****************************************** */
@@ -833,6 +872,13 @@ document.addEventListener('DOMContentLoaded', function () {
 
                 if (checkboxState !== null) {
                     checkbox.checked = JSON.parse(checkboxState);
+                } else {
+                    // Se não houver informação em cache, defina os estados padrão
+                    if (checkboxId === 'autoCapToggle' || checkboxId === 'autoFormatToggle') {
+                        checkbox.checked = true; // Ativado
+                    } else {
+                        checkbox.checked = false; // Desativado
+                    }
                 }
             });
         }
