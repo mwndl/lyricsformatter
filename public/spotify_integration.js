@@ -198,6 +198,27 @@ async function fetchUserData() {
     }
 }
 
+async function checkTokenExpiration() {
+    const tokenRenewalTime = new Date(localStorage.getItem('tokenRenewal')).getTime(); // Tempo em milissegundos
+    const currentTime = new Date().getTime(); // Tempo atual em milissegundos
+
+    // Calcula a diferença de tempo em milissegundos
+    const timeDifference = tokenRenewalTime - currentTime;
+
+    // Converte o tempo limite para 5 minutos em milissegundos
+    const fiveMinutesInMilliseconds = 5 * 60 * 1000;
+
+    if (timeDifference < fiveMinutesInMilliseconds) {
+        // Chama a função para renovar o token e espera a resolução da promessa
+        await spotifyRenewAuth();
+        // Retorna o novo token após a renovação
+        return localStorage.getItem('accessToken');
+    } else {
+        // Retorna o token atual
+        return localStorage.getItem('accessToken');
+    }
+}
+
 async function spotifyRenewAuth() {
     try {
         // Recuperar o refreshToken do armazenamento local do navegador
@@ -241,8 +262,9 @@ async function spotifyRenewAuth() {
         const tokenRenewalTime = new Date().toISOString();
         localStorage.setItem('tokenRenewal', tokenRenewalTime);
 
-        console.log('Spotify authorization renewed successfully!');
         fetchCurrentlyPlayingData();
+
+        return accessToken;
     } catch (error) {
         notification('Spotify authentication failed, please refresh the page');
         console.error('Error renewing Spotify authorization.', error.message);

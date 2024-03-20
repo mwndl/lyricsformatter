@@ -1728,3 +1728,14 @@ function updateLineIssues(color, lines) {
         }
 
 /* ****************************************** */
+
+// Adicione isso ao seu JavaScript para alternar a visibilidade das opções quando o botão de toggle é clicado
+document.getElementById('toggle_options').addEventListener('click', function() {
+    var extendedOptions = document.querySelector('.extended-options');
+    this.classList.toggle('active');
+    if (extendedOptions.style.display === 'flex') {
+        extendedOptions.style.display = 'none';
+    } else {
+        extendedOptions.style.display = 'flex';
+    }
+});
