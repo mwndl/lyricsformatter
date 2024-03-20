@@ -1910,6 +1910,10 @@
   .development_message {
     display:none;
   }
+
+  .extended-options, #toggle_options {
+    display: none; 
+  }
   
   
   /* FOOTER - END */
@@ -2364,6 +2368,50 @@
         -webkit-transition: .4s;
         transition: .4s;
     }
+
+
+    .extended-options {
+        position: fixed;
+        bottom: 60px; /* altura da barra do player */
+        left: 0;
+        width: 100%;
+        background-color: #131313;
+        border-top: 1px solid #252525;
+        display: none; /* Inicialmente oculto */
+        flex-direction: column;
+        padding: 10px 20px; /* Ajuste conforme necessário */
+        box-sizing: border-box;
+    }
+
+.option {
+    color: white;
+    padding: 10px 0;
+    cursor: pointer;
+}
+
+/* Adicione isso ao seu CSS para o layout estendido no mobile */
+#toggle_options {
+    position: relative;
+    display: block;
+    cursor: pointer; /* Adiciona um cursor indicando que é clicável */
+}
+
+#toggle_options svg.arrow {
+    width: 24px; /* Largura ajustável conforme necessário */
+    height: 24px; /* Altura ajustável conforme necessário */
+    fill: #ffffff; /* Cor ajustável conforme necessário */
+    cursor: pointer;
+    transition: transform 0.3s ease; /* Adiciona uma transição suave para a rotação da seta */
+}
+
+#toggle_options.active svg {
+    transform: rotate(-90deg);
+    transition: transform 0.3s ease; /* Adicione uma transição suave para a rotação */
+}
+
+.controls-right {
+    display:none;
+}
 
 
 
