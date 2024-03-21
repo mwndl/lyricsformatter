@@ -138,35 +138,34 @@ function detectBrowser() {
     
     // Verifica se o navegador é o Opera
     if (userAgent.indexOf("OPR") > -1 || userAgent.indexOf("Opera") > -1) {
-        notification("Você está usando o navegador Opera.");
+        notification("You're using the Opera browser.");
         return;
     }
     
     // Verifica se o navegador é o Edge
     if (userAgent.indexOf("Edg") > -1) {
-        notification("Você está usando o navegador Microsoft Edge.");
+        notification("You're using the Microsoft Edge browser.");
         return;
     }
     
     // Verifica se o navegador é o Chrome
     if (userAgent.indexOf("Chrome") > -1) {
-        notification("Você está usando o navegador Google Chrome.");
+        notification("You're using the Google Chrome browser.");
         return;
     }
     
     // Verifica se o navegador é o Safari
     if (userAgent.indexOf("Safari") > -1 && userAgent.indexOf("Chrome") === -1) {
-        notification("Você está usando o navegador Safari.");
+        notification("You're using the Safari browser.");
         return;
     }
     
     // Verifica se o navegador é o Firefox
     if (userAgent.indexOf("Firefox") > -1) {
-        notification("Você está usando o navegador Mozilla Firefox.");
+        notification("You're using the Mozilla Firefox browser.");
         return;
     }
     
-    // Se o navegador não for reconhecido, retorna uma mensagem padrão
-    return "Não foi possível detectar o navegador.";
+    return;
 }
 
