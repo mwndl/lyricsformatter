@@ -255,6 +255,12 @@ document.addEventListener('DOMContentLoaded', function () {
 
             // EXECUTAR AUTO FORMAT
             if (autoFormatToggle.checked) {
+
+                if (selectedLanguageCode === 'pt-BR' || selectedLanguageCode === 'pt-PT') {
+                    fixPunctuation();
+                    replaceX();
+                }
+                
                 replaceSpecialTags(); // auto replace tags
                 addSpaceAboveTags(); // add (caso não haja) espaços acima de todas as tags
                 removeSpacesAroundInstrumental(); // espaços ao redor de tags instrumentais
@@ -262,11 +268,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 autoTrim(); // espaços extras no início ou fim
                 removeDuplicateSpaces(); // espaços duplos entre palavras
                 removeDuplicateEmptyLines(); // linhas vazias duplicadas entre estrofes
-
-                if (selectedLanguageCode === 'pt-BR' || selectedLanguageCode === 'pt-PT') {
-                    fixPunctuation();
-                    replaceX();
-                }
             }
 
             updateSidebar();
@@ -630,9 +631,13 @@ document.addEventListener('DOMContentLoaded', function () {
             var editor = document.getElementById('editor');
             var content = editor.value;
         
-            // Adicionar espaço após pontuações e antes de '(' e depois de ')', se não houver
-            content = content.replace(/([(:])(?=[^\s])/g, '$1 ');
-            content = content.replace(/(?<=[^\s])(\))/g, ' $1');
+            content = content.replace(/([:;,?!])(?=[^\s])/g, '$1 '); // Adiciona espaço após outras pontuações
+            content = content.replace(/\((\s+)/g, '('); // Remove espaço após '('
+            content = content.replace(/\(([^\s])/g, '($1'); // Adiciona espaço antes de '('
+            content = content.replace(/(\s+)\)/g, '$1) '); // Remove espaço antes de ')' e adiciona espaço após ')'
+            content = content.replace(/\s+\)/g, ')'); // Remove espaço antes de ')'
+            
+            
         
             // Atualizar o conteúdo do editor
             editor.value = content;
