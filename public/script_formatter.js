@@ -631,8 +631,8 @@ document.addEventListener('DOMContentLoaded', function () {
             var content = editor.value;
         
             // Adicionar espaço após pontuações e antes de '(' e depois de ')', se não houver
-            content = content.replace(/([:;,?!)])(?=[^\s])/g, '$1 ');
-            content = content.replace(/(?<=[^\s])(\()/g, ' $1');
+            content = content.replace(/([(:])(?=[^\s])/g, '$1 ');
+            content = content.replace(/(?<=[^\s])(\))/g, ' $1');
         
             // Atualizar o conteúdo do editor
             editor.value = content;
