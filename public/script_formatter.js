@@ -260,7 +260,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     fixPunctuation();
                     replaceX();
                 }
-                
+
                 replaceSpecialTags(); // auto replace tags
                 addSpaceAboveTags(); // add (caso não haja) espaços acima de todas as tags
                 removeSpacesAroundInstrumental(); // espaços ao redor de tags instrumentais
@@ -635,8 +635,7 @@ document.addEventListener('DOMContentLoaded', function () {
             content = content.replace(/\((\s+)/g, '('); // Remove espaço após '('
             content = content.replace(/\(([^\s])/g, '($1'); // Adiciona espaço antes de '('
             content = content.replace(/(\s+)\)/g, '$1) '); // Remove espaço antes de ')' e adiciona espaço após ')'
-            content = content.replace(/\s+\)/g, ')'); // Remove espaço antes de ')'
-            
+            content = content.replace(/\s+([!?,:;\)])/g, '$1'); // Remove espaços antes de !?,:; e )
             
         
             // Atualizar o conteúdo do editor
