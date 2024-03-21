@@ -149,7 +149,6 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
         // config inicial
-        detectBrowser()
         updateSidebar();
         setDefaultLanguage();
         setCheckboxStates();
