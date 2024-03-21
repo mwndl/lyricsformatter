@@ -369,8 +369,71 @@
   .bold {
     font-weight: bold;
   }
-  
-  
+
+  .popup_content_intern {
+    width: 100%;
+    padding: 3px 5px;
+    box-sizing: border-box;
+  }
+
+  .popup_content_intern h3 {
+    padding: 3px 5px;
+    margin: 0 0 20px;
+    font-size: 18px;
+    font-weight: bold;
+  }
+
+  .shortcut_option {
+    font-size: 16px;
+  }
+
+    .shortcut_icon {
+        width: 50px; /* Largura */
+        height: 50px; /* Altura */
+        border-radius: 10px; /* Borda arredondada */
+        display: flex;
+        justify-content: center; /* Centraliza horizontalmente */
+        align-items: center; /* Centraliza verticalmente */
+        font-size: 22px; /* Tamanho da fonte */
+        margin: 0 0 0 5px;
+    }
+
+    .shortcut_icon[color="blue"] {
+        background-color: #2196F3; /* Azul */
+    }
+    
+    .shortcut_icon[color="orange"] {
+        background-color: #48c2b0; /* Verde */
+    }
+    
+    .shortcut_icon[color="purple"] {
+        background-color: #4f66ff; /* Vermelho */
+    }
+
+    
+    .shortcut_icon_larger {
+        width: 70px; /* Largura */
+        height: 40px; /* Altura */
+        border-radius: 10px; /* Borda arredondada */
+        display: flex;
+        justify-content: center; /* Centraliza horizontalmente */
+        align-items: center; /* Centraliza verticalmente */
+        font-size: 18px; /* Tamanho da fonte */
+        margin: 0 0 0 5px;
+    }
+
+    .shortcut_icon_larger[color="blue"] {
+        background-color: #2196F3; /* Azul */
+    }
+    
+    .shortcut_icon_larger[color="orange"] {
+        background-color: #48c2b0; /* Verde */
+    }
+    
+    .shortcut_icon_larger[color="purple"] {
+        background-color: #4f66ff; /* Vermelho */
+    }
+
   
   
     #closeButton {
@@ -430,7 +493,7 @@
         .switch {
             position: relative;
             display: inline-block;
-            width: 67px;
+            width: 60px;
             height: 34px;
         }
         
@@ -492,7 +555,7 @@
         /* Swith end */
         
         .popup_title {
-            width: 100%;
+            width: 80%;
             padding: 10px;
             display: flex;
             flex-direction: column;
@@ -540,6 +603,7 @@
         width: 100%;
         font-size: 18px;
         display: flex;
+        flex-direction: row;
         align-items: center;
         justify-content: space-between;
         margin: 5px 0 5px 0;
@@ -2403,6 +2467,13 @@
         background-color: white;
         -webkit-transition: .4s;
         transition: .4s;
+    }
+
+    .switch {
+        position: relative;
+        display: inline-block;
+        width: 56px;
+        height: 34px;
     }
 
 

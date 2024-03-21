@@ -33,11 +33,11 @@
                     <li id="settings_option" style="display:block; border-radius: 10px;">
                         <p>Settings</p>
                     </li>
+                    <li id="shortcuts_option" style="display:block; border-radius: 10px;">
+                        <p>Shortcuts</p>
+                    </li>
                     <li id="credits_option" style="display:block; border-radius: 10px;">
                         <p>Credits</p>
-                    </li>
-                    <li id="suggest_option" style="display:none; border-radius: 10px;">
-                        <p>Suggest a Feature</p>
                     </li>
                     <li id="about_option" style="display:block; border-radius: 10px;">
                         <p>About This Tool</p>
@@ -479,8 +479,7 @@
                 </label>
             </div>
             <div class="settings_hided_div" id="dev_hided_div" style="display:none">
-                <hr
-                    style="border-top: 1px solid rgb(100, 100, 100); border-right: none; border-bottom: none; border-left: none; border-image: initial;">
+                <hr style="border-top: 1px solid rgb(100, 100, 100); border-right: none; border-bottom: none; border-left: none; border-image: initial;">
                 <div class="popup_option">
                     <div class="popup_title">
                         <p class="popup_option_title">Development mode</p>
@@ -513,34 +512,6 @@
             </div>
         </div>
     </div>
-    <div id="suggest_popup" class="popup">
-        <div id="closeButton" onclick="closeSuggestions()">&#215;</div>
-        <div class="popup_title">
-            <h2>Suggest a feature</h2>
-        </div>
-        <div class="popup_description">
-            <p></p>
-        </div>
-        <div class="popup_content" style="display: flex; align-items: center;">
-            <form>
-                <select name="select_menu" id="select_menu" onchange="updateOptions()">
-                    <option value="" disabled selected>Select an option</option>
-                    <option value="option1">Suggest word for the dictionary</option>
-                    <option value="option2">Suggest a new format alert</option>
-                    <option value="option3">Send a feedback</option>
-                    <option value="option4">Report a bug</option>
-                </select>
-                <br>
-                <input type="text" name="text1" style="display: none;">
-                <br>
-                <input type="text" name="text2" style="display: none;">
-                <br>
-                <input type="text" name="text3" style="display: none;">
-                <br>
-                <textarea type="text" name="text4" style="display: none; word-wrap: break-word;"></textarea>
-            </form>
-        </div>
-    </div>
 
     <div id="about_popup" class="popup">
         <div id="closeButton" onclick="closeAboutInfo()">&#215;</div>
@@ -556,6 +527,190 @@
                         <div></div>
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="shortcuts_popup" class="popup">
+        <div id="closeButton" onclick="closeShortcuts()">&#215;</div>
+        <div class="popup_title">
+            <h2>Shortcuts</h2>
+        </div>
+        <div class="popup_description">
+            <div class="improvements_option">
+                <div class="impr_menu_true" id="op_keyboard" style="" title="">
+                    <p>Keyboard</p>
+                </div>
+                <div class="impr_menu_false" id="op_numpad" style="" title="Show numpad shortcuts">
+                    <p>Numpad</p>
+                </div>
+            </div>
+        </div>
+        <div class="popup_content" id="shortcutsKeyboardContent" style="display: flex; align-items: center;">
+            <div class="popup_content_intern" style="margin-bottom: 15px;">
+                <h3 class="popup_content_intern">Audio controls</h3>
+                <div class="popup_option">
+                    <div class="popup_title">
+                        <p class="shortcut_option">Play/Pause</p>
+                        <p class="popup_option_description"></p>
+                    </div>
+                    <div class="shortcut_icon_larger" color="blue">Tab</div>
+                </div>
+                <hr style="border-top: 1px solid rgb(100, 100, 100); border-right: none; border-bottom: none; border-left: none; border-image: initial; margin: 9px 0;">
+                <div class="popup_option">
+                    <div class="popup_title">
+                        <p class="shortcut_option">Rewind X seconds</p>
+                        <p class="popup_option_description"></p>
+                    </div>
+                    <div class="shortcut_icon_larger" color="blue">Shift</div>
+                    <div class="shortcut_icon_larger" color="blue">Tab</div>
+                </div>
+                <hr style="border-top: 1px solid rgb(100, 100, 100); border-right: none; border-bottom: none; border-left: none; border-image: initial; margin: 9px 0;">
+                <div class="popup_option">
+                    <div class="popup_title">
+                        <p class="shortcut_option">Skip X seconds</p>
+                        <p class="popup_option_description"></p>
+                    </div>
+                    <div class="shortcut_icon_larger" color="blue">Shift</div>
+                    <div class="shortcut_icon" color="blue" style="max-height: 40px;">Q</div>
+                </div>
+                <hr style="border-top: 1px solid rgb(100, 100, 100); border-right: none; border-bottom: none; border-left: none; border-image: initial; margin: 9px 0;">
+            </div>
+            <div class="popup_content_intern">
+                <h3>Tools</h3>
+                <div class="popup_option">
+                    <div class="popup_title">
+                        <p class="shortcut_option">Switch players</p>
+                        <p class="popup_option_description"></p>
+                    </div>
+                    <div class="shortcut_icon_larger" color="orange">Shift</div>
+                    <div class="shortcut_icon" color="orange" style="max-height: 40px;">A</div>
+                </div>
+                <hr style="border-top: 1px solid rgb(100, 100, 100); border-right: none; border-bottom: none; border-left: none; border-image: initial; margin: 9px 0;">
+                <div class="popup_option">
+                    <div class="popup_title">
+                        <p class="shortcut_option">Start timer</p>
+                        <p class="popup_option_description"></p>
+                    </div>
+                    <div class="shortcut_icon_larger" color="orange">Shift</div>
+                    <div class="shortcut_icon" color="orange" style="max-height: 40px;">X</div>
+                </div>
+                <hr style="border-top: 1px solid rgb(100, 100, 100); border-right: none; border-bottom: none; border-left: none; border-image: initial; margin: 9px 0;">
+            </div>
+        </div>
+        <div class="popup_content" id="shortcutsNumpadContent" style="display: none; align-items: center;">
+            <div class="popup_content_intern" style="margin-bottom: 15px;">
+                <h3 class="popup_content_intern">Audio controls</h3>
+                <div class="popup_option">
+                    <div class="popup_title">
+                        <p class="shortcut_option">Play/Pause</p>
+                        <p class="popup_option_description"></p>
+                    </div>
+                    <div class="shortcut_icon" color="blue">0</div>
+                </div>
+                <hr style="border-top: 1px solid rgb(100, 100, 100); border-right: none; border-bottom: none; border-left: none; border-image: initial; margin: 9px 0;">
+                <div class="popup_option">
+                    <div class="popup_title">
+                        <p class="shortcut_option">Rewind X seconds</p>
+                        <p class="popup_option_description"></p>
+                    </div>
+                    <div class="shortcut_icon" color="blue">1</div>
+                </div>
+                <hr style="border-top: 1px solid rgb(100, 100, 100); border-right: none; border-bottom: none; border-left: none; border-image: initial; margin: 9px 0;">
+                <div class="popup_option">
+                    <div class="popup_title">
+                        <p class="shortcut_option">Skip X seconds</p>
+                        <p class="popup_option_description"></p>
+                    </div>
+                    <div class="shortcut_icon" color="blue">3</div>
+                </div>
+                <hr style="border-top: 1px solid rgb(100, 100, 100); border-right: none; border-bottom: none; border-left: none; border-image: initial; margin: 9px 0;">
+                <div class="popup_option">
+                    <div class="popup_title">
+                        <p class="shortcut_option">Rewind to the last audio section</p>
+                        <p class="popup_option_description"></p>
+                    </div>
+                    <div class="shortcut_icon" color="blue">4</div>
+                </div>
+                <hr style="border-top: 1px solid rgb(100, 100, 100); border-right: none; border-bottom: none; border-left: none; border-image: initial; margin: 9px 0;">
+                <div class="popup_option">
+                    <div class="popup_title">
+                        <p class="shortcut_option">Play the current audio section</p>
+                        <p class="popup_option_description"></p>
+                    </div>
+                    <div class="shortcut_icon" color="blue">5</div>
+                </div>
+                <hr style="border-top: 1px solid rgb(100, 100, 100); border-right: none; border-bottom: none; border-left: none; border-image: initial; margin: 9px 0;">
+                <div class="popup_option">
+                    <div class="popup_title">
+                        <p class="shortcut_option">Skip to next audio section</p>
+                        <p class="popup_option_description"></p>
+                    </div>
+                    <div class="shortcut_icon" color="blue">6</div>
+                </div>
+                <hr style="border-top: 1px solid rgb(100, 100, 100); border-right: none; border-bottom: none; border-left: none; border-image: initial; margin: 9px 0;">
+            </div>
+            <div class="popup_content_intern" style="margin-bottom: 15px;">
+                <h3>Navegation</h3>
+                <div class="popup_option">
+                    <div class="popup_title">
+                        <p class="shortcut_option">Switch to 'Format' tab</p>
+                        <p class="popup_option_description"></p>
+                    </div>
+                    <div class="shortcut_icon" color="purple">7</div>
+                </div>
+                <hr style="border-top: 1px solid rgb(100, 100, 100); border-right: none; border-bottom: none; border-left: none; border-image: initial; margin: 9px 0;">
+                <div class="popup_option">
+                    <div class="popup_title">
+                        <p class="shortcut_option">Refresh suggestions</p>
+                        <p class="popup_option_description"></p>
+                    </div>
+                    <div class="shortcut_icon" color="purple">8</div>
+                </div>
+                <hr style="border-top: 1px solid rgb(100, 100, 100); border-right: none; border-bottom: none; border-left: none; border-image: initial; margin: 9px 0;">
+                <div class="popup_option">
+                    <div class="popup_title">
+                        <p class="shortcut_option">Switch to 'Grammar' tab</p>
+                        <p class="popup_option_description"></p>
+                    </div>
+                    <div class="shortcut_icon" color="purple">9</div>
+                </div>
+                <hr style="border-top: 1px solid rgb(100, 100, 100); border-right: none; border-bottom: none; border-left: none; border-image: initial; margin: 9px 0;">
+            </div>
+            <div class="popup_content_intern">
+                <h3>Tools</h3>
+                <div class="popup_option">
+                    <div class="popup_title">
+                        <p class="shortcut_option">Volume up</p>
+                        <p class="popup_option_description"></p>
+                    </div>
+                    <div class="shortcut_icon" color="orange">+</div>
+                </div>
+                <hr style="border-top: 1px solid rgb(100, 100, 100); border-right: none; border-bottom: none; border-left: none; border-image: initial; margin: 9px 0;">
+                <div class="popup_option">
+                    <div class="popup_title">
+                        <p class="shortcut_option">Volume down</p>
+                        <p class="popup_option_description"></p>
+                    </div>
+                    <div class="shortcut_icon" color="orange">-</div>
+                </div>
+                <hr style="border-top: 1px solid rgb(100, 100, 100); border-right: none; border-bottom: none; border-left: none; border-image: initial; margin: 9px 0;">
+                <div class="popup_option">
+                    <div class="popup_title">
+                        <p class="shortcut_option">Switch players</p>
+                        <p class="popup_option_description"></p>
+                    </div>
+                    <div class="shortcut_icon" color="orange">*</div>
+                </div>
+                <hr style="border-top: 1px solid rgb(100, 100, 100); border-right: none; border-bottom: none; border-left: none; border-image: initial; margin: 9px 0;">
+                <div class="popup_option">
+                    <div class="popup_title">
+                        <p class="shortcut_option">Start timer</p>
+                        <p class="popup_option_description"></p>
+                    </div>
+                    <div class="shortcut_icon" color="orange">2</div>
+                </div>
+                <hr style="border-top: 1px solid rgb(100, 100, 100); border-right: none; border-bottom: none; border-left: none; border-image: initial; margin: 9px 0;">
             </div>
         </div>
     </div>
@@ -1341,7 +1496,7 @@
             creditsPopup.style.display = "none";
             overlay.style.display = "none";
         }
-        function closeSuggestions() {
+        function closeShortcuts() {
             var suggestPopup = document.getElementById("suggest_popup");
             var overlay = document.getElementById("overlay");
             suggestPopup.style.display = "none";

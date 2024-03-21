@@ -149,6 +149,7 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
         // config inicial
+        detectBrowser()
         updateSidebar();
         setDefaultLanguage();
         setCheckboxStates();
@@ -902,12 +903,12 @@ document.addEventListener('DOMContentLoaded', function () {
 
             var settingsOption = document.getElementById("settings_option");
             var creditsOption = document.getElementById("credits_option");
-            var suggestOption = document.getElementById("suggest_option");
+            var shortcutsOption = document.getElementById("shortcuts_option");
             var aboutOption = document.getElementById("about_option");
 
             var settingsPopup = document.getElementById("settings_popup");
             var creditsPopup = document.getElementById("credits_popup");
-            var suggestPopup = document.getElementById("suggest_popup");
+            var shortcutsPopup = document.getElementById("shortcuts_popup");
             var aboutPopup = document.getElementById("about_popup");
 
             var overlay = document.getElementById("overlay");
@@ -960,15 +961,15 @@ document.addEventListener('DOMContentLoaded', function () {
             });
 
             // Show Suggestions
-            suggestOption.addEventListener("click", function () {
+            shortcutsOption.addEventListener("click", function () {
                 miniMenu.style.display = "none";
-                suggestPopup.style.display = "block";
+                shortcutsPopup.style.display = "block";
                 overlay.style.display = "block";
             });
 
             // Hide Suggestions
             overlay.addEventListener("click", function () {
-                suggestPopup.style.display = "none";
+                shortcutsPopup.style.display = "none";
                 overlay.style.display = "none";
             });
 
@@ -989,6 +990,9 @@ document.addEventListener('DOMContentLoaded', function () {
             const formatButton = document.getElementById('lf_option');
             const grammarButton = document.getElementById('lt_option');
 
+            const keyboardButton = document.getElementById('op_keyboard');
+            const numpadButton = document.getElementById('op_numpad');
+
             formatButton.addEventListener("click", function (event) {
                 showFormatTab()
             });
@@ -996,9 +1000,53 @@ document.addEventListener('DOMContentLoaded', function () {
             grammarButton.addEventListener("click", function (event) {
                 showGrammarTab()
             });
+
+            keyboardButton.addEventListener("click", function (event) {
+                showKeyboardTab()
+            });
+
+            numpadButton.addEventListener("click", function (event) {
+                showNumpadTab()
+            });
         });
 
 /* ****************************************** */
+
+function showKeyboardTab() {
+    const keyboardButton = document.getElementById('op_keyboard');
+    const numpadButton = document.getElementById('op_numpad');
+
+    const keyboardContainer = document.getElementById('shortcutsKeyboardContent');
+    const numpadContainer = document.getElementById('shortcutsNumpadContent');
+
+    keyboardButton.className = 'impr_menu_true'
+    numpadButton.className = 'impr_menu_false'
+    keyboardButton.title = ''
+    numpadButton.title = 'Show numpad shortcuts'
+
+    keyboardContainer.style = 'display:flex'
+    numpadContainer.style = 'display:none'
+    resetLineIssues();
+    closeContainers();
+}
+
+function showNumpadTab() {
+    const keyboardButton = document.getElementById('op_keyboard');
+    const numpadButton = document.getElementById('op_numpad');
+
+    const keyboardContainer = document.getElementById('shortcutsKeyboardContent');
+    const numpadContainer = document.getElementById('shortcutsNumpadContent');
+
+    numpadButton.className = 'impr_menu_true'
+    keyboardButton.className = 'impr_menu_false'
+    numpadButton.title = ''
+    keyboardButton.title = 'Show keyboard shortcuts'
+
+    numpadContainer.style = 'display:flex'
+    keyboardContainer.style = 'display:none'
+    resetLineIssues();
+    closeContainers();
+}
 
 /* FUNÇÕES PARA EXIBIR ABA DE FORMATO OU GRAMÁTICA */
 
@@ -1023,7 +1071,7 @@ function showFormatTab() {
 function showGrammarTab() {
     const formatButton = document.getElementById('lf_option');
     const grammarButton = document.getElementById('lt_option');
-    
+
     const formatContainer = document.getElementById('format_containers');
     const grammarContainer = document.getElementById('grammar_containers');
 
