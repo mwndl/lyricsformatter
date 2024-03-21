@@ -749,6 +749,17 @@
         padding: 2px 4px;
         margin: 0;
       }
+
+    .lt_redirect  {
+        position: relative;
+        text-align: center;
+        color: rgb(195, 195, 195);
+        font-size: 12px;
+        background-color: #131313;
+        padding: 6px 2px 0;
+        right: 20px;
+        bottom: 0;
+    }
     
     #editor .selected-line {
         background-color: yellow; /* Altere para a cor desejada */

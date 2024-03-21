@@ -84,7 +84,7 @@
                 <div class="improvements_box_text">
                     <p>Suggestions</p>
                 </div>
-                <div class="improvements_box" style="height: calc(90% - 120px);">
+                <div class="improvements_box" id="improvements_box" style="height: calc(90% - 120px);">
                     <div class="improvements_box_top">
                         <div class="improvements_menu" id="improvements_menu" style="display:none">
                             <div class="improvements_option">
@@ -358,6 +358,10 @@
     <div class="development_message" id="development_message">
         <h2>Mobile Interface Under Development</h2>
         <p>The interface for mobile devices is still under development. Please use a PC for the best experience.</p>
+    </div>
+
+    <div class="lt_redirect" id="lt_redirect" style="display:none">
+        <p>Click here to download the official LanguageTool add-on!</p>
     </div>
 
     <div id="overlay"></div>
@@ -723,13 +727,13 @@
                                 nextSectionButton();
                                 break;
                             case '7':
-                                toggleTimer()
+                                showFormatTab()
                                 break;
                             case '8':
-                                togglePlayer();
+                                handleRefreshButtonClick()
                                 break;
                             case '9':
-                                handleRefreshButtonClick()
+                                showGrammarTab()
                                 break;
                             case '0':
                                 player.togglePlay();
@@ -752,9 +756,88 @@
                     } else if (event.key === 'A' && event.shiftKey) { // Shift + Q
                         event.preventDefault();
                         togglePlayer();
+                    } else if (event.key === '*' && isNumpadKey) { // '+' do numpad
+                        event.preventDefault();
+                        togglePlayer();
+                    } else if (event.key === '-' && isNumpadKey) { // '+' do numpad
+                        event.preventDefault();
+                        let newVolume = parseInt(volumePercent) - 10;
+                        newVolume = Math.max(newVolume, 0);
+                        setPlayerVolume(newVolume);
+                        volumePercent = newVolume;
+                    } else if (event.key === '+' && isNumpadKey) { // '+' do numpad
+                        event.preventDefault();
+                        let newVolume = parseInt(volumePercent) + 10;
+                        // Limitar o volume a no máximo 100
+                        newVolume = Math.min(newVolume, 100);
+                        setPlayerVolume(newVolume);
+                        volumePercent = newVolume;
                     }
 
-                    });
+                });
+
+                /* COMANDOS DO TIMER */
+
+                var isTimerRunning = false;
+                document.addEventListener('keydown', function(event) {
+                    var numericKeys = ['2'];
+
+                    // verifica se a tecla pressionada está no numpad
+                    var isNumpadKey = (event.location === KeyboardEvent.DOM_KEY_LOCATION_NUMPAD);
+
+                    if (numericKeys.includes(event.key) && isNumpadKey && !isTimerRunning) {
+                        if (event.key === '2') {
+                            event.preventDefault();
+                            startTimer();
+                            isTimerRunning = true;
+                        }
+                    }
+                });
+
+                document.addEventListener('keyup', function(event) {
+                    var numericKeys = ['2'];
+
+                    // verifica se a tecla pressionada está no numpad
+                    var isNumpadKey = (event.location === KeyboardEvent.DOM_KEY_LOCATION_NUMPAD);
+
+                    if (numericKeys.includes(event.key) && isNumpadKey && isTimerRunning) {
+                        if (event.key === '2') {
+                            event.preventDefault();
+                            stopTimer();
+                            isTimerRunning = false;
+                        }
+                    }
+                });
+
+                document.addEventListener('keydown', function(event) {
+                    // Verifica se o elemento '#editor' não está focado
+                    var editor = document.getElementById('editor');
+                    var isEditorFocused = editor === document.activeElement;
+
+                    // Verifica se a tecla pressionada é a barra de espaço e se o temporizador não está em execução
+                    if (event.key === ' ' && !isTimerRunning && !isEditorFocused) {
+                        startTimer();
+                        isTimerRunning = true;
+                    } else if (event.key === 'X' && event.shiftKey && !isTimerRunning) { // Shift + Q
+                        event.preventDefault();
+                        startTimer();
+                        isTimerRunning = true;
+                    }
+                });
+
+                document.addEventListener('keyup', function(event) {
+                    // Verifica se o temporizador está em execução e se a tecla solta é a barra de espaço
+                    if (event.key === ' ' && isTimerRunning) {
+                        stopTimer();
+                        isTimerRunning = false;
+                    } else if (event.key === 'X' && event.shiftKey && isTimerRunning) { // Shift + Q
+                        event.preventDefault();
+                        stopTimer();
+                        isTimerRunning = false;
+                    }
+                });
+
+                /* COMANDOS DO TIMER */
 
                 // Função para atualizar a barra de progresso com base na posição atual da música
                 function updateProgressBar(position, duration) {

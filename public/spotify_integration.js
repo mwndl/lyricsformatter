@@ -272,6 +272,7 @@ async function spotifyRenewAuth() {
 }
 
 let currentSongId = '';
+let volumePercent = '';
 
 async function fetchCurrentlyPlayingData() {
     try {
@@ -339,6 +340,8 @@ async function fetchCurrentlyPlayingData() {
         // definir o ID na variável
         currentSongId = currentlyPlayingData.item.id;
 
+        volumePercent = currentlyPlayingData.device.volume_percent;
+
         /*  quick transfer */
 
                 spTransferIcon = document.getElementById('sp_fast_transfer');
@@ -397,6 +400,39 @@ async function fetchCurrentlyPlayingData() {
 
     } catch (error) {
         console.error('Error getting data from currently playing song: ', error.message);
+    }
+}
+
+async function setPlayerVolume(volumePercent) {
+    playing = getParameterByName('track_id')
+    if (!playing) {
+        return
+    }
+
+    try {
+        // Obter o token de acesso do armazenamento local do navegador
+        const accessToken = localStorage.getItem('accessToken');
+
+        // Verificar se o token de acesso está em cache
+        if (!accessToken) {
+            return; // Sair da função porque não há token do Spotify
+        }
+
+        // Fazer uma solicitação fetch para definir o volume do player do Spotify
+        const response = await fetch('https://api.spotify.com/v1/me/player/volume?volume_percent=' + volumePercent, {
+            method: 'PUT',
+            headers: {
+                'Authorization': `Bearer ${accessToken}`
+            }
+        });
+
+        if (response.ok) {
+            notification(volumePercent + '%')
+        } else {
+            console.error('Error adjusting player volume:', response.statusText);
+        }
+    } catch (error) {
+        console.error('Error adjusting player volume:', error);
     }
 }
 

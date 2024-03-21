@@ -149,6 +149,7 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
         // config inicial
+        detectBrowser()
         updateSidebar();
         setDefaultLanguage();
         setCheckboxStates();
@@ -257,9 +258,15 @@ document.addEventListener('DOMContentLoaded', function () {
             if (autoFormatToggle.checked) {
 
                 if (selectedLanguageCode === 'pt-BR' || selectedLanguageCode === 'pt-PT') {
-                    fixPunctuation();
                     replaceX();
                 }
+
+                if (selectedLanguageCode === 'pt-BR' || selectedLanguageCode === 'pt-PT'|| 
+                selectedLanguageCode === 'en-US' || selectedLanguageCode === 'en-GB'|| 
+                selectedLanguageCode === 'es' || selectedLanguageCode === 'it') {
+                    fixPunctuation1();
+                }
+
 
                 replaceSpecialTags(); // auto replace tags
                 addSpaceAboveTags(); // add (caso não haja) espaços acima de todas as tags
@@ -627,7 +634,8 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         }
 
-        function fixPunctuation() {
+        // corretor padrão
+        function fixPunctuation1() {
             var editor = document.getElementById('editor');
             var content = editor.value;
         
@@ -658,22 +666,19 @@ document.addEventListener('DOMContentLoaded', function () {
 
 /* NOTIFICAÇÕES TEMPORÁRIAS */
 
-        function notification(customMessage, hide = false) {
-            console.log('chamada!)')
+        function notification(customMessage) {
             const notification_div = document.getElementById("notification");
             const message = document.getElementById("notification-message");
             message.textContent = customMessage;
             notification_div.style.opacity = 1;
             notification_div.classList.remove("hidden");
 
-            if (!hide) {
+            setTimeout(() => {
+                notification_div.style.opacity = 0;
                 setTimeout(() => {
-                    notification_div.style.opacity = 0;
-                    setTimeout(() => {
-                        notification_div.classList.add("hidden");
-                    }, 500);
-                }, 4000); // Tempo de exibição
-            }
+                    notification_div.classList.add("hidden");
+                }, 500);
+            }, 4000); // Tempo de exibição
         };
 
 /* ****************************************** */
@@ -985,35 +990,54 @@ document.addEventListener('DOMContentLoaded', function () {
             const formatButton = document.getElementById('lf_option');
             const grammarButton = document.getElementById('lt_option');
 
-            const formatContainer = document.getElementById('format_containers');
-            const grammarContainer = document.getElementById('grammar_containers');
-
             formatButton.addEventListener("click", function (event) {
-                formatButton.className = 'impr_menu_true'
-                grammarButton.className = 'impr_menu_false'
-                formatButton.title = ''
-                grammarButton.title = 'Show grammar suggestions'
-
-                formatContainer.style = 'display:flex'
-                grammarContainer.style = 'display:none'
-                resetLineIssues();
-                closeContainers();
-
+                showFormatTab()
             });
 
             grammarButton.addEventListener("click", function (event) {
-                grammarButton.className = 'impr_menu_true'
-                formatButton.className = 'impr_menu_false'
-                grammarButton.title = ''
-                formatButton.title = 'Show format suggestions'
-
-                grammarContainer.style = 'display:flex'
-                formatContainer.style = 'display:none'
-                resetLineIssues();
-                closeContainers();
-
+                showGrammarTab()
             });
         });
+
+/* ****************************************** */
+
+/* FUNÇÕES PARA EXIBIR ABA DE FORMATO OU GRAMÁTICA */
+
+function showFormatTab() {
+    const formatButton = document.getElementById('lf_option');
+    const grammarButton = document.getElementById('lt_option');
+
+    const formatContainer = document.getElementById('format_containers');
+    const grammarContainer = document.getElementById('grammar_containers');
+
+    formatButton.className = 'impr_menu_true'
+    grammarButton.className = 'impr_menu_false'
+    formatButton.title = ''
+    grammarButton.title = 'Show grammar suggestions'
+
+    formatContainer.style = 'display:flex'
+    grammarContainer.style = 'display:none'
+    resetLineIssues();
+    closeContainers();
+}
+
+function showGrammarTab() {
+    const formatButton = document.getElementById('lf_option');
+    const grammarButton = document.getElementById('lt_option');
+    
+    const formatContainer = document.getElementById('format_containers');
+    const grammarContainer = document.getElementById('grammar_containers');
+
+    grammarButton.className = 'impr_menu_true'
+    formatButton.className = 'impr_menu_false'
+    grammarButton.title = ''
+    formatButton.title = 'Show format suggestions'
+
+    grammarContainer.style = 'display:flex'
+    formatContainer.style = 'display:none'
+    resetLineIssues();
+    closeContainers();
+}
 
 /* ****************************************** */
 
