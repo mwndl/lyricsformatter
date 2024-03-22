@@ -1161,7 +1161,10 @@
                     clearInterval(intervalId); // Limpa o intervalo de atualização do display
 
                     const timerElement = document.getElementById("timer");
-                    timerElement.style.opacity = "0";
+                    setTimeout(function() {
+                        timerElement.style.opacity = "0";
+                    }, 2000); // Atraso de 2 segundos em milissegundos
+
                     isTimerRunning = false; // Atualiza o estado do temporizador
                 }
 
