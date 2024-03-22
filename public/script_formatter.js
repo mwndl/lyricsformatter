@@ -363,12 +363,14 @@ function addTextToSelectedLine(text) {
                     fixPunctuation1();
                 }
 
-
                 replaceSpecialTags(); // auto replace tags
+                trimEditorContent(); // linhas antes ou depois da letra (1)
+                removeExcessInstrumental(); // remove tags instrumentais duplicadas
+                removeInstrumentalStardEnd(); // remove instrumentais no início/fim da letra
                 addSpaceAboveTags(); // add (caso não haja) espaços acima de todas as tags
                 removeSpacesAroundInstrumental(); // espaços ao redor de tags instrumentais
-                trimEditorContent(); // linhas antes ou depois da letra
-                autoTrim(); // espaços extras no início ou fim
+                trimEditorContent(); // linhas antes ou depois da letra (2)
+                autoTrim(); // espaços extras no início ou fim 
                 removeDuplicateSpaces(); // espaços duplos entre palavras
                 removeDuplicateEmptyLines(); // linhas vazias duplicadas entre estrofes
             }
@@ -571,6 +573,78 @@ function addTextToSelectedLine(text) {
             // atualiza o editor
             editor.value = content;
 
+            // restaura a posição do cursor
+            editor.setSelectionRange(startPos, endPos);
+        }
+
+        function removeInstrumentalStardEnd() {
+            var editor = document.getElementById('editor');
+            var content = editor.value;
+        
+            // salvar a posição do cursor
+            var startPos = editor.selectionStart;
+            var endPos = editor.selectionEnd;
+        
+            // separa as linhas
+            var lines = content.split('\n');
+        
+            // verifica se a primeira linha contém '#INSTRUMENTAL'
+            if (lines[0].trim() === '#INSTRUMENTAL') {
+                lines.shift(); // remove a primeira linha
+            }
+        
+            // verifica se a última linha contém '#INSTRUMENTAL'
+            if (lines[lines.length - 1].trim() === '#INSTRUMENTAL') {
+                lines.pop(); // remove a última linha
+            }
+        
+            // reune as linhas novamente
+            content = lines.join('\n');
+        
+            // atualiza o editor
+            editor.value = content;
+        
+            // restaura a posição do cursor
+            editor.setSelectionRange(startPos, endPos);
+        }
+
+        function removeExcessInstrumental() {
+            var editor = document.getElementById('editor');
+            var content = editor.value;
+        
+            // salvar a posição do cursor
+            var startPos = editor.selectionStart;
+            var endPos = editor.selectionEnd;
+        
+            // separa as linhas
+            var lines = content.split('\n');
+        
+            var cleanedLines = [];
+            var prevLineWasInstrumental = false;
+        
+            // percorre todas as linhas
+            for (var i = 0; i < lines.length; i++) {
+                var line = lines[i].trim();
+        
+                // verifica se a linha atual é '#INSTRUMENTAL'
+                if (line === '#INSTRUMENTAL') {
+                    // verifica se a linha anterior também era '#INSTRUMENTAL'
+                    if (!prevLineWasInstrumental) {
+                        cleanedLines.push(line);
+                        prevLineWasInstrumental = true;
+                    }
+                } else {
+                    cleanedLines.push(line);
+                    prevLineWasInstrumental = false;
+                }
+            }
+        
+            // reune as linhas novamente
+            content = cleanedLines.join('\n');
+        
+            // atualiza o editor
+            editor.value = content;
+        
             // restaura a posição do cursor
             editor.setSelectionRange(startPos, endPos);
         }
