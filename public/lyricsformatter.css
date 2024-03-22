@@ -402,8 +402,8 @@
         background-color: #2196F3; /* Azul */
     }
     
-    .shortcut_icon[color="orange"] {
-        background-color: #48c2b0; /* Verde */
+    .shortcut_icon[color="green"] {
+        background-color: #2faaa2; /* Verde */
     }
     
     .shortcut_icon[color="purple"] {
@@ -412,8 +412,9 @@
 
     
     .shortcut_icon_larger {
-        width: 70px; /* Largura */
         height: 40px; /* Altura */
+        max-height: 40px; /* Altura */
+        padding: 0 15px;
         border-radius: 10px; /* Borda arredondada */
         display: flex;
         justify-content: center; /* Centraliza horizontalmente */
@@ -426,8 +427,8 @@
         background-color: #2196F3; /* Azul */
     }
     
-    .shortcut_icon_larger[color="orange"] {
-        background-color: #48c2b0; /* Verde */
+    .shortcut_icon_larger[color="green"] {
+        background-color: #2faaa2; /* Verde */
     }
     
     .shortcut_icon_larger[color="purple"] {
