@@ -69,14 +69,15 @@ function createMatchContainers(matches) {
         || match.sentence === "#OUTRO" || match.sentence === "#INSTRUMENTAL") {
             return; // Ignorar o loop e continuar com o próximo match
         }
-        if (ignoredContainers.includes(`lt_${match.offset}_${match.offset}(${match.context.text} - ${match.message})`)) {
+
+        if (ignoredContainers.includes(`lt_${match.message}_${match.sentence}(${match.rule.id})`)) {
             return; 
         }
 
         var matchContainer = document.createElement('div');
         matchContainer.classList.add('container');
         matchContainer.setAttribute('onclick', 'expandContainer(this)');
-        matchContainer.id = `lt_${match.offset}_${match.offset}(${match.context.text} - ${match.message})`;
+        matchContainer.id = `lt_${match.message}_${match.sentence}(${match.rule.id})`;
         
         // Adicionando o atributo lt-position
         matchContainer.setAttribute('lt-position', `${match.offset}:${match.length}`);
@@ -129,5 +130,42 @@ function replaceText(offset, length, replacement) {
     var newText = editorValue.substring(0, offset) + replacement + editorValue.substring(offset + length);
     editor.value = newText;
     handleRefreshButtonClick();
+}
+
+function detectBrowser() {
+    // Obtém o user agent do navegador
+    var userAgent = navigator.userAgent;
+    
+    // Verifica se o navegador é o Opera
+    if (userAgent.indexOf("OPR") > -1 || userAgent.indexOf("Opera") > -1) {
+        notification("You're using the Opera browser.");
+        return;
+    }
+    
+    // Verifica se o navegador é o Edge
+    if (userAgent.indexOf("Edg") > -1) {
+        notification("You're using the Microsoft Edge browser.");
+        return;
+    }
+    
+    // Verifica se o navegador é o Chrome
+    if (userAgent.indexOf("Chrome") > -1) {
+        notification("You're using the Google Chrome browser.");
+        return;
+    }
+    
+    // Verifica se o navegador é o Safari
+    if (userAgent.indexOf("Safari") > -1 && userAgent.indexOf("Chrome") === -1) {
+        notification("You're using the Safari browser.");
+        return;
+    }
+    
+    // Verifica se o navegador é o Firefox
+    if (userAgent.indexOf("Firefox") > -1) {
+        notification("You're using the Mozilla Firefox browser.");
+        return;
+    }
+    
+    return;
 }
 

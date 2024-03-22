@@ -180,6 +180,39 @@ document.addEventListener('DOMContentLoaded', function () {
             fixButton(event.target);
         });
     });
+
+    document.addEventListener('keydown', function (event) {
+
+        var numericKeys = ['7', '8', '9'];
+
+        // verifica se a tecla pressionada está no numpad
+        var isNumpadKey = (event.location === KeyboardEvent.DOM_KEY_LOCATION_NUMPAD);
+
+        if (numericKeys.includes(event.key) && isNumpadKey) {
+            event.preventDefault();
+            switch (event.key) {
+                case '7':
+                    showFormatTab()
+                    break;
+                case '8':
+                    handleRefreshButtonClick()
+                    break;
+                case '9':
+                    showGrammarTab()
+                    break;
+                default:
+                    // outras teclas (não são tratadas)
+                    break;
+            }
+        } else if ((event.ctrlKey || event.metaKey) && event.key === '.') { // Ctrl/Cmd + .
+            event.preventDefault();
+            toggleTab()
+        } else if ((event.ctrlKey || event.metaKey) && event.key === ',') { // Ctrl/Cmd + ,
+            event.preventDefault();
+            handleRefreshButtonClick()
+        }
+
+    });
 });
 
 
@@ -244,8 +277,29 @@ document.addEventListener('DOMContentLoaded', function () {
             var loadingSpinner = document.getElementById('loading_spinner');
             var textArea = document.getElementById('editor');
             var autoFormatToggle = document.getElementById('autoFormatToggle');
+            var selectedLanguageCode = getParameterByName('language')
 
+            if (textArea.value === '') {
+                fetchCurrentlyPlayingData();
+                notification("The editor is empty, there's nothing to be checked here");
+                return;
+            }
+
+
+            // EXECUTAR AUTO FORMAT
             if (autoFormatToggle.checked) {
+
+                if (selectedLanguageCode === 'pt-BR' || selectedLanguageCode === 'pt-PT') {
+                    replaceX();
+                }
+
+                if (selectedLanguageCode === 'pt-BR' || selectedLanguageCode === 'pt-PT'|| 
+                selectedLanguageCode === 'en-US' || selectedLanguageCode === 'en-GB'|| 
+                selectedLanguageCode === 'es' || selectedLanguageCode === 'it') {
+                    fixPunctuation1();
+                }
+
+
                 replaceSpecialTags(); // auto replace tags
                 addSpaceAboveTags(); // add (caso não haja) espaços acima de todas as tags
                 removeSpacesAroundInstrumental(); // espaços ao redor de tags instrumentais
@@ -265,9 +319,6 @@ document.addEventListener('DOMContentLoaded', function () {
             // Hide the refresh button and show the loading spinner
             refreshButton.style.display = 'none';
             loadingSpinner.style.display = 'block';
-
-            // Get the language code from the selected language element
-            var selectedLanguageCode = getParameterByName('language')
 
             // Check if a language is selected
             if (!selectedLanguageCode) {
@@ -615,6 +666,34 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         }
 
+        // corretor padrão
+        function fixPunctuation1() {
+            var editor = document.getElementById('editor');
+            var content = editor.value;
+        
+            content = content.replace(/([:;,?!])(?=[^\s])/g, '$1 '); // Adiciona espaço após outras pontuações
+            content = content.replace(/\((\s+)/g, '('); // Remove espaço após '('
+            content = content.replace(/\(([^\s])/g, '($1'); // Adiciona espaço antes de '('
+            content = content.replace(/(\s+)\)/g, '$1) '); // Remove espaço antes de ')' e adiciona espaço após ')'
+            content = content.replace(/\s+([!?,:;\)])/g, '$1'); // Remove espaços antes de !?,:; e )
+            
+        
+            // Atualizar o conteúdo do editor
+            editor.value = content;
+        }
+
+        function replaceX() {
+            var editor = document.getElementById('editor');
+            var content = editor.value;
+        
+            // Substituir termos número + x + número por número + × + número
+            content = content.replace(/(\d+)\s*x\s*(\d+)/gi, '$1×$2');
+        
+            // Atualizar o conteúdo do editor
+            editor.value = content;
+        }
+
+
 /* ****************************************** */
 
 /* NOTIFICAÇÕES TEMPORÁRIAS */
@@ -625,11 +704,12 @@ document.addEventListener('DOMContentLoaded', function () {
             message.textContent = customMessage;
             notification_div.style.opacity = 1;
             notification_div.classList.remove("hidden");
+
             setTimeout(() => {
-            notification_div.style.opacity = 0;
-            setTimeout(() => {
-                notification_div.classList.add("hidden");
-            }, 500);
+                notification_div.style.opacity = 0;
+                setTimeout(() => {
+                    notification_div.classList.add("hidden");
+                }, 500);
             }, 4000); // Tempo de exibição
         };
 
@@ -833,6 +913,13 @@ document.addEventListener('DOMContentLoaded', function () {
 
                 if (checkboxState !== null) {
                     checkbox.checked = JSON.parse(checkboxState);
+                } else {
+                    // Se não houver informação em cache, defina os estados padrão
+                    if (checkboxId === 'autoCapToggle' || checkboxId === 'autoFormatToggle') {
+                        checkbox.checked = true; // Ativado
+                    } else {
+                        checkbox.checked = false; // Desativado
+                    }
                 }
             });
         }
@@ -848,12 +935,12 @@ document.addEventListener('DOMContentLoaded', function () {
 
             var settingsOption = document.getElementById("settings_option");
             var creditsOption = document.getElementById("credits_option");
-            var suggestOption = document.getElementById("suggest_option");
+            var shortcutsOption = document.getElementById("shortcuts_option");
             var aboutOption = document.getElementById("about_option");
 
             var settingsPopup = document.getElementById("settings_popup");
             var creditsPopup = document.getElementById("credits_popup");
-            var suggestPopup = document.getElementById("suggest_popup");
+            var shortcutsPopup = document.getElementById("shortcuts_popup");
             var aboutPopup = document.getElementById("about_popup");
 
             var overlay = document.getElementById("overlay");
@@ -906,15 +993,15 @@ document.addEventListener('DOMContentLoaded', function () {
             });
 
             // Show Suggestions
-            suggestOption.addEventListener("click", function () {
+            shortcutsOption.addEventListener("click", function () {
                 miniMenu.style.display = "none";
-                suggestPopup.style.display = "block";
+                shortcutsPopup.style.display = "block";
                 overlay.style.display = "block";
             });
 
             // Hide Suggestions
             overlay.addEventListener("click", function () {
-                suggestPopup.style.display = "none";
+                shortcutsPopup.style.display = "none";
                 overlay.style.display = "none";
             });
 
@@ -935,35 +1022,115 @@ document.addEventListener('DOMContentLoaded', function () {
             const formatButton = document.getElementById('lf_option');
             const grammarButton = document.getElementById('lt_option');
 
-            const formatContainer = document.getElementById('format_containers');
-            const grammarContainer = document.getElementById('grammar_containers');
+            const keyboardButton = document.getElementById('op_keyboard');
+            const numpadButton = document.getElementById('op_numpad');
 
             formatButton.addEventListener("click", function (event) {
-                formatButton.className = 'impr_menu_true'
-                grammarButton.className = 'impr_menu_false'
-                formatButton.title = ''
-                grammarButton.title = 'Show grammar suggestions'
-
-                formatContainer.style = 'display:flex'
-                grammarContainer.style = 'display:none'
-                resetLineIssues();
-                closeContainers();
-
+                showFormatTab()
             });
 
             grammarButton.addEventListener("click", function (event) {
-                grammarButton.className = 'impr_menu_true'
-                formatButton.className = 'impr_menu_false'
-                grammarButton.title = ''
-                formatButton.title = 'Show format suggestions'
+                showGrammarTab()
+            });
 
-                grammarContainer.style = 'display:flex'
-                formatContainer.style = 'display:none'
-                resetLineIssues();
-                closeContainers();
+            keyboardButton.addEventListener("click", function (event) {
+                showKeyboardTab()
+            });
 
+            numpadButton.addEventListener("click", function (event) {
+                showNumpadTab()
             });
         });
+
+/* ****************************************** */
+
+function showKeyboardTab() {
+    const keyboardButton = document.getElementById('op_keyboard');
+    const numpadButton = document.getElementById('op_numpad');
+
+    const keyboardContainer = document.getElementById('shortcutsKeyboardContent');
+    const numpadContainer = document.getElementById('shortcutsNumpadContent');
+
+    keyboardButton.className = 'impr_menu_true'
+    numpadButton.className = 'impr_menu_false'
+    keyboardButton.title = ''
+    numpadButton.title = 'Show numpad shortcuts'
+
+    keyboardContainer.style = 'display:flex'
+    numpadContainer.style = 'display:none'
+    resetLineIssues();
+    closeContainers();
+}
+
+function showNumpadTab() {
+    const keyboardButton = document.getElementById('op_keyboard');
+    const numpadButton = document.getElementById('op_numpad');
+
+    const keyboardContainer = document.getElementById('shortcutsKeyboardContent');
+    const numpadContainer = document.getElementById('shortcutsNumpadContent');
+
+    numpadButton.className = 'impr_menu_true'
+    keyboardButton.className = 'impr_menu_false'
+    numpadButton.title = ''
+    keyboardButton.title = 'Show keyboard shortcuts'
+
+    numpadContainer.style = 'display:flex'
+    keyboardContainer.style = 'display:none'
+    resetLineIssues();
+    closeContainers();
+}
+
+/* FUNÇÕES PARA EXIBIR ABA DE FORMATO OU GRAMÁTICA */
+
+function toggleTab() {
+    const formatButton = document.getElementById('lf_option');
+    const formatVisible = formatButton.className === 'impr_menu_true';
+
+    // Se a aba do teclado estiver visível, alterna para a aba do numpad
+    if (formatVisible) {
+        showGrammarTab()
+    } 
+    // Se a aba do numpad estiver visível, alterna para a aba do teclado
+    else {
+        showFormatTab()
+    }
+}
+
+function showFormatTab() {
+    const formatButton = document.getElementById('lf_option');
+    const grammarButton = document.getElementById('lt_option');
+
+    const formatContainer = document.getElementById('format_containers');
+    const grammarContainer = document.getElementById('grammar_containers');
+
+    formatButton.className = 'impr_menu_true'
+    grammarButton.className = 'impr_menu_false'
+    formatButton.title = ''
+    grammarButton.title = 'Show grammar suggestions'
+
+    formatContainer.style = 'display:flex'
+    grammarContainer.style = 'display:none'
+    resetLineIssues();
+    closeContainers();
+}
+
+function showGrammarTab() {
+    const formatButton = document.getElementById('lf_option');
+    const grammarButton = document.getElementById('lt_option');
+
+    const formatContainer = document.getElementById('format_containers');
+    const grammarContainer = document.getElementById('grammar_containers');
+
+    grammarButton.className = 'impr_menu_true'
+    formatButton.className = 'impr_menu_false'
+    grammarButton.title = ''
+    formatButton.title = 'Show format suggestions'
+
+    grammarContainer.style = 'display:flex'
+    formatContainer.style = 'display:none'
+    resetLineIssues();
+    closeContainers();
+}
 
 /* ****************************************** */
 
@@ -1277,15 +1444,27 @@ function updateLineIssues(color, lines) {
 
             const contentDiv = document.createElement('div');
             contentDiv.className = 'content_ok';
+            contentDiv.style.display = 'flex';
+            contentDiv.style.alignItems = 'center'; // Align items vertically
 
             const h2 = document.createElement('h2');
-            h2.textContent = 'No format issues found! ✨';
 
             const copyBtn = document.createElement('div');
             copyBtn.className = 'content_copy_btn';
             copyBtn.textContent = 'Copy';
             copyBtn.onclick = copyToClipboard;
 
+            // Create a span for the SVG
+            const svgSpan = document.createElement('span');
+            svgSpan.style.display = 'flex';
+            svgSpan.innerHTML = `
+            <svg fill="#ffffff" width="18px" height="18px" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
+                <path d="M208.8584,144a15.85626,15.85626,0,0,1-10.46778,15.01367l-52.16015,19.2168-19.2168,52.16015a16.00075,16.00075,0,0,1-30.02734,0l-19.2168-52.16015-52.16015-19.2168a16.00075,16.00075,0,0,1,0-30.02734l52.16015-19.2168,19.2168-52.16015a16.00075,16.00075,0,0,1,30.02734,0l19.2168,52.16015,52.16015,19.2168A15.85626,15.85626,0,0,1,208.8584,144ZM152,48h16V64a8,8,0,0,0,16,0V48h16a8,8,0,0,0,0-16H184V16a8,8,0,0,0-16,0V32H152a8,8,0,0,0,0,16Zm88,32h-8V72a8,8,0,0,0-16,0v8h-8a8,8,0,0,0,0,16h8v8a8,8,0,0,0,16,0V96h8a8,8,0,0,0,0-16Z"></path>
+            </svg>
+            `;
+
+            h2.textContent = 'No format issues!'; // Add the text to h2
+            h2.appendChild(svgSpan); // Append the span containing the SVG after the text
             contentDiv.appendChild(h2);
             contentDiv.appendChild(copyBtn);
             noIssuesDiv.appendChild(contentDiv);
@@ -1314,14 +1493,24 @@ function updateLineIssues(color, lines) {
 
             const contentDiv = document.createElement('div');
             contentDiv.className = 'content_ok';
+            contentDiv.style.display = 'flex';
+            contentDiv.style.alignItems = 'center'; // Align items vertically
 
             const h2 = document.createElement('h2');
-            h2.textContent = 'No grammar issues found! ✨';
 
             const copyBtn = document.createElement('div');
             copyBtn.className = 'content_copy_btn';
             copyBtn.textContent = 'Copy';
             copyBtn.onclick = copyToClipboard;
+            const svgSpan = document.createElement('span');
+            svgSpan.innerHTML = `
+            <svg fill="#ffffff" width="18px" height="18px" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
+                <path d="M208.8584,144a15.85626,15.85626,0,0,1-10.46778,15.01367l-52.16015,19.2168-19.2168,52.16015a16.00075,16.00075,0,0,1-30.02734,0l-19.2168-52.16015-52.16015-19.2168a16.00075,16.00075,0,0,1,0-30.02734l52.16015-19.2168,19.2168-52.16015a16.00075,16.00075,0,0,1,30.02734,0l19.2168,52.16015,52.16015,19.2168A15.85626,15.85626,0,0,1,208.8584,144ZM152,48h16V64a8,8,0,0,0,16,0V48h16a8,8,0,0,0,0-16H184V16a8,8,0,0,0-16,0V32H152a8,8,0,0,0,0,16Zm88,32h-8V72a8,8,0,0,0-16,0v8h-8a8,8,0,0,0,0,16h8v8a8,8,0,0,0,16,0V96h8a8,8,0,0,0,0-16Z"></path>
+            </svg>
+            `;
+
+            h2.textContent = 'No grammar issues!';
+            h2.appendChild(svgSpan);
 
             contentDiv.appendChild(h2);
             contentDiv.appendChild(copyBtn);
@@ -1660,14 +1849,34 @@ function updateLineIssues(color, lines) {
             localStorage.setItem('spMenu', 'false');
         }
 
+        function showSpShortcuts() {
+            document.getElementById('audio_controls_numpad').style = 'margin-bottom: 15px;'
+            document.getElementById('additional_features_numpad').style = ""
+            document.getElementById('audio_controls_keyboard').style = 'margin-bottom: 15px;'
+            document.getElementById('additional_features_keyboard').style = ""
+            document.getElementById('navegation_keyboard').style = "margin-bottom: 15px;"
+            document.getElementById('navegation_numpad').style = "margin-bottom: 15px;"
+        }
+
+        function hideSpShortcuts() {
+            document.getElementById('audio_controls_numpad').style = 'margin-bottom: 15px; display:none'
+            document.getElementById('additional_features_numpad').style = "display:none"
+            document.getElementById('audio_controls_keyboard').style = 'margin-bottom: 15px; display:none'
+            document.getElementById('additional_features_keyboard').style = "display:none"
+            document.getElementById('navegation_keyboard').style = ""
+            document.getElementById('navegation_numpad').style = ""
+        }
+
         // exibe / oculta o menu do spotify
         function loadSpMenu() {
             const spMenu = localStorage.getItem('spMenu');
 
             if (spMenu === 'true') {
                 showSpMenuDiv();
+                showSpShortcuts()
             } else if (spMenu === 'false') {
                 hideSpMenuDiv();
+                hideSpShortcuts()
             }
         }
 
@@ -1728,3 +1937,14 @@ function updateLineIssues(color, lines) {
         }
 
 /* ****************************************** */
+
+// Adicione isso ao seu JavaScript para alternar a visibilidade das opções quando o botão de toggle é clicado
+document.getElementById('toggle_options').addEventListener('click', function() {
+    var extendedOptions = document.querySelector('.extended-options');
+    this.classList.toggle('active');
+    if (extendedOptions.style.display === 'flex') {
+        extendedOptions.style.display = 'none';
+    } else {
+        extendedOptions.style.display = 'flex';
+    }
+});

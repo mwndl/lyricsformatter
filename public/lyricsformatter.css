@@ -369,8 +369,72 @@
   .bold {
     font-weight: bold;
   }
-  
-  
+
+  .popup_content_intern {
+    width: 100%;
+    padding: 3px 5px;
+    box-sizing: border-box;
+  }
+
+  .popup_content_intern h3 {
+    padding: 3px 5px;
+    margin: 0 0 20px;
+    font-size: 18px;
+    font-weight: bold;
+  }
+
+  .shortcut_option {
+    font-size: 16px;
+  }
+
+    .shortcut_icon {
+        width: 50px; /* Largura */
+        height: 50px; /* Altura */
+        border-radius: 10px; /* Borda arredondada */
+        display: flex;
+        justify-content: center; /* Centraliza horizontalmente */
+        align-items: center; /* Centraliza verticalmente */
+        font-size: 22px; /* Tamanho da fonte */
+        margin: 0 0 0 5px;
+    }
+
+    .shortcut_icon[color="blue"] {
+        background-color: #2196F3; /* Azul */
+    }
+    
+    .shortcut_icon[color="green"] {
+        background-color: #2faaa2; /* Verde */
+    }
+    
+    .shortcut_icon[color="purple"] {
+        background-color: #4f66ff; /* Vermelho */
+    }
+
+    
+    .shortcut_icon_larger {
+        height: 40px; /* Altura */
+        max-height: 40px; /* Altura */
+        padding: 0 15px;
+        border-radius: 10px; /* Borda arredondada */
+        display: flex;
+        justify-content: center; /* Centraliza horizontalmente */
+        align-items: center; /* Centraliza verticalmente */
+        font-size: 18px; /* Tamanho da fonte */
+        margin: 0 0 0 5px;
+    }
+
+    .shortcut_icon_larger[color="blue"] {
+        background-color: #2196F3; /* Azul */
+    }
+    
+    .shortcut_icon_larger[color="green"] {
+        background-color: #2faaa2; /* Verde */
+    }
+    
+    .shortcut_icon_larger[color="purple"] {
+        background-color: #4f66ff; /* Vermelho */
+    }
+
   
   
     #closeButton {
@@ -430,7 +494,7 @@
         .switch {
             position: relative;
             display: inline-block;
-            width: 67px;
+            width: 60px;
             height: 34px;
         }
         
@@ -492,7 +556,7 @@
         /* Swith end */
         
         .popup_title {
-            width: 100%;
+            width: 80%;
             padding: 10px;
             display: flex;
             flex-direction: column;
@@ -540,6 +604,7 @@
         width: 100%;
         font-size: 18px;
         display: flex;
+        flex-direction: row;
         align-items: center;
         justify-content: space-between;
         margin: 5px 0 5px 0;
@@ -749,6 +814,17 @@
         padding: 2px 4px;
         margin: 0;
       }
+
+    .lt_redirect  {
+        position: relative;
+        text-align: center;
+        color: rgb(195, 195, 195);
+        font-size: 12px;
+        background-color: #131313;
+        padding: 6px 2px 0;
+        right: 20px;
+        bottom: 0;
+    }
     
     #editor .selected-line {
         background-color: yellow; /* Altere para a cor desejada */
@@ -1343,6 +1419,11 @@
         margin: 0;
         padding: 10px;
         font-size: 16px;
+        align-items: center;
+        display: flex;
+        pointer-events: none;
+        transform: none;
+        transition: none;
     }
     
     .container .content {
@@ -1517,6 +1598,22 @@
         justify-content: flex-end; /* Isso alinhará o item no final da div verticalmente */
         width: 100%;
     }
+
+
+    #timer {
+        position: absolute;
+        bottom: 70px; /* ajuste conforme necessário */
+        left: 14px; /* ajuste conforme necessário */
+        padding: 8px 15px;
+        background-color: #ffffff;
+        border-radius: 10px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 18px;
+        opacity: 0; /* Definindo a opacidade como 0 para ocultar inicialmente */
+        transition: opacity 0.5s ease; /* Adicionando transição de opacidade */
+    }
   
   
     /* SP PLAYER REAL */
@@ -1620,6 +1717,10 @@
         text-decoration: none;
         color: #ffffff;
         transition: background-color 0.3s ease;
+    }
+
+    .sp_device {
+        cursor: pointer;
     }
     
     .devices_options a:hover {
@@ -1909,6 +2010,10 @@
   
   .development_message {
     display:none;
+  }
+
+  .extended-options, #toggle_options {
+    display: none; 
   }
   
   
@@ -2364,6 +2469,57 @@
         -webkit-transition: .4s;
         transition: .4s;
     }
+
+    .switch {
+        position: relative;
+        display: inline-block;
+        width: 56px;
+        height: 34px;
+    }
+
+
+    .extended-options {
+        position: fixed;
+        bottom: 60px; /* altura da barra do player */
+        left: 0;
+        width: 100%;
+        background-color: #131313;
+        border-top: 1px solid #252525;
+        display: none; /* Inicialmente oculto */
+        flex-direction: column;
+        padding: 10px 20px; /* Ajuste conforme necessário */
+        box-sizing: border-box;
+    }
+
+.option {
+    color: white;
+    padding: 10px 0;
+    cursor: pointer;
+}
+
+/* Adicione isso ao seu CSS para o layout estendido no mobile */
+#toggle_options {
+    position: relative;
+    display: block;
+    cursor: pointer; /* Adiciona um cursor indicando que é clicável */
+}
+
+#toggle_options svg.arrow {
+    width: 24px; /* Largura ajustável conforme necessário */
+    height: 24px; /* Altura ajustável conforme necessário */
+    fill: #ffffff; /* Cor ajustável conforme necessário */
+    cursor: pointer;
+    transition: transform 0.3s ease; /* Adiciona uma transição suave para a rotação da seta */
+}
+
+#toggle_options.active svg {
+    transform: rotate(-90deg);
+    transition: transform 0.3s ease; /* Adicione uma transição suave para a rotação */
+}
+
+.controls-right {
+    display:none;
+}
 
 
 
