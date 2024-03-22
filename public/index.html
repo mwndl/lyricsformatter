@@ -732,7 +732,83 @@
                 </div>
                 <hr style="border-top: 1px solid rgb(100, 100, 100); border-right: none; border-bottom: none; border-left: none; border-image: initial; margin: 9px 0;">
             </div>
+            <div class="popup_content_intern" id="tags_shortcuts_numpad">
+                <h3>Tag Shortcuts</h3>
+                <div class="popup_option">
+                    <div class="popup_title">
+                        <p class="shortcut_option">#INSTRUMENTAL</p>
+                        <p class="popup_option_description"></p>
+                    </div>
+                    <div class="shortcut_icon_larger" color="orange">Shift</div>
+                    <div class="shortcut_icon" color="orange" style="max-height: 40px;">0</div>
+                </div>
+                <hr style="border-top: 1px solid rgb(100, 100, 100); border-right: none; border-bottom: none; border-left: none; border-image: initial; margin: 9px 0;">
+                <div class="popup_option">
+                    <div class="popup_title">
+                        <p class="shortcut_option">#INTRO</p>
+                        <p class="popup_option_description"></p>
+                    </div>
+                    <div class="shortcut_icon_larger" color="orange">Shift</div>
+                    <div class="shortcut_icon" color="orange" style="max-height: 40px;">1</div>
+                </div>
+                <hr style="border-top: 1px solid rgb(100, 100, 100); border-right: none; border-bottom: none; border-left: none; border-image: initial; margin: 9px 0;">
+                <div class="popup_option">
+                    <div class="popup_title">
+                        <p class="shortcut_option">#VERSE</p>
+                        <p class="popup_option_description"></p>
+                    </div>
+                    <div class="shortcut_icon_larger" color="orange">Shift</div>
+                    <div class="shortcut_icon" color="orange" style="max-height: 40px;">2</div>
+                </div>
+                <hr style="border-top: 1px solid rgb(100, 100, 100); border-right: none; border-bottom: none; border-left: none; border-image: initial; margin: 9px 0;">
+                <div class="popup_option">
+                    <div class="popup_title">
+                        <p class="shortcut_option">#PRE-CHORUS</p>
+                        <p class="popup_option_description"></p>
+                    </div>
+                    <div class="shortcut_icon_larger" color="orange">Shift</div>
+                    <div class="shortcut_icon" color="orange" style="max-height: 40px;">3</div>
+                </div>
+                <hr style="border-top: 1px solid rgb(100, 100, 100); border-right: none; border-bottom: none; border-left: none; border-image: initial; margin: 9px 0;">
+                <div class="popup_option">
+                    <div class="popup_title">
+                        <p class="shortcut_option">#CHORUS</p>
+                        <p class="popup_option_description"></p>
+                    </div>
+                    <div class="shortcut_icon_larger" color="orange">Shift</div>
+                    <div class="shortcut_icon" color="orange" style="max-height: 40px;">4</div>
+                </div>
+                <hr style="border-top: 1px solid rgb(100, 100, 100); border-right: none; border-bottom: none; border-left: none; border-image: initial; margin: 9px 0;">
+                <div class="popup_option">
+                    <div class="popup_title">
+                        <p class="shortcut_option">#BRIDGE</p>
+                        <p class="popup_option_description"></p>
+                    </div>
+                    <div class="shortcut_icon_larger" color="orange">Shift</div>
+                    <div class="shortcut_icon" color="orange" style="max-height: 40px;">5</div>
+                </div>
+                <hr style="border-top: 1px solid rgb(100, 100, 100); border-right: none; border-bottom: none; border-left: none; border-image: initial; margin: 9px 0;">
+                <div class="popup_option">
+                    <div class="popup_title">
+                        <p class="shortcut_option">#HOOK</p>
+                        <p class="popup_option_description"></p>
+                    </div>
+                    <div class="shortcut_icon_larger" color="orange">Shift</div>
+                    <div class="shortcut_icon" color="orange" style="max-height: 40px;">6</div>
+                </div>
+                <hr style="border-top: 1px solid rgb(100, 100, 100); border-right: none; border-bottom: none; border-left: none; border-image: initial; margin: 9px 0;">
+                <div class="popup_option">
+                    <div class="popup_title">
+                        <p class="shortcut_option">#OUTRO</p>
+                        <p class="popup_option_description"></p>
+                    </div>
+                    <div class="shortcut_icon_larger" color="orange">Shift</div>
+                    <div class="shortcut_icon" color="orange" style="max-height: 40px;">7</div>
+                </div>
+                <hr style="border-top: 1px solid rgb(100, 100, 100); border-right: none; border-bottom: none; border-left: none; border-image: initial; margin: 9px 0;">
+            </div>
         </div>
+        
     </div>
 
     <script>
@@ -883,7 +959,7 @@
                     // verifica se a tecla pressionada está no numpad
                     var isNumpadKey = (event.location === KeyboardEvent.DOM_KEY_LOCATION_NUMPAD);
 
-                    if (numericKeys.includes(event.key) && isNumpadKey) {
+                    if (numericKeys.includes(event.key) && isNumpadKey && !event.shiftKey) {
                         event.preventDefault();
                         switch (event.key) {
                             case '1':
@@ -983,11 +1059,9 @@
                     // Verifica se a tecla pressionada é a barra de espaço e se o temporizador não está em execução
                     if (event.key === ' ' && !isTimerRunning && !isEditorFocused) {
                         startTimer();
-                        isTimerRunning = true;
                     } else if (event.key === 'X' && event.shiftKey && !isTimerRunning) { // Shift + Q
                         event.preventDefault();
                         startTimer();
-                        isTimerRunning = true;
                     }
                 });
 
@@ -995,11 +1069,9 @@
                     // Verifica se o temporizador está em execução e se a tecla solta é a barra de espaço
                     if (event.key === ' ' && isTimerRunning) {
                         stopTimer();
-                        isTimerRunning = false;
                     } else if (event.key === 'X' && event.shiftKey && isTimerRunning) { // Shift + Q
                         event.preventDefault();
                         stopTimer();
-                        isTimerRunning = false;
                     }
                 });
 
