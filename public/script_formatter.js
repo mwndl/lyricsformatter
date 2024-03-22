@@ -183,12 +183,15 @@ document.addEventListener('DOMContentLoaded', function () {
 
     document.addEventListener('keydown', function (event) {
 
-        var numericKeys = ['7', '8', '9'];
+        var editor = document.getElementById('editor');
+        var isEditorFocused = editor === document.activeElement;
+
+        var numericKeys = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
 
         // verifica se a tecla pressionada está no numpad
         var isNumpadKey = (event.location === KeyboardEvent.DOM_KEY_LOCATION_NUMPAD);
 
-        if (numericKeys.includes(event.key) && isNumpadKey) {
+        if (numericKeys.includes(event.key) && isNumpadKey && !event.shiftKey) {
             event.preventDefault();
             switch (event.key) {
                 case '7':
@@ -204,6 +207,38 @@ document.addEventListener('DOMContentLoaded', function () {
                     // outras teclas (não são tratadas)
                     break;
             }
+
+        } else if (numericKeys.includes(event.key) && isNumpadKey && event.shiftKey && isEditorFocused) {
+            event.preventDefault();
+            switch (event.key) {
+                case '1':
+                    addTextToSelectedLine("#INTRO");
+                    break;
+                case '2':
+                    addTextToSelectedLine("#VERSE");
+                    break;
+                case '3':
+                    addTextToSelectedLine("#PRE-CHORUS");
+                    break;
+                case '4':
+                    addTextToSelectedLine("#CHORUS");
+                    break;
+                case '5':
+                    addTextToSelectedLine("#BRIDGE");
+                    break;
+                case '6':
+                    addTextToSelectedLine("#HOOK");
+                    break;
+                case '7':
+                    addTextToSelectedLine("#OUTRO");
+                    break;
+                case '0':
+                    addTextToSelectedLine("#INSTRUMENTAL");
+                    break;
+                default:
+                    // outras teclas (não são tratadas)
+                    break;
+            }
         } else if ((event.ctrlKey || event.metaKey) && event.key === '.') { // Ctrl/Cmd + .
             event.preventDefault();
             toggleTab()
@@ -211,9 +246,38 @@ document.addEventListener('DOMContentLoaded', function () {
             event.preventDefault();
             handleRefreshButtonClick()
         }
-
     });
 });
+
+function addTextToSelectedLine(text) {
+    const editor = document.getElementById('editor');
+    const cursorPosition = editor.selectionStart;
+    const currentText = editor.value;
+
+    // Dividir o texto em linhas
+    const lines = currentText.split('\n');
+
+    // Encontrar a linha onde o cursor está
+    let lineStart = 0;
+    let lineEnd = 0;
+    for (let i = 0; i < lines.length; i++) {
+        lineEnd = lineStart + lines[i].length;
+        if (cursorPosition >= lineStart && cursorPosition <= lineEnd) {
+            // Adicionar uma nova linha acima da linha onde o cursor está
+            lines.splice(i, 0, "");
+
+            // Adicionar o texto na linha acima da linha selecionada
+            lines[i] = text;
+            break;
+        }
+        lineStart = lineEnd + 1; // +1 para contar o caractere de nova linha (\n)
+    }
+
+    // Atualizar o valor do textarea com as linhas modificadas
+    editor.value = lines.join('\n');
+    updateSidebar()
+}
+
 
 
 /* DEFINIR IDIOMA PADRÃO */
@@ -310,6 +374,7 @@ document.addEventListener('DOMContentLoaded', function () {
             }
 
             updateSidebar();
+            resetLineIssues();
             clearTimeout(typingTimer); // auto 3s
             fetchCurrentlyPlayingData();
             checkLanguage();
@@ -1366,8 +1431,8 @@ function updateLineIssues(color, lines) {
 
             // Oculta o container após a correção (ou tentativa de correção)
             container.style.display = 'none';
-            checkFormatPlaceholder(); // verifica se há containers, se não tiver, exibe o 'copy'
             resetLineIssues();
+            checkFormatPlaceholder(); // verifica se há containers, se não tiver, exibe o 'copy'
             handleRefreshButtonClick();
         }
 
@@ -1851,7 +1916,7 @@ function updateLineIssues(color, lines) {
 
         function showSpShortcuts() {
             document.getElementById('audio_controls_numpad').style = 'margin-bottom: 15px;'
-            document.getElementById('additional_features_numpad').style = ""
+            document.getElementById('additional_features_numpad').style = "margin-bottom: 15px;"
             document.getElementById('audio_controls_keyboard').style = 'margin-bottom: 15px;'
             document.getElementById('additional_features_keyboard').style = ""
             document.getElementById('navegation_keyboard').style = "margin-bottom: 15px;"
@@ -1860,7 +1925,7 @@ function updateLineIssues(color, lines) {
 
         function hideSpShortcuts() {
             document.getElementById('audio_controls_numpad').style = 'margin-bottom: 15px; display:none'
-            document.getElementById('additional_features_numpad').style = "display:none"
+            document.getElementById('additional_features_numpad').style = "margin-bottom: 15px; display:none"
             document.getElementById('audio_controls_keyboard').style = 'margin-bottom: 15px; display:none'
             document.getElementById('additional_features_keyboard').style = "display:none"
             document.getElementById('navegation_keyboard').style = ""

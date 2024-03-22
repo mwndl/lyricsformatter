@@ -410,6 +410,10 @@
         background-color: #4f66ff; /* Vermelho */
     }
 
+    .shortcut_icon[color="orange"] {
+        background-color: #f6924c; /* Vermelho */
+    }
+
     
     .shortcut_icon_larger {
         height: 40px; /* Altura */
@@ -433,6 +437,10 @@
     
     .shortcut_icon_larger[color="purple"] {
         background-color: #4f66ff; /* Vermelho */
+    }
+
+    .shortcut_icon_larger[color="orange"] {
+        background-color: #f6924c; /* Vermelho */
     }
 
   
