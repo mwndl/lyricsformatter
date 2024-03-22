@@ -1161,10 +1161,8 @@
                     clearInterval(intervalId); // Limpa o intervalo de atualização do display
 
                     const timerElement = document.getElementById("timer");
-                    setTimeout(function() {
-                        timerElement.style.opacity = "0";
-                        isTimerRunning = false;
-                    }, 2000);
+                    timerElement.style.opacity = "0";
+                    isTimerRunning = false; // Atualiza o estado do temporizador
                 }
 
                 // Função para atualizar o display do cronômetro
