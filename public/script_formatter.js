@@ -180,6 +180,39 @@ document.addEventListener('DOMContentLoaded', function () {
             fixButton(event.target);
         });
     });
+
+    document.addEventListener('keydown', function (event) {
+
+        var numericKeys = ['7', '8', '9'];
+
+        // verifica se a tecla pressionada está no numpad
+        var isNumpadKey = (event.location === KeyboardEvent.DOM_KEY_LOCATION_NUMPAD);
+
+        if (numericKeys.includes(event.key) && isNumpadKey) {
+            event.preventDefault();
+            switch (event.key) {
+                case '7':
+                    showFormatTab()
+                    break;
+                case '8':
+                    handleRefreshButtonClick()
+                    break;
+                case '9':
+                    showGrammarTab()
+                    break;
+                default:
+                    // outras teclas (não são tratadas)
+                    break;
+            }
+        } else if ((event.ctrlKey || event.metaKey) && event.key === '.') { // Ctrl/Cmd + .
+            event.preventDefault();
+            toggleTab()
+        } else if ((event.ctrlKey || event.metaKey) && event.key === ',') { // Ctrl/Cmd + ,
+            event.preventDefault();
+            handleRefreshButtonClick()
+        }
+
+    });
 });
 
 
@@ -1049,6 +1082,20 @@ function showNumpadTab() {
 
 /* FUNÇÕES PARA EXIBIR ABA DE FORMATO OU GRAMÁTICA */
 
+function toggleTab() {
+    const formatButton = document.getElementById('lf_option');
+    const formatVisible = formatButton.className === 'impr_menu_true';
+
+    // Se a aba do teclado estiver visível, alterna para a aba do numpad
+    if (formatVisible) {
+        showGrammarTab()
+    } 
+    // Se a aba do numpad estiver visível, alterna para a aba do teclado
+    else {
+        showFormatTab()
+    }
+}
+
 function showFormatTab() {
     const formatButton = document.getElementById('lf_option');
     const grammarButton = document.getElementById('lt_option');
@@ -1802,14 +1849,30 @@ function updateLineIssues(color, lines) {
             localStorage.setItem('spMenu', 'false');
         }
 
+        function showSpShortcuts() {
+            document.getElementById('audio_controls_numpad').style = 'margin-bottom: 15px;'
+            document.getElementById('additional_features_numpad').style = ""
+            document.getElementById('audio_controls_keyboard').style = 'margin-bottom: 15px;'
+            document.getElementById('additional_features_keyboard').style = ""
+        }
+
+        function hideSpShortcuts() {
+            document.getElementById('audio_controls_numpad').style = 'margin-bottom: 15px; display:none'
+            document.getElementById('additional_features_numpad').style = "display:none"
+            document.getElementById('audio_controls_keyboard').style = 'margin-bottom: 15px; display:none'
+            document.getElementById('additional_features_keyboard').style = "display:none"
+        }
+
         // exibe / oculta o menu do spotify
         function loadSpMenu() {
             const spMenu = localStorage.getItem('spMenu');
 
             if (spMenu === 'true') {
                 showSpMenuDiv();
+                showSpShortcuts()
             } else if (spMenu === 'false') {
                 hideSpMenuDiv();
+                hideSpShortcuts()
             }
         }
 
