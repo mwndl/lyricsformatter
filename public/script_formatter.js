@@ -1854,6 +1854,8 @@ function updateLineIssues(color, lines) {
             document.getElementById('additional_features_numpad').style = ""
             document.getElementById('audio_controls_keyboard').style = 'margin-bottom: 15px;'
             document.getElementById('additional_features_keyboard').style = ""
+            document.getElementById('navegation_keyboard').style = "margin-bottom: 15px;"
+            document.getElementById('navegation_numpad').style = "margin-bottom: 15px;"
         }
 
         function hideSpShortcuts() {
@@ -1861,6 +1863,8 @@ function updateLineIssues(color, lines) {
             document.getElementById('additional_features_numpad').style = "display:none"
             document.getElementById('audio_controls_keyboard').style = 'margin-bottom: 15px; display:none'
             document.getElementById('additional_features_keyboard').style = "display:none"
+            document.getElementById('navegation_keyboard').style = ""
+            document.getElementById('navegation_numpad').style = ""
         }
 
         // exibe / oculta o menu do spotify
