@@ -1062,6 +1062,7 @@
                     } else if (event.key === 'X' && event.shiftKey && !isTimerRunning) { // Shift + Q
                         event.preventDefault();
                         startTimer();
+                        isTimerRunning = true;
                     }
                 });
 
@@ -1072,6 +1073,7 @@
                     } else if (event.key === 'X' && event.shiftKey && isTimerRunning) { // Shift + Q
                         event.preventDefault();
                         stopTimer();
+                        isTimerRunning = false;
                     }
                 });
 
@@ -1144,25 +1146,23 @@
 
                 // Função para iniciar o cronômetro
                 function startTimer() {
-                    startTime = Date.now(); // Armazena o tempo de início
-                    intervalId = setInterval(updateTimerDisplay, 50); // Atualiza o display do cronômetro a cada 100ms
-                    timerRunning = true;
+                    if (!isTimerRunning) {
+                        startTime = Date.now(); // Armazena o tempo de início
+                        intervalId = setInterval(updateTimerDisplay, 50); // Atualiza o display do cronômetro a cada 50ms
 
-                    const timerElement = document.getElementById("timer")
-                    setTimeout(() => {
+                        const timerElement = document.getElementById("timer");
                         timerElement.style.opacity = "0.9";
-                    }, 50);
+                        isTimerRunning = true; // Atualiza o estado do temporizador
+                    }
                 }
 
                 // Função para parar o cronômetro
                 function stopTimer() {
                     clearInterval(intervalId); // Limpa o intervalo de atualização do display
-                    timerRunning = false;
 
-                    const timerElement = document.getElementById("timer")
-                    setTimeout(() => {
-                        timerElement.style.opacity = "0";
-                    }, 2000);
+                    const timerElement = document.getElementById("timer");
+                    timerElement.style.opacity = "0";
+                    isTimerRunning = false; // Atualiza o estado do temporizador
                 }
 
                 // Função para atualizar o display do cronômetro
