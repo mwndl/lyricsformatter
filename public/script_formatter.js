@@ -159,6 +159,7 @@ document.addEventListener('DOMContentLoaded', function () {
         fetchCreditsData();
         fetchServerInfo();
         checkMobileTestingParams();
+        updateShortcutIcon();
 
     
     // Adicione um evento de clique ao botão de cópia
@@ -186,7 +187,7 @@ document.addEventListener('DOMContentLoaded', function () {
         var editor = document.getElementById('editor');
         var isEditorFocused = editor === document.activeElement;
 
-        var numericKeys = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+        var numericKeys = ['7', '8', '9'];
 
         // verifica se a tecla pressionada está no numpad
         var isNumpadKey = (event.location === KeyboardEvent.DOM_KEY_LOCATION_NUMPAD);
@@ -208,43 +209,37 @@ document.addEventListener('DOMContentLoaded', function () {
                     break;
             }
 
-        } else if (numericKeys.includes(event.key) && isNumpadKey && event.shiftKey && isEditorFocused) {
-            event.preventDefault();
-            switch (event.key) {
-                case '1':
-                    addTextToSelectedLine("#INTRO");
-                    break;
-                case '2':
-                    addTextToSelectedLine("#VERSE");
-                    break;
-                case '3':
-                    addTextToSelectedLine("#PRE-CHORUS");
-                    break;
-                case '4':
-                    addTextToSelectedLine("#CHORUS");
-                    break;
-                case '5':
-                    addTextToSelectedLine("#BRIDGE");
-                    break;
-                case '6':
-                    addTextToSelectedLine("#HOOK");
-                    break;
-                case '7':
-                    addTextToSelectedLine("#OUTRO");
-                    break;
-                case '0':
-                    addTextToSelectedLine("#INSTRUMENTAL");
-                    break;
-                default:
-                    // outras teclas (não são tratadas)
-                    break;
-            }
         } else if ((event.ctrlKey || event.metaKey) && event.key === '.') { // Ctrl/Cmd + .
             event.preventDefault();
             toggleTab()
         } else if ((event.ctrlKey || event.metaKey) && event.key === ',') { // Ctrl/Cmd + ,
             event.preventDefault();
             handleRefreshButtonClick()
+        // tags
+        } else if ((event.ctrlKey || event.metaKey) && event.shiftKey && event.key === 'i' && isEditorFocused) { 
+            event.preventDefault();
+            addTextToSelectedLine("#INTRO");
+        } else if ((event.ctrlKey || event.metaKey) && event.shiftKey && event.key === 'v' && isEditorFocused) { 
+            event.preventDefault();
+            addTextToSelectedLine("#VERSE");
+        } else if ((event.ctrlKey || event.metaKey) && event.shiftKey && event.key === 'p' && isEditorFocused) { 
+            event.preventDefault();
+            addTextToSelectedLine("#PRE-CHORUS");
+        } else if ((event.ctrlKey || event.metaKey) && event.shiftKey && event.key === 'c' && isEditorFocused) { 
+            event.preventDefault();
+            addTextToSelectedLine("#CHORUS");
+        } else if ((event.ctrlKey || event.metaKey) && event.shiftKey && event.key === 'b' && isEditorFocused) { 
+            event.preventDefault();
+            addTextToSelectedLine("#BRIDGE");
+        } else if ((event.ctrlKey || event.metaKey) && event.shiftKey && event.key === 'h' && isEditorFocused) { 
+            event.preventDefault();
+            addTextToSelectedLine("#HOOK");
+        } else if ((event.ctrlKey || event.metaKey) && event.shiftKey && event.key === 'o' && isEditorFocused) { 
+            event.preventDefault();
+            addTextToSelectedLine("#OUTRO");
+        } else if ((event.ctrlKey || event.metaKey) && event.shiftKey && event.key === 'x' && isEditorFocused) { 
+            event.preventDefault();
+            addTextToSelectedLine("#INSTRUMENTAL");
         }
     });
 });
@@ -263,11 +258,8 @@ function addTextToSelectedLine(text) {
     for (let i = 0; i < lines.length; i++) {
         lineEnd = lineStart + lines[i].length;
         if (cursorPosition >= lineStart && cursorPosition <= lineEnd) {
-            // Adicionar uma nova linha acima da linha onde o cursor está
-            lines.splice(i, 0, "");
-
-            // Adicionar o texto na linha acima da linha selecionada
-            lines[i] = text;
+            // Adicionar o texto na linha onde o cursor está
+            lines[i] += text;
             break;
         }
         lineStart = lineEnd + 1; // +1 para contar o caractere de nova linha (\n)
@@ -275,7 +267,7 @@ function addTextToSelectedLine(text) {
 
     // Atualizar o valor do textarea com as linhas modificadas
     editor.value = lines.join('\n');
-    updateSidebar()
+    updateSidebar();
 }
 
 
@@ -363,12 +355,14 @@ function addTextToSelectedLine(text) {
                     fixPunctuation1();
                 }
 
-
                 replaceSpecialTags(); // auto replace tags
+                trimEditorContent(); // linhas antes ou depois da letra (1)
+                removeExcessInstrumental(); // remove tags instrumentais duplicadas
+                removeInstrumentalStardEnd(); // remove instrumentais no início/fim da letra
                 addSpaceAboveTags(); // add (caso não haja) espaços acima de todas as tags
                 removeSpacesAroundInstrumental(); // espaços ao redor de tags instrumentais
-                trimEditorContent(); // linhas antes ou depois da letra
-                autoTrim(); // espaços extras no início ou fim
+                trimEditorContent(); // linhas antes ou depois da letra (2)
+                autoTrim(); // espaços extras no início ou fim 
                 removeDuplicateSpaces(); // espaços duplos entre palavras
                 removeDuplicateEmptyLines(); // linhas vazias duplicadas entre estrofes
             }
@@ -571,6 +565,78 @@ function addTextToSelectedLine(text) {
             // atualiza o editor
             editor.value = content;
 
+            // restaura a posição do cursor
+            editor.setSelectionRange(startPos, endPos);
+        }
+
+        function removeInstrumentalStardEnd() {
+            var editor = document.getElementById('editor');
+            var content = editor.value;
+        
+            // salvar a posição do cursor
+            var startPos = editor.selectionStart;
+            var endPos = editor.selectionEnd;
+        
+            // separa as linhas
+            var lines = content.split('\n');
+        
+            // verifica se a primeira linha contém '#INSTRUMENTAL'
+            if (lines[0].trim() === '#INSTRUMENTAL') {
+                lines.shift(); // remove a primeira linha
+            }
+        
+            // verifica se a última linha contém '#INSTRUMENTAL'
+            if (lines[lines.length - 1].trim() === '#INSTRUMENTAL') {
+                lines.pop(); // remove a última linha
+            }
+        
+            // reune as linhas novamente
+            content = lines.join('\n');
+        
+            // atualiza o editor
+            editor.value = content;
+        
+            // restaura a posição do cursor
+            editor.setSelectionRange(startPos, endPos);
+        }
+
+        function removeExcessInstrumental() {
+            var editor = document.getElementById('editor');
+            var content = editor.value;
+        
+            // salvar a posição do cursor
+            var startPos = editor.selectionStart;
+            var endPos = editor.selectionEnd;
+        
+            // separa as linhas
+            var lines = content.split('\n');
+        
+            var cleanedLines = [];
+            var prevLineWasInstrumental = false;
+        
+            // percorre todas as linhas
+            for (var i = 0; i < lines.length; i++) {
+                var line = lines[i].trim();
+        
+                // verifica se a linha atual é '#INSTRUMENTAL'
+                if (line === '#INSTRUMENTAL') {
+                    // verifica se a linha anterior também era '#INSTRUMENTAL'
+                    if (!prevLineWasInstrumental) {
+                        cleanedLines.push(line);
+                        prevLineWasInstrumental = true;
+                    }
+                } else {
+                    cleanedLines.push(line);
+                    prevLineWasInstrumental = false;
+                }
+            }
+        
+            // reune as linhas novamente
+            content = cleanedLines.join('\n');
+        
+            // atualiza o editor
+            editor.value = content;
+        
             // restaura a posição do cursor
             editor.setSelectionRange(startPos, endPos);
         }
@@ -1916,18 +1982,18 @@ function updateLineIssues(color, lines) {
 
         function showSpShortcuts() {
             document.getElementById('audio_controls_numpad').style = 'margin-bottom: 15px;'
-            document.getElementById('additional_features_numpad').style = "margin-bottom: 15px;"
+            document.getElementById('additional_features_numpad').style = ""
             document.getElementById('audio_controls_keyboard').style = 'margin-bottom: 15px;'
-            document.getElementById('additional_features_keyboard').style = ""
+            document.getElementById('additional_features_keyboard').style = "margin-bottom: 15px;"
             document.getElementById('navegation_keyboard').style = "margin-bottom: 15px;"
             document.getElementById('navegation_numpad').style = "margin-bottom: 15px;"
         }
 
         function hideSpShortcuts() {
             document.getElementById('audio_controls_numpad').style = 'margin-bottom: 15px; display:none'
-            document.getElementById('additional_features_numpad').style = "margin-bottom: 15px; display:none"
+            document.getElementById('additional_features_numpad').style = "display:none"
             document.getElementById('audio_controls_keyboard').style = 'margin-bottom: 15px; display:none'
-            document.getElementById('additional_features_keyboard').style = "display:none"
+            document.getElementById('additional_features_keyboard').style = "margin-bottom: 15px; display:none"
             document.getElementById('navegation_keyboard').style = ""
             document.getElementById('navegation_numpad').style = ""
         }
@@ -1999,6 +2065,44 @@ function updateLineIssues(color, lines) {
                 url = urlParts[0] + (parts.length > 0 ? '?' + parts.join('&') : '');
             }
             return url;
+        }
+
+/* ****************************************** */
+
+/* ALTERARBOTÕES CTRL PARA CMD EM MACS */
+
+        function updateShortcutIcon() {
+            const operatingSystem = checkOperatingSystem();
+            const shortcutElements = document.querySelectorAll('.shortcut_icon_larger[data="ctrl_meta_key"]');
+            
+            shortcutElements.forEach(function(element) {
+                // Criar um elemento <svg> e definir seu conteúdo interno como o SVG do ícone
+                const svgElement = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+                svgElement.setAttribute("fill", "#ffffff");
+                svgElement.setAttribute("width", "28px");
+                svgElement.setAttribute("height", "28px");
+                svgElement.setAttribute("viewBox", "0 0 24 24");
+                svgElement.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+                svgElement.setAttribute("stroke", "#ffffff");
+                svgElement.setAttribute("stroke-width", "0.00024000000000000003");
+                svgElement.innerHTML = '<path style="transform: none; transition: none;" d="M18.5,9A3.5,3.5,0,1,0,15,5.5V7H9V5.5A3.5,3.5,0,1,0,5.5,9H7v6H5.5A3.5,3.5,0,1,0,9,18.5V17h6v1.5A3.5,3.5,0,1,0,18.5,15H17V9ZM17,5.5A1.5,1.5,0,1,1,18.5,7H17ZM7,18.5A1.5,1.5,0,1,1,5.5,17H7ZM7,7H5.5A1.5,1.5,0,1,1,7,5.5Zm8,8H9V9h6Zm3.5,2A1.5,1.5,0,1,1,17,18.5V17Z"></path>';
+
+                // Substituir o conteúdo do elemento original pelo elemento <svg>
+                element.innerHTML = '';
+                element.appendChild(svgElement);
+            });
+        }
+
+        function checkOperatingSystem() {
+            const platform = navigator.platform.toUpperCase();
+            
+            if (platform.indexOf('WIN') !== -1) {
+                return 'Windows';
+            } else if (platform.indexOf('MAC') !== -1) {
+                return 'macOS';
+            } else {
+                return 'Unknown';
+            }
         }
 
 /* ****************************************** */
