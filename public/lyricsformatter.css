@@ -425,6 +425,7 @@
         align-items: center; /* Centraliza verticalmente */
         font-size: 18px; /* Tamanho da fonte */
         margin: 0 0 0 5px;
+        pointer-events: none;
     }
 
     .shortcut_icon_larger[color="blue"] {
@@ -1893,9 +1894,9 @@
   }
   
 
-  .control-container svg:hover {
-    transform: none; /* Remover a transformação de escala ao passar o mouse */
-    transition: none; /* Remover a transição suave */
+    .control-container svg:hover {
+        transform: none; /* Remover a transformação de escala ao passar o mouse */
+        transition: none; /* Remover a transição suave */
     }
   
   .control-container img {
