@@ -1,5 +1,8 @@
 var typingTimer;
 
+var undoStack = [];
+var redoStack = [];
+
 document.addEventListener('DOMContentLoaded', function () {
     var returnArrow = document.getElementById('return_arrow');
     var lyricsBox = document.getElementById('lyrics_box');
@@ -74,9 +77,13 @@ document.addEventListener('DOMContentLoaded', function () {
 
     
     function checkContent() {
+
         const doneTypingInterval = 3000;
         const editor = document.getElementById('editor');
         const content = editor.value;
+
+        undoStack.push(editor.value);
+        redoStack = [];
     
         const checkboxIds = [
             'autoCapToggle',
@@ -241,37 +248,69 @@ document.addEventListener('DOMContentLoaded', function () {
         } else if ((event.ctrlKey || event.metaKey) && event.shiftKey && (event.key === 'X' || event.key === 'x') && isEditorFocused) { 
             event.preventDefault();
             addTextToSelectedLine("#INSTRUMENTAL");
+        
+
+        } else if ((event.ctrlKey || event.metaKey) && !event.shiftKey && (event.key === 'Z' || event.key === 'z')) { // desfazer
+            event.preventDefault();
+            undo()
+        } else if ((event.ctrlKey || event.metaKey) && event.shiftKey && (event.key === 'Z' || event.key === 'z')) { // refazer
+            event.preventDefault();
+            redo()
         }
     });
 });
 
-function addTextToSelectedLine(text) {
-    const editor = document.getElementById('editor');
-    const cursorPosition = editor.selectionStart;
-    const currentText = editor.value;
+/* FUNÇÕES PARA DESFAZER E REFAZER ALTERAÇÕES */
 
-    // Dividir o texto em linhas
-    const lines = currentText.split('\n');
-
-    // Encontrar a linha onde o cursor está
-    let lineStart = 0;
-    let lineEnd = 0;
-    for (let i = 0; i < lines.length; i++) {
-        lineEnd = lineStart + lines[i].length;
-        if (cursorPosition >= lineStart && cursorPosition <= lineEnd) {
-            // Adicionar o texto na linha onde o cursor está
-            lines[i] += text;
-            break;
+    // Função para desfazer
+    function undo() {
+        if (undoStack.length > 1) {
+            const editor = document.getElementById('editor');
+            redoStack.push(undoStack.pop());
+            editor.value = undoStack[undoStack.length - 1];
         }
-        lineStart = lineEnd + 1; // +1 para contar o caractere de nova linha (\n)
     }
 
-    // Atualizar o valor do textarea com as linhas modificadas
-    editor.value = lines.join('\n');
-    updateSidebar();
-}
+    // Função para refazer
+    function redo() {
+        if (redoStack.length > 0) {
+            const editor = document.getElementById('editor');
+            undoStack.push(redoStack.pop());
+            editor.value = undoStack[undoStack.length - 1];
+        }
+    }
 
+/* ****************************************** */
 
+/* FUNÇÃO PRA ADICIONAR TEXTO NO EDITOR (COM BASE NO CURSOR) */
+
+    function addTextToSelectedLine(text) {
+        const editor = document.getElementById('editor');
+        const cursorPosition = editor.selectionStart;
+        const currentText = editor.value;
+
+        // Dividir o texto em linhas
+        const lines = currentText.split('\n');
+
+        // Encontrar a linha onde o cursor está
+        let lineStart = 0;
+        let lineEnd = 0;
+        for (let i = 0; i < lines.length; i++) {
+            lineEnd = lineStart + lines[i].length;
+            if (cursorPosition >= lineStart && cursorPosition <= lineEnd) {
+                // Adicionar o texto na linha onde o cursor está
+                lines[i] += text;
+                break;
+            }
+            lineStart = lineEnd + 1; // +1 para contar o caractere de nova linha (\n)
+        }
+
+        // Atualizar o valor do textarea com as linhas modificadas
+        editor.value = lines.join('\n');
+        updateSidebar();
+    }
+
+/* ****************************************** */
 
 /* DEFINIR IDIOMA PADRÃO */
 
@@ -352,7 +391,8 @@ function addTextToSelectedLine(text) {
 
                 if (selectedLanguageCode === 'pt-BR' || selectedLanguageCode === 'pt-PT'|| 
                 selectedLanguageCode === 'en-US' || selectedLanguageCode === 'en-GB'|| 
-                selectedLanguageCode === 'es' || selectedLanguageCode === 'it') {
+                selectedLanguageCode === 'es' || selectedLanguageCode === 'it'||
+                selectedLanguageCode === 'fr') {
                     fixPunctuation1();
                 }
 
