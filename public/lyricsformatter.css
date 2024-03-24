@@ -2018,8 +2018,58 @@
   }
   
   .development_message {
-    display:none;
-  }
+    position: fixed;
+    padding: 10%;
+    box-sizing: border-box;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #131313; /* Cor de fundo */
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999; /* Para garantir que a mensagem esteja na frente de outros elementos */
+    overflow: hidden; /* Para esconder partes dos pseudo-elementos que saem da div */
+}
+
+.development_message h2, .development_message p {
+    color: white; /* Cor do texto */
+    text-align: center; /* Alinhamento do texto */
+    user-select: none;
+}
+
+.development_message h2 {
+    font-size: 24px;
+    margin-bottom: 20px;
+}
+
+.development_message p {
+    font-size: 18px;
+    margin-bottom: 40px;
+    color: #f1f1f1;
+}
+
+/* Desenhos de fundo */
+.development_message::before, .development_message::after {
+    content: '';
+    position: absolute;
+    background-color: #0077c2; /* Cor e opacidade das faixas */
+    width: 120px; /* Largura das faixas */
+    height: 20px; /* Altura das faixas */
+    border-radius: 10px; /* Borda arredondada */
+}
+
+.development_message::before {
+    top: 20%;
+    left: 10%;
+}
+
+.development_message::after {
+    bottom: 20%;
+    right: 10%;
+}
 
   .extended-options, #toggle_options {
     display: none; 
@@ -2042,60 +2092,7 @@
         background-color: #181818;
         height: 100vh;
     }
-  
-    .development_message {
-        position: fixed;
-        padding: 10%;
-        box-sizing: border-box;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background-color: #181818; /* Cor de fundo */
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        z-index: 9999; /* Para garantir que a mensagem esteja na frente de outros elementos */
-        overflow: hidden; /* Para esconder partes dos pseudo-elementos que saem da div */
-    }
-    
-    .development_message h2, .development_message p {
-        color: white; /* Cor do texto */
-        text-align: center; /* Alinhamento do texto */
-        user-select: none;
-    }
-    
-    .development_message h2 {
-        font-size: 24px;
-        margin-bottom: 20px;
-    }
-    
-    .development_message p {
-        font-size: 18px;
-        margin-bottom: 40px;
-        color: #f1f1f1;
-    }
-    
-    /* Desenhos de fundo */
-    .development_message::before, .development_message::after {
-        content: '';
-        position: absolute;
-        background-color: #0077c2; /* Cor e opacidade das faixas */
-        width: 120px; /* Largura das faixas */
-        height: 20px; /* Altura das faixas */
-        border-radius: 10px; /* Borda arredondada */
-    }
-    
-    .development_message::before {
-        top: 20%;
-        left: 10%;
-    }
-    
-    .development_message::after {
-        bottom: 20%;
-        right: 10%;
-    }
+
     
     /* Adicione mais faixas conforme necessário */
     

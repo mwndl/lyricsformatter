@@ -160,6 +160,7 @@ document.addEventListener('DOMContentLoaded', function () {
         fetchServerInfo();
         checkMobileTestingParams();
         updateShortcutIcon();
+        checkDeviceType()
 
     
     // Adicione um evento de clique ao botão de cópia
@@ -2069,7 +2070,7 @@ function updateLineIssues(color, lines) {
 
 /* ****************************************** */
 
-/* ALTERARBOTÕES CTRL PARA CMD EM MACS */
+/* ALTERAR BOTÕES CTRL PARA ÍCONE CMD EM MACS */
 
         function updateShortcutIcon() {
             const operatingSystem = checkOperatingSystem();
@@ -2095,6 +2096,10 @@ function updateLineIssues(color, lines) {
             }
         }
 
+/* ****************************************** */     
+
+/* FUNÇÕES PARA IDENTIFICAR OS E TIPO DE DISPOSITIVO */
+
         function checkOperatingSystem() {
             const platform = navigator.platform.toUpperCase();
             
@@ -2107,15 +2112,27 @@ function updateLineIssues(color, lines) {
             }
         }
 
+        function checkDeviceType() {
+            const userAgent = navigator.userAgent.toLowerCase();
+        
+            if (/(android|webos|iphone|ipad|ipod|blackberry|windows phone)/.test(userAgent)) {
+                document.getElementById('development_message').style = 'display:flex'
+                return 'Mobile';
+            } else {
+                document.getElementById('development_message').style = 'display:none'
+                return 'PC';
+            }
+        }
+
 /* ****************************************** */
 
-// Adicione isso ao seu JavaScript para alternar a visibilidade das opções quando o botão de toggle é clicado
-document.getElementById('toggle_options').addEventListener('click', function() {
-    var extendedOptions = document.querySelector('.extended-options');
-    this.classList.toggle('active');
-    if (extendedOptions.style.display === 'flex') {
-        extendedOptions.style.display = 'none';
-    } else {
-        extendedOptions.style.display = 'flex';
-    }
-});
+    // Adicione isso ao seu JavaScript para alternar a visibilidade das opções quando o botão de toggle é clicado
+    document.getElementById('toggle_options').addEventListener('click', function() {
+        var extendedOptions = document.querySelector('.extended-options');
+        this.classList.toggle('active');
+        if (extendedOptions.style.display === 'flex') {
+            extendedOptions.style.display = 'none';
+        } else {
+            extendedOptions.style.display = 'flex';
+        }
+    });
