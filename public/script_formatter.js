@@ -2119,14 +2119,14 @@ function updateLineIssues(color, lines) {
                 document.getElementById('development_message').style = 'display:flex'
                 return 'Mobile';
             } else {
-                document.getElementById('development_message').style = 'display:none'
+                document.getElementById('development_message').style = ''
                 return 'PC';
             }
         }
 
 /* ****************************************** */
 
-    // Adicione isso ao seu JavaScript para alternar a visibilidade das opções quando o botão de toggle é clicado
+    // teste para botão de expanção de funções do player no mobile (não terminado)
     document.getElementById('toggle_options').addEventListener('click', function() {
         var extendedOptions = document.querySelector('.extended-options');
         this.classList.toggle('active');

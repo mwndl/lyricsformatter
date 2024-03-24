@@ -2093,8 +2093,9 @@
         height: 100vh;
     }
 
-    
-    /* Adicione mais faixas conforme necessário */
+    .development_message {
+        display: flex;
+    }
     
     
     
