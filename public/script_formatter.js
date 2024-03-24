@@ -216,28 +216,28 @@ document.addEventListener('DOMContentLoaded', function () {
             event.preventDefault();
             handleRefreshButtonClick()
         // tags
-        } else if ((event.ctrlKey || event.metaKey) && event.shiftKey && event.key === 'i' && isEditorFocused) { 
+        } else if ((event.ctrlKey || event.metaKey) && event.shiftKey && (event.key === 'I' || event.key === 'i') && isEditorFocused) { 
             event.preventDefault();
             addTextToSelectedLine("#INTRO");
-        } else if ((event.ctrlKey || event.metaKey) && event.shiftKey && event.key === 'v' && isEditorFocused) { 
+        } else if ((event.ctrlKey || event.metaKey) && event.shiftKey && (event.key === 'V' || event.key === 'v') && isEditorFocused) { 
             event.preventDefault();
             addTextToSelectedLine("#VERSE");
-        } else if ((event.ctrlKey || event.metaKey) && event.shiftKey && event.key === 'p' && isEditorFocused) { 
+        } else if ((event.ctrlKey || event.metaKey) && event.shiftKey && (event.key === 'P' || event.key === 'p') && isEditorFocused) { 
             event.preventDefault();
             addTextToSelectedLine("#PRE-CHORUS");
-        } else if ((event.ctrlKey || event.metaKey) && event.shiftKey && event.key === 'c' && isEditorFocused) { 
+        } else if ((event.ctrlKey || event.metaKey) && event.shiftKey && (event.key === 'C' || event.key === 'c') && isEditorFocused) { 
             event.preventDefault();
             addTextToSelectedLine("#CHORUS");
-        } else if ((event.ctrlKey || event.metaKey) && event.shiftKey && event.key === 'b' && isEditorFocused) { 
+        } else if ((event.ctrlKey || event.metaKey) && event.shiftKey && (event.key === 'B' || event.key === 'b') && isEditorFocused) { 
             event.preventDefault();
             addTextToSelectedLine("#BRIDGE");
-        } else if ((event.ctrlKey || event.metaKey) && event.shiftKey && event.key === 'h' && isEditorFocused) { 
+        } else if ((event.ctrlKey || event.metaKey) && event.shiftKey && (event.key === 'H' || event.key === 'h') && isEditorFocused) { 
             event.preventDefault();
             addTextToSelectedLine("#HOOK");
-        } else if ((event.ctrlKey || event.metaKey) && event.shiftKey && event.key === 'o' && isEditorFocused) { 
+        } else if ((event.ctrlKey || event.metaKey) && event.shiftKey && (event.key === 'O' || event.key === 'o') && isEditorFocused) { 
             event.preventDefault();
             addTextToSelectedLine("#OUTRO");
-        } else if ((event.ctrlKey || event.metaKey) && event.shiftKey && event.key === 'x' && isEditorFocused) { 
+        } else if ((event.ctrlKey || event.metaKey) && event.shiftKey && (event.key === 'X' || event.key === 'x') && isEditorFocused) { 
             event.preventDefault();
             addTextToSelectedLine("#INSTRUMENTAL");
         }
@@ -2075,22 +2075,24 @@ function updateLineIssues(color, lines) {
             const operatingSystem = checkOperatingSystem();
             const shortcutElements = document.querySelectorAll('.shortcut_icon_larger[data="ctrl_meta_key"]');
             
-            shortcutElements.forEach(function(element) {
-                // Criar um elemento <svg> e definir seu conteúdo interno como o SVG do ícone
-                const svgElement = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-                svgElement.setAttribute("fill", "#ffffff");
-                svgElement.setAttribute("width", "28px");
-                svgElement.setAttribute("height", "28px");
-                svgElement.setAttribute("viewBox", "0 0 24 24");
-                svgElement.setAttribute("xmlns", "http://www.w3.org/2000/svg");
-                svgElement.setAttribute("stroke", "#ffffff");
-                svgElement.setAttribute("stroke-width", "0.00024000000000000003");
-                svgElement.innerHTML = '<path style="transform: none; transition: none;" d="M18.5,9A3.5,3.5,0,1,0,15,5.5V7H9V5.5A3.5,3.5,0,1,0,5.5,9H7v6H5.5A3.5,3.5,0,1,0,9,18.5V17h6v1.5A3.5,3.5,0,1,0,18.5,15H17V9ZM17,5.5A1.5,1.5,0,1,1,18.5,7H17ZM7,18.5A1.5,1.5,0,1,1,5.5,17H7ZM7,7H5.5A1.5,1.5,0,1,1,7,5.5Zm8,8H9V9h6Zm3.5,2A1.5,1.5,0,1,1,17,18.5V17Z"></path>';
-
-                // Substituir o conteúdo do elemento original pelo elemento <svg>
-                element.innerHTML = '';
-                element.appendChild(svgElement);
-            });
+            if (operatingSystem === 'macOS') {
+                shortcutElements.forEach(function(element) {
+                    // Criar um elemento <svg> e definir seu conteúdo interno como o SVG do ícone
+                    const svgElement = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+                    svgElement.setAttribute("fill", "#ffffff");
+                    svgElement.setAttribute("width", "28px");
+                    svgElement.setAttribute("height", "28px");
+                    svgElement.setAttribute("viewBox", "0 0 24 24");
+                    svgElement.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+                    svgElement.setAttribute("stroke", "#ffffff");
+                    svgElement.setAttribute("stroke-width", "0.00024000000000000003");
+                    svgElement.innerHTML = '<path style="transform: none; transition: none;" d="M18.5,9A3.5,3.5,0,1,0,15,5.5V7H9V5.5A3.5,3.5,0,1,0,5.5,9H7v6H5.5A3.5,3.5,0,1,0,9,18.5V17h6v1.5A3.5,3.5,0,1,0,18.5,15H17V9ZM17,5.5A1.5,1.5,0,1,1,18.5,7H17ZM7,18.5A1.5,1.5,0,1,1,5.5,17H7ZM7,7H5.5A1.5,1.5,0,1,1,7,5.5Zm8,8H9V9h6Zm3.5,2A1.5,1.5,0,1,1,17,18.5V17Z"></path>';
+    
+                    // Substituir o conteúdo do elemento original pelo elemento <svg>
+                    element.innerHTML = '';
+                    element.appendChild(svgElement);
+                });
+            }
         }
 
         function checkOperatingSystem() {
