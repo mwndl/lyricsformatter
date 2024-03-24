@@ -1547,6 +1547,13 @@ function updateLineIssues(color, lines) {
             resetLineIssues();
             checkFormatPlaceholder(); // verifica se há containers, se não tiver, exibe o 'copy'
             handleRefreshButtonClick();
+
+            const editor = document.getElementById('editor');
+            undoStack.push(editor.value);
+            if (undoStack.length > maxStackSize) {
+                undoStack.shift(); // remove o item mais antigo da pilha
+            }
+            redoStack = [];
         }
 
         // Definindo a função para interpretar e executar o trigger

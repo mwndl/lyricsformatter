@@ -130,6 +130,12 @@ function replaceText(offset, length, replacement) {
     var newText = editorValue.substring(0, offset) + replacement + editorValue.substring(offset + length);
     editor.value = newText;
     handleRefreshButtonClick();
+
+    undoStack.push(editor.value);
+    if (undoStack.length > maxStackSize) {
+        undoStack.shift(); // remove o item mais antigo da pilha
+    }
+    redoStack = [];
 }
 
 function detectBrowser() {
