@@ -478,6 +478,19 @@
                     <span class="slider round"></span>
                 </label>
             </div>
+            <div class="popup_option" style="display:none">
+                <div class="popup_title">
+                    <p class="popup_option_title">Maximum number of undo/redo actions</p>
+                    <p class="popup_option_description">Note: Large numbers may impact performance, especially on older devices.</p>
+                </div>
+                <select id="maxUndoRedoActions" class="select_list" onchange="checkContent()">
+                    <option value="10">10</option>
+                    <option value="50">50</option>
+                    <option value="100" selected>100</option>
+                    <option value="200">200</option>
+                    <option value="200">300</option>
+                </select>
+            </div>
             <div class="settings_hided_div" id="dev_hided_div" style="display:none">
                 <hr style="border-top: 1px solid rgb(100, 100, 100); border-right: none; border-bottom: none; border-left: none; border-image: initial;">
                 <div class="popup_option">

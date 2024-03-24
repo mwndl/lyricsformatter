@@ -2,6 +2,7 @@ var typingTimer;
 
 var undoStack = [];
 var redoStack = [];
+var maxStackSize = 100;
 
 document.addEventListener('DOMContentLoaded', function () {
     var returnArrow = document.getElementById('return_arrow');
@@ -83,6 +84,9 @@ document.addEventListener('DOMContentLoaded', function () {
         const content = editor.value;
 
         undoStack.push(editor.value);
+        if (undoStack.length > maxStackSize) {
+            undoStack.shift(); // remove o item mais antigo da pilha
+        }
         redoStack = [];
     
         const checkboxIds = [
@@ -1080,6 +1084,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 'autoSuggestions',
                 'localHostToggle'
             ];
+            
 
             checkboxIds.forEach(function (checkboxId) {
                 const checkbox = document.getElementById(checkboxId);
@@ -1096,6 +1101,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     }
                 }
             });
+
         }
 
 /* ****************************************** */
