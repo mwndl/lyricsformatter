@@ -1084,7 +1084,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 'autoSuggestions',
                 'localHostToggle'
             ];
-            
 
             checkboxIds.forEach(function (checkboxId) {
                 const checkbox = document.getElementById(checkboxId);
@@ -1101,7 +1100,6 @@ document.addEventListener('DOMContentLoaded', function () {
                     }
                 }
             });
-
         }
 
 /* ****************************************** */
