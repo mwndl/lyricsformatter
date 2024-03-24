@@ -252,10 +252,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
         } else if ((event.ctrlKey || event.metaKey) && !event.shiftKey && (event.key === 'Z' || event.key === 'z')) { // desfazer
             event.preventDefault();
-            undo()
+            undo();
         } else if ((event.ctrlKey || event.metaKey) && event.shiftKey && (event.key === 'Z' || event.key === 'z')) { // refazer
             event.preventDefault();
-            redo()
+            redo();
         }
     });
 });
@@ -269,6 +269,7 @@ document.addEventListener('DOMContentLoaded', function () {
             redoStack.push(undoStack.pop());
             editor.value = undoStack[undoStack.length - 1];
         }
+        updateSidebar();
     }
 
     // Função para refazer
@@ -278,6 +279,7 @@ document.addEventListener('DOMContentLoaded', function () {
             undoStack.push(redoStack.pop());
             editor.value = undoStack[undoStack.length - 1];
         }
+        updateSidebar();
     }
 
 /* ****************************************** */
