@@ -290,31 +290,40 @@ document.addEventListener('DOMContentLoaded', function () {
 
 /* FUNÇÃO PRA ADICIONAR TEXTO NO EDITOR (COM BASE NO CURSOR) */
 
-    function addTextToSelectedLine(text) {
-        const editor = document.getElementById('editor');
-        const cursorPosition = editor.selectionStart;
-        const currentText = editor.value;
+        function addTextToSelectedLine(text) {
+            const editor = document.getElementById('editor');
+            const cursorPosition = editor.selectionStart; // Obtém a posição atual do cursor
+            const currentText = editor.value;
 
-        // Dividir o texto em linhas
-        const lines = currentText.split('\n');
+            // Dividir o texto em linhas
+            const lines = currentText.split('\n');
 
-        // Encontrar a linha onde o cursor está
-        let lineStart = 0;
-        let lineEnd = 0;
-        for (let i = 0; i < lines.length; i++) {
-            lineEnd = lineStart + lines[i].length;
-            if (cursorPosition >= lineStart && cursorPosition <= lineEnd) {
-                // Adicionar o texto na linha onde o cursor está
-                lines[i] += text;
-                break;
+            // Encontrar a linha onde o cursor está
+            let lineStart = 0;
+            let lineEnd = 0;
+            let lineIndex = -1; // Índice da linha onde o cursor está
+            for (let i = 0; i < lines.length; i++) {
+                lineEnd = lineStart + lines[i].length;
+                if (cursorPosition >= lineStart && cursorPosition <= lineEnd) {
+                    // Adicionar o texto na linha onde o cursor está
+                    lines[i] += text;
+                    lineIndex = i; // Salva o índice da linha onde o cursor está
+                    break;
+                }
+                lineStart = lineEnd + 1; // +1 para contar o caractere de nova linha (\n)
             }
-            lineStart = lineEnd + 1; // +1 para contar o caractere de nova linha (\n)
-        }
 
-        // Atualizar o valor do textarea com as linhas modificadas
-        editor.value = lines.join('\n');
-        updateSidebar();
-    }
+            // Atualizar o valor do textarea com as linhas modificadas
+            editor.value = lines.join('\n');
+
+            // Definir a nova posição do cursor
+            if (lineIndex !== -1) {
+                const newCursorPosition = cursorPosition + text.length;
+                editor.setSelectionRange(newCursorPosition, newCursorPosition);
+            }
+
+            updateSidebar();
+        }
 
 /* ****************************************** */
 
@@ -380,6 +389,7 @@ document.addEventListener('DOMContentLoaded', function () {
             var textArea = document.getElementById('editor');
             var autoFormatToggle = document.getElementById('autoFormatToggle');
             var selectedLanguageCode = getParameterByName('language')
+            const cursorPosition = editor.selectionStart; // Obtém a posição atual do cursor
 
             if (textArea.value === '') {
                 fetchCurrentlyPlayingData();
@@ -387,6 +397,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 return;
             }
 
+            // Obter número da linha onde estava o cursor
+            var cursorLine = textArea.value.substr(0, cursorPosition).split("\n").length;
 
             // EXECUTAR AUTO FORMAT
             if (autoFormatToggle.checked) {
@@ -413,6 +425,14 @@ document.addEventListener('DOMContentLoaded', function () {
                 removeDuplicateSpaces(); // espaços duplos entre palavras
                 removeDuplicateEmptyLines(); // linhas vazias duplicadas entre estrofes
             }
+
+            // Encontre o índice do início da próxima linha
+            var nextLineIndex = textArea.value.indexOf("\n", cursorPosition);
+            if (nextLineIndex === -1) {
+                nextLineIndex = textArea.value.length; // Se for a última linha, vá até o final do texto
+            }
+            // Defina a posição do cursor para o final da linha onde estava o cursor antes da formatação automática
+            textArea.setSelectionRange(nextLineIndex, nextLineIndex);
 
             updateSidebar();
             resetLineIssues();
@@ -479,7 +499,6 @@ document.addEventListener('DOMContentLoaded', function () {
                     formatContainer.innerHTML = '';
             
                     if (data.result.issues === false) {
-                        // se não houverem erros, exibe o 'no issues'
                         checkFormatPlaceholder();
                     } else {
                         // add os containers na box "format_containers"
@@ -505,6 +524,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     errorPlaceholder("Something went wrong, please try again in a few seconds.", 'format_containers');
                 })
                 .finally(() => {
+
                     // Show the refresh button and hide the loading spinner after the request is complete
                     refreshButton.style.display = 'block';
                     loadingSpinner.style.display = 'none';
@@ -849,13 +869,15 @@ document.addEventListener('DOMContentLoaded', function () {
             var editor = document.getElementById('editor');
             var content = editor.value;
         
-            content = content.replace(/([:;,?!])(?=[^\s])/g, '$1 '); // Adiciona espaço após outras pontuações
+            content = content.replace(/([:;,?!])(?=[^\s"])/g, '$1 '); // Adiciona espaço após outras pontuações
             content = content.replace(/\((\s+)/g, '('); // Remove espaço após '('
+            content = content.replace(/¿\s+/g, '¿'); // Remove espaço após '¿'
+            content = content.replace(/¡\s+/g, '¡'); // Remove espaço após '¡'
+            content = content.replace(/([^"\s])((?:¿|¡))/g, '$1 $2'); // Adiciona espaço antes de '¿' e '¡' se não houver espaço ou " antes
             content = content.replace(/\(([^\s])/g, '($1'); // Adiciona espaço antes de '('
             content = content.replace(/(\s+)\)/g, '$1) '); // Remove espaço antes de ')' e adiciona espaço após ')'
             content = content.replace(/\s+([!?,:;\)])/g, '$1'); // Remove espaços antes de !?,:; e )
             
-        
             // Atualizar o conteúdo do editor
             editor.value = content;
         }

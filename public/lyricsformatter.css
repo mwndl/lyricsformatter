@@ -310,16 +310,16 @@
     box-sizing: border-box;
   }
   
-  .popup_content select,
-  .popup_content input[type="text"] {
-    width: 100%;
-    padding: 12px;
+  .popup_content select {
+    padding: 10px;
     border: none;
     border-radius: 5px;
     background-color: #444;
     color: #fff;
     outline: none;
     box-sizing: border-box;
+    width: 60px;
+    text-align: center;
   }
   
   .popup_details {
@@ -368,6 +368,10 @@
   
   .bold {
     font-weight: bold;
+  }
+
+  .select_list {
+        width: 50px; /* Largura */
   }
 
   .popup_content_intern {
