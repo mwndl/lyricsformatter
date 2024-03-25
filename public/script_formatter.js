@@ -2,7 +2,7 @@ var typingTimer;
 
 var undoStack = [];
 var redoStack = [];
-var maxStackSize = 100;
+var maxStackSize = 250;
 
 document.addEventListener('DOMContentLoaded', function () {
     var returnArrow = document.getElementById('return_arrow');
@@ -1134,8 +1134,8 @@ document.addEventListener('DOMContentLoaded', function () {
             if (selectedValue !== null) {
                 selectElement.value = selectedValue;
             } else {
-                // Se não houver informação em cache, defina o valor padrão como 100
-                selectElement.value = '100';
+                // Se não houver informação em cache, defina o valor padrão como 250
+                selectElement.value = '250';
             }
 
 
