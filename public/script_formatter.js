@@ -92,7 +92,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const checkboxIds = [
             'autoCapToggle',
             'autoFormatToggle',
-            'autoSuggestions',
+            'autoSuggestion',
             'localHostToggle'
         ];
     
@@ -113,6 +113,7 @@ document.addEventListener('DOMContentLoaded', function () {
     
         if (isAutoSuggestionsChecked()) {
             clearTimeout(typingTimer);
+
             typingTimer = setTimeout(autoSuggestion, doneTypingInterval);
         }
     }
@@ -163,6 +164,7 @@ document.addEventListener('DOMContentLoaded', function () {
         updateSidebar();
         setDefaultLanguage();
         setCheckboxStates();
+        setMaxStackValue();
         loadDevMode();
         loadSpMenu();
         checkTrackIdParams();
@@ -606,7 +608,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         function isAutoSuggestionsChecked() {
-            const autoSuggestions = document.getElementById('autoSuggestions');
+            const autoSuggestions = document.getElementById('autoSuggestion');
             return autoSuggestions.checked;
         }
 
@@ -1103,7 +1105,7 @@ document.addEventListener('DOMContentLoaded', function () {
             const checkboxIds = [
                 'autoCapToggle',
                 'autoFormatToggle',
-                'autoSuggestions',
+                'autoSuggestion',
                 'localHostToggle'
             ];
 
@@ -1122,6 +1124,26 @@ document.addEventListener('DOMContentLoaded', function () {
                     }
                 }
             });
+        }
+
+        // Função para verificar e definir o valor selecionado do select ao carregar a página
+        function setMaxStackValue() {
+            const selectElement = document.getElementById('maxUndoRedoActions');
+            const selectedValue = localStorage.getItem('maxUndoRedoActions');
+
+            if (selectedValue !== null) {
+                selectElement.value = selectedValue;
+            } else {
+                // Se não houver informação em cache, defina o valor padrão como 100
+                selectElement.value = '100';
+            }
+
+
+            // Atualizar o valor de maxStackSize com o valor selecionado
+            maxStackSize = selectElement.value;
+            
+            // Retornar o valor selecionado para ser usado em outras partes do código
+            return selectElement.value;
         }
 
 /* ****************************************** */
