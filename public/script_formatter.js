@@ -2,7 +2,9 @@ var typingTimer;
 
 var undoStack = [];
 var redoStack = [];
+let cursorPositionsStack = [];
 var maxStackSize = 250;
+
 
 document.addEventListener('DOMContentLoaded', function () {
     var returnArrow = document.getElementById('return_arrow');
@@ -71,6 +73,11 @@ document.addEventListener('DOMContentLoaded', function () {
         resetLineIssues()
     });
 
+    textarea.addEventListener('input', function() {
+        const content = editor.value;
+        const cursorPosition = editor.selectionStart;
+        updateCursorPosition(content, cursorPosition);
+    });
 
     textarea.addEventListener('input', updateSidebar);
     textarea.addEventListener('input', checkContent);
@@ -268,25 +275,51 @@ document.addEventListener('DOMContentLoaded', function () {
 
 /* FUNÇÕES PARA DESFAZER E REFAZER ALTERAÇÕES */
 
-    // Função para desfazer
-    function undo() {
-        if (undoStack.length > 1) {
-            const editor = document.getElementById('editor');
-            redoStack.push(undoStack.pop());
-            editor.value = undoStack[undoStack.length - 1];
-        }
-        updateSidebar();
+// Função para desfazer
+function undo() {
+    const editor = document.getElementById('editor');
+
+    if (undoStack.length > 1) {
+        const previousContent = undoStack.pop();
+        redoStack.push(previousContent);
+
+        const cursorPosition = cursorPositionsStack.pop();
+        const newCursorPosition = Math.max(0, cursorPosition - 1); // Definir o cursor para uma posição anterior
+        const content = undoStack[undoStack.length - 1]; // Obter o conteúdo desfeito diretamente do stack
+        editor.value = content;
+        editor.setSelectionRange(newCursorPosition, newCursorPosition);
     }
 
-    // Função para refazer
-    function redo() {
-        if (redoStack.length > 0) {
-            const editor = document.getElementById('editor');
-            undoStack.push(redoStack.pop());
-            editor.value = undoStack[undoStack.length - 1];
-        }
+    updateSidebar();
+}
+
+// Função para refazer
+function redo() {
+    const editor = document.getElementById('editor');
+
+    if (redoStack.length > 0) {
+        const nextContent = redoStack.pop();
+        undoStack.push(nextContent);
+
+        const cursorPosition = cursorPositionsStack.pop();
+        const content = nextContent; // Obter o conteúdo refato diretamente do stack
+        editor.value = content;
+
+        // Definir a posição do cursor após atualizar o conteúdo do editor
+        editor.setSelectionRange(cursorPosition, cursorPosition);
+
+        // Atualizar a barra lateral
         updateSidebar();
     }
+}
+
+// Função para atualizar o conteúdo do editor
+function updateCursorPosition() {
+    const editor = document.getElementById('editor');
+    const cursorPosition = editor.selectionStart;
+
+    cursorPositionsStack.push(cursorPosition);
+}
 
 /* ****************************************** */
 
@@ -317,6 +350,13 @@ document.addEventListener('DOMContentLoaded', function () {
 
             // Atualizar o valor do textarea com as linhas modificadas
             editor.value = lines.join('\n');
+
+            // adiciona a edição no undo stack
+            undoStack.push(editor.value);
+            if (undoStack.length > maxStackSize) {
+                undoStack.shift(); // remove o item mais antigo da pilha
+            }
+            redoStack = [];
 
             // Definir a nova posição do cursor
             if (lineIndex !== -1) {
