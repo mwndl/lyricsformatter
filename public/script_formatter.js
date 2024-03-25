@@ -3,6 +3,7 @@ var typingTimer;
 var undoStack = [];
 var redoStack = [];
 let cursorPositionsStack = [];
+var redoCursorPositionsStack = [];
 var maxStackSize = 250;
 
 
@@ -301,24 +302,31 @@ function redo() {
         const nextContent = redoStack.pop();
         undoStack.push(nextContent);
 
-        const cursorPosition = cursorPositionsStack.pop();
+        const nextCursorPosition = redoCursorPositionsStack.pop(); // Obter a posição do cursor antes da alteração refeita
         const content = nextContent; // Obter o conteúdo refato diretamente do stack
         editor.value = content;
 
         // Definir a posição do cursor após atualizar o conteúdo do editor
-        editor.setSelectionRange(cursorPosition, cursorPosition);
+        editor.setSelectionRange(nextCursorPosition, nextCursorPosition);
 
         // Atualizar a barra lateral
         updateSidebar();
     }
 }
 
-// Função para atualizar o conteúdo do editor
+// Função para atualizar o conteúdo do editor e a posição do cursor
 function updateCursorPosition() {
     const editor = document.getElementById('editor');
     const cursorPosition = editor.selectionStart;
 
+    // Armazenar a posição do cursor
     cursorPositionsStack.push(cursorPosition);
+
+    // Limpar o redoCursorPositionsStack porque estamos fazendo uma nova alteração
+    redoCursorPositionsStack = [];
+
+    // Atualizar a barra lateral
+    updateSidebar();
 }
 
 /* ****************************************** */
