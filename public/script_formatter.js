@@ -112,16 +112,9 @@ document.addEventListener('DOMContentLoaded', function () {
             const checkbox = document.getElementById(checkboxId);
             localStorage.setItem(checkboxId, checkbox.checked);
         });
-    
-        if (content.trim() === '') {
-            clearTimeout(typingTimer);
-            hideOptionsAndButtons();
-        } else {
-            showOptionsAndButtons();
-            if (isAutoCapChecked()) {
-                autoCap();
-            }
-        }
+
+        checkTextarea()
+
     
         if (isAutoSuggestionsChecked()) {
             clearTimeout(typingTimer);
@@ -673,16 +666,26 @@ function addToUndoStack() {
         }
 
         function showOptionsAndButtons() {
-            document.getElementById('improvements_menu').style.display = 'flex';
-            document.getElementById('copy_button').style.display = 'block';
-            document.getElementById('paste_button').style.display = 'block';
-            document.getElementById('reset_button').style.display = 'block';
-            document.getElementById('refresh_button').style.display = 'block';
             const improvementsPlaceholder1 = document.getElementById('improvements_placeholder1');
             const improvementsPlaceholder2 = document.getElementById('improvements_placeholder2');
 
             improvementsPlaceholder1.innerHTML = 'Tap the <span class="highlight_text">Refresh</span> icon to update the format suggestions.';
             improvementsPlaceholder2.innerHTML = 'Tap the <span class="highlight_text">Refresh</span> icon to update the grammar suggestions.';
+        }
+
+        function checkTextarea() {
+            var editor = document.getElementById('editor');
+            var content = editor.value;
+
+            if (content.trim() === '') {
+                clearTimeout(typingTimer);
+                hideOptionsAndButtons();
+            } else {
+                showOptionsAndButtons();
+                if (isAutoCapChecked()) {
+                    autoCap();
+                }
+            }
         }
 
 /* ****************************************** */
@@ -1760,6 +1763,7 @@ function updateTabCounters() {
             checkContent();
             clearTimeout(typingTimer);
             updateTabCounters();
+            checkTextarea()
             notification('Textarea cleared successfully!');
         }
 
@@ -1790,6 +1794,7 @@ function updateTabCounters() {
             // Deseleciona a textarea
             window.getSelection().removeAllRanges();
             updateTabCounters();
+            checkTextarea()
         }
 
         function pasteFromClipboard() {
@@ -1805,6 +1810,7 @@ function updateTabCounters() {
             navigator.clipboard.readText().then(function(text) {
                 const textArea = document.getElementById('editor');
                 textArea.value = text;
+                checkTextarea()
                 notification('Pasted from clipboard!');
                 
                 // Aqui você pode adicionar qualquer outra ação que deseja realizar após colar
