@@ -18,9 +18,6 @@ document.addEventListener('DOMContentLoaded', function () {
     const languageArrow = document.querySelector('.lang_expand_arrow');
     const langButtonContent = document.querySelector('.lang_selector_div');
 
-    var resetButton = document.getElementById('reset_button');
-    var refreshButton = document.getElementById('refresh_button');
-
     var miniMenu = document.getElementById("mini_menu");
 
     var ignoredContainers = []; // aqui ficam guardados temporariamente os IDs ignorados, ao limpar o texto, tocar em 'Copy' ou então ao tocar no botão de lixo, esse array será resetado
@@ -33,6 +30,13 @@ document.addEventListener('DOMContentLoaded', function () {
         returnArrow.style.display = 'flex'
     }
 
+    var undoButton = document.getElementById('undo_button');
+    undoButton.addEventListener('click', undo);
+
+    var redoButton = document.getElementById('redo_button');
+    redoButton.addEventListener('click', redo);
+
+    var resetButton = document.getElementById('reset_button');
     resetButton.addEventListener('click', function() {
         textArea.value = ''; // apaga a transcrição
         updateSidebar(); // reseta os contadores de caracteres e a barra lateral
@@ -41,7 +45,16 @@ document.addEventListener('DOMContentLoaded', function () {
         clearTimeout(typingTimer);
     });
 
+
+    var copyButton = document.getElementById('copy_button');
+    copyButton.addEventListener('click', undo); // copy
+
+    var pasteButton = document.getElementById('paste_button');
+    pasteButton.addEventListener('click', redo); // paste
+
+    var refreshButton = document.getElementById('refresh_button');
     refreshButton.addEventListener('click', handleRefreshButtonClick);
+
 
     var returnArrow = document.querySelector('#return_arrow');
 
