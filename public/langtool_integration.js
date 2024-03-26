@@ -46,6 +46,8 @@ function checkLanguage() {
             createMatchContainers(data.matches);
             checkGrammarPlaceholder();
         }
+
+        updateTabCounters()
     })
     .catch(error => {
         const grammarContainer = document.getElementById('grammar_containers');
@@ -53,6 +55,8 @@ function checkLanguage() {
 
         errorPlaceholder("LanguageTool returned an unknown error, please try again later.", 'grammar_containers');
         console.error('Error:', error.message);
+
+        updateTabCounters()
     });
 }
 

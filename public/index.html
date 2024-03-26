@@ -86,14 +86,14 @@
                 </div>
                 <div class="improvements_box" id="improvements_box" style="height: calc(90% - 120px);">
                     <div class="improvements_box_top">
-                        <div class="improvements_menu" id="improvements_menu" style="display:none">
+                        <div class="improvements_menu" id="improvements_menu" style="display:flex">
                             <div class="improv_tabs">
                                 <div class="improvements_option">
                                     <div class="impr_menu_true" id="lf_option" style="" title="">
-                                        <p>Format</p>
+                                        <p id="format_tab_text" style="font-weight: 500;">Format</p>
                                     </div>
                                     <div class="impr_menu_false" id="lt_option" style="" title="Show grammar suggestions">
-                                        <p>Grammar</p>
+                                        <p id="grammar_tab_text" style="font-weight: 500;">Grammar</p>
                                     </div>
                                 </div>
                             </div>
@@ -106,7 +106,7 @@
                                         </button>
                                     </div>
                                     <div class="redo">
-                                        <button class="gray_button" id="undo_button" style="display:block"
+                                        <button class="gray_button" id="redo_button" style="display:block"
                                             title="Redo Action">
                                             <div class="redo_symbol"></div>
                                         </button>
@@ -114,17 +114,17 @@
                                 </div>
                                 <div class="improv_buttons_right">
                                     <div class="gray_buttons_div">
-                                        <button class="gray_button" id="reset_button" title="Reset transcription">
+                                        <button class="gray_button" id="reset_button" style="display:block" title="Reset transcription">
                                             <div class="reset_symbol"></div>
                                         </button>
                                     </div>
                                     <div class="gray_buttons_div">
-                                        <button class="gray_button" id="copy_button" title="Copy Trascription">
+                                        <button class="gray_button" id="copy_button" style="display:block" title="Copy Trascription">
                                             <div class="copy_symbol"></div>
                                         </button>
                                     </div>
                                     <div class="gray_buttons_div">
-                                        <button class="gray_button" id="paste_button" title="Paste Trascription">
+                                        <button class="gray_button" id="paste_button" style="display:block" title="Paste Trascription">
                                             <div class="paste_symbol"></div>
                                         </button>
                                     </div>

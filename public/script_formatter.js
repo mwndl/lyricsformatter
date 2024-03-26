@@ -30,34 +30,29 @@ document.addEventListener('DOMContentLoaded', function () {
         returnArrow.style.display = 'flex'
     }
 
-    var undoButton = document.getElementById('undo_button');
-    undoButton.addEventListener('click', undo);
+    /* FUNÇÕES AO MENU DE AÇÕES */
 
-    var redoButton = document.getElementById('redo_button');
-    redoButton.addEventListener('click', redo);
+    var undoButton = document.getElementById('undo_button');
+    undoButton.addEventListener('click', undo); // undo
+
+    var redoButton = document.getElementById('redo_button'); 
+    redoButton.addEventListener('click', redo); // redo
 
     var resetButton = document.getElementById('reset_button');
-    resetButton.addEventListener('click', function() {
-        textArea.value = ''; // apaga a transcrição
-        updateSidebar(); // reseta os contadores de caracteres e a barra lateral
-        ignoredContainers = []; // limpa a memória de alertas ignorados
-        checkContent();
-        clearTimeout(typingTimer);
-    });
-
+    resetButton.addEventListener('click', resetTranscription); // reset
 
     var copyButton = document.getElementById('copy_button');
-    copyButton.addEventListener('click', undo); // copy
+    copyButton.addEventListener('click', copyToClipboard); // copy
 
     var pasteButton = document.getElementById('paste_button');
-    pasteButton.addEventListener('click', redo); // paste
+    pasteButton.addEventListener('click', pasteFromClipboard); // paste
 
     var refreshButton = document.getElementById('refresh_button');
-    refreshButton.addEventListener('click', handleRefreshButtonClick);
+    refreshButton.addEventListener('click', handleRefreshButtonClick); // refresh
 
+    /* ****************************************** */
 
     var returnArrow = document.querySelector('#return_arrow');
-
     returnArrow.addEventListener('click', function() {
         // Verificar se referrerUrlValue começa com "http://" ou "https://"
         if (!referrerUrlValue.startsWith('http://') && !referrerUrlValue.startsWith('https://')) {
@@ -190,13 +185,17 @@ document.addEventListener('DOMContentLoaded', function () {
         fetchServerInfo();
         checkMobileTestingParams();
         updateShortcutIcon();
-        checkDeviceType()
+        checkDeviceType();
+        addToUndoStack(); // add o texto vazio como undo inicial
 
     
     // Adicione um evento de clique ao botão de cópia
     var copyButton = document.querySelector('.content_copy_btn');
     if (copyButton) {
-        copyButton.addEventListener('click', copyToClipboard);
+        copyButton.addEventListener('click', function() {
+            copyToClipboard();
+            resetTranscription();
+        });
     }
     
     var ignoreButtons = document.querySelectorAll('.content_ignore_btn');
@@ -279,6 +278,15 @@ document.addEventListener('DOMContentLoaded', function () {
         } else if ((event.ctrlKey || event.metaKey) && event.shiftKey && (event.key === 'Z' || event.key === 'z')) { // refazer
             event.preventDefault();
             redo();
+        } else if ((event.ctrlKey || event.metaKey) && (event.key === 'C' || event.key === 'c') && !isEditorFocused) {
+            event.preventDefault();
+            copyToClipboard();
+        } else if ((event.ctrlKey || event.metaKey) && (event.key === 'V' || event.key === 'v') && !isEditorFocused) {
+            event.preventDefault();
+            pasteFromClipboard();
+        } else if ((event.ctrlKey || event.metaKey) && (event.key === 'X' || event.key === 'x') && !isEditorFocused) {
+            event.preventDefault();
+            resetTranscription();
         }
     });
 });
@@ -303,6 +311,7 @@ function undo() {
     }
 
     updateSidebar();
+    updateTabCounters();
 }
 
 // função refazer ação
@@ -330,6 +339,7 @@ function redo() {
 
         // atualizar a barra lateral
         updateSidebar();
+        updateTabCounters();
     }
 }
 
@@ -361,6 +371,7 @@ function addToUndoStack() {
     }
     redoStack = []; // Limpa a pilha de refazer
     redoCursorPositionsStack = []; // Limpa a pilha de refazer
+    updateTabCounters();
 }
 
 
@@ -570,6 +581,7 @@ function addToUndoStack() {
                             console.error('Error with API request. Status:', response.status);
                             errorPlaceholder("We are experiencing internal issues, please try again later.", 'format_containers');
                         }
+                        updateTabCounters()
                     }
                     return response.json();
                 })
@@ -594,9 +606,11 @@ function addToUndoStack() {
                         }
                         checkFormatPlaceholder();
                     }
+                    updateTabCounters()
 
                 })
                 .catch(error => {
+                    updateTabCounters()
                     // Handle errors here
                     const formatContainer = document.getElementById('format_containers');
                     formatContainer.innerHTML = '';
@@ -605,7 +619,7 @@ function addToUndoStack() {
                     errorPlaceholder("Something went wrong, please try again in a few seconds.", 'format_containers');
                 })
                 .finally(() => {
-
+                    updateTabCounters()
                     // Show the refresh button and hide the loading spinner after the request is complete
                     refreshButton.style.display = 'block';
                     loadingSpinner.style.display = 'none';
@@ -648,11 +662,6 @@ function addToUndoStack() {
 /* EXIBIR OU OCULTAR OS BOTÕES SUPERIORES DO IMPROVEMENTS CONTAINER */
 
         function hideOptionsAndButtons() {
-            document.getElementById('improvements_menu').style.display = 'none';
-            document.getElementById('reset_button').style.display = 'none';
-            document.getElementById('copy_button').style.display = 'none';
-            document.getElementById('paste_button').style.display = 'none';
-            document.getElementById('refresh_button').style.display = 'none';
             const improvementsPlaceholder1 = document.getElementById('improvements_placeholder1');
             const improvementsPlaceholder2 = document.getElementById('improvements_placeholder2');
 
@@ -660,6 +669,7 @@ function addToUndoStack() {
             improvementsPlaceholder2.textContent = 'Type something or paste your current transcription to check the grammar...';
             improvementsPlaceholder1.onclick = '';
             improvementsPlaceholder2.onclick = '';
+            updateTabCounters()
         }
 
         function showOptionsAndButtons() {
@@ -1467,6 +1477,47 @@ function updateLineIssues(color, lines) {
 
 /* ****************************************** */
 
+function countFormatContainers() {
+    var divFormatContainers = document.getElementById('format_containers');
+    
+    if (divFormatContainers) {
+        var containers = divFormatContainers.getElementsByClassName('container');
+        
+        return containers.length;
+    } else {
+        return 0;
+    }
+}
+
+function countGrammarContainers() {
+    var divFormatContainers = document.getElementById('grammar_containers');
+    
+    if (divFormatContainers) {
+        var containers = divFormatContainers.getElementsByClassName('content');
+    
+        return containers.length;
+    } else {
+        return 0;
+    }
+}
+
+function updateTabCounters() {
+    const formatContainers = countFormatContainers()
+    const grammarContainers = countGrammarContainers()
+
+    if (formatContainers > 0) {
+        document.getElementById('format_tab_text').textContent = `${formatContainers} · Format`;
+    } else {
+        document.getElementById('format_tab_text').textContent = `Format`;
+    }
+
+    if (grammarContainers > 0) {
+        document.getElementById('grammar_tab_text').textContent = `${grammarContainers} · Grammar`;
+    } else {
+        document.getElementById('grammar_tab_text').textContent = `Grammar`;
+    }
+}
+
 /* FUNÇÕES PARA SUGESTÕES DE FORMATO */
 
         // Função auxiliar para criar um container HTML com base nos dados da API
@@ -1669,7 +1720,7 @@ function updateLineIssues(color, lines) {
             checkFormatPlaceholder(); // verifica se há containers, se não tiver, exibe o 'copy'
             handleRefreshButtonClick();
 
-            addToUndoStack()
+            addToUndoStack();
         }
 
         // Definindo a função para interpretar e executar o trigger
@@ -1693,6 +1744,25 @@ function updateLineIssues(color, lines) {
             }
         }
 
+        function resetTranscription() {
+            var editor = document.getElementById('editor');
+
+            if (editor.value.trim() === '') {
+                notification('The textarea is already empty')
+                return
+            }
+
+            addToUndoStack()
+
+            editor.value = ''; // apaga a transcrição
+            updateSidebar(); // reseta os contadores de caracteres e a barra lateral
+            ignoredContainers = []; // limpa a memória de alertas ignorados
+            checkContent();
+            clearTimeout(typingTimer);
+            updateTabCounters();
+            notification('Textarea cleared successfully!');
+        }
+
 
         function copyToClipboard() {
             const textArea = document.getElementById('editor');
@@ -1709,10 +1779,7 @@ function updateLineIssues(color, lines) {
                 var message = successful ? 'Copied to your clipboard!' : 'Something went wrong, please try again.';
                 notification(message);
                 
-
-                textArea.value = ''; // apaga a transcrição
                 updateSidebar(); // reseta os contadores de caracteres e a barra lateral
-                hideOptionsAndButtons() // oculta os menus já que não há mais texto
                 ignoredContainers = []; // limpa a memória de alertas ignorados
 
             } catch (err) {
@@ -1722,7 +1789,29 @@ function updateLineIssues(color, lines) {
 
             // Deseleciona a textarea
             window.getSelection().removeAllRanges();
+            updateTabCounters();
+        }
 
+        function pasteFromClipboard() {
+            const textArea = document.getElementById('editor');
+
+            if (textArea.value.trim() !== '') {
+                notification('Please delete the current transcript before pasting a new one')
+                return
+            }
+
+            addToUndoStack()
+
+            navigator.clipboard.readText().then(function(text) {
+                const textArea = document.getElementById('editor');
+                textArea.value = text;
+                notification('Pasted from clipboard!');
+                
+                // Aqui você pode adicionar qualquer outra ação que deseja realizar após colar
+            }).catch(function(err) {
+                console.error('An error occurred while pasting from the clipboard: ', err);
+                notification('An error occurred while pasting from the clipboard.');
+            });
         }
 
         // Função para verificar e exibir a div placeholder
