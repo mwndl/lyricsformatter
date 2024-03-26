@@ -4,7 +4,7 @@ var undoStack = [];
 var redoStack = [];
 let undoCursorPositionsStack = [];
 var redoCursorPositionsStack = [];
-var maxStackSize = 250;
+var maxStackSize = 100;
 
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -635,15 +635,14 @@ function addToUndoStack() {
 /* EXIBIR OU OCULTAR OS BOTÕES SUPERIORES DO IMPROVEMENTS CONTAINER */
 
         function hideOptionsAndButtons() {
-            const improvementsOptions = document.getElementById('improvements_menu');
-            const resetButton = document.getElementById('reset_button');
-            const refreshButton = document.getElementById('refresh_button');
+            document.getElementById('improvements_menu').style.display = 'none';
+            document.getElementById('reset_button').style.display = 'none';
+            document.getElementById('copy_button').style.display = 'none';
+            document.getElementById('paste_button').style.display = 'none';
+            document.getElementById('refresh_button').style.display = 'none';
             const improvementsPlaceholder1 = document.getElementById('improvements_placeholder1');
             const improvementsPlaceholder2 = document.getElementById('improvements_placeholder2');
 
-            improvementsOptions.style.display = 'none';
-            resetButton.style.display = 'none';
-            refreshButton.style.display = 'none';
             improvementsPlaceholder1.textContent = 'Type something or paste your current transcription to check the format...';
             improvementsPlaceholder2.textContent = 'Type something or paste your current transcription to check the grammar...';
             improvementsPlaceholder1.onclick = '';
@@ -651,15 +650,14 @@ function addToUndoStack() {
         }
 
         function showOptionsAndButtons() {
-            const improvementsOptions = document.getElementById('improvements_menu');
-            const resetButton = document.getElementById('reset_button');
-            const refreshButton = document.getElementById('refresh_button');
+            document.getElementById('improvements_menu').style.display = 'flex';
+            document.getElementById('copy_button').style.display = 'block';
+            document.getElementById('paste_button').style.display = 'block';
+            document.getElementById('reset_button').style.display = 'block';
+            document.getElementById('refresh_button').style.display = 'block';
             const improvementsPlaceholder1 = document.getElementById('improvements_placeholder1');
             const improvementsPlaceholder2 = document.getElementById('improvements_placeholder2');
 
-            improvementsOptions.style.display = 'flex';
-            resetButton.style.display = 'block';
-            refreshButton.style.display = 'block';
             improvementsPlaceholder1.innerHTML = 'Tap the <span class="highlight_text">Refresh</span> icon to update the format suggestions.';
             improvementsPlaceholder2.innerHTML = 'Tap the <span class="highlight_text">Refresh</span> icon to update the grammar suggestions.';
         }

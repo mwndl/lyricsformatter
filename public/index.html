@@ -87,28 +87,56 @@
                 <div class="improvements_box" id="improvements_box" style="height: calc(90% - 120px);">
                     <div class="improvements_box_top">
                         <div class="improvements_menu" id="improvements_menu" style="display:none">
-                            <div class="improvements_option">
-                                <div class="impr_menu_true" id="lf_option" style="" title="">
-                                    <p>Format</p>
-                                </div>
-                                <div class="impr_menu_false" id="lt_option" style="" title="Show grammar suggestions">
-                                    <p>Grammar</p>
+                            <div class="improv_tabs">
+                                <div class="improvements_option">
+                                    <div class="impr_menu_true" id="lf_option" style="" title="">
+                                        <p>Format</p>
+                                    </div>
+                                    <div class="impr_menu_false" id="lt_option" style="" title="Show grammar suggestions">
+                                        <p>Grammar</p>
+                                    </div>
                                 </div>
                             </div>
                             <div class="improvement_buttons">
-                                <div class="reset_div">
-                                    <button class="reset_button" id="reset_button" title="Reset transcription">
-                                        <div class="reset_symbol"></div>
-                                    </button>
+                                <div class="improv_buttons_left">
+                                    <div class="undo">
+                                        <button class="gray_button" id="undo_button" style="display:block"
+                                            title="Undo Action">
+                                            <div class="undo_symbol"></div>
+                                        </button>
+                                    </div>
+                                    <div class="redo">
+                                        <button class="gray_button" id="undo_button" style="display:block"
+                                            title="Redo Action">
+                                            <div class="redo_symbol"></div>
+                                        </button>
+                                    </div>
                                 </div>
-                                <div class="refresh_div">
-                                    <button class="refresh_button" id="refresh_button" style="display:block"
-                                        title="Refresh suggestions">
-                                        <div class="refresh_symbol"></div>
-                                    </button>
-                                    <div class="loading_spinner_loop" id="loading_spinner" style="display:none">
-                                        <div class="loading_spinner">
-                                            <div></div>
+                                <div class="improv_buttons_right">
+                                    <div class="gray_buttons_div">
+                                        <button class="gray_button" id="reset_button" title="Reset transcription">
+                                            <div class="reset_symbol"></div>
+                                        </button>
+                                    </div>
+                                    <div class="gray_buttons_div">
+                                        <button class="gray_button" id="copy_button" title="Copy Trascription">
+                                            <div class="copy_symbol"></div>
+                                        </button>
+                                    </div>
+                                    <div class="gray_buttons_div">
+                                        <button class="gray_button" id="paste_button" title="Paste Trascription">
+                                            <div class="paste_symbol"></div>
+                                        </button>
+                                    </div>
+                                    <div class="refresh_div">
+                                        <button class="white_button" id="refresh_button" style="display:block"
+                                            title="Refresh suggestions">
+                                            <div class="refresh_symbol"></div>
+                                        </button>
+                                        <div class="loading_spinner_loop" id="loading_spinner" style="display:none">
+                                            <div class="loading_spinner">
+                                                <div></div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
