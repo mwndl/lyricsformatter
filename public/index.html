@@ -473,11 +473,11 @@
                     <p class="popup_option_description">Note: Large limits may impact performance, especially on older devices.</p>
                 </div>
                 <select id="maxUndoRedoActions" class="select_list" onchange="checkContent()">
+                    <option value="50">50</option>
                     <option value="75">75</option>
-                    <option value="100">100</option>
-                    <option value="250" selected>250</option>
-                    <option value="500">500</option>
-                    <option value="1000">1000</option>
+                    <option value="100" selected>100</option>
+                    <option value="200">200</option>
+                    <option value="300">300</option>
                 </select>
             </div>
             <div class="settings_hided_div" id="dev_hided_div" style="display:none">
@@ -1190,7 +1190,7 @@
 
                 // Função para parar o cronômetro
                 function intervalStopTimer() {
-                    clearInterval(intervalId); // Limpa o intervalo de atualização do display
+                    clearInterval(intervalId); // pausa o timer
                     isTimerRunning = false;
                     setTimeout(stopTimer, 2000);
                 }

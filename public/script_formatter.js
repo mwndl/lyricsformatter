@@ -2,7 +2,7 @@ var typingTimer;
 
 var undoStack = [];
 var redoStack = [];
-let cursorPositionsStack = [];
+let undoCursorPositionsStack = [];
 var redoCursorPositionsStack = [];
 var maxStackSize = 250;
 
@@ -91,11 +91,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const editor = document.getElementById('editor');
         const content = editor.value;
 
-        undoStack.push(editor.value);
-        if (undoStack.length > maxStackSize) {
-            undoStack.shift(); // remove o item mais antigo da pilha
-        }
-        redoStack = [];
+        addToUndoStack()
     
         const checkboxIds = [
             'autoCapToggle',
@@ -284,7 +280,9 @@ function undo() {
         const previousContent = undoStack.pop();
         redoStack.push(previousContent);
 
-        const cursorPosition = cursorPositionsStack.pop();
+        const cursorPosition = undoCursorPositionsStack.pop();
+        redoCursorPositionsStack.push(cursorPosition); // Salva a posição do cursor para refazer
+
         const newCursorPosition = Math.max(0, cursorPosition - 1); // Definir o cursor para uma posição anterior
         const content = undoStack[undoStack.length - 1]; // Obter o conteúdo desfeito diretamente do stack
         editor.value = content;
@@ -294,22 +292,30 @@ function undo() {
     updateSidebar();
 }
 
-// Função para refazer
+// função refazer ação
 function redo() {
     const editor = document.getElementById('editor');
 
-    if (redoStack.length > 0) {
-        const nextContent = redoStack.pop();
-        undoStack.push(nextContent);
+    if (redoStack.length > 0) { // executar apenas caso a pilha 'redoStack' tenha conteúdo
+        // retirar o topo da 'redo'
+        const nextContent = redoStack.pop(); 
+        // definir o conteúdo do topo da 'redo' como topo da 'undo'
+        undoStack.push(nextContent); 
 
-        const nextCursorPosition = redoCursorPositionsStack.pop(); // Obter a posição do cursor antes da alteração refeita
-        const content = nextContent; // Obter o conteúdo refato diretamente do stack
+        // retirar o topo da 'redoCursor'
+        const nextCursorPosition = redoCursorPositionsStack.pop(); 
+        // definir o conteúdo do topo da 'redoCursor' como topo da 'undoCursor'
+        undoCursorPositionsStack.push(nextCursorPosition);
+
+        // atualizar conteúdo e calcular nova posição do cursor
+        const content = nextContent;
         editor.value = content;
+        const redoCursorPosition = nextCursorPosition + (nextContent.length - content.length);
 
-        // Definir a posição do cursor após atualizar o conteúdo do editor
-        editor.setSelectionRange(nextCursorPosition, nextCursorPosition);
+        // definir a posição do cursor após atualizar o conteúdo do editor
+        editor.setSelectionRange(redoCursorPosition, redoCursorPosition);
 
-        // Atualizar a barra lateral
+        // atualizar a barra lateral
         updateSidebar();
     }
 }
@@ -320,7 +326,7 @@ function updateCursorPosition() {
     const cursorPosition = editor.selectionStart;
 
     // Armazenar a posição do cursor
-    cursorPositionsStack.push(cursorPosition);
+    undoCursorPositionsStack.push(cursorPosition);
 
     // Limpar o redoCursorPositionsStack porque estamos fazendo uma nova alteração
     redoCursorPositionsStack = [];
@@ -328,6 +334,22 @@ function updateCursorPosition() {
     // Atualizar a barra lateral
     updateSidebar();
 }
+
+// Essa função adiciona a transcrição atual e a posição do cursor às pilhas do undo
+function addToUndoStack() {
+    let editor = document.getElementById('editor');
+    let value = editor.value;
+    let cursorPosition = editor.selectionStart; // Captura a posição do cursor
+    undoStack.push(value); // Adiciona valor à pilha do undo
+    undoCursorPositionsStack.push(cursorPosition); // Adiciona posição do cursor à pilha de posições
+    if (undoStack.length > maxStackSize) {
+        undoStack.shift(); // Remove o item mais antigo da pilha de transcrição
+        undoCursorPositionsStack.shift(); // Remove a posição do cursor correspondente
+    }
+    redoStack = []; // Limpa a pilha de refazer
+    redoCursorPositionsStack = []; // Limpa a pilha de refazer
+}
+
 
 /* ****************************************** */
 
@@ -360,11 +382,7 @@ function updateCursorPosition() {
             editor.value = lines.join('\n');
 
             // adiciona a edição no undo stack
-            undoStack.push(editor.value);
-            if (undoStack.length > maxStackSize) {
-                undoStack.shift(); // remove o item mais antigo da pilha
-            }
-            redoStack = [];
+            addToUndoStack()
 
             // Definir a nova posição do cursor
             if (lineIndex !== -1) {
@@ -1640,12 +1658,7 @@ function updateLineIssues(color, lines) {
             checkFormatPlaceholder(); // verifica se há containers, se não tiver, exibe o 'copy'
             handleRefreshButtonClick();
 
-            const editor = document.getElementById('editor');
-            undoStack.push(editor.value);
-            if (undoStack.length > maxStackSize) {
-                undoStack.shift(); // remove o item mais antigo da pilha
-            }
-            redoStack = [];
+            addToUndoStack()
         }
 
         // Definindo a função para interpretar e executar o trigger
