@@ -465,6 +465,26 @@
                         </svg>
                     </div>
                 </div>
+                <div class="popup_option">
+                    <div class="popup_title">
+                        <p class="popup_option_title">Transfer playback on copy</p>
+                        <p class="popup_option_description">If there is an alternative playback device, the song will be transferred back automatically when you tap the copy button</p>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="copyTransferToggle" onclick="checkContent()">
+                        <span class="slider round"></span>
+                    </label>
+                </div>
+                <div class="popup_option">
+                    <div class="popup_title">
+                        <p class="popup_option_title">Transfer playback on paste</p>
+                        <p class="popup_option_description">If there is a currently playing track on another device, the song will be transferred to LyricsFormatter when you tap the paste button</p>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="pasteTransferToggle" onclick="checkContent()">
+                        <span class="slider round"></span>
+                    </label>
+                </div>
                 <hr
                     style="border-top: 1px solid rgb(100, 100, 100); border-right: none; border-bottom: none; border-left: none; border-image: initial;">
             </div>
@@ -1556,6 +1576,8 @@
             localStorage.setItem('maxUndoRedoActions', selectedValue);
 
             const checkboxIds = [
+                'copyTransferToggle',
+                'pasteTransferToggle',
                 'autoCapToggle',
                 'autoFormatToggle',
                 'autoSuggestion',

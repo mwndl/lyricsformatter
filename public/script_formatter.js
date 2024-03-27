@@ -102,6 +102,8 @@ document.addEventListener('DOMContentLoaded', function () {
         addToUndoStack()
     
         const checkboxIds = [
+            'copyTransferToggle',
+            'pasteTransferToggle',
             'autoCapToggle',
             'autoFormatToggle',
             'autoSuggestion',
@@ -671,6 +673,7 @@ function addToUndoStack() {
 
             improvementsPlaceholder1.innerHTML = 'Tap the <span class="highlight_text">Refresh</span> icon to update the format suggestions.';
             improvementsPlaceholder2.innerHTML = 'Tap the <span class="highlight_text">Refresh</span> icon to update the grammar suggestions.';
+            updateTabCounters()
         }
 
         function checkTextarea() {
@@ -700,6 +703,16 @@ function addToUndoStack() {
         function isAutoSuggestionsChecked() {
             const autoSuggestions = document.getElementById('autoSuggestion');
             return autoSuggestions.checked;
+        }
+
+        function isCopyTransferTottleChecked() {
+            const copyTransferToggle = document.getElementById('copyTransferToggle');
+            return copyTransferToggle.checked;
+        }
+
+        function isPasteTransferTottleChecked() {
+            const pasteTransferToggle = document.getElementById('pasteTransferToggle');
+            return pasteTransferToggle.checked;
         }
 
         function autoCap() {
@@ -1193,6 +1206,8 @@ function addToUndoStack() {
         function setCheckboxStates() {
             // Adicione IDs aos seus elementos de checkbox para tornar a manipulação mais fácil
             const checkboxIds = [
+                'copyTransferToggle',
+                'pasteTransferToggle',
                 'autoCapToggle',
                 'autoFormatToggle',
                 'autoSuggestion',
@@ -1779,12 +1794,21 @@ function updateTabCounters() {
             
             try {
                 // Copia o conteúdo para a área de transferência
-                var successful = document.execCommand('copy');
-                var message = successful ? 'Copied to your clipboard!' : 'Something went wrong, please try again.';
-                notification(message);
+                document.execCommand('copy');
                 
                 updateSidebar(); // reseta os contadores de caracteres e a barra lateral
                 ignoredContainers = []; // limpa a memória de alertas ignorados
+
+                const transferPlaybackToggle = isCopyTransferTottleChecked()
+                const altDeviceId = getParameterByName('alt_device_id');
+                const accessToken = localStorage.getItem('accessToken');
+
+                if (transferPlaybackToggle === true && currentSongId !== '') {
+                    transferPlayback(accessToken, altDeviceId)
+                    notification('Content copied and playback transferred successfully!');
+                } else {
+                    notification('Content copied to your clipboard!');
+                }
 
             } catch (err) {
                 console.error('An error occurred while copying the text: ', err);
@@ -1811,7 +1835,17 @@ function updateTabCounters() {
                 const textArea = document.getElementById('editor');
                 textArea.value = text;
                 checkTextarea()
-                notification('Pasted from clipboard!');
+                updateSidebar()
+
+                const transferPlaybackToggle = isPasteTransferTottleChecked()
+                const accessToken = localStorage.getItem('accessToken');
+
+                if (transferPlaybackToggle === true && currentSongId !== '') {
+                    transferPlayback(accessToken, deviceId)
+                    notification('Content pasted and playback transferred successfully!');
+                } else {
+                    notification('Pasted from clipboard!');
+                }
                 
                 // Aqui você pode adicionar qualquer outra ação que deseja realizar após colar
             }).catch(function(err) {
