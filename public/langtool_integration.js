@@ -166,10 +166,10 @@ function exportLTObject(match) {
     var matchString = JSON.stringify(modifiedMatch);
     
     // Chamar a função unificada para copiar para a área de transferência
-    copyToClipboard(matchString, 'JSON object copied to clipboard!');
+    copyContentToClipboard(matchString, 'JSON object copied to clipboard!');
 }
 
-function copyToClipboard(content, message) {
+function copyContentToClipboard(content, message) {
     // Copiar o conteúdo para a área de transferência
     navigator.clipboard.writeText(content).then(function() {
         console.log('Content copied to clipboard:', content);
