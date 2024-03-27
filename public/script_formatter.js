@@ -1239,8 +1239,8 @@ function addToUndoStack() {
             if (selectedValue !== null) {
                 selectElement.value = selectedValue;
             } else {
-                // Se não houver informação em cache, defina o valor padrão como 250
-                selectElement.value = '250';
+                // Se não houver informação em cache, defina o valor padrão como 100
+                selectElement.value = '100';
             }
 
 
