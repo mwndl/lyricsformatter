@@ -21,6 +21,7 @@ LyricsFormatter is a free service created with the help of talented users design
 ## Getting Started
 
 Access LyricsFormatter at: [Lyrics Formatter](https://lyricsformatter.onrender.com/)
+
 Or access our beta version: [Lyrics Formatter - BETA](https://lyricsformatter-beta.onrender.com/)
 
 ## Acknowledgments
