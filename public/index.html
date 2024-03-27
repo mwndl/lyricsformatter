@@ -548,6 +548,16 @@
                         <span class="slider round"></span>
                     </label>
                 </div>
+                <div class="popup_option" style="display:flex">
+                    <div class="popup_title">
+                        <p class="popup_option_title">Export button on LT suggestions</p>
+                        <p class="popup_option_description">Copy data from each object returned by the LanguageTool API - for debugging and development purposes</p>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="lfExportToggle" onclick="checkContent()">
+                        <span class="slider round"></span>
+                    </label>
+                </div>
                 <div class="popup_option">
                     <div class="popup_title">
                         <p class="popup_option_title">Auto suggestions</p>
@@ -1583,6 +1593,7 @@
                 'autoCapToggle',
                 'autoFormatToggle',
                 'autoSuggestion',
+                'lfExportToggle',
                 'localHostToggle'
             ];
 
