@@ -3,7 +3,7 @@
 ## Welcome to LyricsFormatter
 Your assistant for transcribing song lyrics quickly and accurately!
 
-LyricsFormatter is a free website designed to help you transcribe song lyrics for Musixmatch. It combines its own back-end checks with the spelling expertise of LanguageTool and useful tools such as line character counters and shortcuts for quick transcription.
+LyricsFormatter is a free service created with the help of talented users designed to help you transcribe song lyrics for Musixmatch, following their main writing guidelines. It combines its own back-end checks with the spelling expertise of LanguageTool and useful tools such as line character counters and shortcuts for quick transcription.
 
 ## Features
 
@@ -14,17 +14,31 @@ LyricsFormatter is a free website designed to help you transcribe song lyrics fo
 
 ## Benefits
 
-- **Faster and more accurate transcriptions:** LyricsFormatter saves your time and effort.
+- **Faster and more accurate transcriptions:** Save your time with our auto-format and auto-capitalization function.
 - **Higher quality lyrics:** The tool ensures that your lyrics are formatted according to Musixmatch guidelines.
 - **More enjoyable transcription experience:** Say goodbye to frustrations with grammatical and spelling errors.
 
 ## Getting Started
 
 Access LyricsFormatter at: [Lyrics Formatter](https://lyricsformatter.onrender.com/)
+Or access our beta version: [Lyrics Formatter - BETA](https://lyricsformatter-beta.onrender.com/)
 
 ## Acknowledgments
 
 - **Musixmatch Team:** For providing an amazing platform for fans and artists to share their song lyrics.
 - **LanguageTool Team:** For making their open-source spell-checking tool available.
+
+## Disclaimer
+
+LyricsFormatter is an independent tool created solely to assist users in transcribing song lyrics. It is not affiliated with or endorsed by Musixmatch. We provide this service as a supportive resource for individuals transcribing lyrics for Musixmatch, aiming to streamline the process and ensure adherence to Musixmatch's guidelines.
+
+## Credits
+
+- **English:** Jen Galvin
+- **French:** Naomie M
+- **Italian:** Nicola Di Costanzo, Sara Fasano
+- **Portuguese (BR):** Marcos Wiendl
+- **Portuguese (PT):** JJ. Aparício
+- **Spanish:** Andreks Tdos, Brayan Gutiérrez
 
 We hope LyricsFormatter is a useful tool for you!
