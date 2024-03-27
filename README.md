@@ -20,7 +20,7 @@ LyricsFormatter is a free website designed to help you transcribe song lyrics fo
 
 ## Getting Started
 
-Access LyricsFormatter at: [Lyrics Formatter](https://lyricsformatter.onrender.com/))
+Access LyricsFormatter at: [Lyrics Formatter](https://lyricsformatter.onrender.com/)
 
 ## Acknowledgments
 
