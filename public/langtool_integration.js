@@ -70,7 +70,7 @@ function createMatchContainers(matches) {
 
         if (match.sentence === "#INTRO" || match.sentence === "#VERSE" || match.sentence === "#PRE-CHORUS" 
         || match.sentence === "#CHORUS" || match.sentence === "#BRIDGE" || match.sentence === "#HOOK" 
-        || match.sentence === "#OUTRO" || match.sentence === "#INSTRUMENTAL") {
+        || match.sentence === "#OUTRO" || match.sentence === "#INSTRUMENTAL" ) {
             return; // Ignorar o loop e continuar com o próximo match
         }
 
@@ -125,6 +125,17 @@ function createMatchContainers(matches) {
         matchContainer.appendChild(content);
 
         container.appendChild(matchContainer);
+
+        // Adiciona o botão 'EXPORT' apenas se isLfExportToggleChecked retornar true
+        if (isLfExportToggleChecked()) {
+            var exportBtn = document.createElement('div');
+            exportBtn.textContent = 'Export Object';
+            exportBtn.classList.add('grammar_export_btn');
+            exportBtn.onclick = function() {
+                exportLTObject(match);
+            };
+            contentOptions.appendChild(exportBtn);
+        }
     });
 }
 
@@ -136,6 +147,37 @@ function replaceText(offset, length, replacement) {
     handleRefreshButtonClick();
 
     addToUndoStack()
+}
+
+function exportLTObject(match) {
+    // Obtendo o conteúdo do textarea
+    var editorContent = document.getElementById('editor').value;
+
+    // Obtendo a parte correspondente ao offset e length
+    var content = editorContent.substring(match.offset, match.offset + match.length);
+
+    // Construindo o objeto JSON modificado
+    var modifiedMatch = {
+        content: content,
+        match: match
+    };
+
+    // Convertendo o objeto JavaScript para uma string JSON
+    var matchString = JSON.stringify(modifiedMatch);
+    
+    // Chamar a função unificada para copiar para a área de transferência
+    copyToClipboard(matchString, 'JSON object copied to clipboard!');
+}
+
+function copyToClipboard(content, message) {
+    // Copiar o conteúdo para a área de transferência
+    navigator.clipboard.writeText(content).then(function() {
+        console.log('Content copied to clipboard:', content);
+        notification(message);
+    }, function(err) {
+        console.error('Failed to copy content to clipboard: ', err);
+        notification('Failed to copy JSON object');
+    });
 }
 
 function detectBrowser() {

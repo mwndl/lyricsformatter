@@ -107,6 +107,7 @@ document.addEventListener('DOMContentLoaded', function () {
             'autoCapToggle',
             'autoFormatToggle',
             'autoSuggestion',
+            'lfExportToggle',
             'localHostToggle'
         ];
     
@@ -176,6 +177,7 @@ document.addEventListener('DOMContentLoaded', function () {
         loadSpMenu();
         checkTrackIdParams();
         checkSpotifyParams();
+        checkLTExportParams();
         fetchCreditsData();
         fetchServerInfo();
         checkMobileTestingParams();
@@ -693,17 +695,7 @@ function addToUndoStack() {
 
 /* ****************************************** */
 
-/* FUNÇÕES DE FORMATO DO MENU SETTINGS */
-
-        function isAutoCapChecked() {
-            const autoCapToggle = document.getElementById('autoCapToggle');
-            return autoCapToggle.checked;
-        }
-
-        function isAutoSuggestionsChecked() {
-            const autoSuggestions = document.getElementById('autoSuggestion');
-            return autoSuggestions.checked;
-        }
+/* FUNÇÕES TRUE/FALSE PARA VERIFICAR SE TOGGLES ESTÃO ATIVADOS */
 
         function isCopyTransferTottleChecked() {
             const copyTransferToggle = document.getElementById('copyTransferToggle');
@@ -714,6 +706,35 @@ function addToUndoStack() {
             const pasteTransferToggle = document.getElementById('pasteTransferToggle');
             return pasteTransferToggle.checked;
         }
+
+        function isAutoCapChecked() {
+            const autoCapToggle = document.getElementById('autoCapToggle');
+            return autoCapToggle.checked;
+        }
+
+        function isAutoFormatChecked() {
+            const autoFormatToggle = document.getElementById('autoFormatToggle');
+            return autoFormatToggle.checked;
+        }
+        
+        function isAutoSuggestionsChecked() {
+            const autoSuggestions = document.getElementById('autoSuggestion');
+            return autoSuggestions.checked;
+        }
+
+        function isLfExportToggleChecked() {
+            const lfExportToggle = document.getElementById('lfExportToggle');
+            return lfExportToggle.checked;
+        }
+
+        function isLocalHostChecked() {
+            const localHostToggle = document.getElementById('localHostToggle');
+            return localHostToggle.checked;
+        }
+
+/* ****************************************** */
+
+/* FUNÇÕES DE FORMATO DO MENU SETTINGS */
 
         function autoCap() {
             var editor = document.getElementById('editor');
@@ -1211,6 +1232,7 @@ function addToUndoStack() {
                 'autoCapToggle',
                 'autoFormatToggle',
                 'autoSuggestion',
+                'lfExportToggle',
                 'localHostToggle'
             ];
 
@@ -2244,6 +2266,21 @@ function updateTabCounters() {
                 var element = document.getElementById('development_message');
                 if (element) {
                     element.remove();
+                }
+            }
+        }
+
+        // Função para verificar os parâmetros da URL e acionar a função correspondente
+        function checkLTExportParams() {
+            const ltExportParam = getParameterByName('lt_export');
+            
+            if (ltExportParam !== null) {
+                if (ltExportParam === '1') {
+                    document.getElementById('lfExportToggle').checked = true;
+                    removeParameterFromURL('lt_export')
+                } else if (ltExportParam === '0') {
+                    document.getElementById('lfExportToggle').checked = false;
+                    removeParameterFromURL('lt_export')
                 }
             }
         }

@@ -1563,27 +1563,40 @@
     }
 
     .container .grammar_replace_btn {
-        padding: 3px 5px;
+        padding: 5px 7px;
         display: flex;
         align-items: center;
         justify-content: center;
-        border-radius: 8px;
+        border-radius: 4px;
         background-color: #0091ec;
         border: 1px solid #0075be;
         font-size: 12px;
         color: white;
-        margin: 0 3px 0 0;
+        margin: 2px 3px 0 0;
     }
 
     .container .grammar_ignore_btn {
-        padding: 3px 5px;
+        padding: 5px 7px;
         display: flex;
         align-items: center;
         justify-content: center;
-        border-radius: 8px;
+        border-radius: 4px;
         background-color: rgb(20, 20, 20);
         font-size: 14px;
-        color: white
+        color: white;
+        margin: 2px 3px 0 0;
+    }
+
+    .container .grammar_export_btn {
+        padding: 5px 7px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 4px;
+        background-color: #ffffff;
+        font-size: 12px;
+        color: rgb(49, 49, 49);
+        margin: 2px 5px 0 0;
     }
 
     .container .content_options {
