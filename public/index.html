@@ -298,7 +298,9 @@
     </div>
     <div class="footer" id="footer">
         <div class="player" id="sdk_player" style="display:none">
-            <div id="timer">0:00</div>
+            <div id="timer_div">
+                <div id="timer">0:00</div>
+            </div>
             <script src="https://sdk.scdn.co/spotify-player.js"></script>
             <div class="control-container" id="play_pause">
                 <svg width="20px" height="20px" viewBox="-1 0 8 8" version="1.1" xmlns="http://www.w3.org/2000/svg"
@@ -923,7 +925,7 @@
 
         let startTime;
         let intervalId;
-        let timerRunning = false;
+        let isTimerRunning = false;
 
         window.onSpotifyWebPlaybackSDKReady = () => {
 
@@ -1105,7 +1107,6 @@
 
                 /* COMANDOS DO TIMER */
 
-                var isTimerRunning = false;
                 document.addEventListener('keydown', function(event) {
                     var numericKeys = ['2'];
 
@@ -1221,14 +1222,6 @@
                     });
                 });
 
-                function toggleTimer() {
-                    if (timerRunning) {
-                        intervalStopTimer(); // Se o cronômetro estiver em execução, pare-o
-                    } else {
-                        startTimer(); // Se o cronômetro não estiver em execução, inicie-o
-                    }
-                }
-
                 // Função para iniciar o cronômetro
                 function startTimer() {
                     if (!isTimerRunning) {
@@ -1236,7 +1229,8 @@
                         intervalId = setInterval(updateTimerDisplay, 50); // Atualiza o display do cronômetro a cada 50ms
 
                         const timerElement = document.getElementById("timer");
-                        timerElement.style.opacity = "0.9";
+                        timerElement.style.display = "flex"; // Define o estilo de display para flex
+                        timerElement.style.opacity = "0.9"; // Define a opacidade
                         isTimerRunning = true; // Atualiza o estado do temporizador
                     }
                 }
@@ -1251,7 +1245,15 @@
                 function stopTimer() {
                     const timerElement = document.getElementById("timer");
                     timerElement.style.opacity = "0";
-                    isTimerRunning = false; // Atualiza o estado do temporizador
+
+                    // Adicione um ouvinte de evento para detectar quando a transição de opacidade for concluída
+                    timerElement.addEventListener("transitionend", function(event) {
+                        // Verifica se a propriedade de transição que mudou é a opacidade
+                        if (event.propertyName === "opacity") {
+                            // Define o estilo display como none após a transição de opacidade
+                            timerElement.style.display = "none";
+                        }
+                    });
                 }
 
                 // Função para atualizar o display do cronômetro

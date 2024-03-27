@@ -1708,11 +1708,11 @@
         padding: 8px 15px;
         background-color: #ffffff;
         border-radius: 10px;
-        display: flex;
+        display: none;
         justify-content: center;
         align-items: center;
         font-size: 18px;
-        opacity: 0; /* Definindo a opacidade como 0 para ocultar inicialmente */
+        opacity: 0.9; /* Definindo a opacidade como 0 para ocultar inicialmente */
         transition: opacity 0.5s ease; /* Adicionando transição de opacidade */
     }
   
