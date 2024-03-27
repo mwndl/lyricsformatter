@@ -86,29 +86,62 @@
                 </div>
                 <div class="improvements_box" id="improvements_box" style="height: calc(90% - 120px);">
                     <div class="improvements_box_top">
-                        <div class="improvements_menu" id="improvements_menu" style="display:none">
-                            <div class="improvements_option">
-                                <div class="impr_menu_true" id="lf_option" style="" title="">
-                                    <p>Format</p>
-                                </div>
-                                <div class="impr_menu_false" id="lt_option" style="" title="Show grammar suggestions">
-                                    <p>Grammar</p>
+                        <div class="improvements_menu" id="improvements_menu" style="display:flex">
+                            <div class="improv_tabs">
+                                <div class="improvements_option">
+                                    <div class="impr_menu_true" id="lf_option" style="" title="">
+                                        <p id="format_tab_text" style="font-weight: 500;">Format</p>
+                                    </div>
+                                    <div class="impr_menu_false" id="lt_option" style="" title="Show grammar suggestions">
+                                        <p id="grammar_tab_text" style="font-weight: 500;">Grammar</p>
+                                    </div>
                                 </div>
                             </div>
                             <div class="improvement_buttons">
-                                <div class="reset_div">
-                                    <button class="reset_button" id="reset_button" title="Reset transcription">
-                                        <div class="reset_symbol"></div>
-                                    </button>
+                                <div class="improv_buttons_left">
+                                    <div class="undo">
+                                        <button class="gray_button" id="undo_button" style="display:block"
+                                            title="Undo Action">
+                                            <div class="undo_symbol"></div>
+                                        </button>
+                                    </div>
+                                    <div class="redo">
+                                        <button class="gray_button" id="redo_button" style="display:block"
+                                            title="Redo Action">
+                                            <div class="redo_symbol"></div>
+                                        </button>
+                                    </div>
                                 </div>
-                                <div class="refresh_div">
-                                    <button class="refresh_button" id="refresh_button" style="display:block"
-                                        title="Refresh suggestions">
-                                        <div class="refresh_symbol"></div>
-                                    </button>
-                                    <div class="loading_spinner_loop" id="loading_spinner" style="display:none">
-                                        <div class="loading_spinner">
-                                            <div></div>
+                                <div class="improv_buttons_right">
+                                    <div class="gray_buttons_div" style="display:none">
+                                        <button class="gray_button" id="save_button" style="display:block" title="Save Transcription">
+                                            <div class="save_symbol"></div>
+                                        </button>
+                                    </div>
+                                    <div class="gray_buttons_div">
+                                        <button class="gray_button" id="reset_button" style="display:block" title="Reset Transcription">
+                                            <div class="reset_symbol"></div>
+                                        </button>
+                                    </div>
+                                    <div class="gray_buttons_div">
+                                        <button class="gray_button" id="copy_button" style="display:block" title="Copy Trascription">
+                                            <div class="copy_symbol"></div>
+                                        </button>
+                                    </div>
+                                    <div class="gray_buttons_div">
+                                        <button class="gray_button" id="paste_button" style="display:block" title="Paste Trascription">
+                                            <div class="paste_symbol"></div>
+                                        </button>
+                                    </div>
+                                    <div class="refresh_div">
+                                        <button class="white_button" id="refresh_button" style="display:block"
+                                            title="Refresh Suggestions">
+                                            <div class="refresh_symbol"></div>
+                                        </button>
+                                        <div class="loading_spinner_loop" id="loading_spinner" title="Loading Suggestions..." style="display:none">
+                                            <div class="loading_spinner">
+                                                <div></div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -265,7 +298,9 @@
     </div>
     <div class="footer" id="footer">
         <div class="player" id="sdk_player" style="display:none">
-            <div id="timer">0:00</div>
+            <div id="timer_div">
+                <div id="timer">0:00</div>
+            </div>
             <script src="https://sdk.scdn.co/spotify-player.js"></script>
             <div class="control-container" id="play_pause">
                 <svg width="20px" height="20px" viewBox="-1 0 8 8" version="1.1" xmlns="http://www.w3.org/2000/svg"
@@ -432,6 +467,26 @@
                         </svg>
                     </div>
                 </div>
+                <div class="popup_option">
+                    <div class="popup_title">
+                        <p class="popup_option_title">Transfer playback on copy</p>
+                        <p class="popup_option_description">If there is an alternative playback device, the song will be transferred back automatically when you tap the copy button</p>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="copyTransferToggle" onclick="checkContent()">
+                        <span class="slider round"></span>
+                    </label>
+                </div>
+                <div class="popup_option">
+                    <div class="popup_title">
+                        <p class="popup_option_title">Transfer playback on paste</p>
+                        <p class="popup_option_description">If there is a currently playing track on another device, the song will be transferred to LyricsFormatter when you tap the paste button</p>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="pasteTransferToggle" onclick="checkContent()">
+                        <span class="slider round"></span>
+                    </label>
+                </div>
                 <hr
                     style="border-top: 1px solid rgb(100, 100, 100); border-right: none; border-bottom: none; border-left: none; border-image: initial;">
             </div>
@@ -469,20 +524,44 @@
             </div>
             <div class="popup_option">
                 <div class="popup_title">
-                    <p class="popup_option_title">Auto suggestions</p>
-                    <p class="popup_option_description">Enable this option to receive automatic suggestions as you
-                        transcribe the lyrics</p>
+                    <p class="popup_option_title">Maximum number of undo/redo actions</p>
+                    <p class="popup_option_description">Note: Large limits may impact performance, especially on older devices.</p>
                 </div>
-                <label class="switch">
-                    <input type="checkbox" id="autoSuggestions" onclick="checkContent()">
-                    <span class="slider round"></span>
-                </label>
+                <select id="maxUndoRedoActions" class="select_list" onchange="checkContent()">
+                    <option value="50">50</option>
+                    <option value="75">75</option>
+                    <option value="100" selected>100</option>
+                    <option value="200">200</option>
+                    <option value="300">300</option>
+                </select>
             </div>
             <div class="settings_hided_div" id="dev_hided_div" style="display:none">
                 <hr style="border-top: 1px solid rgb(100, 100, 100); border-right: none; border-bottom: none; border-left: none; border-image: initial;">
+                <h3 class="popup_content_intern">-- Dev Tools --</h3>
+                <div class="popup_option" style="display:none">
+                    <div class="popup_title">
+                        <p class="popup_option_title">Show Musixmatch button</p>
+                        <p class="popup_option_description">Get Musixmatch links to a currently playing track</p>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="mxmIconToggle" onclick="checkContent()">
+                        <span class="slider round"></span>
+                    </label>
+                </div>
                 <div class="popup_option">
                     <div class="popup_title">
-                        <p class="popup_option_title">Development mode</p>
+                        <p class="popup_option_title">Auto suggestions</p>
+                        <p class="popup_option_description">Enable this option to receive automatic suggestions as you
+                            transcribe the lyrics</p>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="autoSuggestion" onclick="checkContent()">
+                        <span class="slider round"></span>
+                    </label>
+                </div>
+                <div class="popup_option">
+                    <div class="popup_title">
+                        <p class="popup_option_title">Run on local server</p>
                         <p class="popup_option_description">Enable this option to switch to the local server</p>
                     </div>
                     <label class="switch">
@@ -846,7 +925,7 @@
 
         let startTime;
         let intervalId;
-        let timerRunning = false;
+        let isTimerRunning = false;
 
         window.onSpotifyWebPlaybackSDKReady = () => {
 
@@ -1028,7 +1107,6 @@
 
                 /* COMANDOS DO TIMER */
 
-                var isTimerRunning = false;
                 document.addEventListener('keydown', function(event) {
                     var numericKeys = ['2'];
 
@@ -1144,14 +1222,6 @@
                     });
                 });
 
-                function toggleTimer() {
-                    if (timerRunning) {
-                        intervalStopTimer(); // Se o cronômetro estiver em execução, pare-o
-                    } else {
-                        startTimer(); // Se o cronômetro não estiver em execução, inicie-o
-                    }
-                }
-
                 // Função para iniciar o cronômetro
                 function startTimer() {
                     if (!isTimerRunning) {
@@ -1159,14 +1229,15 @@
                         intervalId = setInterval(updateTimerDisplay, 50); // Atualiza o display do cronômetro a cada 50ms
 
                         const timerElement = document.getElementById("timer");
-                        timerElement.style.opacity = "0.9";
+                        timerElement.style.display = "flex"; // Define o estilo de display para flex
+                        timerElement.style.opacity = "0.9"; // Define a opacidade
                         isTimerRunning = true; // Atualiza o estado do temporizador
                     }
                 }
 
                 // Função para parar o cronômetro
                 function intervalStopTimer() {
-                    clearInterval(intervalId); // Limpa o intervalo de atualização do display
+                    clearInterval(intervalId); // pausa o timer
                     isTimerRunning = false;
                     setTimeout(stopTimer, 2000);
                 }
@@ -1174,7 +1245,15 @@
                 function stopTimer() {
                     const timerElement = document.getElementById("timer");
                     timerElement.style.opacity = "0";
-                    isTimerRunning = false; // Atualiza o estado do temporizador
+
+                    // Adicione um ouvinte de evento para detectar quando a transição de opacidade for concluída
+                    timerElement.addEventListener("transitionend", function(event) {
+                        // Verifica se a propriedade de transição que mudou é a opacidade
+                        if (event.propertyName === "opacity") {
+                            // Define o estilo display como none após a transição de opacidade
+                            timerElement.style.display = "none";
+                        }
+                    });
                 }
 
                 // Função para atualizar o display do cronômetro
@@ -1493,10 +1572,17 @@
 
         function checkContent() {
 
+            // Salvar o valor selecionado do select
+            const selectElement = document.getElementById('maxUndoRedoActions');
+            const selectedValue = selectElement.value;
+            localStorage.setItem('maxUndoRedoActions', selectedValue);
+
             const checkboxIds = [
+                'copyTransferToggle',
+                'pasteTransferToggle',
                 'autoCapToggle',
                 'autoFormatToggle',
-                'autoSuggestions',
+                'autoSuggestion',
                 'localHostToggle'
             ];
 
@@ -1505,6 +1591,7 @@
                 localStorage.setItem(checkboxId, checkbox.checked);
             });
             setCheckboxStates();
+            setMaxStackValue();
         }
 
         function handleSettingsClick() {
