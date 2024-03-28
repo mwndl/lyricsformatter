@@ -1000,8 +1000,8 @@ function addToUndoStack() {
             content = content.replace(/¿\s+/g, '¿'); // Remove espaço após '¿'
             content = content.replace(/¡\s+/g, '¡'); // Remove espaço após '¡'
             content = content.replace(/([^"\s])((?:¿|¡))/g, '$1 $2'); // Adiciona espaço antes de '¿' e '¡' se não houver espaço ou " antes
-            content = content.replace(/(?<!\")\(([^ \t])/g, '($1'); // Adiciona espaço antes de '(' se não houver espaço ou " antes
-            content = content.replace(/(\s+)\)(?!\")/g, '$1) ');  // Remove espaço antes de ')' e adiciona espaço após ')' se não houver espaço ou " depois
+            content = content.replace(/(?<!\")\(([^ \t])/g, ' ($1'); // Adiciona espaço antes de '(' se não houver espaço ou " antes
+            content = content.replace(/(\s*)\)(?!\")/g, '$1) ');    // Remove espaço antes de ')' e adiciona espaço após ')' se não houver espaço ou " depois
             content = content.replace(/\s+([!?,:;\)])/g, '$1'); // Remove espaços antes de !?,:; e )
             
             // Atualizar o conteúdo do editor
