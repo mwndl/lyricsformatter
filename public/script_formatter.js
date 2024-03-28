@@ -83,9 +83,7 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     textarea.addEventListener('input', function() {
-        const content = editor.value;
-        const cursorPosition = editor.selectionStart;
-        updateCursorPosition(content, cursorPosition);
+        addToUndoStack()
     });
 
     textarea.addEventListener('input', updateSidebar);
@@ -98,8 +96,6 @@ document.addEventListener('DOMContentLoaded', function () {
         const doneTypingInterval = 3000;
         const editor = document.getElementById('editor');
         const content = editor.value;
-
-        addToUndoStack()
     
         const checkboxIds = [
             'copyTransferToggle',
@@ -107,7 +103,6 @@ document.addEventListener('DOMContentLoaded', function () {
             'autoCapToggle',
             'autoFormatToggle',
             'autoSuggestion',
-            'lfExportToggle',
             'localHostToggle'
         ];
     
@@ -381,6 +376,7 @@ function addToUndoStack() {
             const selectionStart = editor.selectionStart;
             const selectionEnd = editor.selectionEnd;
             const currentText = editor.value;
+
 
             // Verifica se há texto selecionado
             if (selectionStart !== selectionEnd) {
@@ -1241,7 +1237,6 @@ function addToUndoStack() {
                 'autoCapToggle',
                 'autoFormatToggle',
                 'autoSuggestion',
-                'lfExportToggle',
                 'localHostToggle'
             ];
 
@@ -2285,10 +2280,8 @@ function updateTabCounters() {
             if (ltExportParam !== null) {
                 if (ltExportParam === '1') {
                     document.getElementById('lfExportToggle').checked = true;
-                    removeParameterFromURL('lt_export')
                 } else if (ltExportParam === '0') {
                     document.getElementById('lfExportToggle').checked = false;
-                    removeParameterFromURL('lt_export')
                 }
             }
         }
