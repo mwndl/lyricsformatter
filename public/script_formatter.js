@@ -1782,10 +1782,17 @@ function updateTabCounters() {
 
 
         function closeContainers() {
+            
             const allContainers = document.querySelectorAll('.container');
             allContainers.forEach((container) => {
                 container.classList.remove('expanded');
                 container.querySelector('.content').style.display = 'none';
+                
+                // Fecha o elemento 'add_to_dictionary_svg' dentro do contêiner
+                const svgElement = container.querySelector('.add_to_dictionary_svg');
+                if (svgElement) {
+                    svgElement.style.display = 'none';
+                }
             });
 
             resetLineIssues();
@@ -1818,6 +1825,11 @@ function updateTabCounters() {
                     const [offset, length] = ltPosition.split(':').map(Number);
                     // Aciona a função selectText com os parâmetros offset e length
                     selectText(offset, length);
+                }
+                const svgElement = container.querySelector('.add_to_dictionary_svg');
+        
+                if (svgElement) {
+                    svgElement.style.display = 'block';
                 }
             }
         }
