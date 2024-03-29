@@ -107,6 +107,7 @@ document.addEventListener('DOMContentLoaded', function () {
             'autoCapToggle',
             'autoFormatToggle',
             'mxmIconToggle',
+            'mxmPersonalTokenToggle',
             'autoSuggestion',
             'localHostToggle'
         ];
@@ -657,11 +658,17 @@ function addToUndoStack() {
             }
 
             const privateMxmToken = localStorage.getItem('mxm_token');
+            const privateTokenToggle = document.getElementById('mxmPersonalTokenToggle')
 
             // Check the value of localHostToggle and set window.serverPath
             let tokenPath;
-            if (privateMxmToken !== null) {
+            if (privateMxmToken !== null && privateTokenToggle.checked === true) {
                 tokenPath = `access_mode=2&user_token=${privateMxmToken}`;
+                
+            // caso o usuário tenha definido a opção de token privado mas o campo esteja em branco
+            } else if (privateMxmToken === null && privateTokenToggle.checked === true) {
+                document.getElementById('mxmPersonalTokenToggle').checked = false; 
+                tokenPath = `access_mode=1&user_token=${userToken}`;
             } else {
                 tokenPath = `access_mode=1&user_token=${userToken}`;
             }
@@ -808,6 +815,11 @@ function addToUndoStack() {
         function isMxmIconChecked() {
             const mxmIconDiv = document.getElementById('mxmIconToggle');
             return mxmIconDiv.checked;
+        }
+
+        function isMxmPersonalTokenToggleChecked() {
+            const mxmTokenToggle = document.getElementById('mxmPersonalTokenToggle');
+            return mxmTokenToggle.checked;
         }
 
         function isLfExportToggleChecked() {
@@ -1339,6 +1351,7 @@ function addToUndoStack() {
                 'autoCapToggle',
                 'autoFormatToggle',
                 'mxmIconToggle',
+                'mxmPersonalTokenToggle',
                 'autoSuggestion',
                 'localHostToggle'
             ];
@@ -2414,9 +2427,22 @@ function updateTabCounters() {
             if (available === true) {
                 document.getElementById('mxm_icon_div').style.display = 'flex'
                 document.getElementById('mxm_token_div').style.display = 'flex';
+                displayTokenField()
             } else {
                 document.getElementById('mxm_icon_div').style.display = 'none'
                 document.getElementById('mxm_token_div').style.display = 'none';
+                document.getElementById('mxm_token_field').style.display = 'none'
+                document.getElementById('mxmPersonalTokenToggle').checked = false;
+                displayTokenField()
+            }
+        }
+
+        function displayTokenField() {
+            checked = isMxmPersonalTokenToggleChecked()
+            if (checked === true) {
+                document.getElementById('mxm_token_field').style.display = 'flex'
+            } else {
+                document.getElementById('mxm_token_field').style.display = 'none'
             }
         }
 

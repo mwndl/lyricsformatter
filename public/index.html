@@ -553,14 +553,18 @@
                         <span class="slider round"></span>
                     </label>
                 </div>
-                <div class="popup_option_column" id="mxm_token_div" style="display:none">
-                    <div class="popup_title_full">
-                        <p class="popup_option_title">Set personal Musixmatch token (optional)</p>
+                <div class="popup_option" id="mxm_token_div" style="display:none">
+                    <div class="popup_title">
+                        <p class="popup_option_title">Use personal Musixmatch API key</p>
                         <p class="popup_option_description">If you have a personal Musixmatch API key, you can add it here to enjoy an experience without our request limits (don't worry, this data isn't stored on our end)</p>
                     </div>
-                    <div class="text_input_full" style="margin-bottom: 3px;">
-                        <input type="text" id="mxm_token_input" oninput="checkMxmToken()">
-                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="mxmPersonalTokenToggle" onclick="checkContent()">
+                        <span class="slider round"></span>
+                    </label>
+                </div>
+                <div class="text_input_full" style="margin-bottom: 3px;" id="mxm_token_field">
+                    <input type="text" id="mxm_token_input" placeholder="Enter your Musixmatch API key here" oninput="checkMxmToken()">
                 </div>
                 <div class="popup_option">
                     <div class="popup_title">
@@ -1622,6 +1626,7 @@
                 'autoCapToggle',
                 'autoFormatToggle',
                 'mxmIconToggle',
+                'mxmPersonalTokenToggle',
                 'autoSuggestion',
                 'localHostToggle'
             ];
@@ -1633,6 +1638,7 @@
             setCheckboxStates();
             setMaxStackValue();
             updateMxmIcon();
+            displayTokenField();
         }
 
         function handleSettingsClick() {
