@@ -50,6 +50,10 @@ document.addEventListener('DOMContentLoaded', function () {
     var refreshButton = document.getElementById('refresh_button');
     refreshButton.addEventListener('click', handleRefreshButtonClick); // refresh
 
+    document.getElementById('mxm_icon_div').addEventListener('click', function() {
+         getMxmLyrics(currentIsrc, 'xleU8AVcuM9iS99upAs0RfWjvty6Vjn7') // 10 requests per hour token (public)
+    });    
+
     /* ****************************************** */
 
     var returnArrow = document.querySelector('#return_arrow');
@@ -102,6 +106,7 @@ document.addEventListener('DOMContentLoaded', function () {
             'pasteTransferToggle',
             'autoCapToggle',
             'autoFormatToggle',
+            'mxmIconToggle',
             'autoSuggestion',
             'localHostToggle'
         ];
@@ -178,6 +183,8 @@ document.addEventListener('DOMContentLoaded', function () {
         checkMobileTestingParams();
         updateShortcutIcon();
         checkDeviceType();
+        checkMxmIconParams();
+        updateMxmIcon();
         addToUndoStack(); // add o texto vazio como undo inicial
 
     
@@ -207,7 +214,9 @@ document.addEventListener('DOMContentLoaded', function () {
     document.addEventListener('keydown', function (event) {
 
         var editor = document.getElementById('editor');
+        var mxmTokenField = document.getElementById('mxm_token_input');
         var isEditorFocused = editor === document.activeElement;
+        var isMxmTokenFieldFocused = mxmTokenField === document.activeElement;
 
         var numericKeys = ['7', '8', '9'];
 
@@ -264,19 +273,19 @@ document.addEventListener('DOMContentLoaded', function () {
             addTextToSelectedLine("#INSTRUMENTAL");
         
 
-        } else if ((event.ctrlKey || event.metaKey) && !event.shiftKey && (event.key === 'Z' || event.key === 'z')) { // desfazer
+        } else if ((event.ctrlKey || event.metaKey) && !event.shiftKey && (event.key === 'Z' || event.key === 'z') && !isMxmTokenFieldFocused) { // desfazer
             event.preventDefault();
             undo();
         } else if ((event.ctrlKey || event.metaKey) && event.shiftKey && (event.key === 'Z' || event.key === 'z')) { // refazer
             event.preventDefault();
             redo();
-        } else if ((event.ctrlKey || event.metaKey) && (event.key === 'C' || event.key === 'c') && !isEditorFocused) {
+        } else if ((event.ctrlKey || event.metaKey) && (event.key === 'C' || event.key === 'c') && !isEditorFocused && !isMxmTokenFieldFocused) {
             event.preventDefault();
             copyToClipboard();
-        } else if ((event.ctrlKey || event.metaKey) && (event.key === 'V' || event.key === 'v') && !isEditorFocused) {
+        } else if ((event.ctrlKey || event.metaKey) && (event.key === 'V' || event.key === 'v') && !isEditorFocused && !isMxmTokenFieldFocused) {
             event.preventDefault();
             pasteFromClipboard();
-        } else if ((event.ctrlKey || event.metaKey) && (event.key === 'X' || event.key === 'x') && !isEditorFocused) {
+        } else if ((event.ctrlKey || event.metaKey) && (event.key === 'X' || event.key === 'x') && !isEditorFocused && !isMxmTokenFieldFocused) {
             event.preventDefault();
             resetTranscription();
         }
@@ -630,6 +639,75 @@ function addToUndoStack() {
 
 /* ****************************************** */
 
+/* FUNÇÃO PARA OBTER DADOS DA MUSIXMATCH APENAS */
+
+        function getMxmLyrics(isrc, userToken) {
+
+            document.getElementById('mxm_white_logo').style.display = 'none';
+            document.getElementById('mxm_loading_spinner').style.display = 'block';
+
+            // Get the value of localHostToggle from localStorage
+            const localHostToggle = localStorage.getItem('localHostToggle');
+
+            // Check the value of localHostToggle and set window.serverPath
+            if (localHostToggle === 'true') {
+                window.serverPath = 'http://localhost:3000';
+            } else {
+                window.serverPath = 'https://datamatch-backend.onrender.com';
+            }
+
+            const privateMxmToken = localStorage.getItem('mxm_token');
+
+            // Check the value of localHostToggle and set window.serverPath
+            let tokenPath;
+            if (privateMxmToken !== null) {
+                tokenPath = `access_mode=2&user_token=${privateMxmToken}`;
+            } else {
+                tokenPath = `access_mode=1&user_token=${userToken}`;
+            }
+
+            // Constructing the request URL
+            const url = `${window.serverPath}/mxm/get_track?isrc=${isrc}&${tokenPath}`;
+
+            // Making the GET request using fetch API
+            fetch(url)
+                .then(response => {
+
+                    document.getElementById('mxm_white_logo').style.display = 'block';
+                    document.getElementById('mxm_loading_spinner').style.display = 'none';
+
+                    // Checking the response status code
+                    if (response.status === 500) {
+                        notification('Something went wrong, please try again later')
+                        throw new Error('Internal Server Error (500)');
+                    } else if (response.status === 400) {
+                        notification('This track is not available on Musixmatch')
+                        throw new Error('Bad Request (400)');
+                    } else if (response.status === 429) {
+                        notification('Too many requests, please try again later')
+                        throw new Error('Too Many Requests (429)');
+                    } else if (!response.ok) {
+                        notification('An unexpected error has occurred')
+                        throw new Error('Error making request to server');
+                    }
+                    // Converting the response to JSON
+                    return response.json();
+                })
+                .then(data => {
+                    // Handling the received data
+                    console.log(data);
+
+                    const trackId = data.track_id;
+                    const redirectUrl = `http://mxmt.ch/t/${trackId}`;
+                    window.open(redirectUrl, '_blank');
+                })
+                .catch(error => {
+                    // Capturing and handling errors
+                    console.error('An error occurred:', error);
+                });
+        }
+
+
 /* SELECIONAR TEXTO COM BASE NO OFFSET E LENGTH */
 
         function selectText(offset, length) {
@@ -727,6 +805,11 @@ function addToUndoStack() {
             return autoSuggestions.checked;
         }
 
+        function isMxmIconChecked() {
+            const mxmIconDiv = document.getElementById('mxmIconToggle');
+            return mxmIconDiv.checked;
+        }
+
         function isLfExportToggleChecked() {
             const lfExportToggle = document.getElementById('lfExportToggle');
             return lfExportToggle.checked;
@@ -736,6 +819,7 @@ function addToUndoStack() {
             const localHostToggle = document.getElementById('localHostToggle');
             return localHostToggle.checked;
         }
+
 
 /* ****************************************** */
 
@@ -1226,6 +1310,24 @@ function addToUndoStack() {
 
 /* ****************************************** */
 
+/* VERIFICAR PRESENÇA DE TOKEN DA MUSIXMATCH */
+
+        function checkMxmToken() {
+            // Obtendo o elemento input
+            var inputElement = document.getElementById('mxm_token_input');
+
+            // Verificando se o campo de texto está vazio
+            if (inputElement.value.trim() === '') {
+                // Se estiver vazio, remova o item 'mxm_token' do cache, se existir
+                localStorage.removeItem('mxm_token');
+            } else {
+                // Se não estiver vazio, salve o conteúdo do campo de texto no cache
+                localStorage.setItem('mxm_token', inputElement.value.trim());
+            }
+        }
+
+/* ****************************************** */
+
 /* DEFINIR TOGGLES COM BASE NO LOCALSTORAGE */
 
         // Função para verificar e definir o estado dos checkboxes ao carregar a página
@@ -1236,6 +1338,7 @@ function addToUndoStack() {
                 'pasteTransferToggle',
                 'autoCapToggle',
                 'autoFormatToggle',
+                'mxmIconToggle',
                 'autoSuggestion',
                 'localHostToggle'
             ];
@@ -1255,6 +1358,12 @@ function addToUndoStack() {
                     }
                 }
             });
+
+            // Verificando se há um token salvo em cache e preenchendo o campo de texto com ele, se existir
+            const cachedToken = localStorage.getItem('mxm_token');
+            if (cachedToken !== null) {
+                document.getElementById('mxm_token_input').value = cachedToken;
+            }
         }
 
         // Função para verificar e definir o valor selecionado do select ao carregar a página
@@ -2285,6 +2394,33 @@ function updateTabCounters() {
                 }
             }
         }
+
+        // Função para verificar os parâmetros da URL e acionar a função correspondente
+        function checkMxmIconParams() {
+            const mxmParam = getParameterByName('mxm_shortcut');
+            
+            if (mxmParam !== null) {
+                if (mxmParam === '1') {
+                    document.getElementById('mxmIconToggle').checked = true;
+                } else if (mxmParam === '0') {
+                    document.getElementById('mxmIconToggle').checked = false;
+                }
+            }
+        }
+
+
+        function updateMxmIcon() {
+            available = isMxmIconChecked()
+            if (available === true) {
+                document.getElementById('mxm_icon_div').style.display = 'flex'
+                document.getElementById('mxm_token_div').style.display = 'flex';
+            } else {
+                document.getElementById('mxm_icon_div').style.display = 'none'
+                document.getElementById('mxm_token_div').style.display = 'none';
+            }
+        }
+
+
 
 /* EXIBIR OU OCULTAR CONFIGURAÇÕES DO SPOTIFY */
 
