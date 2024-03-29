@@ -181,9 +181,8 @@
                                 <div class="sp_web_player">
                                     <div class="sp_up">
                                         <div class="button-container">
-                                            <div class="round-button"></div>
                                             <div class="round-button" id="player_refresh" style="display:block" title="Refresh">
-                                                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" id="player_refresh_svg" style="display:block">
                                                     <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
                                                     <g id="SVGRepo_tracerCarrier" stroke-linecap="round"
                                                         stroke-linejoin="round"></g>
@@ -193,37 +192,43 @@
                                                             fill="#ffffff"></path>
                                                     </g>
                                                 </svg>
+                                                <div class="lds-ring" id="player_refresh_loading_spinner" style="display:none"><div></div><div></div><div></div><div></div></div>
+                                            </div>
+                                            <div class="round-button" id="mxm_icon_div" title="See lyrics" style="display:none">
+                                                <div class="mxm_white_logo" id="mxm_white_logo" style="display:block"></div>
+                                                <div class="lds-ring" id="mxm_loading_spinner" style="display:none"><div></div><div></div><div></div><div></div></div>
                                             </div>
                                             <div class="round-button" id="sp_fast_transfer" style="display:none" onclick="togglePlayer()" title="">
                                                 <div id="sp_fast_transfer_icon" style="display:block">
                                                     <svg viewBox="0 0 24 24" version="1.1"
-                                                    xmlns="http://www.w3.org/2000/svg"
-                                                    xmlns:xlink="http://www.w3.org/1999/xlink" fill="#ffffff">
-                                                    <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
-                                                    <g id="SVGRepo_tracerCarrier" stroke-linecap="round"
-                                                        stroke-linejoin="round"></g>
-                                                    <g id="SVGRepo_iconCarrier">
-                                                        <g id="Page-1" stroke="none" stroke-width="1" fill="none"
-                                                            fill-rule="evenodd">
-                                                            <g id="Transfer">
-                                                                <rect id="Rectangle" fill-rule="nonzero" x="0" y="0"
-                                                                    width="24" height="24"> </rect>
-                                                                <path d="M19,7 L5,7 M20,17 L5,17" id="Shape"
-                                                                    stroke="#ffffff" stroke-width="2"
-                                                                    stroke-linecap="round"> </path>
-                                                                <path
-                                                                    d="M16,3 L19.2929,6.29289 C19.6834,6.68342 19.6834,7.31658 19.2929,7.70711 L16,11"
-                                                                    id="Path" stroke="#ffffff" stroke-width="2"
-                                                                    stroke-linecap="round"> </path>
-                                                                <path
-                                                                    d="M8,13 L4.70711,16.2929 C4.31658,16.6834 4.31658,17.3166 4.70711,17.7071 L8,21"
-                                                                    id="Path" stroke="#ffffff" stroke-width="2"
-                                                                    stroke-linecap="round"> </path>
+                                                        xmlns="http://www.w3.org/2000/svg"
+                                                        xmlns:xlink="http://www.w3.org/1999/xlink" fill="#ffffff">
+                                                        <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                                                        <g id="SVGRepo_tracerCarrier" stroke-linecap="round"
+                                                            stroke-linejoin="round"></g>
+                                                        <g id="SVGRepo_iconCarrier">
+                                                            <g id="Page-1" stroke="none" stroke-width="1" fill="none"
+                                                                fill-rule="evenodd">
+                                                                <g id="Transfer">
+                                                                    <rect id="Rectangle" fill-rule="nonzero" x="0" y="0"
+                                                                        width="24" height="24"> </rect>
+                                                                    <path d="M19,7 L5,7 M20,17 L5,17" id="Shape"
+                                                                        stroke="#ffffff" stroke-width="2"
+                                                                        stroke-linecap="round"> </path>
+                                                                    <path
+                                                                        d="M16,3 L19.2929,6.29289 C19.6834,6.68342 19.6834,7.31658 19.2929,7.70711 L16,11"
+                                                                        id="Path" stroke="#ffffff" stroke-width="2"
+                                                                        stroke-linecap="round"> </path>
+                                                                    <path
+                                                                        d="M8,13 L4.70711,16.2929 C4.31658,16.6834 4.31658,17.3166 4.70711,17.7071 L8,21"
+                                                                        id="Path" stroke="#ffffff" stroke-width="2"
+                                                                        stroke-linecap="round"> </path>
+                                                                </g>
                                                             </g>
                                                         </g>
-                                                    </g>
-                                                </svg>
+                                                    </svg>
                                                 </div>
+                                                <div class="lds-ring" id="sp_fast_transfer_loading_spinner" style="display:none"><div></div><div></div><div></div><div></div></div>
                                             </div>
                                             <div class="round-button" id="sp_connect" style="display:none" title="See available devices">
                                                 <div id="sp_connect_icon_green" style="display:block">
@@ -538,17 +543,20 @@
             <div class="settings_hided_div" id="dev_hided_div" style="display:none">
                 <hr style="border-top: 1px solid rgb(100, 100, 100); border-right: none; border-bottom: none; border-left: none; border-image: initial;">
                 <h3 class="popup_content_intern">-- Dev Tools --</h3>
-                <div class="popup_option" style="display:none">
+                <div class="popup_option" id="mxm_token_div">
                     <div class="popup_title">
-                        <p class="popup_option_title">Show Musixmatch button</p>
-                        <p class="popup_option_description">Get Musixmatch links to a currently playing track</p>
+                        <p class="popup_option_title">Use personal Musixmatch API key</p>
+                        <p class="popup_option_description">If you have a personal Musixmatch API key, you can add it here to enjoy an experience without our request limits (don't worry, this data isn't stored on our end)</p>
                     </div>
                     <label class="switch">
-                        <input type="checkbox" id="mxmIconToggle" onclick="checkContent()">
+                        <input type="checkbox" id="mxmPersonalTokenToggle" onclick="checkContent()">
                         <span class="slider round"></span>
                     </label>
                 </div>
-                <div class="popup_option" style="display:flex">
+                <div class="text_input_full" style="margin-bottom: 3px;" id="mxm_token_field">
+                    <input type="text" id="mxm_token_input" placeholder="Enter your Musixmatch API key here" oninput="checkMxmToken()">
+                </div>
+                <div class="popup_option">
                     <div class="popup_title">
                         <p class="popup_option_title">Export button on LT suggestions</p>
                         <p class="popup_option_description">Copy data from each object returned by the LanguageTool API - for debugging and development purposes</p>
@@ -594,9 +602,7 @@
         <div class="popup_content" style="display: flex; align-items: center;">
             <div class="loading_container" id="loading_container">
                 <div class="loading_spinner_loop" id="loading_spinner_credits" style="display:block">
-                    <div class="loading_spinner">
-                        <div></div>
-                    </div>
+                    <div class="loading_spinner"><div></div></div>
                 </div>
             </div>
         </div>
@@ -1553,14 +1559,28 @@
                 }
             });
 
-            spRefreshButton.addEventListener('click', function (e) {
-                fetchCurrentlyPlayingData()
-                fetchAvailableDevices()
+            spRefreshButton.addEventListener('click', async function (e) {
+                document.getElementById('player_refresh_svg').style.display = 'none';
+                document.getElementById('player_refresh_loading_spinner').style.display = 'block';
+
+                try {
+                    // Executa as funções de busca de dados
+                    await fetchCurrentlyPlayingData();
+                    await fetchAvailableDevices();
+                } catch (error) {
+                    console.error('Something went wrong', error);
+                } finally {
+                    document.getElementById('player_refresh_svg').style.display = 'block';
+                    document.getElementById('player_refresh_loading_spinner').style.display = 'none';
+                }
             });
         });
         
         // Função para alternar entre o player do site e o dispositivo atualmente em reprodução
         async function togglePlayer() {
+
+            document.getElementById('sp_fast_transfer_icon').style.display = 'none';
+            document.getElementById('sp_fast_transfer_loading_spinner').style.display = 'block';
 
             if (document.getElementById('sp_fast_transfer').style.display === 'none') {
                 notification('No default alternative player, try moving the song manually')
@@ -1578,6 +1598,9 @@
             // Transferir a reprodução para o novo dispositivo
             const accessToken = localStorage.getItem('accessToken');
             transferPlayback(accessToken, newDeviceId);
+
+            document.getElementById('sp_fast_transfer_icon').style.display = 'block';
+            document.getElementById('sp_fast_transfer_loading_spinner').style.display = 'none';
         }
 
         function checkContent() {
@@ -1592,6 +1615,7 @@
                 'pasteTransferToggle',
                 'autoCapToggle',
                 'autoFormatToggle',
+                'mxmPersonalTokenToggle',
                 'autoSuggestion',
                 'localHostToggle'
             ];
@@ -1602,6 +1626,7 @@
             });
             setCheckboxStates();
             setMaxStackValue();
+            displayTokenField();
         }
 
         function handleSettingsClick() {

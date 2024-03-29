@@ -272,6 +272,7 @@ async function spotifyRenewAuth() {
 }
 
 let currentSongId = '';
+let currentIsrc = '';
 let volumePercent = '';
 
 async function fetchCurrentlyPlayingData() {
@@ -309,21 +310,25 @@ async function fetchCurrentlyPlayingData() {
         if (response.status === 204) {
             document.getElementById('sp_player_div').style.display = ''; // Exibir elemento
             document.getElementById('sp_connect').style.display = 'none'; // Ocultar elemento
+            document.getElementById('mxm_icon_div').style.display = 'none';
             document.getElementById('sp_fast_transfer').style.display = 'none'
             document.getElementById('playback_info').style.display = 'none'; // Ocultar elemento
-            document.getElementById('no_playback').style.display = 'block'; // Ocultar elemento
+            document.getElementById('no_playback').style.display = 'block'; // Exibir elemento 
             currentSongId = '';
+            currentIsrc = '';
             return; // Sair da função
 
         } else if (response.status === 200) {
             document.getElementById('sp_player_div').style.display = ''; // Exibir elemento
             document.getElementById('sp_connect').style.display = 'block'; // exibir elemento
+            document.getElementById('mxm_icon_div').style.display = 'block';
             document.getElementById('playback_info').style.display = 'flex'; // exibir elemento
             document.getElementById('no_playback').style.display = 'none'; // exibir elemento
 
         } else if (response.status === 401) {
             spotifyRenewAuth()
             currentSongId = '';
+            currentIsrc = '';
         } else {
             document.getElementById('sp_player_div').style.display = 'none'; // ocultar elemento
             return; // Sair da função
@@ -339,6 +344,7 @@ async function fetchCurrentlyPlayingData() {
 
         // definir o ID na variável
         currentSongId = currentlyPlayingData.item.id;
+        currentIsrc = currentlyPlayingData.item.external_ids.isrc;
 
         volumePercent = currentlyPlayingData.device.volume_percent;
 

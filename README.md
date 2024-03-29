@@ -17,6 +17,7 @@ LyricsFormatter is a free service created with the help of talented users design
 - **Faster and more accurate transcriptions:** Save your time with our auto-format and auto-capitalization function.
 - **Higher quality lyrics:** The tool ensures that your lyrics are formatted according to Musixmatch guidelines.
 - **More enjoyable transcription experience:** Say goodbye to frustrations with grammatical and spelling errors.
+- **Convenient access to Musixmatch lyrics:** Easily open the lyrics page of the currently playing song on Musixmatch with just one click.
 
 ## Getting Started
 
