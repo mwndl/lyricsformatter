@@ -128,6 +128,7 @@ function createMatchContainers(matches) {
         var addToDictionaryBtn = document.createElement('div');
         addToDictionaryBtn.classList.add('add_to_dictionary_svg');
         addToDictionaryBtn.style.display = 'none';
+        addToDictionaryBtn.title = 'Add to the dictionary';
 
         // Construindo o valor do atributo data
         var textareaContent = getTextareaContent(match.offset, match.length); // Função fictícia para obter o conteúdo do textarea
