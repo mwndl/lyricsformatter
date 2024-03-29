@@ -83,9 +83,7 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     textarea.addEventListener('input', function() {
-        const content = editor.value;
-        const cursorPosition = editor.selectionStart;
-        updateCursorPosition(content, cursorPosition);
+        addToUndoStack()
     });
 
     textarea.addEventListener('input', updateSidebar);
@@ -98,8 +96,6 @@ document.addEventListener('DOMContentLoaded', function () {
         const doneTypingInterval = 3000;
         const editor = document.getElementById('editor');
         const content = editor.value;
-
-        addToUndoStack()
     
         const checkboxIds = [
             'copyTransferToggle',
@@ -107,7 +103,6 @@ document.addEventListener('DOMContentLoaded', function () {
             'autoCapToggle',
             'autoFormatToggle',
             'autoSuggestion',
-            'lfExportToggle',
             'localHostToggle'
         ];
     
@@ -378,41 +373,51 @@ function addToUndoStack() {
 
         function addTextToSelectedLine(text) {
             const editor = document.getElementById('editor');
-            const cursorPosition = editor.selectionStart; // Obtém a posição atual do cursor
+            const selectionStart = editor.selectionStart;
+            const selectionEnd = editor.selectionEnd;
             const currentText = editor.value;
 
-            // Dividir o texto em linhas
-            const lines = currentText.split('\n');
 
-            // Encontrar a linha onde o cursor está
-            let lineStart = 0;
-            let lineEnd = 0;
-            let lineIndex = -1; // Índice da linha onde o cursor está
-            for (let i = 0; i < lines.length; i++) {
-                lineEnd = lineStart + lines[i].length;
-                if (cursorPosition >= lineStart && cursorPosition <= lineEnd) {
-                    // Adicionar o texto na linha onde o cursor está
-                    lines[i] += text;
-                    lineIndex = i; // Salva o índice da linha onde o cursor está
-                    break;
+            // Verifica se há texto selecionado
+            if (selectionStart !== selectionEnd) {
+                // Substitui o texto selecionado com o novo texto
+                const newText = currentText.substring(0, selectionStart) + text + currentText.substring(selectionEnd);
+                editor.value = newText;
+                // Move o cursor para o final do novo texto adicionado
+                editor.setSelectionRange(selectionStart + text.length, selectionStart + text.length);
+            } else {
+                // Dividir o texto em linhas
+                const lines = currentText.split('\n');
+
+                // Encontrar a linha onde o cursor está
+                let lineStart = 0;
+                let lineEnd = 0;
+                let lineIndex = -1; // Índice da linha onde o cursor está
+                for (let i = 0; i < lines.length; i++) {
+                    lineEnd = lineStart + lines[i].length;
+                    if (selectionStart >= lineStart && selectionStart <= lineEnd) {
+                        // Adicionar o texto na linha onde o cursor está
+                        lines[i] += text;
+                        lineIndex = i; // Salva o índice da linha onde o cursor está
+                        break;
+                    }
+                    lineStart = lineEnd + 1; // +1 para contar o caractere de nova linha (\n)
                 }
-                lineStart = lineEnd + 1; // +1 para contar o caractere de nova linha (\n)
+
+                // Atualizar o valor do textarea com as linhas modificadas
+                editor.value = lines.join('\n');
+
+                // Definir a nova posição do cursor
+                if (lineIndex !== -1) {
+                    const newCursorPosition = selectionStart + text.length;
+                    editor.setSelectionRange(newCursorPosition, newCursorPosition);
+                }
             }
 
-            // Atualizar o valor do textarea com as linhas modificadas
-            editor.value = lines.join('\n');
-
-            // adiciona a edição no undo stack
-            addToUndoStack()
-
-            // Definir a nova posição do cursor
-            if (lineIndex !== -1) {
-                const newCursorPosition = cursorPosition + text.length;
-                editor.setSelectionRange(newCursorPosition, newCursorPosition);
-            }
-
+            addToUndoStack();
             updateSidebar();
         }
+
 
 /* ****************************************** */
 
@@ -1000,8 +1005,8 @@ function addToUndoStack() {
             content = content.replace(/¿\s+/g, '¿'); // Remove espaço após '¿'
             content = content.replace(/¡\s+/g, '¡'); // Remove espaço após '¡'
             content = content.replace(/([^"\s])((?:¿|¡))/g, '$1 $2'); // Adiciona espaço antes de '¿' e '¡' se não houver espaço ou " antes
-            content = content.replace(/(?<!\")\(([^ \t])/g, '($1'); // Adiciona espaço antes de '(' se não houver espaço ou " antes
-            content = content.replace(/(\s+)\)(?!\")/g, '$1) ');  // Remove espaço antes de ')' e adiciona espaço após ')' se não houver espaço ou " depois
+            content = content.replace(/(?<!\")\(([^ \t])/g, ' ($1'); // Adiciona espaço antes de '(' se não houver espaço ou " antes
+            content = content.replace(/(\s*)\)(?!\")/g, '$1) ');    // Remove espaço antes de ')' e adiciona espaço após ')' se não houver espaço ou " depois
             content = content.replace(/\s+([!?,:;\)])/g, '$1'); // Remove espaços antes de !?,:; e )
             
             // Atualizar o conteúdo do editor
@@ -1232,7 +1237,6 @@ function addToUndoStack() {
                 'autoCapToggle',
                 'autoFormatToggle',
                 'autoSuggestion',
-                'lfExportToggle',
                 'localHostToggle'
             ];
 
@@ -1851,13 +1855,12 @@ function updateTabCounters() {
                 return
             }
 
-            addToUndoStack()
-
             navigator.clipboard.readText().then(function(text) {
                 const textArea = document.getElementById('editor');
                 textArea.value = text;
                 checkTextarea()
                 updateSidebar()
+                addToUndoStack();
 
                 const transferPlaybackToggle = isPasteTransferTottleChecked()
                 const accessToken = localStorage.getItem('accessToken');
@@ -2277,10 +2280,8 @@ function updateTabCounters() {
             if (ltExportParam !== null) {
                 if (ltExportParam === '1') {
                     document.getElementById('lfExportToggle').checked = true;
-                    removeParameterFromURL('lt_export')
                 } else if (ltExportParam === '0') {
                     document.getElementById('lfExportToggle').checked = false;
-                    removeParameterFromURL('lt_export')
                 }
             }
         }
