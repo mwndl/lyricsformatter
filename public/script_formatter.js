@@ -1,5 +1,12 @@
 var typingTimer;
 
+var undoStack = [];
+var redoStack = [];
+let undoCursorPositionsStack = [];
+var redoCursorPositionsStack = [];
+var maxStackSize = 100;
+
+
 document.addEventListener('DOMContentLoaded', function () {
     var returnArrow = document.getElementById('return_arrow');
     var lyricsBox = document.getElementById('lyrics_box');
@@ -10,9 +17,6 @@ document.addEventListener('DOMContentLoaded', function () {
     const languageList = document.querySelector('.language_list');
     const languageArrow = document.querySelector('.lang_expand_arrow');
     const langButtonContent = document.querySelector('.lang_selector_div');
-
-    var resetButton = document.getElementById('reset_button');
-    var refreshButton = document.getElementById('refresh_button');
 
     var miniMenu = document.getElementById("mini_menu");
 
@@ -26,18 +30,29 @@ document.addEventListener('DOMContentLoaded', function () {
         returnArrow.style.display = 'flex'
     }
 
-    resetButton.addEventListener('click', function() {
-        textArea.value = ''; // apaga a transcrição
-        updateSidebar(); // reseta os contadores de caracteres e a barra lateral
-        ignoredContainers = []; // limpa a memória de alertas ignorados
-        checkContent();
-        clearTimeout(typingTimer);
-    });
+    /* FUNÇÕES AO MENU DE AÇÕES */
 
-    refreshButton.addEventListener('click', handleRefreshButtonClick);
+    var undoButton = document.getElementById('undo_button');
+    undoButton.addEventListener('click', undo); // undo
+
+    var redoButton = document.getElementById('redo_button'); 
+    redoButton.addEventListener('click', redo); // redo
+
+    var resetButton = document.getElementById('reset_button');
+    resetButton.addEventListener('click', resetTranscription); // reset
+
+    var copyButton = document.getElementById('copy_button');
+    copyButton.addEventListener('click', copyToClipboard); // copy
+
+    var pasteButton = document.getElementById('paste_button');
+    pasteButton.addEventListener('click', pasteFromClipboard); // paste
+
+    var refreshButton = document.getElementById('refresh_button');
+    refreshButton.addEventListener('click', handleRefreshButtonClick); // refresh
+
+    /* ****************************************** */
 
     var returnArrow = document.querySelector('#return_arrow');
-
     returnArrow.addEventListener('click', function() {
         // Verificar se referrerUrlValue começa com "http://" ou "https://"
         if (!referrerUrlValue.startsWith('http://') && !referrerUrlValue.startsWith('https://')) {
@@ -67,6 +82,9 @@ document.addEventListener('DOMContentLoaded', function () {
         resetLineIssues()
     });
 
+    textarea.addEventListener('input', function() {
+        addToUndoStack()
+    });
 
     textarea.addEventListener('input', updateSidebar);
     textarea.addEventListener('input', checkContent);
@@ -74,14 +92,17 @@ document.addEventListener('DOMContentLoaded', function () {
 
     
     function checkContent() {
+
         const doneTypingInterval = 3000;
         const editor = document.getElementById('editor');
         const content = editor.value;
     
         const checkboxIds = [
+            'copyTransferToggle',
+            'pasteTransferToggle',
             'autoCapToggle',
             'autoFormatToggle',
-            'autoSuggestions',
+            'autoSuggestion',
             'localHostToggle'
         ];
     
@@ -89,19 +110,13 @@ document.addEventListener('DOMContentLoaded', function () {
             const checkbox = document.getElementById(checkboxId);
             localStorage.setItem(checkboxId, checkbox.checked);
         });
-    
-        if (content.trim() === '') {
-            clearTimeout(typingTimer);
-            hideOptionsAndButtons();
-        } else {
-            showOptionsAndButtons();
-            if (isAutoCapChecked()) {
-                autoCap();
-            }
-        }
+
+        checkTextarea()
+
     
         if (isAutoSuggestionsChecked()) {
             clearTimeout(typingTimer);
+
             typingTimer = setTimeout(autoSuggestion, doneTypingInterval);
         }
     }
@@ -152,21 +167,27 @@ document.addEventListener('DOMContentLoaded', function () {
         updateSidebar();
         setDefaultLanguage();
         setCheckboxStates();
+        setMaxStackValue();
         loadDevMode();
         loadSpMenu();
         checkTrackIdParams();
         checkSpotifyParams();
+        checkLTExportParams();
         fetchCreditsData();
         fetchServerInfo();
         checkMobileTestingParams();
         updateShortcutIcon();
-        checkDeviceType()
+        checkDeviceType();
+        addToUndoStack(); // add o texto vazio como undo inicial
 
     
     // Adicione um evento de clique ao botão de cópia
     var copyButton = document.querySelector('.content_copy_btn');
     if (copyButton) {
-        copyButton.addEventListener('click', copyToClipboard);
+        copyButton.addEventListener('click', function() {
+            copyToClipboard();
+            resetTranscription();
+        });
     }
     
     var ignoreButtons = document.querySelectorAll('.content_ignore_btn');
@@ -241,37 +262,164 @@ document.addEventListener('DOMContentLoaded', function () {
         } else if ((event.ctrlKey || event.metaKey) && event.shiftKey && (event.key === 'X' || event.key === 'x') && isEditorFocused) { 
             event.preventDefault();
             addTextToSelectedLine("#INSTRUMENTAL");
+        
+
+        } else if ((event.ctrlKey || event.metaKey) && !event.shiftKey && (event.key === 'Z' || event.key === 'z')) { // desfazer
+            event.preventDefault();
+            undo();
+        } else if ((event.ctrlKey || event.metaKey) && event.shiftKey && (event.key === 'Z' || event.key === 'z')) { // refazer
+            event.preventDefault();
+            redo();
+        } else if ((event.ctrlKey || event.metaKey) && (event.key === 'C' || event.key === 'c') && !isEditorFocused) {
+            event.preventDefault();
+            copyToClipboard();
+        } else if ((event.ctrlKey || event.metaKey) && (event.key === 'V' || event.key === 'v') && !isEditorFocused) {
+            event.preventDefault();
+            pasteFromClipboard();
+        } else if ((event.ctrlKey || event.metaKey) && (event.key === 'X' || event.key === 'x') && !isEditorFocused) {
+            event.preventDefault();
+            resetTranscription();
         }
     });
 });
 
-function addTextToSelectedLine(text) {
+/* FUNÇÕES PARA DESFAZER E REFAZER ALTERAÇÕES */
+
+// Função para desfazer
+function undo() {
     const editor = document.getElementById('editor');
-    const cursorPosition = editor.selectionStart;
-    const currentText = editor.value;
 
-    // Dividir o texto em linhas
-    const lines = currentText.split('\n');
+    if (undoStack.length > 1) {
+        const previousContent = undoStack.pop();
+        redoStack.push(previousContent);
 
-    // Encontrar a linha onde o cursor está
-    let lineStart = 0;
-    let lineEnd = 0;
-    for (let i = 0; i < lines.length; i++) {
-        lineEnd = lineStart + lines[i].length;
-        if (cursorPosition >= lineStart && cursorPosition <= lineEnd) {
-            // Adicionar o texto na linha onde o cursor está
-            lines[i] += text;
-            break;
-        }
-        lineStart = lineEnd + 1; // +1 para contar o caractere de nova linha (\n)
+        const cursorPosition = undoCursorPositionsStack.pop();
+        redoCursorPositionsStack.push(cursorPosition); // Salva a posição do cursor para refazer
+
+        const newCursorPosition = Math.max(0, cursorPosition - 1); // Definir o cursor para uma posição anterior
+        const content = undoStack[undoStack.length - 1]; // Obter o conteúdo desfeito diretamente do stack
+        editor.value = content;
+        editor.setSelectionRange(newCursorPosition, newCursorPosition);
     }
 
-    // Atualizar o valor do textarea com as linhas modificadas
-    editor.value = lines.join('\n');
+    updateSidebar();
+    updateTabCounters();
+}
+
+// função refazer ação
+function redo() {
+    const editor = document.getElementById('editor');
+
+    if (redoStack.length > 0) { // executar apenas caso a pilha 'redoStack' tenha conteúdo
+        // retirar o topo da 'redo'
+        const nextContent = redoStack.pop(); 
+        // definir o conteúdo do topo da 'redo' como topo da 'undo'
+        undoStack.push(nextContent); 
+
+        // retirar o topo da 'redoCursor'
+        const nextCursorPosition = redoCursorPositionsStack.pop(); 
+        // definir o conteúdo do topo da 'redoCursor' como topo da 'undoCursor'
+        undoCursorPositionsStack.push(nextCursorPosition);
+
+        // atualizar conteúdo e calcular nova posição do cursor
+        const content = nextContent;
+        editor.value = content;
+        const redoCursorPosition = nextCursorPosition + (nextContent.length - content.length);
+
+        // definir a posição do cursor após atualizar o conteúdo do editor
+        editor.setSelectionRange(redoCursorPosition, redoCursorPosition);
+
+        // atualizar a barra lateral
+        updateSidebar();
+        updateTabCounters();
+    }
+}
+
+// Função para atualizar o conteúdo do editor e a posição do cursor
+function updateCursorPosition() {
+    const editor = document.getElementById('editor');
+    const cursorPosition = editor.selectionStart;
+
+    // Armazenar a posição do cursor
+    undoCursorPositionsStack.push(cursorPosition);
+
+    // Limpar o redoCursorPositionsStack porque estamos fazendo uma nova alteração
+    redoCursorPositionsStack = [];
+
+    // Atualizar a barra lateral
     updateSidebar();
 }
 
+// Essa função adiciona a transcrição atual e a posição do cursor às pilhas do undo
+function addToUndoStack() {
+    let editor = document.getElementById('editor');
+    let value = editor.value;
+    let cursorPosition = editor.selectionStart; // Captura a posição do cursor
+    undoStack.push(value); // Adiciona valor à pilha do undo
+    undoCursorPositionsStack.push(cursorPosition); // Adiciona posição do cursor à pilha de posições
+    if (undoStack.length > maxStackSize) {
+        undoStack.shift(); // Remove o item mais antigo da pilha de transcrição
+        undoCursorPositionsStack.shift(); // Remove a posição do cursor correspondente
+    }
+    redoStack = []; // Limpa a pilha de refazer
+    redoCursorPositionsStack = []; // Limpa a pilha de refazer
+    updateTabCounters();
+}
 
+
+/* ****************************************** */
+
+/* FUNÇÃO PRA ADICIONAR TEXTO NO EDITOR (COM BASE NO CURSOR) */
+
+        function addTextToSelectedLine(text) {
+            const editor = document.getElementById('editor');
+            const selectionStart = editor.selectionStart;
+            const selectionEnd = editor.selectionEnd;
+            const currentText = editor.value;
+
+
+            // Verifica se há texto selecionado
+            if (selectionStart !== selectionEnd) {
+                // Substitui o texto selecionado com o novo texto
+                const newText = currentText.substring(0, selectionStart) + text + currentText.substring(selectionEnd);
+                editor.value = newText;
+                // Move o cursor para o final do novo texto adicionado
+                editor.setSelectionRange(selectionStart + text.length, selectionStart + text.length);
+            } else {
+                // Dividir o texto em linhas
+                const lines = currentText.split('\n');
+
+                // Encontrar a linha onde o cursor está
+                let lineStart = 0;
+                let lineEnd = 0;
+                let lineIndex = -1; // Índice da linha onde o cursor está
+                for (let i = 0; i < lines.length; i++) {
+                    lineEnd = lineStart + lines[i].length;
+                    if (selectionStart >= lineStart && selectionStart <= lineEnd) {
+                        // Adicionar o texto na linha onde o cursor está
+                        lines[i] += text;
+                        lineIndex = i; // Salva o índice da linha onde o cursor está
+                        break;
+                    }
+                    lineStart = lineEnd + 1; // +1 para contar o caractere de nova linha (\n)
+                }
+
+                // Atualizar o valor do textarea com as linhas modificadas
+                editor.value = lines.join('\n');
+
+                // Definir a nova posição do cursor
+                if (lineIndex !== -1) {
+                    const newCursorPosition = selectionStart + text.length;
+                    editor.setSelectionRange(newCursorPosition, newCursorPosition);
+                }
+            }
+
+            addToUndoStack();
+            updateSidebar();
+        }
+
+
+/* ****************************************** */
 
 /* DEFINIR IDIOMA PADRÃO */
 
@@ -335,6 +483,7 @@ function addTextToSelectedLine(text) {
             var textArea = document.getElementById('editor');
             var autoFormatToggle = document.getElementById('autoFormatToggle');
             var selectedLanguageCode = getParameterByName('language')
+            const cursorPosition = editor.selectionStart; // Obtém a posição atual do cursor
 
             if (textArea.value === '') {
                 fetchCurrentlyPlayingData();
@@ -342,6 +491,8 @@ function addTextToSelectedLine(text) {
                 return;
             }
 
+            // Obter número da linha onde estava o cursor
+            var cursorLine = textArea.value.substr(0, cursorPosition).split("\n").length;
 
             // EXECUTAR AUTO FORMAT
             if (autoFormatToggle.checked) {
@@ -352,7 +503,8 @@ function addTextToSelectedLine(text) {
 
                 if (selectedLanguageCode === 'pt-BR' || selectedLanguageCode === 'pt-PT'|| 
                 selectedLanguageCode === 'en-US' || selectedLanguageCode === 'en-GB'|| 
-                selectedLanguageCode === 'es' || selectedLanguageCode === 'it') {
+                selectedLanguageCode === 'es' || selectedLanguageCode === 'it'||
+                selectedLanguageCode === 'fr') {
                     fixPunctuation1();
                 }
 
@@ -367,6 +519,14 @@ function addTextToSelectedLine(text) {
                 removeDuplicateSpaces(); // espaços duplos entre palavras
                 removeDuplicateEmptyLines(); // linhas vazias duplicadas entre estrofes
             }
+
+            // Encontre o índice do início da próxima linha
+            var nextLineIndex = textArea.value.indexOf("\n", cursorPosition);
+            if (nextLineIndex === -1) {
+                nextLineIndex = textArea.value.length; // Se for a última linha, vá até o final do texto
+            }
+            // Defina a posição do cursor para o final da linha onde estava o cursor antes da formatação automática
+            textArea.setSelectionRange(nextLineIndex, nextLineIndex);
 
             updateSidebar();
             resetLineIssues();
@@ -423,6 +583,7 @@ function addTextToSelectedLine(text) {
                             console.error('Error with API request. Status:', response.status);
                             errorPlaceholder("We are experiencing internal issues, please try again later.", 'format_containers');
                         }
+                        updateTabCounters()
                     }
                     return response.json();
                 })
@@ -433,7 +594,6 @@ function addTextToSelectedLine(text) {
                     formatContainer.innerHTML = '';
             
                     if (data.result.issues === false) {
-                        // se não houverem erros, exibe o 'no issues'
                         checkFormatPlaceholder();
                     } else {
                         // add os containers na box "format_containers"
@@ -448,9 +608,11 @@ function addTextToSelectedLine(text) {
                         }
                         checkFormatPlaceholder();
                     }
+                    updateTabCounters()
 
                 })
                 .catch(error => {
+                    updateTabCounters()
                     // Handle errors here
                     const formatContainer = document.getElementById('format_containers');
                     formatContainer.innerHTML = '';
@@ -459,6 +621,7 @@ function addTextToSelectedLine(text) {
                     errorPlaceholder("Something went wrong, please try again in a few seconds.", 'format_containers');
                 })
                 .finally(() => {
+                    updateTabCounters()
                     // Show the refresh button and hide the loading spinner after the request is complete
                     refreshButton.style.display = 'block';
                     loadingSpinner.style.display = 'none';
@@ -501,48 +664,82 @@ function addTextToSelectedLine(text) {
 /* EXIBIR OU OCULTAR OS BOTÕES SUPERIORES DO IMPROVEMENTS CONTAINER */
 
         function hideOptionsAndButtons() {
-            const improvementsOptions = document.getElementById('improvements_menu');
-            const resetButton = document.getElementById('reset_button');
-            const refreshButton = document.getElementById('refresh_button');
             const improvementsPlaceholder1 = document.getElementById('improvements_placeholder1');
             const improvementsPlaceholder2 = document.getElementById('improvements_placeholder2');
 
-            improvementsOptions.style.display = 'none';
-            resetButton.style.display = 'none';
-            refreshButton.style.display = 'none';
             improvementsPlaceholder1.textContent = 'Type something or paste your current transcription to check the format...';
             improvementsPlaceholder2.textContent = 'Type something or paste your current transcription to check the grammar...';
             improvementsPlaceholder1.onclick = '';
             improvementsPlaceholder2.onclick = '';
+            updateTabCounters()
         }
 
         function showOptionsAndButtons() {
-            const improvementsOptions = document.getElementById('improvements_menu');
-            const resetButton = document.getElementById('reset_button');
-            const refreshButton = document.getElementById('refresh_button');
             const improvementsPlaceholder1 = document.getElementById('improvements_placeholder1');
             const improvementsPlaceholder2 = document.getElementById('improvements_placeholder2');
 
-            improvementsOptions.style.display = 'flex';
-            resetButton.style.display = 'block';
-            refreshButton.style.display = 'block';
             improvementsPlaceholder1.innerHTML = 'Tap the <span class="highlight_text">Refresh</span> icon to update the format suggestions.';
             improvementsPlaceholder2.innerHTML = 'Tap the <span class="highlight_text">Refresh</span> icon to update the grammar suggestions.';
+            updateTabCounters()
+        }
+
+        function checkTextarea() {
+            var editor = document.getElementById('editor');
+            var content = editor.value;
+
+            if (content.trim() === '') {
+                clearTimeout(typingTimer);
+                hideOptionsAndButtons();
+            } else {
+                showOptionsAndButtons();
+                if (isAutoCapChecked()) {
+                    autoCap();
+                }
+            }
         }
 
 /* ****************************************** */
 
-/* FUNÇÕES DE FORMATO DO MENU SETTINGS */
+/* FUNÇÕES TRUE/FALSE PARA VERIFICAR SE TOGGLES ESTÃO ATIVADOS */
+
+        function isCopyTransferTottleChecked() {
+            const copyTransferToggle = document.getElementById('copyTransferToggle');
+            return copyTransferToggle.checked;
+        }
+
+        function isPasteTransferTottleChecked() {
+            const pasteTransferToggle = document.getElementById('pasteTransferToggle');
+            return pasteTransferToggle.checked;
+        }
 
         function isAutoCapChecked() {
             const autoCapToggle = document.getElementById('autoCapToggle');
             return autoCapToggle.checked;
         }
 
+        function isAutoFormatChecked() {
+            const autoFormatToggle = document.getElementById('autoFormatToggle');
+            return autoFormatToggle.checked;
+        }
+        
         function isAutoSuggestionsChecked() {
-            const autoSuggestions = document.getElementById('autoSuggestions');
+            const autoSuggestions = document.getElementById('autoSuggestion');
             return autoSuggestions.checked;
         }
+
+        function isLfExportToggleChecked() {
+            const lfExportToggle = document.getElementById('lfExportToggle');
+            return lfExportToggle.checked;
+        }
+
+        function isLocalHostChecked() {
+            const localHostToggle = document.getElementById('localHostToggle');
+            return localHostToggle.checked;
+        }
+
+/* ****************************************** */
+
+/* FUNÇÕES DE FORMATO DO MENU SETTINGS */
 
         function autoCap() {
             var editor = document.getElementById('editor');
@@ -803,13 +1000,15 @@ function addTextToSelectedLine(text) {
             var editor = document.getElementById('editor');
             var content = editor.value;
         
-            content = content.replace(/([:;,?!])(?=[^\s])/g, '$1 '); // Adiciona espaço após outras pontuações
+            content = content.replace(/([:;,?!])(?=[^\s"])/g, '$1 '); // Adiciona espaço após outras pontuações
             content = content.replace(/\((\s+)/g, '('); // Remove espaço após '('
-            content = content.replace(/\(([^\s])/g, '($1'); // Adiciona espaço antes de '('
-            content = content.replace(/(\s+)\)/g, '$1) '); // Remove espaço antes de ')' e adiciona espaço após ')'
+            content = content.replace(/¿\s+/g, '¿'); // Remove espaço após '¿'
+            content = content.replace(/¡\s+/g, '¡'); // Remove espaço após '¡'
+            content = content.replace(/([^"\s])((?:¿|¡))/g, '$1 $2'); // Adiciona espaço antes de '¿' e '¡' se não houver espaço ou " antes
+            content = content.replace(/(?<!\")\(([^ \t])/g, ' ($1'); // Adiciona espaço antes de '(' se não houver espaço ou " antes
+            content = content.replace(/(\s*)\)(?!\")/g, '$1) ');    // Remove espaço antes de ')' e adiciona espaço após ')' se não houver espaço ou " depois
             content = content.replace(/\s+([!?,:;\)])/g, '$1'); // Remove espaços antes de !?,:; e )
             
-        
             // Atualizar o conteúdo do editor
             editor.value = content;
         }
@@ -1033,9 +1232,11 @@ function addTextToSelectedLine(text) {
         function setCheckboxStates() {
             // Adicione IDs aos seus elementos de checkbox para tornar a manipulação mais fácil
             const checkboxIds = [
+                'copyTransferToggle',
+                'pasteTransferToggle',
                 'autoCapToggle',
                 'autoFormatToggle',
-                'autoSuggestions',
+                'autoSuggestion',
                 'localHostToggle'
             ];
 
@@ -1054,6 +1255,26 @@ function addTextToSelectedLine(text) {
                     }
                 }
             });
+        }
+
+        // Função para verificar e definir o valor selecionado do select ao carregar a página
+        function setMaxStackValue() {
+            const selectElement = document.getElementById('maxUndoRedoActions');
+            const selectedValue = localStorage.getItem('maxUndoRedoActions');
+
+            if (selectedValue !== null) {
+                selectElement.value = selectedValue;
+            } else {
+                // Se não houver informação em cache, defina o valor padrão como 100
+                selectElement.value = '100';
+            }
+
+
+            // Atualizar o valor de maxStackSize com o valor selecionado
+            maxStackSize = selectElement.value;
+            
+            // Retornar o valor selecionado para ser usado em outras partes do código
+            return selectElement.value;
         }
 
 /* ****************************************** */
@@ -1300,6 +1521,47 @@ function updateLineIssues(color, lines) {
 
 /* ****************************************** */
 
+function countFormatContainers() {
+    var divFormatContainers = document.getElementById('format_containers');
+    
+    if (divFormatContainers) {
+        var containers = divFormatContainers.getElementsByClassName('container');
+        
+        return containers.length;
+    } else {
+        return 0;
+    }
+}
+
+function countGrammarContainers() {
+    var divFormatContainers = document.getElementById('grammar_containers');
+    
+    if (divFormatContainers) {
+        var containers = divFormatContainers.getElementsByClassName('content');
+    
+        return containers.length;
+    } else {
+        return 0;
+    }
+}
+
+function updateTabCounters() {
+    const formatContainers = countFormatContainers()
+    const grammarContainers = countGrammarContainers()
+
+    if (formatContainers > 0) {
+        document.getElementById('format_tab_text').textContent = `${formatContainers} · Format`;
+    } else {
+        document.getElementById('format_tab_text').textContent = `Format`;
+    }
+
+    if (grammarContainers > 0) {
+        document.getElementById('grammar_tab_text').textContent = `${grammarContainers} · Grammar`;
+    } else {
+        document.getElementById('grammar_tab_text').textContent = `Grammar`;
+    }
+}
+
 /* FUNÇÕES PARA SUGESTÕES DE FORMATO */
 
         // Função auxiliar para criar um container HTML com base nos dados da API
@@ -1501,6 +1763,8 @@ function updateLineIssues(color, lines) {
             resetLineIssues();
             checkFormatPlaceholder(); // verifica se há containers, se não tiver, exibe o 'copy'
             handleRefreshButtonClick();
+
+            addToUndoStack();
         }
 
         // Definindo a função para interpretar e executar o trigger
@@ -1524,6 +1788,26 @@ function updateLineIssues(color, lines) {
             }
         }
 
+        function resetTranscription() {
+            var editor = document.getElementById('editor');
+
+            if (editor.value.trim() === '') {
+                notification('The textarea is already empty')
+                return
+            }
+
+            addToUndoStack()
+
+            editor.value = ''; // apaga a transcrição
+            updateSidebar(); // reseta os contadores de caracteres e a barra lateral
+            ignoredContainers = []; // limpa a memória de alertas ignorados
+            checkContent();
+            clearTimeout(typingTimer);
+            updateTabCounters();
+            checkTextarea()
+            notification('Textarea cleared successfully!');
+        }
+
 
         function copyToClipboard() {
             const textArea = document.getElementById('editor');
@@ -1536,15 +1820,21 @@ function updateLineIssues(color, lines) {
             
             try {
                 // Copia o conteúdo para a área de transferência
-                var successful = document.execCommand('copy');
-                var message = successful ? 'Copied to your clipboard!' : 'Something went wrong, please try again.';
-                notification(message);
+                document.execCommand('copy');
                 
-
-                textArea.value = ''; // apaga a transcrição
                 updateSidebar(); // reseta os contadores de caracteres e a barra lateral
-                hideOptionsAndButtons() // oculta os menus já que não há mais texto
                 ignoredContainers = []; // limpa a memória de alertas ignorados
+
+                const transferPlaybackToggle = isCopyTransferTottleChecked()
+                const altDeviceId = getParameterByName('alt_device_id');
+                const accessToken = localStorage.getItem('accessToken');
+
+                if (transferPlaybackToggle === true && currentSongId !== '') {
+                    transferPlayback(accessToken, altDeviceId)
+                    notification('Content copied and playback transferred successfully!');
+                } else {
+                    notification('Content copied to your clipboard!');
+                }
 
             } catch (err) {
                 console.error('An error occurred while copying the text: ', err);
@@ -1553,7 +1843,40 @@ function updateLineIssues(color, lines) {
 
             // Deseleciona a textarea
             window.getSelection().removeAllRanges();
+            updateTabCounters();
+            checkTextarea()
+        }
 
+        function pasteFromClipboard() {
+            const textArea = document.getElementById('editor');
+
+            if (textArea.value.trim() !== '') {
+                notification('Please delete the current transcript before pasting a new one')
+                return
+            }
+
+            navigator.clipboard.readText().then(function(text) {
+                const textArea = document.getElementById('editor');
+                textArea.value = text;
+                checkTextarea()
+                updateSidebar()
+                addToUndoStack();
+
+                const transferPlaybackToggle = isPasteTransferTottleChecked()
+                const accessToken = localStorage.getItem('accessToken');
+
+                if (transferPlaybackToggle === true && currentSongId !== '') {
+                    transferPlayback(accessToken, deviceId)
+                    notification('Content pasted and playback transferred successfully!');
+                } else {
+                    notification('Pasted from clipboard!');
+                }
+                
+                // Aqui você pode adicionar qualquer outra ação que deseja realizar após colar
+            }).catch(function(err) {
+                console.error('An error occurred while pasting from the clipboard: ', err);
+                notification('An error occurred while pasting from the clipboard.');
+            });
         }
 
         // Função para verificar e exibir a div placeholder
@@ -1946,6 +2269,19 @@ function updateLineIssues(color, lines) {
                 var element = document.getElementById('development_message');
                 if (element) {
                     element.remove();
+                }
+            }
+        }
+
+        // Função para verificar os parâmetros da URL e acionar a função correspondente
+        function checkLTExportParams() {
+            const ltExportParam = getParameterByName('lt_export');
+            
+            if (ltExportParam !== null) {
+                if (ltExportParam === '1') {
+                    document.getElementById('lfExportToggle').checked = true;
+                } else if (ltExportParam === '0') {
+                    document.getElementById('lfExportToggle').checked = false;
                 }
             }
         }
