@@ -321,6 +321,7 @@ async function fetchCurrentlyPlayingData() {
         } else if (response.status === 200) {
             document.getElementById('sp_player_div').style.display = ''; // Exibir elemento
             document.getElementById('sp_connect').style.display = 'block'; // exibir elemento
+            document.getElementById('mxm_icon_div').style.display = 'block';
             document.getElementById('playback_info').style.display = 'flex'; // exibir elemento
             document.getElementById('no_playback').style.display = 'none'; // exibir elemento
 

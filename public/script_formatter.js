@@ -106,7 +106,6 @@ document.addEventListener('DOMContentLoaded', function () {
             'pasteTransferToggle',
             'autoCapToggle',
             'autoFormatToggle',
-            'mxmIconToggle',
             'mxmPersonalTokenToggle',
             'autoSuggestion',
             'localHostToggle'
@@ -184,8 +183,7 @@ document.addEventListener('DOMContentLoaded', function () {
         checkMobileTestingParams();
         updateShortcutIcon();
         checkDeviceType();
-        checkMxmIconParams();
-        updateMxmIcon();
+        displayTokenField()
         addToUndoStack(); // add o texto vazio como undo inicial
 
     
@@ -650,6 +648,7 @@ function addToUndoStack() {
             // Get the value of localHostToggle from localStorage
             const localHostToggle = localStorage.getItem('localHostToggle');
 
+
             // Check the value of localHostToggle and set window.serverPath
             if (localHostToggle === 'true') {
                 window.serverPath = 'http://localhost:3000';
@@ -664,7 +663,7 @@ function addToUndoStack() {
             let tokenPath;
             if (privateMxmToken !== null && privateTokenToggle.checked === true) {
                 tokenPath = `access_mode=2&user_token=${privateMxmToken}`;
-                
+
             // caso o usuário tenha definido a opção de token privado mas o campo esteja em branco
             } else if (privateMxmToken === null && privateTokenToggle.checked === true) {
                 document.getElementById('mxmPersonalTokenToggle').checked = false; 
@@ -810,11 +809,6 @@ function addToUndoStack() {
         function isAutoSuggestionsChecked() {
             const autoSuggestions = document.getElementById('autoSuggestion');
             return autoSuggestions.checked;
-        }
-
-        function isMxmIconChecked() {
-            const mxmIconDiv = document.getElementById('mxmIconToggle');
-            return mxmIconDiv.checked;
         }
 
         function isMxmPersonalTokenToggleChecked() {
@@ -1350,7 +1344,6 @@ function addToUndoStack() {
                 'pasteTransferToggle',
                 'autoCapToggle',
                 'autoFormatToggle',
-                'mxmIconToggle',
                 'mxmPersonalTokenToggle',
                 'autoSuggestion',
                 'localHostToggle'
@@ -2408,34 +2401,6 @@ function updateTabCounters() {
             }
         }
 
-        // Função para verificar os parâmetros da URL e acionar a função correspondente
-        function checkMxmIconParams() {
-            const mxmParam = getParameterByName('mxm_shortcut');
-            
-            if (mxmParam !== null) {
-                if (mxmParam === '1') {
-                    document.getElementById('mxmIconToggle').checked = true;
-                } else if (mxmParam === '0') {
-                    document.getElementById('mxmIconToggle').checked = false;
-                }
-            }
-        }
-
-
-        function updateMxmIcon() {
-            available = isMxmIconChecked()
-            if (available === true) {
-                document.getElementById('mxm_icon_div').style.display = 'flex'
-                document.getElementById('mxm_token_div').style.display = 'flex';
-                displayTokenField()
-            } else {
-                document.getElementById('mxm_icon_div').style.display = 'none'
-                document.getElementById('mxm_token_div').style.display = 'none';
-                document.getElementById('mxm_token_field').style.display = 'none'
-                document.getElementById('mxmPersonalTokenToggle').checked = false;
-                displayTokenField()
-            }
-        }
 
         function displayTokenField() {
             checked = isMxmPersonalTokenToggleChecked()

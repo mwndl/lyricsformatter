@@ -543,17 +543,7 @@
             <div class="settings_hided_div" id="dev_hided_div" style="display:none">
                 <hr style="border-top: 1px solid rgb(100, 100, 100); border-right: none; border-bottom: none; border-left: none; border-image: initial;">
                 <h3 class="popup_content_intern">-- Dev Tools --</h3>
-                <div class="popup_option">
-                    <div class="popup_title">
-                        <p class="popup_option_title">Show Musixmatch button</p>
-                        <p class="popup_option_description">Get Musixmatch links to a currently playing track</p>
-                    </div>
-                    <label class="switch">
-                        <input type="checkbox" id="mxmIconToggle" onclick="checkContent()">
-                        <span class="slider round"></span>
-                    </label>
-                </div>
-                <div class="popup_option" id="mxm_token_div" style="display:none">
+                <div class="popup_option" id="mxm_token_div">
                     <div class="popup_title">
                         <p class="popup_option_title">Use personal Musixmatch API key</p>
                         <p class="popup_option_description">If you have a personal Musixmatch API key, you can add it here to enjoy an experience without our request limits (don't worry, this data isn't stored on our end)</p>
@@ -1625,7 +1615,6 @@
                 'pasteTransferToggle',
                 'autoCapToggle',
                 'autoFormatToggle',
-                'mxmIconToggle',
                 'mxmPersonalTokenToggle',
                 'autoSuggestion',
                 'localHostToggle'
@@ -1637,7 +1626,6 @@
             });
             setCheckboxStates();
             setMaxStackValue();
-            updateMxmIcon();
             displayTokenField();
         }
 
