@@ -1,4 +1,5 @@
 var ignoredContainers = [];
+var selectedLanguage;
 
 function checkLanguage() {
     var text = document.getElementById('editor').value;
@@ -180,29 +181,40 @@ function replaceText(offset, length, replacement) {
 function addToDictionary(button) {
     var content = button.getAttribute('data-content');
     var message = button.getAttribute('data-message');
+    var selectedLanguage = getParameterByName('language')
 
     // Verificar se o item já está no dicionário
     if (!isInDictionary(content, message)) {
         // Adicionar o item ao cache do navegador
         var cachedItems = getCachedItems();
-        cachedItems.push({ content: content, message: message });
+        var dictionary = {}; // Criar um objeto para representar o dicionário
+
+        // Se já houver um dicionário armazenado, usá-lo
+        if (cachedItems.hasOwnProperty(selectedLanguage)) {
+            dictionary = cachedItems[selectedLanguage];
+        }
+
+        // Adicionar o novo item ao dicionário
+        dictionary[content] = message;
+
+        // Atualizar ou adicionar o dicionário ao cache do navegador
+        cachedItems[selectedLanguage] = dictionary;
         localStorage.setItem('dictionaryCache', JSON.stringify(cachedItems));
     }
 
     handleRefreshButtonClick();
 }
 
-
 function isInDictionary(content, message) {
+    var selectedLanguage = getParameterByName('language')
     var cachedItems = getCachedItems();
-    return cachedItems.some(function(item) {
-        return item.content === content && item.message === message;
-    });
+    var dictionary = cachedItems[selectedLanguage] || {};
+    return dictionary.hasOwnProperty(content) && dictionary[content] === message;
 }
 
 function getCachedItems() {
     var cachedItems = localStorage.getItem('dictionaryCache');
-    return cachedItems ? JSON.parse(cachedItems) : [];
+    return cachedItems ? JSON.parse(cachedItems) : {};
 }
 
 function getTextareaContent(offset, length) {

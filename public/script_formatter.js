@@ -6,6 +6,8 @@ let undoCursorPositionsStack = [];
 var redoCursorPositionsStack = [];
 var maxStackSize = 100;
 
+var lf_version = '2.8.1';
+var lf_release_date = '30/03/2023'
 
 document.addEventListener('DOMContentLoaded', function () {
     var returnArrow = document.getElementById('return_arrow');
@@ -2250,93 +2252,102 @@ function updateTabCounters() {
             .catch(error => console.error('Error fetching data from server:', error));
         }
 
-        // Função para atualizar os elementos HTML com os novos dados do servidor
-        function updateServerInfo(data) {
-            // Selecione os elementos HTML onde você deseja atualizar as informações do servidor
-            const popupContent = document.querySelector('#aboutContent'); // Seleciona o popup_content dentro de about_popup
+// Função para atualizar os elementos HTML com os novos dados do servidor
+function updateServerInfo(data) {
+    // Selecione os elementos HTML onde você deseja atualizar as informações do servidor
+    const popupContent = document.querySelector('#aboutContent'); // Seleciona o popup_content dentro de about_popup
 
-            // Limpe o conteúdo antigo antes de adicionar novas informações
-            popupContent.innerHTML = '';
+    // Limpe o conteúdo antigo antes de adicionar novas informações
+    popupContent.innerHTML = '';
 
-            // Verifica se há dados do servidor
-            if (data.serverInfo) {
-                const serverInfo = data.serverInfo;
+    // Verifica se há dados do servidor
+    if (data.serverInfo) {
+        const serverInfo = data.serverInfo;
 
-                // Adiciona o título How to use acima da descrição
-                const howToUseTitleElement = document.createElement('h3');
-                howToUseTitleElement.textContent = 'How to use';
-                popupContent.appendChild(howToUseTitleElement);
+        // Adiciona o título How to use acima da descrição
+        const howToUseTitleElement = document.createElement('h3');
+        howToUseTitleElement.textContent = 'How to use';
+        popupContent.appendChild(howToUseTitleElement);
 
-                // Divide o texto How to use em parágrafos usando '\n\n\n'
-                const howToUseParagraphs = serverInfo.howToUseText.split('\n\n\n');
+        // Divide o texto How to use em parágrafos usando '\n\n\n'
+        const howToUseParagraphs = serverInfo.howToUseText.split('\n\n\n');
 
-                // Adiciona cada parágrafo como um elemento <p>
-                howToUseParagraphs.forEach((paragraph, index) => {
-                    const paragraphElement = document.createElement('p');
-                    paragraphElement.textContent = paragraph;
-                    
-                    // Adiciona margem inferior de 10px entre os parágrafos, exceto para o último parágrafo
-                    if (index !== howToUseParagraphs.length - 1) {
-                        paragraphElement.style.marginBottom = '10px';
-                    }
-                    
-                    popupContent.appendChild(paragraphElement);
-                });
+        // Adiciona cada parágrafo como um elemento <p>
+        howToUseParagraphs.forEach((paragraph, index) => {
+            const paragraphElement = document.createElement('p');
+            paragraphElement.textContent = paragraph;
 
-                // Adiciona uma barra fina cinza horizontal abaixo do how to use
-                const howToUseDividerElement = document.createElement('hr');
-                howToUseDividerElement.style.border = 'none';
-                howToUseDividerElement.style.borderTop = '1px solid #646464';
-                popupContent.appendChild(howToUseDividerElement);
-
-                // Adiciona o título Changelog acima da descrição
-                const changelogTitleElement = document.createElement('h3');
-                changelogTitleElement.textContent = 'Changelog';
-                popupContent.appendChild(changelogTitleElement);
-
-                // Divide o texto Changelog em parágrafos usando '\n\n\n'
-                const changelogParagraphs = serverInfo.description.split('\n\n\n');
-
-                // Adiciona cada parágrafo como um elemento <p>
-                changelogParagraphs.forEach((paragraph, index) => {
-                    const paragraphElement = document.createElement('p');
-                    paragraphElement.textContent = paragraph;
-                    
-                    // Adiciona margem inferior de 10px entre os parágrafos, exceto para o último parágrafo
-                    if (index !== changelogParagraphs.length - 1) {
-                        paragraphElement.style.marginBottom = '10px';
-                    }
-                    
-                    popupContent.appendChild(paragraphElement);
-                });
-
-                // Adiciona uma barra fina cinza horizontal abaixo da descrição
-                const dividerElement = document.createElement('hr');
-                dividerElement.style.border = 'none';
-                dividerElement.style.borderTop = '1px solid #646464';
-                popupContent.appendChild(dividerElement);
-
-                // Cria o contêiner para as informações do servidor
-                const serverInfoContainer = document.createElement('div');
-                serverInfoContainer.classList.add('server_info'); // Adiciona a classe 'server_info'
-
-                // Adiciona o título das informações do servidor
-                const titleElement = document.createElement('h3');
-                titleElement.textContent = serverInfo.title;
-                serverInfoContainer.appendChild(titleElement);
-
-                // Itera sobre os dados do servidor
-                for (const item of serverInfo.data) {
-                    const itemElement = document.createElement('p');
-
-                    // Adiciona a classe 'bold' apenas ao valor
-                    itemElement.innerHTML = `<span>${item.label}: </span><span class="bold">${item.value}</span>`;
-                    serverInfoContainer.appendChild(itemElement);
-                }
-            // Adiciona o contêiner das informações do servidor ao popupContent
-            popupContent.appendChild(serverInfoContainer);
+            // Adiciona margem inferior de 10px entre os parágrafos, exceto para o último parágrafo
+            if (index !== howToUseParagraphs.length - 1) {
+                paragraphElement.style.marginBottom = '10px';
             }
+
+            popupContent.appendChild(paragraphElement);
+        });
+
+        // Adiciona uma barra fina cinza horizontal abaixo do how to use
+        const howToUseDividerElement = document.createElement('hr');
+        howToUseDividerElement.style.border = 'none';
+        howToUseDividerElement.style.borderTop = '1px solid #646464';
+        popupContent.appendChild(howToUseDividerElement);
+
+        // Adiciona o título Changelog acima da descrição
+        const changelogTitleElement = document.createElement('h3');
+        changelogTitleElement.textContent = 'Changelog';
+        popupContent.appendChild(changelogTitleElement);
+
+        // Divide o texto Changelog em parágrafos usando '\n\n\n'
+        const changelogParagraphs = serverInfo.description.split('\n\n\n');
+
+        // Adiciona cada parágrafo como um elemento <p>
+        changelogParagraphs.forEach((paragraph, index) => {
+            const paragraphElement = document.createElement('p');
+            paragraphElement.textContent = paragraph;
+
+            // Adiciona margem inferior de 10px entre os parágrafos, exceto para o último parágrafo
+            if (index !== changelogParagraphs.length - 1) {
+                paragraphElement.style.marginBottom = '10px';
+            }
+
+            popupContent.appendChild(paragraphElement);
+        });
+
+        // Adiciona uma barra fina cinza horizontal abaixo da descrição
+        const dividerElement = document.createElement('hr');
+        dividerElement.style.border = 'none';
+        dividerElement.style.borderTop = '1px solid #646464';
+        popupContent.appendChild(dividerElement);
+
+        // Cria o contêiner para as informações do servidor
+        const serverInfoContainer = document.createElement('div');
+        serverInfoContainer.classList.add('server_info'); // Adiciona a classe 'server_info'
+
+        // Adiciona o título das informações do servidor
+        const titleElement = document.createElement('h3');
+        titleElement.textContent = serverInfo.title;
+        serverInfoContainer.appendChild(titleElement);
+
+        // Adiciona os valores manualmente antes dos dados do servidor
+        const lfVersionElement = document.createElement('p');
+        lfVersionElement.innerHTML = `<span>LyricsFormatter version: </span><span class="bold">${lf_version}</span>`;
+        serverInfoContainer.appendChild(lfVersionElement);
+
+        const lfReleaseDateElement = document.createElement('p');
+        lfReleaseDateElement.innerHTML = `<span>Release date: </span><span class="bold">${lf_release_date}</span>`;
+        serverInfoContainer.appendChild(lfReleaseDateElement);
+
+        // Itera sobre os dados do servidor
+        for (const item of serverInfo.data) {
+            const itemElement = document.createElement('p');
+
+            // Adiciona a classe 'bold' apenas ao valor
+            itemElement.innerHTML = `<span>${item.label}: </span><span class="bold">${item.value}</span>`;
+            serverInfoContainer.appendChild(itemElement);
         }
+        // Adiciona o contêiner das informações do servidor ao popupContent
+        popupContent.appendChild(serverInfoContainer);
+    }
+}
 
 /* ****************************************** */
 
