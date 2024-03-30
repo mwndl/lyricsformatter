@@ -1958,6 +1958,14 @@
         transition: background-color 0.3s ease;
     }
 
+    .sp_device.current_device {
+        display: block;
+        padding: 8px 12px;
+        text-decoration: none;
+        color: #1ED760;
+        transition: background-color 0.3s ease;
+    }
+
     .sp_device {
         cursor: pointer;
     }

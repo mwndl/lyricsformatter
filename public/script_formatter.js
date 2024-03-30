@@ -6,7 +6,8 @@ let undoCursorPositionsStack = [];
 var redoCursorPositionsStack = [];
 var maxStackSize = 100;
 
-var lf_version = '2.8.1';
+// efeito de destaque no player em reprodução
+var lf_version = '2.8.2';
 var lf_release_date = '30/03/2023'
 
 document.addEventListener('DOMContentLoaded', function () {

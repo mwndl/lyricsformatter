@@ -1565,8 +1565,9 @@
 
                 try {
                     // Executa as funções de busca de dados
-                    await fetchCurrentlyPlayingData();
                     await fetchAvailableDevices();
+                    await fetchCurrentlyPlayingData();
+                    highlightDevice(currentDeviceId);
                 } catch (error) {
                     console.error('Something went wrong', error);
                 } finally {
