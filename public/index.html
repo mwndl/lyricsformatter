@@ -1253,9 +1253,11 @@
 
                 // Função para parar o cronômetro
                 function intervalStopTimer() {
-                    clearInterval(intervalId); // pausa o timer
-                    isTimerRunning = false;
-                    setTimeout(stopTimer, 2000);
+                    if (isTimerRunning === true) {
+                        clearInterval(intervalId); // pausa o timer
+                        isTimerRunning = false;
+                        setTimeout(stopTimer, 2000);
+                    }
                 }
 
                 function stopTimer() {
