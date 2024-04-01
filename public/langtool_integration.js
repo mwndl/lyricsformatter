@@ -1,4 +1,5 @@
 var ignoredContainers = [];
+var selectedLanguage;
 
 function checkLanguage() {
     var text = document.getElementById('editor').value;
@@ -78,6 +79,12 @@ function createMatchContainers(matches) {
             return; 
         }
 
+        // Verifica se o conteúdo está no dicionário pessoal do usuário
+        var textareaContent = getTextareaContent(match.offset, match.length);
+        if (isInDictionary(textareaContent, match.message)) {
+            return; 
+        }
+
         var matchContainer = document.createElement('div');
         matchContainer.classList.add('container');
         matchContainer.setAttribute('onclick', 'expandContainer(this)');
@@ -85,6 +92,9 @@ function createMatchContainers(matches) {
         
         // Adicionando o atributo lt-position
         matchContainer.setAttribute('lt-position', `${match.offset}:${match.length}`);
+
+        var topDiv = document.createElement('div');
+        topDiv.classList.add('grammar_top');
 
         var title = document.createElement('h2');
         title.textContent = match.rule.category.name;
@@ -116,12 +126,30 @@ function createMatchContainers(matches) {
             ignoreButton(matchContainer);
         };
 
+        var addToDictionaryBtn = document.createElement('div');
+        addToDictionaryBtn.classList.add('add_to_dictionary_svg');
+        addToDictionaryBtn.style.display = 'none';
+        addToDictionaryBtn.title = 'Add to the dictionary';
+
+        // Construindo o valor do atributo data
+        var textareaContent = getTextareaContent(match.offset, match.length); // Função fictícia para obter o conteúdo do textarea
+
+        addToDictionaryBtn.setAttribute('data-content', textareaContent);
+        addToDictionaryBtn.setAttribute('data-message', match.message);
+
+        addToDictionaryBtn.onclick = function() {
+            addToDictionary(this);
+        };
+
         contentOptions.appendChild(ignoreBtn);
 
         content.appendChild(description);
         content.appendChild(contentOptions);
 
-        matchContainer.appendChild(title);
+        topDiv.appendChild(title);
+        topDiv.appendChild(addToDictionaryBtn);
+
+        matchContainer.appendChild(topDiv);
         matchContainer.appendChild(content);
 
         container.appendChild(matchContainer);
@@ -139,6 +167,7 @@ function createMatchContainers(matches) {
     });
 }
 
+
 function replaceText(offset, length, replacement) {
     var editor = document.getElementById('editor');
     var editorValue = editor.value;
@@ -147,6 +176,55 @@ function replaceText(offset, length, replacement) {
     handleRefreshButtonClick();
 
     addToUndoStack()
+}
+
+function addToDictionary(button) {
+    var content = button.getAttribute('data-content');
+    var message = button.getAttribute('data-message');
+    var selectedLanguage = getParameterByName('language')
+
+    // Verificar se o item já está no dicionário
+    if (!isInDictionary(content, message)) {
+        // Adicionar o item ao cache do navegador
+        var cachedItems = getCachedItems();
+        var dictionary = {}; // Criar um objeto para representar o dicionário
+
+        // Se já houver um dicionário armazenado, usá-lo
+        if (cachedItems.hasOwnProperty(selectedLanguage)) {
+            dictionary = cachedItems[selectedLanguage];
+        }
+
+        // Adicionar o novo item ao dicionário
+        dictionary[content] = message;
+
+        // Atualizar ou adicionar o dicionário ao cache do navegador
+        cachedItems[selectedLanguage] = dictionary;
+        localStorage.setItem('dictionaryCache', JSON.stringify(cachedItems));
+    }
+
+    handleRefreshButtonClick();
+}
+
+function isInDictionary(content, message) {
+    var selectedLanguage = getParameterByName('language')
+    var cachedItems = getCachedItems();
+    var dictionary = cachedItems[selectedLanguage] || {};
+    return dictionary.hasOwnProperty(content) && dictionary[content] === message;
+}
+
+function getCachedItems() {
+    var cachedItems = localStorage.getItem('dictionaryCache');
+    return cachedItems ? JSON.parse(cachedItems) : {};
+}
+
+function getTextareaContent(offset, length) {
+    var editorTextarea = document.getElementById('editor');
+    var content = editorTextarea.value;
+
+    // Obtém o conteúdo com base no offset e length
+    var textContent = content.substring(offset, offset + length);
+    
+    return textContent;
 }
 
 function exportLTObject(match) {

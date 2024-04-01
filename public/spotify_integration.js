@@ -15,6 +15,7 @@ document.addEventListener('visibilitychange', function() {
     if (!document.hidden) {
         // ações a executar quando a página ficar ativa novamente
         fetchCurrentlyPlayingData()
+        highlightDevice(currentDeviceId)
     }
 });
 
@@ -274,6 +275,7 @@ async function spotifyRenewAuth() {
 let currentSongId = '';
 let currentIsrc = '';
 let volumePercent = '';
+let currentDeviceId = '';
 
 async function fetchCurrentlyPlayingData() {
     try {
@@ -329,6 +331,7 @@ async function fetchCurrentlyPlayingData() {
             spotifyRenewAuth()
             currentSongId = '';
             currentIsrc = '';
+            currentDeviceId = '';
         } else {
             document.getElementById('sp_player_div').style.display = 'none'; // ocultar elemento
             return; // Sair da função
@@ -347,6 +350,10 @@ async function fetchCurrentlyPlayingData() {
         currentIsrc = currentlyPlayingData.item.external_ids.isrc;
 
         volumePercent = currentlyPlayingData.device.volume_percent;
+
+        // definir a cor verde no dispositivo em reprodução
+        currentDeviceId = currentlyPlayingData.device.id;
+        highlightDevice(currentDeviceId)
 
         /*  quick transfer */
 
@@ -407,6 +414,32 @@ async function fetchCurrentlyPlayingData() {
     } catch (error) {
         console.error('Error getting data from currently playing song: ', error.message);
     }
+}
+
+function highlightDevice(currentDeviceId) {
+    // Encontre a div com id "devices_options"
+    const devicesOptionsDiv = document.getElementById('devices_options');
+
+    // Encontre todas as divs filhas com a classe "sp_device"
+    const deviceDivs = devicesOptionsDiv.querySelectorAll('.sp_device');
+
+    // Itere sobre as divs para adicionar/remover a classe conforme necessário
+    deviceDivs.forEach(deviceDiv => {
+        // Remova a classe '.current_device' de todas as divs
+        deviceDiv.classList.remove('current_device');
+
+        // Verifique se o currentDeviceId está vazio
+        if (currentDeviceId === '') {
+            // Redefina a classe para 'sp_device'
+            deviceDiv.classList.add('sp_device');
+        } else {
+            // Verifique se o data-id da div é igual ao currentDeviceId
+            if (deviceDiv.getAttribute('data-id') === currentDeviceId) {
+                // Adicione a classe '.current_device' ao dispositivo correto
+                deviceDiv.classList.add('current_device');
+            }
+        }
+    });
 }
 
 async function setPlayerVolume(volumePercent) {
@@ -650,6 +683,7 @@ async function fetchAvailableDevices() {
             });
         }
 
+
     } catch (error) {
         console.error('Error fetching available devices: ', error.message);
     }
@@ -673,7 +707,7 @@ async function transferPlayback(accessToken, deviceID) {
         if (!response.ok) {
             throw new Error('response not ok');
         }
-
+        highlightDevice(deviceID)
         console.log('Playback transferred successfully.');
 
     } catch (error) {
