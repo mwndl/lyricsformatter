@@ -6,7 +6,7 @@ let undoCursorPositionsStack = [];
 var redoCursorPositionsStack = [];
 var maxStackSize = 100;
 
-var lf_version = '2.8.6';
+var lf_version = '2.8.7';
 var lf_release_date = '02/04/2024'
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -1407,7 +1407,7 @@ function addToUndoStack() {
         document.addEventListener("DOMContentLoaded", function () {
             var optionsDots = document.getElementById("settings_dots");
             var miniMenu = document.getElementById("mini_menu");
-            var langList = document.getElementById("language_list");
+            var langList = document.getElementById("language_list_div");
 
             var settingsOption = document.getElementById("settings_option");
             var creditsOption = document.getElementById("credits_option");
