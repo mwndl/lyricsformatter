@@ -6,8 +6,8 @@ let undoCursorPositionsStack = [];
 var redoCursorPositionsStack = [];
 var maxStackSize = 100;
 
-var lf_version = '2.8.5';
-var lf_release_date = '31/03/2024'
+var lf_version = '2.8.6';
+var lf_release_date = '02/04/2024'
 
 document.addEventListener('DOMContentLoaded', function () {
     var returnArrow = document.getElementById('return_arrow');
@@ -16,7 +16,7 @@ document.addEventListener('DOMContentLoaded', function () {
     var textarea = document.querySelector('.editor');
     const selector = document.querySelector('.language_selector');
     const selectedLanguage = document.querySelector('.selected_language');
-    const languageList = document.querySelector('.language_list');
+    const languageList = document.querySelector('.language_list_div');
     const languageArrow = document.querySelector('.lang_expand_arrow');
     const langButtonContent = document.querySelector('.lang_selector_div');
 
@@ -462,18 +462,24 @@ function addToUndoStack() {
         // Função para obter o nome completo do idioma com base no código
         function getLanguageFullName(code) {
             const languageMap = {
-                'en-AU': 'English (Australian)',
-                'en-CA': 'English (Canadian)',
-                'en-NZ': 'English (New Zealand)',
+                'nl': 'Dutch',
+                'nl-BE': 'Dutch (BE)',
+                'en-AU': 'English (AU)',
+                'en-CA': 'English (CA)',
+                'en-NZ': 'English (NZ)',
                 'en-GB': 'English (UK)',
                 'en-US': 'English (US)',
-                'nl': 'Dutch',
+                'en-ZA': 'English (ZA)',
                 'fr': 'French',
-                'fr-CA': 'French (Canada)',
-                'de-AT': 'German (Austria)',
-                'de-DE': 'German (Germany)',
-                'de-CH': 'German (Swiss)',
+                'fr-BE': 'French (BE)',
+                'fr-CA': 'French (CA)',
+                'fr-CH': 'French (CH)',
+                'de-AT': 'German (AT)',
+                'de-DE': 'German (DE)',
+                'de-CH': 'German (CH)',
                 'it': 'Italian',
+                'ja-JP': 'Japanese',
+                'pt-AO': 'Portuguese (AO)',
                 'pt-BR': 'Portuguese (BR)',
                 'pt-PT': 'Portuguese (PT)',
                 'es': 'Spanish',
