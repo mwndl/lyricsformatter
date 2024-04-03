@@ -6,7 +6,7 @@ let undoCursorPositionsStack = [];
 var redoCursorPositionsStack = [];
 var maxStackSize = 100;
 
-var lf_version = '2.9.1';
+var lf_version = '2.9.2';
 var lf_release_date = '03/04/2024'
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -2894,7 +2894,8 @@ function updateServerInfo(data) {
             notification('No dictionary data found.');
         }
     }
-    
+
+    // OBTER DATA ATUAL
     function getCurrentDate() {
         const now = new Date();
         const year = now.getFullYear();
@@ -2958,3 +2959,67 @@ function updateServerInfo(data) {
             confirmPopup.remove();
         }
     }
+
+/* ****************************************** */
+
+/* IMPORTAR OU EXPORTAR TODOS OS DADOS EM CACHÊ (OCULTO) */
+    function importCacheData() {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = 'application/json';
+    
+        input.onchange = (event) => {
+            const file = event.target.files[0];
+            if (!file) return;
+    
+            const reader = new FileReader();
+            reader.readAsText(file);
+    
+            reader.onload = (event) => {
+                const data = event.target.result;
+                try {
+                    const parsedData = JSON.parse(data);
+                    for (const key in parsedData) {
+                        localStorage.setItem(key, parsedData[key]);
+                    }
+                    notification('Cache data imported successfully!');
+                } catch (error) {
+                    notification('Error importing cache data: Invalid JSON format.');
+                }
+            };
+    
+            reader.onerror = () => {
+                notification('Error reading file.');
+            };
+        };
+    
+        input.click();
+    }
+
+    function exportCacheData() {
+        const cacheData = {};
+        for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            const value = localStorage.getItem(key);
+            cacheData[key] = value;
+        }
+    
+        if (Object.keys(cacheData).length > 0) {
+            const filename = `lf${lf_version}_localdata_${getCurrentDate()}.json`;
+            const json = JSON.stringify(cacheData, null, 2);
+            const blob = new Blob([json], { type: 'application/json' });
+    
+            // Cria um link temporário para fazer o download do arquivo
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = filename;
+            link.click();
+    
+            notification('Cache data exported successfully!');
+        } else {
+            notification('No cache data found.');
+        }
+    }
+
+
+/* ****************************************** */
