@@ -6,8 +6,8 @@ let undoCursorPositionsStack = [];
 var redoCursorPositionsStack = [];
 var maxStackSize = 100;
 
-var lf_version = '2.8.5';
-var lf_release_date = '31/03/2024'
+var lf_version = '2.9.4';
+var lf_release_date = '03/04/2024'
 
 document.addEventListener('DOMContentLoaded', function () {
     var returnArrow = document.getElementById('return_arrow');
@@ -16,7 +16,7 @@ document.addEventListener('DOMContentLoaded', function () {
     var textarea = document.querySelector('.editor');
     const selector = document.querySelector('.language_selector');
     const selectedLanguage = document.querySelector('.selected_language');
-    const languageList = document.querySelector('.language_list');
+    const languageList = document.querySelector('.language_list_div');
     const languageArrow = document.querySelector('.lang_expand_arrow');
     const langButtonContent = document.querySelector('.lang_selector_div');
 
@@ -187,6 +187,7 @@ document.addEventListener('DOMContentLoaded', function () {
         checkDeviceType();
         displayTokenField()
         addToUndoStack(); // add o texto vazio como undo inicial
+        updateMemoryUsage();
 
     
     // Adicione um evento de clique ao botão de cópia
@@ -280,16 +281,7 @@ document.addEventListener('DOMContentLoaded', function () {
         } else if ((event.ctrlKey || event.metaKey) && event.shiftKey && (event.key === 'Z' || event.key === 'z')) { // refazer
             event.preventDefault();
             redo();
-        } else if ((event.ctrlKey || event.metaKey) && (event.key === 'C' || event.key === 'c') && !isEditorFocused && !isMxmTokenFieldFocused) {
-            event.preventDefault();
-            copyToClipboard();
-        } else if ((event.ctrlKey || event.metaKey) && (event.key === 'V' || event.key === 'v') && !isEditorFocused && !isMxmTokenFieldFocused) {
-            event.preventDefault();
-            pasteFromClipboard();
-        } else if ((event.ctrlKey || event.metaKey) && (event.key === 'X' || event.key === 'x') && !isEditorFocused && !isMxmTokenFieldFocused) {
-            event.preventDefault();
-            resetTranscription();
-        }
+        } 
     });
 });
 
@@ -462,18 +454,24 @@ function addToUndoStack() {
         // Função para obter o nome completo do idioma com base no código
         function getLanguageFullName(code) {
             const languageMap = {
-                'en-AU': 'English (Australian)',
-                'en-CA': 'English (Canadian)',
-                'en-NZ': 'English (New Zealand)',
+                'nl': 'Dutch',
+                'nl-BE': 'Dutch (BE)',
+                'en-AU': 'English (AU)',
+                'en-CA': 'English (CA)',
+                'en-NZ': 'English (NZ)',
                 'en-GB': 'English (UK)',
                 'en-US': 'English (US)',
-                'nl': 'Dutch',
+                'en-ZA': 'English (ZA)',
                 'fr': 'French',
-                'fr-CA': 'French (Canada)',
-                'de-AT': 'German (Austria)',
-                'de-DE': 'German (Germany)',
-                'de-CH': 'German (Swiss)',
+                'fr-BE': 'French (BE)',
+                'fr-CA': 'French (CA)',
+                'fr-CH': 'French (CH)',
+                'de-AT': 'German (AT)',
+                'de-DE': 'German (DE)',
+                'de-CH': 'German (CH)',
                 'it': 'Italian',
+                'ja-JP': 'Japanese',
+                'pt-AO': 'Portuguese (AO)',
                 'pt-BR': 'Portuguese (BR)',
                 'pt-PT': 'Portuguese (PT)',
                 'es': 'Spanish',
@@ -515,7 +513,7 @@ function addToUndoStack() {
                 selectedLanguageCode === 'en-US' || selectedLanguageCode === 'en-GB'|| 
                 selectedLanguageCode === 'es' || selectedLanguageCode === 'it'||
                 selectedLanguageCode === 'fr') {
-                    fixPunctuation1();
+                    fixPunctuation();
                 }
 
                 replaceSpecialTags(); // auto replace tags
@@ -525,6 +523,7 @@ function addToUndoStack() {
                 addSpaceAboveTags(); // add (caso não haja) espaços acima de todas as tags
                 removeSpacesAroundInstrumental(); // espaços ao redor de tags instrumentais
                 trimEditorContent(); // linhas antes ou depois da letra (2)
+                removeEOL(); // remove pontuações EOL
                 autoTrim(); // espaços extras no início ou fim 
                 removeDuplicateSpaces(); // espaços duplos entre palavras
                 removeDuplicateEmptyLines(); // linhas vazias duplicadas entre estrofes
@@ -813,6 +812,11 @@ function addToUndoStack() {
             return autoSuggestions.checked;
         }
 
+        function isDisplayPlaybackToggleChecked() {
+            const showPlaybackTabToggle = document.getElementById('displayPlaybackTabToggle');
+            return showPlaybackTabToggle.checked;
+        }
+
         function isMxmPersonalTokenToggleChecked() {
             const mxmTokenToggle = document.getElementById('mxmPersonalTokenToggle');
             return mxmTokenToggle.checked;
@@ -1088,7 +1092,7 @@ function addToUndoStack() {
         }
 
         // corretor padrão
-        function fixPunctuation1() {
+        function fixPunctuation() {
             var editor = document.getElementById('editor');
             var content = editor.value;
         
@@ -1116,6 +1120,16 @@ function addToUndoStack() {
             editor.value = content;
         }
 
+        function removeEOL() {
+            var editor = document.getElementById('editor');
+            var content = editor.value;
+        
+            // Remove pontuações específicas no final das linhas
+            content = content.replace(/[:.,(;]+\s*$/gm, '');
+        
+            // Atualizar o conteúdo do editor
+            editor.value = content;
+        }
 
 /* ****************************************** */
 
@@ -1401,7 +1415,7 @@ function addToUndoStack() {
         document.addEventListener("DOMContentLoaded", function () {
             var optionsDots = document.getElementById("settings_dots");
             var miniMenu = document.getElementById("mini_menu");
-            var langList = document.getElementById("language_list");
+            var langList = document.getElementById("language_list_div");
 
             var settingsOption = document.getElementById("settings_option");
             var creditsOption = document.getElementById("credits_option");
@@ -1488,12 +1502,9 @@ function addToUndoStack() {
                 overlay.style.display = "none";
             });
 
-
+            // format e grammar
             const formatButton = document.getElementById('lf_option');
             const grammarButton = document.getElementById('lt_option');
-
-            const keyboardButton = document.getElementById('op_keyboard');
-            const numpadButton = document.getElementById('op_numpad');
 
             formatButton.addEventListener("click", function (event) {
                 showFormatTab()
@@ -1503,6 +1514,34 @@ function addToUndoStack() {
                 showGrammarTab()
             });
 
+            // settings submenus
+            const playbackButton = document.getElementById('playback_sub');
+            const prefButton = document.getElementById('pref_sub');
+            const storageButton = document.getElementById('storage_sub');
+            const DevToolsButton = document.getElementById('dev_sub');
+
+            playbackButton.addEventListener("click", function (event) {
+                showPlaybackTab()
+            });
+
+            prefButton.addEventListener("click", function (event) {
+                showPreferencesTab()
+            });
+
+            storageButton.addEventListener("click", function (event) {
+                showStorageTab();
+                updateMemoryUsage();
+            });
+
+            DevToolsButton.addEventListener("click", function (event) {
+                showDevToolsTab()
+            });
+
+
+            // shortcuts: keyboard e numpad
+            const keyboardButton = document.getElementById('op_keyboard');
+            const numpadButton = document.getElementById('op_numpad');
+
             keyboardButton.addEventListener("click", function (event) {
                 showKeyboardTab()
             });
@@ -1510,7 +1549,110 @@ function addToUndoStack() {
             numpadButton.addEventListener("click", function (event) {
                 showNumpadTab()
             });
+
+
         });
+
+        function showPreferencesTab() {
+            const prefButton = document.getElementById('pref_sub');
+            const playbackButton = document.getElementById('playback_sub');
+            const storageButton = document.getElementById('storage_sub');
+            const DevToolsButton = document.getElementById('dev_sub');
+        
+            const prefContainer = document.getElementById('preferences_menu');
+            const playbackContainer = document.getElementById('playback_menu');
+            const storageContainer = document.getElementById('storage_menu');
+            const DevToolsContainer = document.getElementById('devtools_menu');
+        
+            prefButton.className = 'impr_menu_true'
+            playbackButton.className = 'impr_menu_false'
+            storageButton.className = 'impr_menu_false'
+            DevToolsButton.className = 'impr_menu_false'
+        
+            prefContainer.style = 'display:block'
+            playbackContainer.style = 'display:none'
+            storageContainer.style = 'display:none'
+            DevToolsContainer.style = 'display:none'
+
+            resetLineIssues();
+            closeContainers();
+        }
+
+        function showPlaybackTab() {
+            const prefButton = document.getElementById('pref_sub');
+            const playbackButton = document.getElementById('playback_sub');
+            const storageButton = document.getElementById('storage_sub');
+            const DevToolsButton = document.getElementById('dev_sub');
+        
+            const prefContainer = document.getElementById('preferences_menu');
+            const playbackContainer = document.getElementById('playback_menu');
+            const storageContainer = document.getElementById('storage_menu');
+            const DevToolsContainer = document.getElementById('devtools_menu');
+        
+            prefButton.className = 'impr_menu_false'
+            playbackButton.className = 'impr_menu_true'
+            storageButton.className = 'impr_menu_false'
+            DevToolsButton.className = 'impr_menu_false'
+        
+            prefContainer.style = 'display:none'
+            playbackContainer.style = 'display:block'
+            storageContainer.style = 'display:none'
+            DevToolsContainer.style = 'display:none'
+
+            resetLineIssues();
+            closeContainers();
+        }
+
+        function showStorageTab() {
+            const prefButton = document.getElementById('pref_sub');
+            const playbackButton = document.getElementById('playback_sub');
+            const storageButton = document.getElementById('storage_sub');
+            const DevToolsButton = document.getElementById('dev_sub');
+        
+            const prefContainer = document.getElementById('preferences_menu');
+            const playbackContainer = document.getElementById('playback_menu');
+            const storageContainer = document.getElementById('storage_menu');
+            const DevToolsContainer = document.getElementById('devtools_menu');
+        
+            prefButton.className = 'impr_menu_false'
+            playbackButton.className = 'impr_menu_false'
+            storageButton.className = 'impr_menu_true'
+            DevToolsButton.className = 'impr_menu_false'
+        
+            prefContainer.style = 'display:none'
+            playbackContainer.style = 'display:none'
+            storageContainer.style = 'display:block'
+            DevToolsContainer.style = 'display:none'
+
+            resetLineIssues();
+            closeContainers();
+        }
+
+        function showDevToolsTab() {
+            const prefButton = document.getElementById('pref_sub');
+            const playbackButton = document.getElementById('playback_sub');
+            const storageButton = document.getElementById('storage_sub');
+            const DevToolsButton = document.getElementById('dev_sub');
+        
+            const prefContainer = document.getElementById('preferences_menu');
+            const playbackContainer = document.getElementById('playback_menu');
+            const storageContainer = document.getElementById('storage_menu');
+            const DevToolsContainer = document.getElementById('devtools_menu');
+        
+            prefButton.className = 'impr_menu_false'
+            playbackButton.className = 'impr_menu_false'
+            storageButton.className = 'impr_menu_false'
+            DevToolsButton.className = 'impr_menu_true'
+        
+            prefContainer.style = 'display:none'
+            playbackContainer.style = 'display:none'
+            storageContainer.style = 'display:none'
+            DevToolsContainer.style = 'display:block'
+
+            resetLineIssues();
+            closeContainers();
+        }
+
 
 /* ****************************************** */
 
@@ -1841,18 +1983,18 @@ function updateTabCounters() {
             // Remove os colchetes dos termos
             const cleanIncorrectTerm = incorrectTerm.replace(/\[|\]/g, '');
             const cleanCorrection = correction.replace(/\[|\]/g, '');
-
+        
             // Obtém o conteúdo do textarea com ID 'editor'
             const editor = document.getElementById('editor');
             let content = editor.value;
-
+        
             // Escapa caracteres especiais da palavra de busca
             const escapedTerm = cleanIncorrectTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-
+        
             // Substitui todas as ocorrências de incorrectTerm por correction
-            const regex = new RegExp('(^|\\s|[,.;:!?\\-¿¡])' + escapedTerm + '(?=\\s|[,.;:!?\\-¿¡]|$)', 'g');
+            const regex = new RegExp('(^|\\s|[,.;:!?\\-¿¡(])' + escapedTerm + '(?=\\s|[,.;:!?\\-¿¡)\\-]|$)', 'g');
             content = content.replace(regex, '$1' + cleanCorrection);
-
+        
             // Define o conteúdo do textarea como o texto modificado
             editor.value = content;
         }
@@ -2355,15 +2497,14 @@ function updateServerInfo(data) {
 
         // Função para exibir/ocultar a div e salvar a escolha em cache
         function displayDevModeDiv() {
-            const devHidedDiv = document.getElementById('dev_hided_div');
+            const devButton = document.getElementById('dev_sub');
             const devMode = localStorage.getItem('devMode') === 'true'; // Obtém o estado atual do modo de desenvolvimento
 
             // Alterna entre exibir e ocultar a div
             if (devMode) {
-                devHidedDiv.style.display = 'none';
+                devButton.style.display = 'none';
             } else {
-                devHidedDiv.style.display = 'block';
-                showSpMenuDiv()
+                devButton.style.display = 'flex';
             }
 
             // Salva a escolha em cache invertendo o valor atual
@@ -2373,12 +2514,12 @@ function updateServerInfo(data) {
         // Carrega a escolha do modo de desenvolvimento do cache e exibe/oculta a div conforme necessário
         function loadDevMode() {
             const devMode = localStorage.getItem('devMode') === 'true';
-            const devHidedDiv = document.getElementById('dev_hided_div');
+            const devButton = document.getElementById('dev_sub');
 
             if (devMode) {
-                devHidedDiv.style.display = 'block';
+                devButton.style.display = 'flex';
             } else {
-                devHidedDiv.style.display = 'none';
+                devButton.style.display = 'none';
             }
         }
 
@@ -2453,18 +2594,31 @@ function updateServerInfo(data) {
             }
         }
 
+        function displayPlaybackTabToggle() {
+            checked = isDisplayPlaybackToggleChecked()
+            if (checked === true) {
+                showSpMenuDiv();
+            } else {
+                hideSpMenuDiv();
+            }
+        }
+
         // Função para exibir a div
         function showSpMenuDiv() {
-            const spHidedDiv = document.getElementById('sp_hided_div');
-            spHidedDiv.style.display = 'block';
+            const spMenu = document.getElementById('playback_sub');
+            const showPlaybackTabToggle = document.getElementById('displayPlaybackTabToggle');
+            spMenu.style.display = 'flex';
             localStorage.setItem('spMenu', 'true');
+            showPlaybackTabToggle.checked = true;
         }
 
         // Função para ocultar a div
         function hideSpMenuDiv() {
-            const spHidedDiv = document.getElementById('sp_hided_div');
-            spHidedDiv.style.display = 'none';
+            const spMenu = document.getElementById('playback_sub');
+            const showPlaybackTabToggle = document.getElementById('displayPlaybackTabToggle');
+            spMenu.style.display = 'none';
             localStorage.setItem('spMenu', 'false');
+            showPlaybackTabToggle.checked = false;
         }
 
         function showSpShortcuts() {
@@ -2622,3 +2776,274 @@ function updateServerInfo(data) {
             extendedOptions.style.display = 'flex';
         }
     });
+
+
+
+
+
+
+
+    function importDictionary() {
+        // Abre a biblioteca do PC filtrando apenas arquivos JSON
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = '.json';
+    
+        input.onchange = function (event) {
+            const file = event.target.files[0];
+            const reader = new FileReader();
+    
+            reader.onload = function () {
+                try {
+                    const newData = JSON.parse(reader.result);
+    
+                    // Verifica se o arquivo tem a estrutura correta
+                    if (isValidDictionary(newData)) {
+                        let dictionaryCache = localStorage.getItem('dictionaryCache');
+                        if (dictionaryCache) {
+                            dictionaryCache = JSON.parse(dictionaryCache);
+                            // Mescla os dados existentes com os novos dados
+                            for (const lang in newData) {
+                                if (newData.hasOwnProperty(lang)) {
+                                    if (dictionaryCache.hasOwnProperty(lang)) {
+                                        Object.assign(dictionaryCache[lang], newData[lang]);
+                                    } else {
+                                        dictionaryCache[lang] = newData[lang];
+                                    }
+                                }
+                            }
+                        } else {
+                            dictionaryCache = newData;
+                        }
+    
+                        // Salva os dados mesclados em cache
+                        localStorage.setItem('dictionaryCache', JSON.stringify(dictionaryCache));
+                        notification('Dictionary imported successfully!');
+                        updateMemoryUsage()
+                    } else {
+                        notification('The file does not have the correct structure');
+                    }
+                } catch (error) {
+                    notification('Error reading the file');
+                    console.error(error);
+                }
+            };
+    
+            reader.readAsText(file);
+        };
+    
+        input.click();
+    }
+
+    function isValidDictionary(data) {
+        // Verifica se o objeto possui a estrutura correta
+        if (!data || typeof data !== 'object') {
+            return false;
+        }
+    
+        // Verifica se as chaves correspondem a idiomas suportados
+        for (const key of Object.keys(data)) {
+            if (!getLanguageFullName(key)) {
+                return false;
+            }
+        }
+    
+        // Verifica se cada valor dentro do objeto é um par chave-valor simples
+        for (const languageData of Object.values(data)) {
+            for (const value of Object.values(languageData)) {
+                if (typeof value !== 'string') {
+                    return false; // Valor não é uma string
+                }
+            }
+        }
+    
+        return true; // Estrutura válida
+    }
+    
+    function isValidLanguageData(languageData) {
+        // Verifica se cada valor dentro do objeto é uma string
+        for (const key in languageData) {
+            if (typeof languageData[key] !== 'string') {
+                return false; // Valor não é uma string
+            }
+        }
+    
+        return true; // Dados da linguagem válidos
+    }
+
+
+    function exportDictionary() {
+        const dictionaryCache = localStorage.getItem('dictionaryCache');
+    
+        if (dictionaryCache) {
+            const data = JSON.parse(dictionaryCache);
+            const filename = `lf${lf_version}_dictionarybackup_${getCurrentDate()}.json`;
+            const json = JSON.stringify(data, null, 2);
+            const blob = new Blob([json], { type: 'application/json' });
+    
+            // Cria um link temporário para fazer o download do arquivo
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = filename;
+            link.click();
+    
+            notification('Dictionary exported successfully!');
+        } else {
+            notification('No dictionary data found.');
+        }
+    }
+
+    // OBTER DATA ATUAL
+    function getCurrentDate() {
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day = String(now.getDate()).padStart(2, '0');
+        return `${year}${month}${day}`;
+    }
+
+    function deletePreferences() {
+        localStorage.removeItem('localHostToggle');
+        localStorage.removeItem('lfExportToggle');
+        localStorage.removeItem('maxUndoRedoActions');
+        localStorage.removeItem('pasteTransferToggle');
+        localStorage.removeItem('spAutoPlay');
+        localStorage.removeItem('autoCapToggle');
+        localStorage.removeItem('copyTransferToggle');
+        localStorage.removeItem('characterCounterToggle');
+        localStorage.removeItem('forward_list');
+        localStorage.removeItem('rewind_list');
+        localStorage.removeItem('autoFormatToggle');
+        localStorage.removeItem('devMode');
+        localStorage.removeItem('autoSuggestion');
+        localStorage.removeItem('selectedLanguage');
+        addParamToURL('language', 'null')
+
+        updateMemoryUsage()
+        notification('Preferences deleted successfully!');
+    }
+
+    function clearCache() {
+        localStorage.clear();
+        cancelClearCache()
+        updateMemoryUsage()
+        notification('Cache cleared successfully!');
+    }
+
+    // Adiciona um event listener para capturar o clique no corpo do documento
+    document.body.addEventListener('click', function(event) {
+        const confirmPopup = document.querySelector('.confirm_popup');
+        // Verifica se o clique ocorreu fora do popup
+        if (confirmPopup && !confirmPopup.contains(event.target)) {
+            confirmPopup.remove(); // Fecha o popup
+        }
+    });
+
+    function confirmClearCache() {
+        const confirmPopup = document.createElement('div');
+        confirmPopup.innerHTML = `
+            <div class="confirm_popup">
+                <p>Are you sure you want to delete all local data? This can't be undone! 😕</p>
+                <div class="button_container">
+                    <div class="cancel_button" onclick="cancelClearCache()">Cancel</div>
+                    <div class="confirm_button" onclick="clearCache()">Confirm</div>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(confirmPopup);
+    }
+    
+    function cancelClearCache() {
+        const confirmPopup = document.querySelector('.confirm_popup');
+        if (confirmPopup) {
+            confirmPopup.remove();
+        }
+    }
+
+/* ****************************************** */
+
+/* IMPORTAR OU EXPORTAR TODOS OS DADOS EM CACHÊ (OCULTO) */
+    function importCacheData() {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = 'application/json';
+    
+        input.onchange = (event) => {
+            const file = event.target.files[0];
+            if (!file) return;
+    
+            const reader = new FileReader();
+            reader.readAsText(file);
+    
+            reader.onload = (event) => {
+                const data = event.target.result;
+                try {
+                    const parsedData = JSON.parse(data);
+                    for (const key in parsedData) {
+                        localStorage.setItem(key, parsedData[key]);
+                    }
+                    notification('Cache data imported successfully!');
+                    updateMemoryUsage()
+                } catch (error) {
+                    notification('Error importing cache data: Invalid JSON format.');
+                }
+            };
+    
+            reader.onerror = () => {
+                notification('Error reading file.');
+            };
+        };
+    
+        input.click();
+    }
+
+    function exportCacheData() {
+        const cacheData = {};
+        for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            const value = localStorage.getItem(key);
+            cacheData[key] = value;
+        }
+    
+        if (Object.keys(cacheData).length > 0) {
+            const filename = `lf${lf_version}_localdata_${getCurrentDate()}.json`;
+            const json = JSON.stringify(cacheData, null, 2);
+            const blob = new Blob([json], { type: 'application/json' });
+    
+            // Cria um link temporário para fazer o download do arquivo
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = filename;
+            link.click();
+    
+            notification('Cache data exported successfully!');
+        } else {
+            notification('No cache data found.');
+        }
+    }
+
+
+/* ****************************************** */
+
+function updateMemoryUsage() {
+    usage = calculateCacheSize();
+    document.getElementById('memory_usage').textContent = usage;
+}
+
+function calculateCacheSize() {
+    let totalSize = 0;
+    for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        const value = localStorage.getItem(key);
+        totalSize += (key.length + value.length) * 2; // Aproximação do tamanho em bytes
+    }
+
+    // Convertendo bytes para KB ou MB
+    if (totalSize < 1024) {
+        return totalSize.toFixed(2) + ' bytes';
+    } else if (totalSize < 1048576) { // 1024 * 1024 (1 MB)
+        return (totalSize / 1024).toFixed(2) + ' KB';
+    } else {
+        return (totalSize / 1048576).toFixed(2) + ' MB';
+    }
+}
