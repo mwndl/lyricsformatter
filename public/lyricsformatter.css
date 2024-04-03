@@ -484,7 +484,7 @@
     }
   
     #closeButton:hover {
-        background-color: rgb(218, 218, 218);
+        background-color: #d2d2d2;
     }
     
     #closeButton:before,
@@ -622,6 +622,17 @@
         justify-content: flex-start;
         box-sizing: border-box;
     }
+
+    .popup_submenu {
+        height: 10%;
+        width: 100%;
+        padding: 10px;
+        display: flex;
+        text-align: start;
+        align-items: center;
+        justify-content: flex-start;
+        box-sizing: border-box;
+    }
   
     .popup_content {
         height: 90%;
@@ -635,7 +646,7 @@
         box-sizing: border-box;
     }
   
-    .settings_hided_div {
+    .settings_tab {
         width: 100%;
     }
   
@@ -684,6 +695,76 @@
     .error {
         color: red;
     }
+
+    .white_button2 {
+        width: 60px;
+        padding: 10px;
+        font-size: 16px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #000000;
+        background-color: #ffffff;
+    }
+
+    .white_button2:hover {
+        background-color: #d2d2d2;
+    }
+
+    /* delete cache popup */
+
+                /* Estilo para o popup de confirmação */
+            .confirm_popup {
+                width: 250px;
+                font-size: 18px;
+                font-weight: 500;
+                user-select: none;
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background-color: #0f0f0f;
+                color:white;
+                padding: 20px;
+                border-radius: 10px;
+                box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+                z-index: 9999;
+            }
+
+            /* Estilos para os botões dentro do popup */
+            .button_container {
+                margin-top: 35px;
+                display: flex;
+                justify-content: flex-end;
+            }
+
+            .confirm_popup .confirm_button,
+            .confirm_popup .cancel_button {
+                padding: 10px 20px;
+                cursor: pointer;
+                border-radius: 5px;
+            }
+
+            .confirm_button {
+                background-color: #575757;
+                color: white;
+                margin: 0 0 0 7px
+            }
+
+            .confirm_button:hover {
+                background-color: #484848;
+            }
+
+            .cancel_button {
+                background-color: #ffffff;
+                color: rgb(0, 0, 0);
+            }
+
+            .cancel_button:hover {
+                background-color: #d2d2d2;
+            }
+
   
   
     /* Credits */
@@ -1017,7 +1098,6 @@
     }
 
     .language_selector .language_list_div {
-        list-style: none;
         padding: 8px 5px;
         margin: 5px 0 0 0;
         display: none;
@@ -1797,7 +1877,7 @@
     }
   
     .container .content_fix_btn:hover {
-        background-color: rgb(210, 210, 210);
+        background-color: #d2d2d2;
     }
   
     .content_copy_btn {
@@ -1815,7 +1895,7 @@
     }
   
     .container_no_issues .content_copy_btn:hover {
-        background-color: rgb(210, 210, 210);
+        background-color: #d2d2d2;
     }
   
   
@@ -1987,7 +2067,7 @@
     }
     
     .devices_options a:hover {
-        background-color: #ddd;
+        background-color: #d2d2d2;
     }
   
   

@@ -6,8 +6,8 @@ let undoCursorPositionsStack = [];
 var redoCursorPositionsStack = [];
 var maxStackSize = 100;
 
-var lf_version = '2.8.7';
-var lf_release_date = '02/04/2024'
+var lf_version = '2.9.0';
+var lf_release_date = '03/04/2024'
 
 document.addEventListener('DOMContentLoaded', function () {
     var returnArrow = document.getElementById('return_arrow');
@@ -819,6 +819,16 @@ function addToUndoStack() {
             return autoSuggestions.checked;
         }
 
+        function isDisplayImportExportCacheToggleChecked() {
+            const displayImportExportCacheToggle = document.getElementById('displayImportExportCacheToggle');
+            return displayImportExportCacheToggle.checked;
+        }
+
+        function isDisplayPlaybackToggleChecked() {
+            const showPlaybackTabToggle = document.getElementById('displayPlaybackTabToggle');
+            return showPlaybackTabToggle.checked;
+        }
+
         function isMxmPersonalTokenToggleChecked() {
             const mxmTokenToggle = document.getElementById('mxmPersonalTokenToggle');
             return mxmTokenToggle.checked;
@@ -1494,12 +1504,9 @@ function addToUndoStack() {
                 overlay.style.display = "none";
             });
 
-
+            // format e grammar
             const formatButton = document.getElementById('lf_option');
             const grammarButton = document.getElementById('lt_option');
-
-            const keyboardButton = document.getElementById('op_keyboard');
-            const numpadButton = document.getElementById('op_numpad');
 
             formatButton.addEventListener("click", function (event) {
                 showFormatTab()
@@ -1509,6 +1516,33 @@ function addToUndoStack() {
                 showGrammarTab()
             });
 
+            // settings submenus
+            const playbackButton = document.getElementById('playback_sub');
+            const prefButton = document.getElementById('pref_sub');
+            const storageButton = document.getElementById('storage_sub');
+            const DevToolsButton = document.getElementById('dev_sub');
+
+            playbackButton.addEventListener("click", function (event) {
+                showPlaybackTab()
+            });
+
+            prefButton.addEventListener("click", function (event) {
+                showPreferencesTab()
+            });
+
+            storageButton.addEventListener("click", function (event) {
+                showStorageTab()
+            });
+
+            DevToolsButton.addEventListener("click", function (event) {
+                showDevToolsTab()
+            });
+
+
+            // shortcuts: keyboard e numpad
+            const keyboardButton = document.getElementById('op_keyboard');
+            const numpadButton = document.getElementById('op_numpad');
+
             keyboardButton.addEventListener("click", function (event) {
                 showKeyboardTab()
             });
@@ -1516,7 +1550,110 @@ function addToUndoStack() {
             numpadButton.addEventListener("click", function (event) {
                 showNumpadTab()
             });
+
+
         });
+
+        function showPreferencesTab() {
+            const prefButton = document.getElementById('pref_sub');
+            const playbackButton = document.getElementById('playback_sub');
+            const storageButton = document.getElementById('storage_sub');
+            const DevToolsButton = document.getElementById('dev_sub');
+        
+            const prefContainer = document.getElementById('preferences_menu');
+            const playbackContainer = document.getElementById('playback_menu');
+            const storageContainer = document.getElementById('storage_menu');
+            const DevToolsContainer = document.getElementById('devtools_menu');
+        
+            prefButton.className = 'impr_menu_true'
+            playbackButton.className = 'impr_menu_false'
+            storageButton.className = 'impr_menu_false'
+            DevToolsButton.className = 'impr_menu_false'
+        
+            prefContainer.style = 'display:block'
+            playbackContainer.style = 'display:none'
+            storageContainer.style = 'display:none'
+            DevToolsContainer.style = 'display:none'
+
+            resetLineIssues();
+            closeContainers();
+        }
+
+        function showPlaybackTab() {
+            const prefButton = document.getElementById('pref_sub');
+            const playbackButton = document.getElementById('playback_sub');
+            const storageButton = document.getElementById('storage_sub');
+            const DevToolsButton = document.getElementById('dev_sub');
+        
+            const prefContainer = document.getElementById('preferences_menu');
+            const playbackContainer = document.getElementById('playback_menu');
+            const storageContainer = document.getElementById('storage_menu');
+            const DevToolsContainer = document.getElementById('devtools_menu');
+        
+            prefButton.className = 'impr_menu_false'
+            playbackButton.className = 'impr_menu_true'
+            storageButton.className = 'impr_menu_false'
+            DevToolsButton.className = 'impr_menu_false'
+        
+            prefContainer.style = 'display:none'
+            playbackContainer.style = 'display:block'
+            storageContainer.style = 'display:none'
+            DevToolsContainer.style = 'display:none'
+
+            resetLineIssues();
+            closeContainers();
+        }
+
+        function showStorageTab() {
+            const prefButton = document.getElementById('pref_sub');
+            const playbackButton = document.getElementById('playback_sub');
+            const storageButton = document.getElementById('storage_sub');
+            const DevToolsButton = document.getElementById('dev_sub');
+        
+            const prefContainer = document.getElementById('preferences_menu');
+            const playbackContainer = document.getElementById('playback_menu');
+            const storageContainer = document.getElementById('storage_menu');
+            const DevToolsContainer = document.getElementById('devtools_menu');
+        
+            prefButton.className = 'impr_menu_false'
+            playbackButton.className = 'impr_menu_false'
+            storageButton.className = 'impr_menu_true'
+            DevToolsButton.className = 'impr_menu_false'
+        
+            prefContainer.style = 'display:none'
+            playbackContainer.style = 'display:none'
+            storageContainer.style = 'display:block'
+            DevToolsContainer.style = 'display:none'
+
+            resetLineIssues();
+            closeContainers();
+        }
+
+        function showDevToolsTab() {
+            const prefButton = document.getElementById('pref_sub');
+            const playbackButton = document.getElementById('playback_sub');
+            const storageButton = document.getElementById('storage_sub');
+            const DevToolsButton = document.getElementById('dev_sub');
+        
+            const prefContainer = document.getElementById('preferences_menu');
+            const playbackContainer = document.getElementById('playback_menu');
+            const storageContainer = document.getElementById('storage_menu');
+            const DevToolsContainer = document.getElementById('devtools_menu');
+        
+            prefButton.className = 'impr_menu_false'
+            playbackButton.className = 'impr_menu_false'
+            storageButton.className = 'impr_menu_false'
+            DevToolsButton.className = 'impr_menu_true'
+        
+            prefContainer.style = 'display:none'
+            playbackContainer.style = 'display:none'
+            storageContainer.style = 'display:none'
+            DevToolsContainer.style = 'display:block'
+
+            resetLineIssues();
+            closeContainers();
+        }
+
 
 /* ****************************************** */
 
@@ -2361,15 +2498,14 @@ function updateServerInfo(data) {
 
         // Função para exibir/ocultar a div e salvar a escolha em cache
         function displayDevModeDiv() {
-            const devHidedDiv = document.getElementById('dev_hided_div');
+            const devButton = document.getElementById('dev_sub');
             const devMode = localStorage.getItem('devMode') === 'true'; // Obtém o estado atual do modo de desenvolvimento
 
             // Alterna entre exibir e ocultar a div
             if (devMode) {
-                devHidedDiv.style.display = 'none';
+                devButton.style.display = 'none';
             } else {
-                devHidedDiv.style.display = 'block';
-                showSpMenuDiv()
+                devButton.style.display = 'flex';
             }
 
             // Salva a escolha em cache invertendo o valor atual
@@ -2379,12 +2515,23 @@ function updateServerInfo(data) {
         // Carrega a escolha do modo de desenvolvimento do cache e exibe/oculta a div conforme necessário
         function loadDevMode() {
             const devMode = localStorage.getItem('devMode') === 'true';
-            const devHidedDiv = document.getElementById('dev_hided_div');
+            const devButton = document.getElementById('dev_sub');
 
             if (devMode) {
-                devHidedDiv.style.display = 'block';
+                devButton.style.display = 'flex';
             } else {
-                devHidedDiv.style.display = 'none';
+                devButton.style.display = 'none';
+            }
+        }
+
+        function displayImportExportCacheOptions() {
+            permission = isDisplayImportExportCacheToggleChecked()
+            if (permission === true) {
+                document.getElementById('import_cache_div').style.display = 'flex'
+                document.getElementById('export_cache_div').style.display = 'flex'
+            } else {
+                document.getElementById('import_cache_div').style.display = 'none'
+                document.getElementById('export_cache_div').style.display = 'none'
             }
         }
 
@@ -2459,18 +2606,31 @@ function updateServerInfo(data) {
             }
         }
 
+        function displayPlaybackTabToggle() {
+            checked = isDisplayPlaybackToggleChecked()
+            if (checked === true) {
+                showSpMenuDiv();
+            } else {
+                hideSpMenuDiv();
+            }
+        }
+
         // Função para exibir a div
         function showSpMenuDiv() {
-            const spHidedDiv = document.getElementById('sp_hided_div');
-            spHidedDiv.style.display = 'block';
+            const spMenu = document.getElementById('playback_sub');
+            const showPlaybackTabToggle = document.getElementById('displayPlaybackTabToggle');
+            spMenu.style.display = 'flex';
             localStorage.setItem('spMenu', 'true');
+            showPlaybackTabToggle.checked = true;
         }
 
         // Função para ocultar a div
         function hideSpMenuDiv() {
-            const spHidedDiv = document.getElementById('sp_hided_div');
-            spHidedDiv.style.display = 'none';
+            const spMenu = document.getElementById('playback_sub');
+            const showPlaybackTabToggle = document.getElementById('displayPlaybackTabToggle');
+            spMenu.style.display = 'none';
             localStorage.setItem('spMenu', 'false');
+            showPlaybackTabToggle.checked = false;
         }
 
         function showSpShortcuts() {
@@ -2628,3 +2788,182 @@ function updateServerInfo(data) {
             extendedOptions.style.display = 'flex';
         }
     });
+
+
+
+
+
+
+
+    function importDictionary() {
+        // Abre a biblioteca do PC filtrando apenas arquivos JSON
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = '.json';
+    
+        input.onchange = function (event) {
+            const file = event.target.files[0];
+            const reader = new FileReader();
+    
+            reader.onload = function () {
+                try {
+                    const newData = JSON.parse(reader.result);
+    
+                    // Verifica se o arquivo tem a estrutura correta
+                    if (isValidDictionary(newData)) {
+                        let dictionaryCache = localStorage.getItem('dictionaryCache');
+                        if (dictionaryCache) {
+                            dictionaryCache = JSON.parse(dictionaryCache);
+                            // Mescla os dados existentes com os novos dados
+                            for (const lang in newData) {
+                                if (newData.hasOwnProperty(lang)) {
+                                    if (dictionaryCache.hasOwnProperty(lang)) {
+                                        Object.assign(dictionaryCache[lang], newData[lang]);
+                                    } else {
+                                        dictionaryCache[lang] = newData[lang];
+                                    }
+                                }
+                            }
+                        } else {
+                            dictionaryCache = newData;
+                        }
+    
+                        // Salva os dados mesclados em cache
+                        localStorage.setItem('dictionaryCache', JSON.stringify(dictionaryCache));
+                        notification('Dictionary imported successfully!');
+                    } else {
+                        notification('The file does not have the correct structure');
+                    }
+                } catch (error) {
+                    notification('Error reading the file');
+                    console.error(error);
+                }
+            };
+    
+            reader.readAsText(file);
+        };
+    
+        input.click();
+    }
+
+    function isValidDictionary(data) {
+        // Verifica se o objeto possui a estrutura correta
+        if (!data || typeof data !== 'object') {
+            return false;
+        }
+    
+        // Verifica se as chaves correspondem a idiomas suportados
+        for (const key of Object.keys(data)) {
+            if (!getLanguageFullName(key)) {
+                return false;
+            }
+        }
+    
+        // Verifica se cada valor dentro do objeto é um par chave-valor simples
+        for (const languageData of Object.values(data)) {
+            for (const value of Object.values(languageData)) {
+                if (typeof value !== 'string') {
+                    return false; // Valor não é uma string
+                }
+            }
+        }
+    
+        return true; // Estrutura válida
+    }
+    
+    function isValidLanguageData(languageData) {
+        // Verifica se cada valor dentro do objeto é uma string
+        for (const key in languageData) {
+            if (typeof languageData[key] !== 'string') {
+                return false; // Valor não é uma string
+            }
+        }
+    
+        return true; // Dados da linguagem válidos
+    }
+
+
+    function exportDictionary() {
+        const dictionaryCache = localStorage.getItem('dictionaryCache');
+    
+        if (dictionaryCache) {
+            const data = JSON.parse(dictionaryCache);
+            const filename = `lf${lf_version}_dictionarybackup_${getCurrentDate()}.json`;
+            const json = JSON.stringify(data, null, 2);
+            const blob = new Blob([json], { type: 'application/json' });
+    
+            // Cria um link temporário para fazer o download do arquivo
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = filename;
+            link.click();
+    
+            notification('Dictionary exported successfully!');
+        } else {
+            notification('No dictionary data found.');
+        }
+    }
+    
+    function getCurrentDate() {
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day = String(now.getDate()).padStart(2, '0');
+        return `${year}${month}${day}`;
+    }
+
+    function deletePreferences() {
+        localStorage.removeItem('localHostToggle');
+        localStorage.removeItem('lfExportToggle');
+        localStorage.removeItem('maxUndoRedoActions');
+        localStorage.removeItem('autoSuggestions');
+        localStorage.removeItem('pasteTransferToggle');
+        localStorage.removeItem('spAutoPlay');
+        localStorage.removeItem('autoCapToggle');
+        localStorage.removeItem('copyTransferToggle');
+        localStorage.removeItem('characterCounterToggle');
+        localStorage.removeItem('forward_list');
+        localStorage.removeItem('rewind_list');
+        localStorage.removeItem('autoSuggestion');
+        localStorage.removeItem('autoFormatToggle');
+        localStorage.removeItem('rewind_list');
+
+
+        notification('Preferences deleted successfully!');
+    }
+
+    function clearCache() {
+        localStorage.clear();
+        cancelClearCache()
+        notification('Cache cleared successfully!');
+    }
+
+    // Adiciona um event listener para capturar o clique no corpo do documento
+    document.body.addEventListener('click', function(event) {
+        const confirmPopup = document.querySelector('.confirm_popup');
+        // Verifica se o clique ocorreu fora do popup
+        if (confirmPopup && !confirmPopup.contains(event.target)) {
+            confirmPopup.remove(); // Fecha o popup
+        }
+    });
+
+    function confirmClearCache() {
+        const confirmPopup = document.createElement('div');
+        confirmPopup.innerHTML = `
+            <div class="confirm_popup">
+                <p>Are you sure you want to delete all local data? This can't be undone! 😕</p>
+                <div class="button_container">
+                    <div class="cancel_button" onclick="cancelClearCache()">Cancel</div>
+                    <div class="confirm_button" onclick="clearCache()">Confirm</div>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(confirmPopup);
+    }
+    
+    function cancelClearCache() {
+        const confirmPopup = document.querySelector('.confirm_popup');
+        if (confirmPopup) {
+            confirmPopup.remove();
+        }
+    }
