@@ -6,7 +6,7 @@ let undoCursorPositionsStack = [];
 var redoCursorPositionsStack = [];
 var maxStackSize = 100;
 
-var lf_version = '2.9.2';
+var lf_version = '2.9.3';
 var lf_release_date = '03/04/2024'
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -187,6 +187,7 @@ document.addEventListener('DOMContentLoaded', function () {
         checkDeviceType();
         displayTokenField()
         addToUndoStack(); // add o texto vazio como undo inicial
+        updateMemoryUsage();
 
     
     // Adicione um evento de clique ao botão de cópia
@@ -512,7 +513,7 @@ function addToUndoStack() {
                 selectedLanguageCode === 'en-US' || selectedLanguageCode === 'en-GB'|| 
                 selectedLanguageCode === 'es' || selectedLanguageCode === 'it'||
                 selectedLanguageCode === 'fr') {
-                    fixPunctuation1();
+                    fixPunctuation();
                 }
 
                 replaceSpecialTags(); // auto replace tags
@@ -522,6 +523,7 @@ function addToUndoStack() {
                 addSpaceAboveTags(); // add (caso não haja) espaços acima de todas as tags
                 removeSpacesAroundInstrumental(); // espaços ao redor de tags instrumentais
                 trimEditorContent(); // linhas antes ou depois da letra (2)
+                removeEOL(); // remove pontuações EOL
                 autoTrim(); // espaços extras no início ou fim 
                 removeDuplicateSpaces(); // espaços duplos entre palavras
                 removeDuplicateEmptyLines(); // linhas vazias duplicadas entre estrofes
@@ -810,11 +812,6 @@ function addToUndoStack() {
             return autoSuggestions.checked;
         }
 
-        function isDisplayImportExportCacheToggleChecked() {
-            const displayImportExportCacheToggle = document.getElementById('displayImportExportCacheToggle');
-            return displayImportExportCacheToggle.checked;
-        }
-
         function isDisplayPlaybackToggleChecked() {
             const showPlaybackTabToggle = document.getElementById('displayPlaybackTabToggle');
             return showPlaybackTabToggle.checked;
@@ -1095,7 +1092,7 @@ function addToUndoStack() {
         }
 
         // corretor padrão
-        function fixPunctuation1() {
+        function fixPunctuation() {
             var editor = document.getElementById('editor');
             var content = editor.value;
         
@@ -1123,6 +1120,16 @@ function addToUndoStack() {
             editor.value = content;
         }
 
+        function removeEOL() {
+            var editor = document.getElementById('editor');
+            var content = editor.value;
+        
+            // Remove pontuações específicas no final das linhas
+            content = content.replace(/[:.,(;]+\s*$/gm, '');
+        
+            // Atualizar o conteúdo do editor
+            editor.value = content;
+        }
 
 /* ****************************************** */
 
@@ -1522,7 +1529,8 @@ function addToUndoStack() {
             });
 
             storageButton.addEventListener("click", function (event) {
-                showStorageTab()
+                showStorageTab();
+                updateMemoryUsage();
             });
 
             DevToolsButton.addEventListener("click", function (event) {
@@ -1975,18 +1983,18 @@ function updateTabCounters() {
             // Remove os colchetes dos termos
             const cleanIncorrectTerm = incorrectTerm.replace(/\[|\]/g, '');
             const cleanCorrection = correction.replace(/\[|\]/g, '');
-
+        
             // Obtém o conteúdo do textarea com ID 'editor'
             const editor = document.getElementById('editor');
             let content = editor.value;
-
+        
             // Escapa caracteres especiais da palavra de busca
             const escapedTerm = cleanIncorrectTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-
+        
             // Substitui todas as ocorrências de incorrectTerm por correction
-            const regex = new RegExp('(^|\\s|[,.;:!?\\-¿¡])' + escapedTerm + '(?=\\s|[,.;:!?\\-¿¡]|$)', 'g');
+            const regex = new RegExp('(^|\\s|[,.;:!?\\-¿¡(])' + escapedTerm + '(?=\\s|[,.;:!?\\-¿¡)\\-]|$)', 'g');
             content = content.replace(regex, '$1' + cleanCorrection);
-
+        
             // Define o conteúdo do textarea como o texto modificado
             editor.value = content;
         }
@@ -2515,17 +2523,6 @@ function updateServerInfo(data) {
             }
         }
 
-        function displayImportExportCacheOptions() {
-            permission = isDisplayImportExportCacheToggleChecked()
-            if (permission === true) {
-                document.getElementById('import_cache_div').style.display = 'flex'
-                document.getElementById('export_cache_div').style.display = 'flex'
-            } else {
-                document.getElementById('import_cache_div').style.display = 'none'
-                document.getElementById('export_cache_div').style.display = 'none'
-            }
-        }
-
 /* ****************************************** */
 
 /* REDIRECTIONAR O USUÁRIO AUTOMATICAMENTE PARA A ATENTICAÇÃO NO CASO DE PARAMETROS TRACK ID NA URL */
@@ -2822,6 +2819,7 @@ function updateServerInfo(data) {
                         // Salva os dados mesclados em cache
                         localStorage.setItem('dictionaryCache', JSON.stringify(dictionaryCache));
                         notification('Dictionary imported successfully!');
+                        updateMemoryUsage()
                     } else {
                         notification('The file does not have the correct structure');
                     }
@@ -2908,7 +2906,6 @@ function updateServerInfo(data) {
         localStorage.removeItem('localHostToggle');
         localStorage.removeItem('lfExportToggle');
         localStorage.removeItem('maxUndoRedoActions');
-        localStorage.removeItem('autoSuggestions');
         localStorage.removeItem('pasteTransferToggle');
         localStorage.removeItem('spAutoPlay');
         localStorage.removeItem('autoCapToggle');
@@ -2916,17 +2913,20 @@ function updateServerInfo(data) {
         localStorage.removeItem('characterCounterToggle');
         localStorage.removeItem('forward_list');
         localStorage.removeItem('rewind_list');
-        localStorage.removeItem('autoSuggestion');
         localStorage.removeItem('autoFormatToggle');
-        localStorage.removeItem('rewind_list');
+        localStorage.removeItem('devMode');
+        localStorage.removeItem('autoSuggestion');
+        localStorage.removeItem('selectedLanguage');
+        addParamToURL('language', 'null')
 
-
+        updateMemoryUsage()
         notification('Preferences deleted successfully!');
     }
 
     function clearCache() {
         localStorage.clear();
         cancelClearCache()
+        updateMemoryUsage()
         notification('Cache cleared successfully!');
     }
 
@@ -2983,6 +2983,7 @@ function updateServerInfo(data) {
                         localStorage.setItem(key, parsedData[key]);
                     }
                     notification('Cache data imported successfully!');
+                    updateMemoryUsage()
                 } catch (error) {
                     notification('Error importing cache data: Invalid JSON format.');
                 }
@@ -3023,3 +3024,26 @@ function updateServerInfo(data) {
 
 
 /* ****************************************** */
+
+function updateMemoryUsage() {
+    usage = calculateCacheSize();
+    document.getElementById('memory_usage').textContent = usage;
+}
+
+function calculateCacheSize() {
+    let totalSize = 0;
+    for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        const value = localStorage.getItem(key);
+        totalSize += (key.length + value.length) * 2; // Aproximação do tamanho em bytes
+    }
+
+    // Convertendo bytes para KB ou MB
+    if (totalSize < 1024) {
+        return totalSize.toFixed(2) + ' bytes';
+    } else if (totalSize < 1048576) { // 1024 * 1024 (1 MB)
+        return (totalSize / 1024).toFixed(2) + ' KB';
+    } else {
+        return (totalSize / 1048576).toFixed(2) + ' MB';
+    }
+}

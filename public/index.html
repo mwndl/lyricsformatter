@@ -560,45 +560,53 @@
             <div class="settings_tab" id="storage_menu" style="display:none">
                 <div class="popup_option">
                     <div class="popup_title">
-                        <p class="popup_option_title">Import dictionary</p>
-                        <p class="popup_option_description">Import a JSON file with data to be imported into your dictionary</p>
-                    </div>
-                    <div class="white_button2" id="import_dictionary" onclick="importDictionary()">Import</div> 
-                </div>
-                <div class="popup_option">
-                    <div class="popup_title">
                         <p class="popup_option_title">Export dictionary</p>
                         <p class="popup_option_description">Export all saved data from your local dictionary</p>
                     </div>
                     <div class="white_button2" id="export_dictionary" onclick="exportDictionary()">Export</div> 
                 </div>
-                <div class="popup_option" id="import_cache_div" style="display:none">
+                <div class="popup_option">
+                    <div class="popup_title">
+                        <p class="popup_option_title">Import dictionary</p>
+                        <p class="popup_option_description">Import a JSON file with data to be imported into your dictionary</p>
+                    </div>
+                    <div class="white_button2" id="import_dictionary" onclick="importDictionary()">Import</div> 
+                </div>
+                <hr style="border-top: 1px solid rgb(100, 100, 100); border-right: none; border-bottom: none; border-left: none; border-image: initial; margin: 9px 0;">
+                <div class="popup_option">
+                    <div class="popup_title">
+                        <p class="popup_option_title">Reset preferences</p>
+                        <p class="popup_option_description">Reset all preferences to default</p>
+                    </div>
+                    <div class="white_button2" id="delete_data" onclick="deletePreferences()">Reset</div>
+                </div>
+                <div class="popup_option" id="export_cache_div">
+                    <div class="popup_title">
+                        <p class="popup_option_title">Export local storage file<span class="info_icon">ⓘ</span></p>
+                        <p class="popup_option_description">Export all local data stored on this site (including tokens)</p>
+                    </div>
+                    <div class="white_button2" id="export_dictionary" onclick="exportCacheData()">Export</div> 
+                </div>
+                <div class="popup_option" id="import_cache_div">
                     <div class="popup_title">
                         <p class="popup_option_title">Import local storage file</p>
                         <p class="popup_option_description">Import and replace all cached data</p>
                     </div>
                     <div class="white_button2" id="export_dictionary" onclick="importCacheData()">Import</div> 
                 </div>
-                <div class="popup_option" id="export_cache_div" style="display:none">
+                <hr style="border-top: 1px solid rgb(100, 100, 100); border-right: none; border-bottom: none; border-left: none; border-image: initial; margin: 9px 0;">
+                <div class="popup_option">
                     <div class="popup_title">
-                        <p class="popup_option_title">Export local storage file</p>
-                        <p class="popup_option_description">Export all cached data (including tokens and dictionaries), do not share this with anyone!</p>
+                        <p class="popup_option_title">Memory usage</p>
                     </div>
-                    <div class="white_button2" id="export_dictionary" onclick="exportCacheData()">Export</div> 
-                </div>
-                <div class="popup_option" style="display:none">
-                    <div class="popup_title">
-                        <p class="popup_option_title">Reset preferences</p>
-                        <p class="popup_option_description">Reset all preferences to default</p>
-                    </div>
-                    <div class="white_button2" id="delete_data" clearCache()>Reset</div>
+                    <div class="right_side_text" id="memory_usage" onclick="updateMemoryUsage()">-</div>
                 </div>
                 <div class="popup_option">
                     <div class="popup_title">
                         <p class="popup_option_title">Delete all local data</p>
                         <p class="popup_option_description">This will delete all data from your browser, including your dictionary, be sure to keep a backup</p>
                     </div>
-                    <div class="white_button2" id="delete_data" onclick="confirmClearCache()">Reset</div>
+                    <div class="black_button2" id="delete_data" onclick="confirmClearCache()">Reset</div>
                 </div>
             </div>
             <div class="settings_tab" id="devtools_menu" style="display:none">
@@ -609,16 +617,6 @@
                     </div>
                     <label class="switch">
                         <input type="checkbox" id="displayPlaybackTabToggle" onclick="displayPlaybackTabToggle()">
-                        <span class="slider round"></span>
-                    </label>
-                </div>
-                <div class="popup_option">
-                    <div class="popup_title">
-                        <p class="popup_option_title">Import/Export all data toggles</p>
-                        <p class="popup_option_description">Show import and export options for all cached data (including tokens), this data can never be shared!</p>
-                    </div>
-                    <label class="switch">
-                        <input type="checkbox" id="displayImportExportCacheToggle" onclick="displayImportExportCacheOptions()">
                         <span class="slider round"></span>
                     </label>
                 </div>

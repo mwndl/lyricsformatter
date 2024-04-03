@@ -696,6 +696,55 @@
         color: red;
     }
 
+    .info_icon {
+        margin-left: 5px;
+        position: relative;
+        cursor: pointer;
+        font-weight: 300;
+    }
+
+
+    .popup_option_title .info_icon:hover::after {
+        content: "do not share, may include sensitive data!";
+        position: absolute;
+        background-color: #f9f9f9;
+        color: #333;
+        padding: 5px 8px;
+        border-radius: 6px;
+        font-size: 12px;
+        bottom: 100%;
+        left: 50%;
+        transform: translateX(-50%);
+        white-space: nowrap;
+        z-index: 1;
+    }
+
+    .right_side_text {
+        width: 80px;
+        height: 100%;
+        font-size: 16px;
+        display: flex;
+        text-align: center;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .black_button2 {
+        width: 60px;
+        padding: 10px;
+        font-size: 16px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #ffffff;
+        background-color: #000000;
+    } 
+
+    .black_button2:hover {
+        background-color: #090909;
+    }
+
     .white_button2 {
         width: 60px;
         padding: 10px;
