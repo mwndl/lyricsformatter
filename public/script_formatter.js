@@ -6,7 +6,7 @@ let undoCursorPositionsStack = [];
 var redoCursorPositionsStack = [];
 var maxStackSize = 100;
 
-var lf_version = '2.9.0';
+var lf_version = '2.9.1';
 var lf_release_date = '03/04/2024'
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -280,16 +280,7 @@ document.addEventListener('DOMContentLoaded', function () {
         } else if ((event.ctrlKey || event.metaKey) && event.shiftKey && (event.key === 'Z' || event.key === 'z')) { // refazer
             event.preventDefault();
             redo();
-        } else if ((event.ctrlKey || event.metaKey) && (event.key === 'C' || event.key === 'c') && !isEditorFocused && !isMxmTokenFieldFocused) {
-            event.preventDefault();
-            copyToClipboard();
-        } else if ((event.ctrlKey || event.metaKey) && (event.key === 'V' || event.key === 'v') && !isEditorFocused && !isMxmTokenFieldFocused) {
-            event.preventDefault();
-            pasteFromClipboard();
-        } else if ((event.ctrlKey || event.metaKey) && (event.key === 'X' || event.key === 'x') && !isEditorFocused && !isMxmTokenFieldFocused) {
-            event.preventDefault();
-            resetTranscription();
-        }
+        } 
     });
 });
 
