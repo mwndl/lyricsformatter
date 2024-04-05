@@ -6,7 +6,7 @@ let undoCursorPositionsStack = [];
 var redoCursorPositionsStack = [];
 var maxStackSize = 100;
 
-var lf_version = '2.10.0';
+var lf_version = '2.11.0';
 var lf_release_date = '05/04/2024'
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -123,9 +123,11 @@ document.addEventListener('DOMContentLoaded', function () {
     
         if (isAutoSuggestionsChecked()) {
             clearTimeout(typingTimer);
-
             typingTimer = setTimeout(autoSuggestion, doneTypingInterval);
         }
+
+        clearTimeout(typingTimer);
+        typingTimer = setTimeout(autoSave, doneTypingInterval);
     }
 
 
@@ -188,12 +190,15 @@ document.addEventListener('DOMContentLoaded', function () {
         displayTokenField()
         addToUndoStack(); // add o texto vazio como undo inicial
         updateMemoryUsage();
+        draftsCounter()
+        checkExpiredDrafts();
 
     
     // Adicione um evento de clique ao botão de cópia
     var copyButton = document.querySelector('.content_copy_btn');
     if (copyButton) {
         copyButton.addEventListener('click', function() {
+            saveDraft()
             copyToClipboard();
             resetTranscription();
         });
@@ -281,11 +286,15 @@ document.addEventListener('DOMContentLoaded', function () {
         } else if ((event.ctrlKey || event.metaKey) && event.shiftKey && (event.key === 'Z' || event.key === 'z')) { // refazer
             event.preventDefault();
             redo();
+        } else if ((event.ctrlKey || event.metaKey) && !event.shiftKey && (event.key === 'S' || event.key === 's')) { // salvar rascunho
+            event.preventDefault();
+            saveDraft();
         } else if ((event.ctrlKey || event.metaKey) && event.shiftKey && (event.key === 'E' || event.key === 'e')) {
             event.preventDefault();
             addOrRemoveParentheses()
         }
     });
+
 });
 
 /* FUNÇÕES PARA DESFAZER E REFAZER ALTERAÇÕES */
@@ -309,6 +318,7 @@ function undo() {
 
     updateSidebar();
     updateTabCounters();
+    saveDraft();
 }
 
 // função refazer ação
@@ -337,6 +347,7 @@ function redo() {
         // atualizar a barra lateral
         updateSidebar();
         updateTabCounters();
+        saveDraft();
     }
 }
 
@@ -1582,12 +1593,6 @@ function addToUndoStack() {
                 overlay.style.display = "block";
             });
 
-            // Hide Settings
-            overlay.addEventListener("click", function () {
-                settingsPopup.style.display = "none";
-                overlay.style.display = "none";
-            });
-
             // Show Credits
             creditsOption.addEventListener("click", function () {
                 miniMenu.style.display = "none";
@@ -1595,23 +1600,11 @@ function addToUndoStack() {
                 overlay.style.display = "block";
             });
 
-            // Hide Credits
-            overlay.addEventListener("click", function () {
-                creditsPopup.style.display = "none";
-                overlay.style.display = "none";
-            });
-
             // Show Suggestions
             shortcutsOption.addEventListener("click", function () {
                 miniMenu.style.display = "none";
                 shortcutsPopup.style.display = "block";
                 overlay.style.display = "block";
-            });
-
-            // Hide Suggestions
-            overlay.addEventListener("click", function () {
-                shortcutsPopup.style.display = "none";
-                overlay.style.display = "none";
             });
 
             // Show About Info
@@ -1623,8 +1616,12 @@ function addToUndoStack() {
 
             // Hide About Info
             overlay.addEventListener("click", function () {
+                settingsPopup.style.display = "none";
+                creditsPopup.style.display = "none";
+                shortcutsPopup.style.display = "none";
                 aboutPopup.style.display = "none";
                 overlay.style.display = "none";
+                discardDraft()
             });
 
             // format e grammar
@@ -1656,6 +1653,7 @@ function addToUndoStack() {
             storageButton.addEventListener("click", function (event) {
                 showStorageTab();
                 updateMemoryUsage();
+                draftsCounter()
             });
 
             DevToolsButton.addEventListener("click", function (event) {
@@ -3032,8 +3030,10 @@ function updateServerInfo(data) {
         localStorage.removeItem('autoCapToggle');
         localStorage.removeItem('copyTransferToggle');
         localStorage.removeItem('characterCounterToggle');
-        localStorage.removeItem('forward_list');
-        localStorage.removeItem('rewind_list');
+        localStorage.removeItem('forwardValue');
+        localStorage.removeItem('rewindValue');
+        localStorage.removeItem('draftDuration');
+        localStorage.removeItem('draftLimit');
         localStorage.removeItem('autoFormatToggle');
         localStorage.removeItem('devMode');
         localStorage.removeItem('autoSuggestion');
@@ -3048,6 +3048,7 @@ function updateServerInfo(data) {
         localStorage.clear();
         cancelClearCache()
         updateMemoryUsage()
+        draftsCounter()
         notification('Cache cleared successfully!');
     }
 
@@ -3105,6 +3106,7 @@ function updateServerInfo(data) {
                     }
                     notification('Cache data imported successfully!');
                     updateMemoryUsage()
+                    draftsCounter()
                 } catch (error) {
                     notification('Error importing cache data: Invalid JSON format.');
                 }
@@ -3151,6 +3153,19 @@ function updateMemoryUsage() {
     document.getElementById('memory_usage').textContent = usage;
 }
 
+function draftsCounter() {
+    var localDrafts = localStorage.getItem('localDrafts');
+    var totalLimit = localStorage.getItem('draftLimit');
+    var counter = 0;
+
+    if (localDrafts) {
+        var draftsObject = JSON.parse(localDrafts);
+        counter = Object.keys(draftsObject).length;
+    }
+
+    document.getElementById('drafts_counter').textContent = `${counter} / ${totalLimit}`;
+}
+
 function calculateCacheSize() {
     let totalSize = 0;
     for (let i = 0; i < localStorage.length; i++) {
@@ -3193,4 +3208,163 @@ function showSettingsMenu() {
     
     // Substituindo o conteúdo da settings_tab pelo conteúdo original
     document.querySelector('.settings_tab').innerHTML = originalContent;
+}
+
+
+/* DRAFTS */
+
+function checkExpiredDrafts() {
+    var draftDuration = localStorage.getItem('draftDuration');
+    if (!draftDuration) {
+        return; // Se não houver configuração de duração, não faz nada
+    }
+    draftDuration = parseInt(draftDuration);
+
+    var localDrafts = localStorage.getItem('localDrafts');
+    if (!localDrafts) {
+        return; // Não há rascunhos salvos
+    }
+
+    var draftsObject = JSON.parse(localDrafts);
+    var currentDateTime = new Date();
+
+    for (var key in draftsObject) {
+        if (draftsObject.hasOwnProperty(key)) {
+            var draftDateTime = new Date(draftsObject[key].datetime);
+            var diffTime = Math.abs(currentDateTime - draftDateTime);
+            var diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+            if (diffDays > draftDuration) {
+                delete draftsObject[key];
+            }
+        }
+    }
+
+    // Atualiza os rascunhos no localStorage
+    localStorage.setItem('localDrafts', JSON.stringify(draftsObject));
+}
+
+function saveDraft() {
+    var editorValue = document.getElementById('editor').value;
+    var draftStatus = document.getElementById('draft_status');
+
+    if (editorValue === '') {
+        return;
+    }
+
+    if (currentSongId === '' || currentIsrc === '') {
+        notification("Missing track data, unable to save draft");
+        return;
+    }
+
+    draftStatus.textContent = 'Saving draft...';
+
+    // Verifica se há algum draft salvo
+    var localDrafts = localStorage.getItem('localDrafts');
+    var draftsObject = localDrafts ? JSON.parse(localDrafts) : {};
+
+    // Adiciona data e hora atual
+    var currentDateTime = new Date().toISOString();
+
+    // Atualiza ou adiciona o draft atual
+    draftsObject[currentIsrc] = {
+        "track_name": trackName,
+        "artist_name": artistName,
+        "track_id": currentSongId,
+        "datetime": currentDateTime,
+        "transcription": editorValue
+    };
+
+    // Verifica o limite de rascunhos
+    var draftLimit = localStorage.getItem('draftLimit') || 100; // Limite padrão se não estiver definido
+    draftLimit = parseInt(draftLimit);
+
+    var draftKeys = Object.keys(draftsObject);
+    if (draftKeys.length > draftLimit) {
+        // Encontra o item mais antigo com base na datetime
+        var oldestKey = draftKeys.reduce(function (a, b) {
+            return draftsObject[a].datetime < draftsObject[b].datetime ? a : b;
+        });
+
+        // Exclui o item mais antigo
+        delete draftsObject[oldestKey];
+    }
+
+    // Salva o draft no localStorage
+    localStorage.setItem('localDrafts', JSON.stringify(draftsObject));
+    // Define a função para atualizar o textContent após 1.5 segundos
+    setTimeout(function () {
+        draftStatus.textContent = 'Draft saved';
+    }, 1500);
+
+    // Define a função para atualizar o textContent após 1.5 segundos
+    setTimeout(function () {
+        draftStatus.textContent = '';
+    }, 5000);
+}
+
+function recoverDraft() {
+    var localDrafts = localStorage.getItem('localDrafts');
+    var draftsObject = localDrafts ? JSON.parse(localDrafts) : {};
+
+    var currentDraft = draftsObject[currentIsrc];
+
+    if (currentDraft && currentDraft.transcription) {
+        // Exibindo o popup
+        document.getElementById('draft_content').style.display = 'flex';
+        document.getElementById('overlay').style.display = 'block';
+
+        // Exibir a data se estiver disponível
+        if (currentDraft.datetime) {
+            var draftSavedDate = new Date(currentDraft.datetime);
+            var formattedDate = draftSavedDate.toLocaleString(); // Você pode personalizar o formato conforme necessário
+            document.getElementById('draft_saved_date').textContent = "Saved on: " + formattedDate;
+        }
+    }
+}
+function recoverConfirmed() {
+    var localDrafts = localStorage.getItem('localDrafts');
+    var draftsObject = localDrafts ? JSON.parse(localDrafts) : {};
+    var currentDraft = draftsObject[currentIsrc];
+
+    // Recuperando o rascunho
+    document.getElementById('editor').value = currentDraft.transcription;
+    notification("Draft successfully recovered!");
+
+    updateSidebar()
+    // Escondendo o popup
+    document.getElementById('draft_content').style.display = 'none';
+    document.getElementById('overlay').style.display = 'none';
+}
+
+function discardDraft() {
+    // Descartando o rascunho
+    notification("Draft discarded");
+
+    // Escondendo o popup
+    document.getElementById('draft_content').style.display = 'none';
+    document.getElementById('overlay').style.display = 'none';
+}
+
+// Adicionar event listener para clicar fora do draft_content
+document.addEventListener('click', function(event) {
+    var draftContent = document.getElementById('draft_content');
+    var overlay = document.getElementById('overlay');
+
+    // Verificar se o clique não está dentro de draft_content
+    if (!draftContent.contains(event.target)) {
+        // Descartar o rascunho
+        discardDraft();
+    }
+});
+
+function autoSave() {
+    const editor = document.getElementById('editor');
+    const content = editor.value;
+
+    if (content.trim() === '') {
+        return;
+    } else {
+        saveDraft()
+    }
 }
