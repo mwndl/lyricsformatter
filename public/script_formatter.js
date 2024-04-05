@@ -6,7 +6,7 @@ let undoCursorPositionsStack = [];
 var redoCursorPositionsStack = [];
 var maxStackSize = 100;
 
-var lf_version = '2.11.0';
+var lf_version = '2.11.1';
 var lf_release_date = '05/04/2024'
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -108,6 +108,7 @@ document.addEventListener('DOMContentLoaded', function () {
             'pasteTransferToggle',
             'autoCapToggle',
             'autoFormatToggle',
+            'saveDraft',
             'mxmPersonalTokenToggle',
             'autoSuggestion',
             'localHostToggle'
@@ -126,8 +127,10 @@ document.addEventListener('DOMContentLoaded', function () {
             typingTimer = setTimeout(autoSuggestion, doneTypingInterval);
         }
 
-        clearTimeout(typingTimer);
-        typingTimer = setTimeout(autoSave, doneTypingInterval);
+        if (isDraftChecked()) {
+            clearTimeout(typingTimer);
+            typingTimer = setTimeout(autoSave, doneTypingInterval);
+        }
     }
 
 
@@ -198,7 +201,9 @@ document.addEventListener('DOMContentLoaded', function () {
     var copyButton = document.querySelector('.content_copy_btn');
     if (copyButton) {
         copyButton.addEventListener('click', function() {
-            saveDraft()
+            if (isDraftChecked()) {
+                saveDraft();
+            }
             copyToClipboard();
             resetTranscription();
         });
@@ -288,7 +293,11 @@ document.addEventListener('DOMContentLoaded', function () {
             redo();
         } else if ((event.ctrlKey || event.metaKey) && !event.shiftKey && (event.key === 'S' || event.key === 's')) { // salvar rascunho
             event.preventDefault();
-            saveDraft();
+            if (isDraftChecked()) {
+                saveDraft();
+            } else {
+                notification('Please enable the "Local Draft" toggle in the settings')
+            }
         } else if ((event.ctrlKey || event.metaKey) && event.shiftKey && (event.key === 'E' || event.key === 'e')) {
             event.preventDefault();
             addOrRemoveParentheses()
@@ -318,7 +327,9 @@ function undo() {
 
     updateSidebar();
     updateTabCounters();
-    saveDraft();
+    if (isDraftChecked()) {
+        saveDraft();
+    }
 }
 
 // função refazer ação
@@ -347,7 +358,10 @@ function redo() {
         // atualizar a barra lateral
         updateSidebar();
         updateTabCounters();
-        saveDraft();
+
+        if (isDraftChecked()) {
+            saveDraft();
+        }
     }
 }
 
@@ -926,8 +940,13 @@ function addToUndoStack() {
         function isAutoFormatChecked() {
             const autoFormatToggle = document.getElementById('autoFormatToggle');
             return autoFormatToggle.checked;
-        }
+        } 
         
+        function isDraftChecked() {
+            const saveDraft = document.getElementById('saveDraft');
+            return saveDraft.checked;
+        }
+
         function isAutoSuggestionsChecked() {
             const autoSuggestions = document.getElementById('autoSuggestion');
             return autoSuggestions.checked;
@@ -1496,6 +1515,7 @@ function addToUndoStack() {
                 'pasteTransferToggle',
                 'autoCapToggle',
                 'autoFormatToggle',
+                'saveDraft',
                 'mxmPersonalTokenToggle',
                 'autoSuggestion',
                 'localHostToggle'
@@ -1509,7 +1529,7 @@ function addToUndoStack() {
                     checkbox.checked = JSON.parse(checkboxState);
                 } else {
                     // Se não houver informação em cache, defina os estados padrão
-                    if (checkboxId === 'autoCapToggle' || checkboxId === 'autoFormatToggle') {
+                    if (checkboxId === 'autoCapToggle' || checkboxId === 'autoFormatToggle' || checkboxId === 'saveDraft') {
                         checkbox.checked = true; // Ativado
                     } else {
                         checkbox.checked = false; // Desativado
@@ -1621,7 +1641,6 @@ function addToUndoStack() {
                 shortcutsPopup.style.display = "none";
                 aboutPopup.style.display = "none";
                 overlay.style.display = "none";
-                discardDraft()
             });
 
             // format e grammar
@@ -3035,6 +3054,7 @@ function updateServerInfo(data) {
         localStorage.removeItem('draftDuration');
         localStorage.removeItem('draftLimit');
         localStorage.removeItem('autoFormatToggle');
+        localStorage.removeItem('saveDraft');
         localStorage.removeItem('devMode');
         localStorage.removeItem('autoSuggestion');
         localStorage.removeItem('selectedLanguage');
@@ -3312,7 +3332,7 @@ function recoverDraft() {
     if (currentDraft && currentDraft.transcription) {
         // Exibindo o popup
         document.getElementById('draft_content').style.display = 'flex';
-        document.getElementById('overlay').style.display = 'block';
+        document.getElementById('draft_overlay').style.display = 'block';
 
         // Exibir a data se estiver disponível
         if (currentDraft.datetime) {
@@ -3334,7 +3354,7 @@ function recoverConfirmed() {
     updateSidebar()
     // Escondendo o popup
     document.getElementById('draft_content').style.display = 'none';
-    document.getElementById('overlay').style.display = 'none';
+    document.getElementById('draft_overlay').style.display = 'none';
 }
 
 function discardDraft() {
@@ -3343,13 +3363,13 @@ function discardDraft() {
 
     // Escondendo o popup
     document.getElementById('draft_content').style.display = 'none';
-    document.getElementById('overlay').style.display = 'none';
+    document.getElementById('draft_overlay').style.display = 'none';
 }
 
 // Adicionar event listener para clicar fora do draft_content
 document.addEventListener('click', function(event) {
     var draftContent = document.getElementById('draft_content');
-    var overlay = document.getElementById('overlay');
+    var overlay = document.getElementById('draft_overlay');
 
     // Verificar se o clique não está dentro de draft_content
     if (!draftContent.contains(event.target)) {

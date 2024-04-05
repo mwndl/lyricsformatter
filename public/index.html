@@ -312,6 +312,7 @@
             <div class="recover_button" onclick="recoverConfirmed()">Recover</div>
         </div>
     </div>
+    <div id="draft_overlay"></div>
     <div class="draft_status" id="draft_status"></div>
     <div id="notification" class="hidden">
         <div class="notification-content">
@@ -494,13 +495,13 @@
                         <option value="300">300</option>
                     </select>
                 </div>
-                <div class="popup_option" style="display:none">
+                <div class="popup_option">
                     <div class="popup_title">
-                        <p class="popup_option_title">Automatically save draft</p>
+                        <p class="popup_option_title">Save draft locally</p>
                         <p class="popup_option_description">If you're listening to the song through LyricsFormatter, we'll save a draft after each edit automatically</p>
                     </div>
                     <label class="switch">
-                        <input type="checkbox" id="autoFormatToggle" onclick="checkContent()">
+                        <input type="checkbox" id="saveDraft" onclick="checkContent()">
                         <span class="slider round"></span>
                     </label>
                 </div>
@@ -1764,6 +1765,7 @@
                 'pasteTransferToggle',
                 'autoCapToggle',
                 'autoFormatToggle',
+                'saveDraft',
                 'mxmPersonalTokenToggle',
                 'autoSuggestion',
                 'localHostToggle'
@@ -1867,7 +1869,8 @@
             setStoredValue('draftDuration', draftDuration)
             setStoredValue('draftLimit', draftLimit)
 
-            loadStoredValues()
+            loadStoredValues();
+            draftsCounter();
         }
 
         // Função para obter os valores armazenados no localStorage ou definir padrões

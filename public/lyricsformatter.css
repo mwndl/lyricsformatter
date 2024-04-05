@@ -53,12 +53,14 @@
         background-color: #000000;
         border-radius: 12px;
         z-index: 999; 
+        box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2); /* Ajusta a sombra */
     }
 
-    .draft_text_content{
+    .draft_text_content {
         display: flex;
         flex-direction: column;
         justify-content: space-between;
+        padding: 5px;
     }
 
     .draft_title{
@@ -85,6 +87,11 @@
         justify-content: center;
         margin-left: 3px;
         border-radius: 12px;
+        cursor: pointer;
+    }
+
+    .discard_button:hover {
+        background-color: #454545;
     }
 
     .recover_button {
@@ -97,7 +104,25 @@
         justify-content: center;
         margin-left: 3px;
         border-radius: 12px;
+        cursor: pointer;
     }
+
+    .recover_button:hover {
+        background-color: #dbdbdb;
+    }
+
+        /* Estilos para o fundo embaçado */
+        #draft_overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5); /* Ajuste o último valor para tornar o fundo mais escuro e embaçado */
+            z-index: 10;
+            backdrop-filter: blur(2px); /* Adiciona o efeito de embaçamento ao fundo */
+        }
   
   .notification-content p {
     width: 100%;
