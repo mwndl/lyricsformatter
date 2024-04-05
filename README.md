@@ -1,4 +1,4 @@
-[# LyricsFormatter
+# LyricsFormatter
 
 ## Welcome to LyricsFormatter
 Your assistant for transcribing song lyrics quickly and accurately!
