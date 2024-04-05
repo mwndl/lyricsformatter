@@ -6,7 +6,7 @@ let undoCursorPositionsStack = [];
 var redoCursorPositionsStack = [];
 var maxStackSize = 100;
 
-var lf_version = '2.11.2';
+var lf_version = '2.11.3';
 var lf_release_date = '05/04/2024'
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -3365,18 +3365,6 @@ function discardDraft() {
     document.getElementById('draft_content').style.display = 'none';
     document.getElementById('draft_overlay').style.display = 'none';
 }
-
-// Adicionar event listener para clicar fora do draft_content
-document.addEventListener('click', function(event) {
-    var draftContent = document.getElementById('draft_content');
-    var overlay = document.getElementById('draft_overlay');
-
-    // Verificar se o clique não está dentro de draft_content
-    if (!draftContent.contains(event.target)) {
-        // Descartar o rascunho
-        discardDraft();
-    }
-});
 
 function autoSave() {
     const editor = document.getElementById('editor');
