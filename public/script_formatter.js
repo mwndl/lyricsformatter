@@ -6,8 +6,8 @@ let undoCursorPositionsStack = [];
 var redoCursorPositionsStack = [];
 var maxStackSize = 100;
 
-var lf_version = '2.9.4';
-var lf_release_date = '03/04/2024'
+var lf_version = '2.9.5';
+var lf_release_date = '05/04/2024'
 
 document.addEventListener('DOMContentLoaded', function () {
     var returnArrow = document.getElementById('return_arrow');
@@ -1124,8 +1124,8 @@ function addToUndoStack() {
             var editor = document.getElementById('editor');
             var content = editor.value;
         
-            // Remove pontuações específicas no final das linhas
-            content = content.replace(/[:.,(;]+\s*$/gm, '');
+            // Remove pontuações específicas no final das linhas, exceto quando seguidas por '...'
+            content = content.replace(/(?<!\.{3})[:,;]+(?!\.{2,})\s*$/gm, '');
         
             // Atualizar o conteúdo do editor
             editor.value = content;
@@ -2779,10 +2779,6 @@ function updateServerInfo(data) {
 
 
 
-
-
-
-
     function importDictionary() {
         // Abre a biblioteca do PC filtrando apenas arquivos JSON
         const input = document.createElement('input');
@@ -3046,4 +3042,30 @@ function calculateCacheSize() {
     } else {
         return (totalSize / 1048576).toFixed(2) + ' MB';
     }
+}
+
+
+
+function showDictionaryManagement() {
+    // Salvando o conteúdo atual da settings_tab
+    var originalContent = document.querySelector('.settings_tab').innerHTML;
+
+    // Criando o conteúdo da tela de gerenciamento do dicionário
+    var dictionaryManagementContent = `
+        <div class="dictionary_management">
+            <!-- Conteúdo da tela de gerenciamento do dicionário -->
+            <button onclick="showSettingsMenu()">Voltar</button>
+        </div>
+    `;
+
+    // Substituindo o conteúdo da settings_tab pelo conteúdo da tela de gerenciamento do dicionário
+    document.querySelector('.settings_tab').innerHTML = dictionaryManagementContent;
+}
+
+function showSettingsMenu() {
+    // Restaurando o conteúdo original da settings_tab
+    var originalContent = document.querySelector('.settings_tab').innerHTML;
+    
+    // Substituindo o conteúdo da settings_tab pelo conteúdo original
+    document.querySelector('.settings_tab').innerHTML = originalContent;
 }
