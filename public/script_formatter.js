@@ -6,7 +6,7 @@ let undoCursorPositionsStack = [];
 var redoCursorPositionsStack = [];
 var maxStackSize = 100;
 
-var lf_version = '2.9.7';
+var lf_version = '2.10.0';
 var lf_release_date = '05/04/2024'
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -281,7 +281,10 @@ document.addEventListener('DOMContentLoaded', function () {
         } else if ((event.ctrlKey || event.metaKey) && event.shiftKey && (event.key === 'Z' || event.key === 'z')) { // refazer
             event.preventDefault();
             redo();
-        } 
+        } else if ((event.ctrlKey || event.metaKey) && event.shiftKey && (event.key === 'E' || event.key === 'e')) {
+            event.preventDefault();
+            addOrRemoveParentheses()
+        }
     });
 });
 
@@ -419,6 +422,113 @@ function addToUndoStack() {
             addToUndoStack();
             updateSidebar();
         }
+
+        function addOrRemoveParentheses() {
+            const languageParam = getParameterByName('language');
+            if (languageParam === 'fr' || languageParam === 'it') {
+                addParenthesesAlt();
+                removeDuplicatePunctuations()
+            } else {
+                addParentheses()
+                removeDuplicatePunctuations()
+            }
+        }
+
+        // Adiciona ou remove parentesis - idiomas onde é permitido abrir e fechar parentesis em linhas diferentes
+        function addParenthesesAlt() {
+            const editor = document.getElementById('editor');
+            const selectionStart = editor.selectionStart;
+            const selectionEnd = editor.selectionEnd;
+            const currentText = editor.value;
+
+            // Verifica se há texto selecionado
+            if (selectionStart !== selectionEnd) {
+                const selectedText = currentText.substring(selectionStart, selectionEnd);
+                
+                // Verifica se o texto selecionado faz parte de uma linha com valores específicos
+                const lineMarkers = ['#INTRO', '#VERSE', '#PRE-CHORUS', '#CHORUS', '#HOOK', '#BRIDGE', '#OUTRO', '#INSTRUMENTAL'];
+                const lineContainingMarker = lineMarkers.find(marker => {
+                    const index = selectedText.indexOf(marker);
+                    return index !== -1 && (index === 0 || selectedText[index - 1] === '\n');
+                });
+                if (lineContainingMarker) {
+                    notification(`Selected text is part of a line containing "${lineContainingMarker}".`);
+                    return; // Retorna com erro
+                }
+                
+                // Verifica se o texto selecionado já está entre parênteses
+                if (selectedText.startsWith('(') && selectedText.endsWith(')')) {
+                    // Remove os parênteses do texto selecionado
+                    const newText = selectedText.substring(1, selectedText.length - 1);
+                    editor.setRangeText(newText, selectionStart, selectionEnd, 'end');
+                } else {
+                    // Adiciona parênteses ao redor do texto selecionado
+                    const newText = '(' + selectedText + ')';
+                    editor.setRangeText(newText, selectionStart, selectionEnd, 'end');
+                }
+            } else {
+                // Se não houver texto selecionado, insere parênteses ao redor do próximo caractere
+                const nextChar = currentText.charAt(selectionStart);
+                if (!nextChar.trim()) {
+                    // Notifica erro se não houver próximo caractere
+                    notification('No text selected, you need to select something');
+                    return;
+                }
+                const newText = '(' + nextChar + ')';
+                editor.setRangeText(newText, selectionStart, selectionStart + 1, 'end');
+            }
+
+            addToUndoStack();
+            updateSidebar();
+        }
+
+        function addParentheses() {
+            const editor = document.getElementById('editor');
+            const selectionStart = editor.selectionStart;
+            const selectionEnd = editor.selectionEnd;
+            const currentText = editor.value;
+        
+            // Verifica se há texto selecionado
+            if (selectionStart === selectionEnd) {
+                notification('No text selected, you need to select something');
+                return; // Retorna com erro
+            }
+        
+            // Verifica se há mais de uma linha selecionada
+            const selectedTextLines = currentText.substring(selectionStart, selectionEnd).split('\n');
+            if (selectedTextLines.length > 1) {
+                notification('Multiple lines selected, select one at a time');
+                return; // Retorna com erro
+            }
+        
+            const selectedText = selectedTextLines[0];
+        
+            // Verifica se o texto selecionado faz parte de uma linha com valores específicos
+            const lineMarkers = ['#INTRO', '#VERSE', '#PRE-CHORUS', '#CHORUS', '#HOOK', '#BRIDGE', '#OUTRO', '#INSTRUMENTAL'];
+            const lineContainingMarker = lineMarkers.find(marker => {
+                const index = selectedText.indexOf(marker);
+                return index !== -1 && (index === 0 || selectedText[index - 1] === '\n');
+            });
+            if (lineContainingMarker) {
+                notification(`Selected text is part of a line containing "${lineContainingMarker}".`);
+                return; // Retorna com erro
+            }
+        
+            // Verifica se o texto selecionado já está entre parênteses
+            if (selectedText.startsWith('(') && selectedText.endsWith(')')) {
+                // Remove os parênteses do texto selecionado
+                const newText = selectedText.substring(1, selectedText.length - 1);
+                editor.setRangeText(newText, selectionStart, selectionEnd, 'end');
+            } else {
+                // Adiciona parênteses ao redor do texto selecionado
+                const newText = '(' + selectedText + ')';
+                editor.setRangeText(newText, selectionStart, selectionEnd, 'end');
+            }
+        
+            addToUndoStack();
+            updateSidebar();
+        }
+        
 
 
 /* ****************************************** */
@@ -992,6 +1102,21 @@ function addToUndoStack() {
             // Atualizar o conteúdo do editor
             editor.value = content;
         }
+
+        function removeDuplicatePunctuations() {
+            var editor = document.getElementById('editor');
+            var content = editor.value;
+            
+            // Definir padrões de pontuações duplicadas
+            var duplicatePunctuations = /([,!?()])\1+/g; // Detecta repetições de vírgulas, pontos de exclamação, interrogação, parênteses abertos e fechados
+            
+            // Substituir pontuações duplicadas por apenas uma repetição
+            content = content.replace(duplicatePunctuations, '$1');
+            
+            // Atualizar o conteúdo do editor
+            editor.value = content;
+        }
+        
 
         function replaceSpecialTags() {
             var editor = document.getElementById('editor');
