@@ -301,6 +301,7 @@
             </div>
         </div>
     </div>
+    <div class="draft_div" id="draft_content"></div>
     <div id="notification" class="hidden">
         <div class="notification-content">
             <p id="notification-message"></p>
@@ -482,6 +483,16 @@
                         <option value="300">300</option>
                     </select>
                 </div>
+                <div class="popup_option">
+                    <div class="popup_title">
+                        <p class="popup_option_title">Automatically save draft</p>
+                        <p class="popup_option_description">If you're listening to the song through LyricsFormatter, we'll save a draft after each edit automatically</p>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="autoFormatToggle" onclick="checkContent()">
+                        <span class="slider round"></span>
+                    </label>
+                </div>
             </div>
             <div class="settings_tab" id="playback_menu" style="display:none">
                 <div class="popup_option">
@@ -558,6 +569,12 @@
                 </div>
             </div>
             <div class="settings_tab" id="storage_menu" style="display:none">
+                <div class="popup_option">
+                    <div class="popup_title">
+                        <p class="popup_option_title">Manage dictionary</p>
+                    </div>
+                    <div class="white_button2" id="import_dictionary" onclick="importDictionary()">Edit</div> 
+                </div>
                 <div class="popup_option">
                     <div class="popup_title">
                         <p class="popup_option_title">Export dictionary</p>
