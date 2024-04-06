@@ -68,18 +68,23 @@
                                 alt="Expand Arrow" draggable="false">
                         </div>
                     </div>
-                    <ul class="language_list" id="language_list">
-                        <li data-lang="en-GB">English (UK)</li>
-                        <li data-lang="en-US">English (US)</li>
-                        <li data-lang="nl" style="display:none">Dutch</li>
-                        <li data-lang="fr">French</li>
-                        <li data-lang="de" style="display:none">German<span class="new_tag">new</span></li>
-                        <li data-lang="it">Italian</li>
-                        <li data-lang="pt-BR">Portuguese (BR)</li>
-                        <li data-lang="pt-PT">Portuguese (PT)</li>
-                        <li data-lang="es">Spanish</li>
-                        <p>More languages soon...</p>
-                    </ul>
+                    <div class="language_list_div" id="language_list_div">
+                        <ul class="language_list" id="language_list">
+                            <li data-lang="en-AU" style="display:none">English (AU)<span class="new_tag">new</span></li>
+                            <li data-lang="en-CA" style="display:none">English (CA)<span class="new_tag">new</span></li>
+                            <li data-lang="en-NZ" style="display:none">English (NZ)<span class="new_tag">new</span></li>
+                            <li data-lang="en-GB">English (UK)</li>
+                            <li data-lang="en-US">English (US)</li>
+                            <li data-lang="nl" style="display:none">Dutch</li>
+                            <li data-lang="fr">French</li>
+                            <li data-lang="de" style="display:none">German<span class="new_tag">new</span></li>
+                            <li data-lang="it">Italian</li>
+                            <li data-lang="pt-BR">Portuguese (BR)</li>
+                            <li data-lang="pt-PT">Portuguese (PT)</li>
+                            <li data-lang="es">Spanish</li>
+                            <p>More languages soon...</p>
+                        </ul>
+                    </div>
                 </div>
                 <div class="improvements_box_text">
                     <p>Suggestions</p>
@@ -296,6 +301,7 @@
             </div>
         </div>
     </div>
+    <div class="draft_div" id="draft_content"></div>
     <div id="notification" class="hidden">
         <div class="notification-content">
             <p id="notification-message"></p>
@@ -414,8 +420,81 @@
         <div class="popup_title">
             <h2 onclick="handleSettingsClick()">Settings</h2>
         </div>
+        <div class="popup_submenu">
+            <div class="improvements_option">
+                <div class="impr_menu_true" id="pref_sub" style="">
+                    <p>Preferences</p>
+                </div>
+                <div class="impr_menu_false" id="playback_sub" style="display:none" title="">
+                    <p>Playback</p>
+                </div>
+                <div class="impr_menu_false" id="storage_sub" style="">
+                    <p>Storage</p>
+                </div>
+                <div class="impr_menu_false" id="dev_sub" style="display:none">
+                    <p>Development Tools</p>
+                </div>
+            </div>
+        </div>
         <div class="popup_content">
-            <div class="settings_hided_div" id="sp_hided_div" style="display:none">
+            <div class="settings_tab" id="preferences_menu" style="display:block">
+                <div class="popup_option" style="display:none">
+                    <div class="popup_title">
+                        <p class="popup_option_title">Character counter</p>
+                        <p class="popup_option_description">description</p>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="characterCounterToggle" onclick="checkContent()">
+                        <span class="slider round"></span>
+                    </label>
+                </div>
+                <div class="popup_option">
+                    <div class="popup_title">
+                        <p class="popup_option_title">Auto capitalization</p>
+                        <p class="popup_option_description">Enable this option to automatically capitalize the first letter
+                            of the lines</p>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="autoCapToggle" onclick="checkContent()">
+                        <span class="slider round"></span>
+                    </label>
+                </div>
+                <div class="popup_option">
+                    <div class="popup_title">
+                        <p class="popup_option_title">Auto format lyrics</p>
+                        <p class="popup_option_description">Enable this option to automatically fix the sections format and
+                            remove unnecessary spaces and empty lines</p>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="autoFormatToggle" onclick="checkContent()">
+                        <span class="slider round"></span>
+                    </label>
+                </div>
+                <div class="popup_option">
+                    <div class="popup_title">
+                        <p class="popup_option_title">Maximum number of undo/redo actions</p>
+                        <p class="popup_option_description">Note: Large limits may impact performance, especially on older devices.</p>
+                    </div>
+                    <select id="maxUndoRedoActions" class="select_list" onchange="checkContent()">
+                        <option value="50">50</option>
+                        <option value="75">75</option>
+                        <option value="100" selected>100</option>
+                        <option value="200">200</option>
+                        <option value="300">300</option>
+                    </select>
+                </div>
+                <div class="popup_option" style="display:none">
+                    <div class="popup_title">
+                        <p class="popup_option_title">Automatically save draft</p>
+                        <p class="popup_option_description">If you're listening to the song through LyricsFormatter, we'll save a draft after each edit automatically</p>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="autoFormatToggle" onclick="checkContent()">
+                        <span class="slider round"></span>
+                    </label>
+                </div>
+            </div>
+            <div class="settings_tab" id="playback_menu" style="display:none">
                 <div class="popup_option">
                     <div class="popup_title">
                         <p class="popup_option_title">Spotify account</p>
@@ -445,15 +524,13 @@
                         <p class="popup_option_description">Specify the duration in seconds to rewind during backward
                             playback</p>
                     </div>
-                    <div class="number_selector">
-                        <svg class="arrow left" viewBox="0 0 24 24" onclick="decreaseValue('selectedValue1')">
-                            <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"></path>
-                        </svg>
-                        <span id="selectedValue1" style="user-select: none;">3</span>
-                        <svg class="arrow right" viewBox="0 0 24 24" onclick="increaseValue('selectedValue1')">
-                            <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"></path>
-                        </svg>
-                    </div>
+                    <select id="rewind_list" class="select_list" onchange="updatePlaybackValues()">
+                        <option value="1">1s</option>
+                        <option value="2">2s</option>
+                        <option value="3">3s</option>
+                        <option value="4">4s</option>
+                        <option value="5">5s</option>
+                    </select>
                 </div>
                 <div class="popup_option">
                     <div class="popup_title">
@@ -462,15 +539,13 @@
                             playback
                         </p>
                     </div>
-                    <div class="number_selector">
-                        <svg class="arrow left" viewBox="0 0 24 24" onclick="decreaseValue('selectedValue2')">
-                            <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"></path>
-                        </svg>
-                        <span id="selectedValue2" style="user-select: none;">3</span>
-                        <svg class="arrow right" viewBox="0 0 24 24" onclick="increaseValue('selectedValue2')">
-                            <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"></path>
-                        </svg>
-                    </div>
+                    <select id="forward_list" class="select_list" onchange="updatePlaybackValues()">
+                        <option value="1">1s</option>
+                        <option value="2">2s</option>
+                        <option value="3">3s</option>
+                        <option value="4">4s</option>
+                        <option value="5">5s</option>
+                    </select>
                 </div>
                 <div class="popup_option">
                     <div class="popup_title">
@@ -492,58 +567,77 @@
                         <span class="slider round"></span>
                     </label>
                 </div>
-                <hr
-                    style="border-top: 1px solid rgb(100, 100, 100); border-right: none; border-bottom: none; border-left: none; border-image: initial;">
             </div>
-            <div class="popup_option" style="display:none">
-                <div class="popup_title">
-                    <p class="popup_option_title">Character counter</p>
-                    <p class="popup_option_description">description</p>
+            <div class="settings_tab" id="storage_menu" style="display:none">
+                <div class="popup_option" style="display:none">
+                    <div class="popup_title">
+                        <p class="popup_option_title">Manage dictionary</p>
+                    </div>
+                    <div class="white_button2" id="import_dictionary" onclick="manageDictionary()">Edit</div> 
                 </div>
-                <label class="switch">
-                    <input type="checkbox" id="characterCounterToggle" onclick="checkContent()">
-                    <span class="slider round"></span>
-                </label>
-            </div>
-            <div class="popup_option">
-                <div class="popup_title">
-                    <p class="popup_option_title">Auto capitalization</p>
-                    <p class="popup_option_description">Enable this option to automatically capitalize the first letter
-                        of the lines</p>
+                <div class="popup_option">
+                    <div class="popup_title">
+                        <p class="popup_option_title">Export dictionary</p>
+                        <p class="popup_option_description">Export all saved data from your local dictionary</p>
+                    </div>
+                    <div class="white_button2" id="export_dictionary" onclick="exportDictionary()">Export</div> 
                 </div>
-                <label class="switch">
-                    <input type="checkbox" id="autoCapToggle" onclick="checkContent()">
-                    <span class="slider round"></span>
-                </label>
-            </div>
-            <div class="popup_option">
-                <div class="popup_title">
-                    <p class="popup_option_title">Auto format lyrics</p>
-                    <p class="popup_option_description">Enable this option to automatically fix the sections format and
-                        remove unnecessary spaces and empty lines</p>
+                <div class="popup_option">
+                    <div class="popup_title">
+                        <p class="popup_option_title">Import dictionary</p>
+                        <p class="popup_option_description">Import a JSON file with data to be imported into your dictionary</p>
+                    </div>
+                    <div class="white_button2" id="import_dictionary" onclick="importDictionary()">Import</div> 
                 </div>
-                <label class="switch">
-                    <input type="checkbox" id="autoFormatToggle" onclick="checkContent()">
-                    <span class="slider round"></span>
-                </label>
-            </div>
-            <div class="popup_option">
-                <div class="popup_title">
-                    <p class="popup_option_title">Maximum number of undo/redo actions</p>
-                    <p class="popup_option_description">Note: Large limits may impact performance, especially on older devices.</p>
+                <hr style="border-top: 1px solid rgb(100, 100, 100); border-right: none; border-bottom: none; border-left: none; border-image: initial; margin: 9px 0;">
+                <div class="popup_option">
+                    <div class="popup_title">
+                        <p class="popup_option_title">Reset preferences</p>
+                        <p class="popup_option_description">Reset all preferences to default</p>
+                    </div>
+                    <div class="white_button2" id="delete_data" onclick="deletePreferences()">Reset</div>
                 </div>
-                <select id="maxUndoRedoActions" class="select_list" onchange="checkContent()">
-                    <option value="50">50</option>
-                    <option value="75">75</option>
-                    <option value="100" selected>100</option>
-                    <option value="200">200</option>
-                    <option value="300">300</option>
-                </select>
+                <div class="popup_option" id="export_cache_div">
+                    <div class="popup_title">
+                        <p class="popup_option_title">Export local storage file<span class="info_icon">ⓘ</span></p>
+                        <p class="popup_option_description">Export all local data stored on this site (including tokens)</p>
+                    </div>
+                    <div class="white_button2" id="export_dictionary" onclick="exportCacheData()">Export</div> 
+                </div>
+                <div class="popup_option" id="import_cache_div">
+                    <div class="popup_title">
+                        <p class="popup_option_title">Import local storage file</p>
+                        <p class="popup_option_description">Import and replace all cached data</p>
+                    </div>
+                    <div class="white_button2" id="export_dictionary" onclick="importCacheData()">Import</div> 
+                </div>
+                <hr style="border-top: 1px solid rgb(100, 100, 100); border-right: none; border-bottom: none; border-left: none; border-image: initial; margin: 9px 0;">
+                <div class="popup_option">
+                    <div class="popup_title">
+                        <p class="popup_option_title">Memory usage</p>
+                    </div>
+                    <div class="right_side_text" id="memory_usage" onclick="updateMemoryUsage()">-</div>
+                </div>
+                <div class="popup_option">
+                    <div class="popup_title">
+                        <p class="popup_option_title">Delete all local data</p>
+                        <p class="popup_option_description">This will delete all data from your browser, including your dictionary, be sure to keep a backup</p>
+                    </div>
+                    <div class="black_button2" id="delete_data" onclick="confirmClearCache()">Reset</div>
+                </div>
             </div>
-            <div class="settings_hided_div" id="dev_hided_div" style="display:none">
-                <hr style="border-top: 1px solid rgb(100, 100, 100); border-right: none; border-bottom: none; border-left: none; border-image: initial;">
-                <h3 class="popup_content_intern">-- Dev Tools --</h3>
-                <div class="popup_option" id="mxm_token_div">
+            <div class="settings_tab" id="devtools_menu" style="display:none">
+                <div class="popup_option">
+                    <div class="popup_title">
+                        <p class="popup_option_title">Display playback tab</p>
+                        <p class="popup_option_description">To hide the tab permanently, make sure to disconnect your account</p>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="displayPlaybackTabToggle" onclick="displayPlaybackTabToggle()">
+                        <span class="slider round"></span>
+                    </label>
+                </div>
+                <div class="popup_option">
                     <div class="popup_title">
                         <p class="popup_option_title">Use personal Musixmatch API key</p>
                         <p class="popup_option_description">If you have a personal Musixmatch API key, you can add it here to enjoy an experience without our request limits (don't worry, this data isn't stored on our end)</p>
@@ -613,8 +707,6 @@
         <div class="popup_title">
             <h2>About this tool</h2>
         </div>
-        <div class="popup_description">
-        </div>
         <div class="popup_content" id="aboutContent" style="display: flex; align-items: center;">
             <div class="loading_container" id="loading_container">
                 <div class="loading_spinner_loop" id="loading_spinner_credits" style="display:block">
@@ -631,7 +723,7 @@
         <div class="popup_title">
             <h2>Shortcuts</h2>
         </div>
-        <div class="popup_description">
+        <div class="popup_submenu">
             <div class="improvements_option">
                 <div class="impr_menu_true" id="op_keyboard" style="" title="">
                     <p>Keyboard</p>
@@ -1031,11 +1123,11 @@
                 };
 
                 document.getElementById('3s_backward').onclick = function () {
-                    rewind(document.getElementById('selectedValue1').textContent)
+                    rewind(document.getElementById('rewind_list').value);
                 };
 
                 document.getElementById('3s_forward').onclick = function () {
-                    fastForward(document.getElementById('selectedValue2').textContent)
+                    fastForward(document.getElementById('forward_list').value)
                 };;
 
                 document.getElementById('previous_section').onclick = function () {
@@ -1066,10 +1158,10 @@
                         event.preventDefault();
                         switch (event.key) {
                             case '1':
-                                rewind(document.getElementById('selectedValue1').textContent);
+                                rewind(document.getElementById('rewind_list').value);
                                 break;
                             case '3':
-                                fastForward(document.getElementById('selectedValue2').textContent);
+                                fastForward(document.getElementById('forward_list').value);
                                 break;
                             case '4':
                                 lastSectionButton();
@@ -1090,14 +1182,14 @@
                         }
                     } else if (event.key === 'Tab' && event.shiftKey) { // Shift + Tab
                         event.preventDefault();
-                        rewind(document.getElementById('selectedValue1').textContent);
+                        rewind(document.getElementById('rewind_list').value);
                     } else if (event.key === 'Tab') { // Tab
                         event.preventDefault();
                         player.togglePlay();
                         intervalStopTimer()
                     } else if (event.key === 'Q' && event.shiftKey) { // Shift + Q
                         event.preventDefault();
-                        fastForward(document.getElementById('selectedValue2').textContent);
+                        fastForward(document.getElementById('forward_list').value);
                     } else if (event.key === 'A' && event.shiftKey) { // Shift + Q
                         event.preventDefault();
                         togglePlayer();
@@ -1630,6 +1722,7 @@
             setCheckboxStates();
             setMaxStackValue();
             displayTokenField();
+            updatePlaybackValues();
         }
 
         function handleSettingsClick() {
@@ -1642,33 +1735,6 @@
             }
         }
 
-        // Função para exibir/ocultar a div e salvar a escolha em cache
-        function displayDevModeDiv() {
-            const devHidedDiv = document.getElementById('dev_hided_div');
-            const devMode = localStorage.getItem('devMode') === 'true'; // Obtém o estado atual do modo de desenvolvimento
-
-            // Alterna entre exibir e ocultar a div
-            if (devMode) {
-                devHidedDiv.style.display = 'none';
-            } else {
-                devHidedDiv.style.display = 'block';
-            }
-
-            // Salva a escolha em cache invertendo o valor atual
-            localStorage.setItem('devMode', (!devMode).toString());
-        }
-
-        // Carrega a escolha do modo de desenvolvimento do cache e exibe/oculta a div conforme necessário
-        function loadDevMode() {
-            const devMode = localStorage.getItem('devMode') === 'true';
-            const devHidedDiv = document.getElementById('dev_hided_div');
-
-            if (devMode) {
-                devHidedDiv.style.display = 'block';
-            } else {
-                devHidedDiv.style.display = 'none';
-            }
-        }
         loadDevMode();
 
         /*
@@ -1736,25 +1802,19 @@
             overlay.style.display = "none";
         }
 
-        function increaseValue(selectedId) {
-            var selectedValue = parseInt(document.getElementById(selectedId).textContent);
-            if (selectedValue < 15) {
-                selectedValue++;
-                updateSelectedValue(selectedId, selectedValue);
-            }
-        }
+        function updatePlaybackValues() {
+            rewindValue = document.getElementById('rewind_list').value
+            forwardValue = document.getElementById('forward_list').value
 
-        function decreaseValue(selectedId) {
-            var selectedValue = parseInt(document.getElementById(selectedId).textContent);
-            if (selectedValue > 3) {
-                selectedValue--;
-                updateSelectedValue(selectedId, selectedValue);
-            }
+            setStoredValue('rewind_list', rewindValue)
+            setStoredValue('forward_list', forwardValue)
+
+            loadStoredValues()
         }
 
         // Função para obter os valores armazenados no localStorage ou definir padrões
         function getStoredValue(id) {
-            return localStorage.getItem(id) || '5'; // Valor padrão é 5 segundos
+            return localStorage.getItem(id) || '3'; // Valor padrão é 3 segundos
         }
 
         // Função para armazenar os valores selecionados no localStorage
@@ -1764,22 +1824,10 @@
 
         // Função para carregar os valores armazenados e definir os elementos correspondentes
         function loadStoredValues() {
-            document.getElementById('selectedValue1').textContent = getStoredValue('selectedValue1');
-            document.getElementById('selectedValue2').textContent = getStoredValue('selectedValue2');
-            document.getElementById('backwardValue').textContent = getStoredValue('selectedValue1');
-            document.getElementById('forwardValue').textContent = getStoredValue('selectedValue2');
-        }
-
-        function updateSelectedValue(id, value) {
-            document.getElementById(id).textContent = value;
-            setStoredValue(id, value); // Armazenar o valor selecionado no localStorage
-            // Atualizar os elementos <p> com base nos valores selecionados
-            if (id === 'selectedValue1') {
-                document.getElementById('backwardValue').textContent = value;
-            } else if (id === 'selectedValue2') {
-                document.getElementById('forwardValue').textContent = value;
-            }
-            // Aqui você pode fazer qualquer outra ação necessária com o valor selecionado
+            document.getElementById('rewind_list').value = getStoredValue('rewind_list');
+            document.getElementById('forward_list').value = getStoredValue('forward_list');
+            document.getElementById('backwardValue').textContent = getStoredValue('rewind_list');
+            document.getElementById('forwardValue').textContent = getStoredValue('forward_list');
         }
 
         // Carregar os valores armazenados ao carregar a página
