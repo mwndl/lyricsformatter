@@ -583,8 +583,8 @@
             <div class="settings_tab" id="storage_menu" style="display:none">
                 <div class="popup_option">
                     <div class="popup_title">
-                        <p class="popup_option_title">See transcription drafts</p>
-                        <p class="popup_option_description">Import, export, delete or start the playback of your saved drafts</p>
+                        <p class="popup_option_title">Manage drafts</p>
+                        <p class="popup_option_description">Manage all your saved drafts</p>
                     </div>
                     <div class="white_button2" onclick="manageDraft()">Open</div> 
                 </div>
@@ -602,11 +602,11 @@
                         <p class="popup_option_description">We'll check expired drafts and automatically delete them so they don't take up unnecessary space in your browser</p>
                     </div>
                     <select id="draft_duration" class="select_list" style="width: 80px;" onchange="updateSelectValues()">
-                        <option value="1">1 day</option>
                         <option value="3">3 days</option>
                         <option value="7">7 days</option>
                         <option value="30">30 days</option>
                         <option value="60">60 days</option>
+                        <option value="0">Never</option>
                     </select>
                 </div>
                 <div class="popup_option">
@@ -650,12 +650,6 @@
                         <p class="popup_option_title">Memory usage</p>
                     </div>
                     <div class="right_side_text" id="memory_usage" onclick="updateMemoryUsage()">-</div>
-                </div>
-                <div class="popup_option">
-                    <div class="popup_title">
-                        <p class="popup_option_title">Total drafts saved</p>
-                    </div>
-                    <div class="right_side_text" id="drafts_counter" onclick="draftsCounter()">-</div>
                 </div>
                 <div class="popup_option">
                     <div class="popup_title">
