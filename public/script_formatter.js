@@ -6,7 +6,7 @@ let undoCursorPositionsStack = [];
 var redoCursorPositionsStack = [];
 var maxStackSize = 100;
 
-var lf_version = '2.9.7';
+var lf_version = '2.11.3';
 var lf_release_date = '05/04/2024'
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -108,6 +108,7 @@ document.addEventListener('DOMContentLoaded', function () {
             'pasteTransferToggle',
             'autoCapToggle',
             'autoFormatToggle',
+            'saveDraft',
             'mxmPersonalTokenToggle',
             'autoSuggestion',
             'localHostToggle'
@@ -123,8 +124,12 @@ document.addEventListener('DOMContentLoaded', function () {
     
         if (isAutoSuggestionsChecked()) {
             clearTimeout(typingTimer);
-
             typingTimer = setTimeout(autoSuggestion, doneTypingInterval);
+        }
+
+        if (isDraftChecked()) {
+            clearTimeout(typingTimer);
+            typingTimer = setTimeout(autoSave, doneTypingInterval);
         }
     }
 
@@ -188,12 +193,17 @@ document.addEventListener('DOMContentLoaded', function () {
         displayTokenField()
         addToUndoStack(); // add o texto vazio como undo inicial
         updateMemoryUsage();
+        draftsCounter()
+        checkExpiredDrafts();
 
     
     // Adicione um evento de clique ao botão de cópia
     var copyButton = document.querySelector('.content_copy_btn');
     if (copyButton) {
         copyButton.addEventListener('click', function() {
+            if (isDraftChecked()) {
+                saveDraft();
+            }
             copyToClipboard();
             resetTranscription();
         });
@@ -281,8 +291,19 @@ document.addEventListener('DOMContentLoaded', function () {
         } else if ((event.ctrlKey || event.metaKey) && event.shiftKey && (event.key === 'Z' || event.key === 'z')) { // refazer
             event.preventDefault();
             redo();
-        } 
+        } else if ((event.ctrlKey || event.metaKey) && !event.shiftKey && (event.key === 'S' || event.key === 's')) { // salvar rascunho
+            event.preventDefault();
+            if (isDraftChecked()) {
+                saveDraft();
+            } else {
+                notification('Please enable the "Local Draft" toggle in the settings')
+            }
+        } else if ((event.ctrlKey || event.metaKey) && event.shiftKey && (event.key === 'E' || event.key === 'e')) {
+            event.preventDefault();
+            addOrRemoveParentheses()
+        }
     });
+
 });
 
 /* FUNÇÕES PARA DESFAZER E REFAZER ALTERAÇÕES */
@@ -306,6 +327,9 @@ function undo() {
 
     updateSidebar();
     updateTabCounters();
+    if (isDraftChecked()) {
+        saveDraft();
+    }
 }
 
 // função refazer ação
@@ -334,6 +358,10 @@ function redo() {
         // atualizar a barra lateral
         updateSidebar();
         updateTabCounters();
+
+        if (isDraftChecked()) {
+            saveDraft();
+        }
     }
 }
 
@@ -419,6 +447,113 @@ function addToUndoStack() {
             addToUndoStack();
             updateSidebar();
         }
+
+        function addOrRemoveParentheses() {
+            const languageParam = getParameterByName('language');
+            if (languageParam === 'fr' || languageParam === 'it') {
+                addParenthesesAlt();
+                removeDuplicatePunctuations()
+            } else {
+                addParentheses()
+                removeDuplicatePunctuations()
+            }
+        }
+
+        // Adiciona ou remove parentesis - idiomas onde é permitido abrir e fechar parentesis em linhas diferentes
+        function addParenthesesAlt() {
+            const editor = document.getElementById('editor');
+            const selectionStart = editor.selectionStart;
+            const selectionEnd = editor.selectionEnd;
+            const currentText = editor.value;
+
+            // Verifica se há texto selecionado
+            if (selectionStart !== selectionEnd) {
+                const selectedText = currentText.substring(selectionStart, selectionEnd);
+                
+                // Verifica se o texto selecionado faz parte de uma linha com valores específicos
+                const lineMarkers = ['#INTRO', '#VERSE', '#PRE-CHORUS', '#CHORUS', '#HOOK', '#BRIDGE', '#OUTRO', '#INSTRUMENTAL'];
+                const lineContainingMarker = lineMarkers.find(marker => {
+                    const index = selectedText.indexOf(marker);
+                    return index !== -1 && (index === 0 || selectedText[index - 1] === '\n');
+                });
+                if (lineContainingMarker) {
+                    notification(`Selected text is part of a line containing "${lineContainingMarker}".`);
+                    return; // Retorna com erro
+                }
+                
+                // Verifica se o texto selecionado já está entre parênteses
+                if (selectedText.startsWith('(') && selectedText.endsWith(')')) {
+                    // Remove os parênteses do texto selecionado
+                    const newText = selectedText.substring(1, selectedText.length - 1);
+                    editor.setRangeText(newText, selectionStart, selectionEnd, 'end');
+                } else {
+                    // Adiciona parênteses ao redor do texto selecionado
+                    const newText = '(' + selectedText + ')';
+                    editor.setRangeText(newText, selectionStart, selectionEnd, 'end');
+                }
+            } else {
+                // Se não houver texto selecionado, insere parênteses ao redor do próximo caractere
+                const nextChar = currentText.charAt(selectionStart);
+                if (!nextChar.trim()) {
+                    // Notifica erro se não houver próximo caractere
+                    notification('No text selected, you need to select something');
+                    return;
+                }
+                const newText = '(' + nextChar + ')';
+                editor.setRangeText(newText, selectionStart, selectionStart + 1, 'end');
+            }
+
+            addToUndoStack();
+            updateSidebar();
+        }
+
+        function addParentheses() {
+            const editor = document.getElementById('editor');
+            const selectionStart = editor.selectionStart;
+            const selectionEnd = editor.selectionEnd;
+            const currentText = editor.value;
+        
+            // Verifica se há texto selecionado
+            if (selectionStart === selectionEnd) {
+                notification('No text selected, you need to select something');
+                return; // Retorna com erro
+            }
+        
+            // Verifica se há mais de uma linha selecionada
+            const selectedTextLines = currentText.substring(selectionStart, selectionEnd).split('\n');
+            if (selectedTextLines.length > 1) {
+                notification('Multiple lines selected, select one at a time');
+                return; // Retorna com erro
+            }
+        
+            const selectedText = selectedTextLines[0];
+        
+            // Verifica se o texto selecionado faz parte de uma linha com valores específicos
+            const lineMarkers = ['#INTRO', '#VERSE', '#PRE-CHORUS', '#CHORUS', '#HOOK', '#BRIDGE', '#OUTRO', '#INSTRUMENTAL'];
+            const lineContainingMarker = lineMarkers.find(marker => {
+                const index = selectedText.indexOf(marker);
+                return index !== -1 && (index === 0 || selectedText[index - 1] === '\n');
+            });
+            if (lineContainingMarker) {
+                notification(`Selected text is part of a line containing "${lineContainingMarker}".`);
+                return; // Retorna com erro
+            }
+        
+            // Verifica se o texto selecionado já está entre parênteses
+            if (selectedText.startsWith('(') && selectedText.endsWith(')')) {
+                // Remove os parênteses do texto selecionado
+                const newText = selectedText.substring(1, selectedText.length - 1);
+                editor.setRangeText(newText, selectionStart, selectionEnd, 'end');
+            } else {
+                // Adiciona parênteses ao redor do texto selecionado
+                const newText = '(' + selectedText + ')';
+                editor.setRangeText(newText, selectionStart, selectionEnd, 'end');
+            }
+        
+            addToUndoStack();
+            updateSidebar();
+        }
+        
 
 
 /* ****************************************** */
@@ -805,8 +940,13 @@ function addToUndoStack() {
         function isAutoFormatChecked() {
             const autoFormatToggle = document.getElementById('autoFormatToggle');
             return autoFormatToggle.checked;
-        }
+        } 
         
+        function isDraftChecked() {
+            const saveDraft = document.getElementById('saveDraft');
+            return saveDraft.checked;
+        }
+
         function isAutoSuggestionsChecked() {
             const autoSuggestions = document.getElementById('autoSuggestion');
             return autoSuggestions.checked;
@@ -992,6 +1132,21 @@ function addToUndoStack() {
             // Atualizar o conteúdo do editor
             editor.value = content;
         }
+
+        function removeDuplicatePunctuations() {
+            var editor = document.getElementById('editor');
+            var content = editor.value;
+            
+            // Definir padrões de pontuações duplicadas
+            var duplicatePunctuations = /([,!?()])\1+/g; // Detecta repetições de vírgulas, pontos de exclamação, interrogação, parênteses abertos e fechados
+            
+            // Substituir pontuações duplicadas por apenas uma repetição
+            content = content.replace(duplicatePunctuations, '$1');
+            
+            // Atualizar o conteúdo do editor
+            editor.value = content;
+        }
+        
 
         function replaceSpecialTags() {
             var editor = document.getElementById('editor');
@@ -1360,6 +1515,7 @@ function addToUndoStack() {
                 'pasteTransferToggle',
                 'autoCapToggle',
                 'autoFormatToggle',
+                'saveDraft',
                 'mxmPersonalTokenToggle',
                 'autoSuggestion',
                 'localHostToggle'
@@ -1373,7 +1529,7 @@ function addToUndoStack() {
                     checkbox.checked = JSON.parse(checkboxState);
                 } else {
                     // Se não houver informação em cache, defina os estados padrão
-                    if (checkboxId === 'autoCapToggle' || checkboxId === 'autoFormatToggle') {
+                    if (checkboxId === 'autoCapToggle' || checkboxId === 'autoFormatToggle' || checkboxId === 'saveDraft') {
                         checkbox.checked = true; // Ativado
                     } else {
                         checkbox.checked = false; // Desativado
@@ -1457,12 +1613,6 @@ function addToUndoStack() {
                 overlay.style.display = "block";
             });
 
-            // Hide Settings
-            overlay.addEventListener("click", function () {
-                settingsPopup.style.display = "none";
-                overlay.style.display = "none";
-            });
-
             // Show Credits
             creditsOption.addEventListener("click", function () {
                 miniMenu.style.display = "none";
@@ -1470,23 +1620,11 @@ function addToUndoStack() {
                 overlay.style.display = "block";
             });
 
-            // Hide Credits
-            overlay.addEventListener("click", function () {
-                creditsPopup.style.display = "none";
-                overlay.style.display = "none";
-            });
-
             // Show Suggestions
             shortcutsOption.addEventListener("click", function () {
                 miniMenu.style.display = "none";
                 shortcutsPopup.style.display = "block";
                 overlay.style.display = "block";
-            });
-
-            // Hide Suggestions
-            overlay.addEventListener("click", function () {
-                shortcutsPopup.style.display = "none";
-                overlay.style.display = "none";
             });
 
             // Show About Info
@@ -1498,6 +1636,9 @@ function addToUndoStack() {
 
             // Hide About Info
             overlay.addEventListener("click", function () {
+                settingsPopup.style.display = "none";
+                creditsPopup.style.display = "none";
+                shortcutsPopup.style.display = "none";
                 aboutPopup.style.display = "none";
                 overlay.style.display = "none";
             });
@@ -1531,6 +1672,7 @@ function addToUndoStack() {
             storageButton.addEventListener("click", function (event) {
                 showStorageTab();
                 updateMemoryUsage();
+                draftsCounter()
             });
 
             DevToolsButton.addEventListener("click", function (event) {
@@ -2907,9 +3049,12 @@ function updateServerInfo(data) {
         localStorage.removeItem('autoCapToggle');
         localStorage.removeItem('copyTransferToggle');
         localStorage.removeItem('characterCounterToggle');
-        localStorage.removeItem('forward_list');
-        localStorage.removeItem('rewind_list');
+        localStorage.removeItem('forwardValue');
+        localStorage.removeItem('rewindValue');
+        localStorage.removeItem('draftDuration');
+        localStorage.removeItem('draftLimit');
         localStorage.removeItem('autoFormatToggle');
+        localStorage.removeItem('saveDraft');
         localStorage.removeItem('devMode');
         localStorage.removeItem('autoSuggestion');
         localStorage.removeItem('selectedLanguage');
@@ -2923,6 +3068,7 @@ function updateServerInfo(data) {
         localStorage.clear();
         cancelClearCache()
         updateMemoryUsage()
+        draftsCounter()
         notification('Cache cleared successfully!');
     }
 
@@ -2980,6 +3126,7 @@ function updateServerInfo(data) {
                     }
                     notification('Cache data imported successfully!');
                     updateMemoryUsage()
+                    draftsCounter()
                 } catch (error) {
                     notification('Error importing cache data: Invalid JSON format.');
                 }
@@ -3026,6 +3173,19 @@ function updateMemoryUsage() {
     document.getElementById('memory_usage').textContent = usage;
 }
 
+function draftsCounter() {
+    var localDrafts = localStorage.getItem('localDrafts');
+    var totalLimit = localStorage.getItem('draftLimit');
+    var counter = 0;
+
+    if (localDrafts) {
+        var draftsObject = JSON.parse(localDrafts);
+        counter = Object.keys(draftsObject).length;
+    }
+
+    document.getElementById('drafts_counter').textContent = `${counter} / ${totalLimit}`;
+}
+
 function calculateCacheSize() {
     let totalSize = 0;
     for (let i = 0; i < localStorage.length; i++) {
@@ -3068,4 +3228,151 @@ function showSettingsMenu() {
     
     // Substituindo o conteúdo da settings_tab pelo conteúdo original
     document.querySelector('.settings_tab').innerHTML = originalContent;
+}
+
+
+/* DRAFTS */
+
+function checkExpiredDrafts() {
+    var draftDuration = localStorage.getItem('draftDuration');
+    if (!draftDuration) {
+        return; // Se não houver configuração de duração, não faz nada
+    }
+    draftDuration = parseInt(draftDuration);
+
+    var localDrafts = localStorage.getItem('localDrafts');
+    if (!localDrafts) {
+        return; // Não há rascunhos salvos
+    }
+
+    var draftsObject = JSON.parse(localDrafts);
+    var currentDateTime = new Date();
+
+    for (var key in draftsObject) {
+        if (draftsObject.hasOwnProperty(key)) {
+            var draftDateTime = new Date(draftsObject[key].datetime);
+            var diffTime = Math.abs(currentDateTime - draftDateTime);
+            var diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+            if (diffDays > draftDuration) {
+                delete draftsObject[key];
+            }
+        }
+    }
+
+    // Atualiza os rascunhos no localStorage
+    localStorage.setItem('localDrafts', JSON.stringify(draftsObject));
+}
+
+function saveDraft() {
+    var editorValue = document.getElementById('editor').value;
+    var draftStatus = document.getElementById('draft_status');
+
+    if (editorValue === '') {
+        return;
+    }
+
+    if (currentSongId === '' || currentIsrc === '') {
+        notification("Missing track data, unable to save draft");
+        return;
+    }
+
+    draftStatus.textContent = 'Saving draft...';
+
+    // Verifica se há algum draft salvo
+    var localDrafts = localStorage.getItem('localDrafts');
+    var draftsObject = localDrafts ? JSON.parse(localDrafts) : {};
+
+    // Adiciona data e hora atual
+    var currentDateTime = new Date().toISOString();
+
+    // Atualiza ou adiciona o draft atual
+    draftsObject[currentIsrc] = {
+        "track_name": trackName,
+        "artist_name": artistName,
+        "track_id": currentSongId,
+        "datetime": currentDateTime,
+        "transcription": editorValue
+    };
+
+    // Verifica o limite de rascunhos
+    var draftLimit = localStorage.getItem('draftLimit') || 100; // Limite padrão se não estiver definido
+    draftLimit = parseInt(draftLimit);
+
+    var draftKeys = Object.keys(draftsObject);
+    if (draftKeys.length > draftLimit) {
+        // Encontra o item mais antigo com base na datetime
+        var oldestKey = draftKeys.reduce(function (a, b) {
+            return draftsObject[a].datetime < draftsObject[b].datetime ? a : b;
+        });
+
+        // Exclui o item mais antigo
+        delete draftsObject[oldestKey];
+    }
+
+    // Salva o draft no localStorage
+    localStorage.setItem('localDrafts', JSON.stringify(draftsObject));
+    // Define a função para atualizar o textContent após 1.5 segundos
+    setTimeout(function () {
+        draftStatus.textContent = 'Draft saved';
+    }, 1500);
+
+    // Define a função para atualizar o textContent após 1.5 segundos
+    setTimeout(function () {
+        draftStatus.textContent = '';
+    }, 5000);
+}
+
+function recoverDraft() {
+    var localDrafts = localStorage.getItem('localDrafts');
+    var draftsObject = localDrafts ? JSON.parse(localDrafts) : {};
+
+    var currentDraft = draftsObject[currentIsrc];
+
+    if (currentDraft && currentDraft.transcription) {
+        // Exibindo o popup
+        document.getElementById('draft_content').style.display = 'flex';
+        document.getElementById('draft_overlay').style.display = 'block';
+
+        // Exibir a data se estiver disponível
+        if (currentDraft.datetime) {
+            var draftSavedDate = new Date(currentDraft.datetime);
+            var formattedDate = draftSavedDate.toLocaleString(); // Você pode personalizar o formato conforme necessário
+            document.getElementById('draft_saved_date').textContent = "Saved on: " + formattedDate;
+        }
+    }
+}
+function recoverConfirmed() {
+    var localDrafts = localStorage.getItem('localDrafts');
+    var draftsObject = localDrafts ? JSON.parse(localDrafts) : {};
+    var currentDraft = draftsObject[currentIsrc];
+
+    // Recuperando o rascunho
+    document.getElementById('editor').value = currentDraft.transcription;
+    notification("Draft successfully recovered!");
+
+    updateSidebar()
+    // Escondendo o popup
+    document.getElementById('draft_content').style.display = 'none';
+    document.getElementById('draft_overlay').style.display = 'none';
+}
+
+function discardDraft() {
+    // Descartando o rascunho
+    notification("Draft discarded");
+
+    // Escondendo o popup
+    document.getElementById('draft_content').style.display = 'none';
+    document.getElementById('draft_overlay').style.display = 'none';
+}
+
+function autoSave() {
+    const editor = document.getElementById('editor');
+    const content = editor.value;
+
+    if (content.trim() === '') {
+        return;
+    } else {
+        saveDraft()
+    }
 }

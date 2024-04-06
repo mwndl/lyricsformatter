@@ -23,7 +23,7 @@ LyricsFormatter is a free service created with the help of talented users design
 
 Access LyricsFormatter at: [Lyrics Formatter](https://lyricsformatter.onrender.com/)
 
-Or access our beta version: [Lyrics Formatter - BETA](https://lyricsformatter-beta.onrender.com/)
+Or access our beta version: [Lyrics Formatter - BETA](https://lyricsformatter-beta.onrender.com/?referrer=https://github.com/mwndl/lyricsformatter?tab=readme-ov-file)
 
 ## Acknowledgments
 
@@ -44,3 +44,4 @@ LyricsFormatter is an independent tool created solely to assist users in transcr
 - **Spanish:** Andreks Tdos, Brayan Gutiérrez
 
 We hope LyricsFormatter is a useful tool for you!
+](https://github.com/mwndl/lyricsformatter?tab=readme-ov-file)
