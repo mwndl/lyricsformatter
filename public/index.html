@@ -20,8 +20,7 @@
 <body>
     <div class="top">
         <div class="return">
-            <img class="return_arrow" id="return_arrow" src="images\arrow.svg" alt="Return Arrow" title="Return"
-                draggable="false" style="display:none">
+            <img class="return_arrow" id="return_arrow" src="images\arrow.svg" alt="Return Arrow" title="Return" draggable="false" style="display:none">
         </div>
         <div class="page_title">LyricsFormatter</div>
         <div class="settings">
@@ -450,6 +449,7 @@
         </div>
         <div class="popup_content">
             <div class="settings_tab" id="preferences_menu" style="display:block">
+                
                 <div class="popup_option" style="display:none">
                     <div class="popup_title">
                         <p class="popup_option_title">Character counter</p>
@@ -581,25 +581,19 @@
                 </div>
             </div>
             <div class="settings_tab" id="storage_menu" style="display:none">
-                <div class="popup_option" style="display:none">
+                <div class="popup_option">
+                    <div class="popup_title">
+                        <p class="popup_option_title">See transcription drafts</p>
+                        <p class="popup_option_description">Import, export, delete or start the playback of your saved drafts</p>
+                    </div>
+                    <div class="white_button2" onclick="manageDraft()">Open</div> 
+                </div>
+                <div class="popup_option">
                     <div class="popup_title">
                         <p class="popup_option_title">Manage dictionary</p>
+                        <p class="popup_option_description">Import, export or delete words from your local dictionary</p>
                     </div>
-                    <div class="white_button2" id="import_dictionary" onclick="manageDictionary()">Edit</div> 
-                </div>
-                <div class="popup_option">
-                    <div class="popup_title">
-                        <p class="popup_option_title">Export dictionary</p>
-                        <p class="popup_option_description">Export all saved data from your local dictionary</p>
-                    </div>
-                    <div class="white_button2" id="export_dictionary" onclick="exportDictionary()">Export</div> 
-                </div>
-                <div class="popup_option">
-                    <div class="popup_title">
-                        <p class="popup_option_title">Import dictionary</p>
-                        <p class="popup_option_description">Import a JSON file with data to be imported into your dictionary</p>
-                    </div>
-                    <div class="white_button2" id="import_dictionary" onclick="importDictionary()">Import</div> 
+                    <div class="white_button2" onclick="manageDictionary()">Open</div> 
                 </div>
                 <hr style="border-top: 1px solid rgb(100, 100, 100); border-right: none; border-bottom: none; border-left: none; border-image: initial; margin: 9px 0;">
                 <div class="popup_option">
@@ -850,6 +844,15 @@
                 <hr style="border-top: 1px solid rgb(100, 100, 100); border-right: none; border-bottom: none; border-left: none; border-image: initial; margin: 9px 0;">
                 <div class="popup_option">
                     <div class="popup_title">
+                        <p class="shortcut_option">Save draft</p>
+                        <p class="popup_option_description"></p>
+                    </div>
+                    <div class="shortcut_icon_larger" data="ctrl_meta_key" color="green">Ctrl</div>
+                    <div class="shortcut_icon" color="green" style="max-height: 40px;">S</div>
+                </div>
+                <hr style="border-top: 1px solid rgb(100, 100, 100); border-right: none; border-bottom: none; border-left: none; border-image: initial; margin: 9px 0;">
+                <div class="popup_option">
+                    <div class="popup_title">
                         <p class="shortcut_option">Add or remove parentheses</p>
                         <p class="popup_option_description">You must select the text to be changed</p>
                     </div>
@@ -1058,7 +1061,48 @@
                 <hr style="border-top: 1px solid rgb(100, 100, 100); border-right: none; border-bottom: none; border-left: none; border-image: initial; margin: 9px 0;">
             </div>
         </div>
-        
+    </div>
+
+    <div id="manage_dictionary_popup" class="alt_popup">
+        <div class="popup_title" style="flex-direction: row;">
+            <div style="margin-right: 20px;">
+                <img class="return_arrow" src="images\arrow.svg" title="Return to the settings menu" onclick="closeManageDictionary()" alt="Return Arrow" style="width: 15px; height: 100%;" title="Return" draggable="false" style="display:block">
+            </div>
+            <h2>Manage dictionary</h2>
+        </div>
+        <div class="popup_content" style="display: flex; align-items: center;">
+        </div>
+        <div class="popup_bottom" >
+            <div style="display: flex; flex-direction: column;">
+                <p id="dictionary_rows">Total rows: -</p>
+                <p id="dictionary_memory">Memory usage -</p>
+            </div>
+            <div style="display: flex; flex-direction: row;">
+                <div class="white_button2" id="import_dictionary" onclick="importDictionary()">Import</div> 
+                <div class="white_button2" id="export_dictionary" style="margin-left: 5px;" onclick="exportDictionary()">Export</div> 
+            </div>
+        </div>
+    </div>
+
+    <div id="manage_draft_popup" class="alt_popup">
+        <div class="popup_title" style="flex-direction: row;">
+            <div style="margin-right: 20px;">
+                <img class="return_arrow" src="images\arrow.svg" title="Return to the settings menu" onclick="closeManageDraft()" alt="Return Arrow" style="width: 15px; height: 100%;" title="Return" draggable="false" style="display:block">
+            </div>
+            <h2>Manage drafts</h2>
+        </div>
+        <div class="popup_content" style="display: flex; align-items: center;">
+        </div>
+        <div class="popup_bottom" >
+            <div style="display: flex; flex-direction: column;">
+                <p id="draft_items">Total drafts: -</p>
+                <p id="draft_memory">Memory usage -</p>
+            </div>
+            <div style="display: flex; flex-direction: row;">
+                <div class="white_button2" id="export_dictionary" title="Import drafts" style="margin-left: 5px;" onclick="importDrafts()">Import</div>
+                <div class="white_button2" id="export_dictionary" style="margin-left: 5px;" onclick="exportAllDrafts()">Export</div> 
+            </div>
+        </div>
     </div>
 
     <script>
