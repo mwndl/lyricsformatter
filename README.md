@@ -12,7 +12,7 @@ LyricsFormatter is a free service created with the help of talented users design
 - **Line character counter:** Track the number of characters on each line to make sure the lyrics are within the platform limits.
 - **Quick transcription shortcuts:** Use keyboard shortcuts to control the playback or even insert structure tags into the lyrics.
 - **Spotify integration:** Connect LyricsFormatter with Spotify to transcribe lyrics directly from the website.
-- **Draft compatibility:** Drafts are now supported, allowing for seamless editing and saving of your work.
+- **Draft compatibility:** Drafts are now supported, allowing a full backup of your lyrics.
 - **Diffchecker creation:** Generate Diffcheckers links based on saved draft transcriptions inside the settings menu, no need to copy and paste lyrics into multiple tabs.
 
 ## Benefits
