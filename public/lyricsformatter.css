@@ -85,8 +85,96 @@
     th, td {
         padding: 3px 5px;
         text-align: center;
-        border: 1px solid #ddd; 
+        border: 1px solid #f1f2f4;
+        font-size: 14px;
     }
+
+
+/* Estilizando o input */
+.diff_name_input {
+    width: 200px; /* Defina a largura desejada */
+    padding: 10px; /* Espaçamento interno */
+    border: 1px solid #ccc; /* Adiciona uma borda */
+    border-radius: 5px; /* Borda arredondada */
+    font-size: 16px; /* Tamanho da fonte */
+    outline: none; /* Remove a borda ao clicar */
+  }
+
+.diff_link_div {
+    height: 40px;
+    background-color: #fff;
+    border-radius: 12px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #848484;
+}
+
+.diff_link_output {
+    padding: 0 0 0 15px;
+}
+  
+  /* Estilizando o placeholder */
+  .diff_name_input::placeholder {
+    color: #999; /* Cor do texto do placeholder */
+  }
+
+/* DIFFCHECKER */
+
+.diff-table {
+    font-family: monospace;
+    font-size: 13px;
+    border-collapse: collapse;
+    color: #000000;
+  }
+  .side-content-header {
+    width: 50%;
+  }
+  .diff-row {
+  }
+  .diff-line-number {
+    color: #aaaaaa;
+    font-size: 11px;
+    text-align: center;
+    vertical-align: middle;
+}
+  .diff-line-number:before {
+    content: attr(data-content);
+  }
+  .diff-line {
+    white-space: pre-wrap;
+    word-break: break-all;
+    overflow-wrap: break-word;
+    line-height: 1rem;
+    padding-right: 20px;
+    text-align: left;
+  }
+  .diff-line-inserted {
+    background: #c8f0da;
+    color: #000000;
+  }
+  .diff-line-removed {
+    background: #ffcbbd;
+  }
+  .diff-line-empty {
+    background: #EAEEF0;
+  }
+  .diff-line-modified.diff-line-with-inserts {
+    background: #c8f0da;
+  }
+  .diff-line-modified.diff-line-with-removes {
+    background: #ffcbbd;
+  }
+  .diff-chunk-inserted {
+    background: #8ee0b6;
+  }
+  .diff-chunk-removed {
+    background: #ff957e;
+  }
+  
+
+/* ******************* */
+
 
     .discard_button{
         height: 40px;
@@ -427,6 +515,23 @@
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
     z-index: 1000;
     color: white;
+    user-select: none;
+  }
+
+  .diff_popup {
+    width: 80%;
+    max-width: 1000px;
+    border-radius: 20px;
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    padding: 10px;
+    transform: translate(-50%, -50%);
+    background-color: #f1f2f4;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+    z-index: 1000;
+    color: rgb(0, 0, 0);
     user-select: none;
   }
 
@@ -934,10 +1039,27 @@
         justify-content: center;
         color: #000000;
         background-color: #ffffff;
+        cursor: pointer;
     }
 
     .white_button2:hover {
-        background-color: #d2d2d2;
+        background-color: #dcdcdc;
+    }
+
+    .diff_get_link_button {
+        background-color: #00c281;
+        width: 60px;
+        padding: 10px;
+        font-size: 16px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+    }
+
+    .diff_get_link_button:hover {
+        background-color: #096;
     }
 
     /* delete cache popup */
@@ -1499,6 +1621,28 @@
         justify-content: flex-end;
         width: 30px;
         height: 100%;
+    }
+
+    .return_black_arrow {
+        position: relative;
+        width: 30px;
+        height: 30px;
+        background-image: url("data:image/svg+xml,%3Csvg width='30px' height='30px' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cg id='SVGRepo_bgCarrier' stroke-width='0'%3E%3C/g%3E%3Cg id='SVGRepo_tracerCarrier' stroke-linecap='round' stroke-linejoin='round'%3E%3C/g%3E%3Cg id='SVGRepo_iconCarrier'%3E%3Cpath d='M5 12H19M5 12L11 6M5 12L11 18' stroke='%23000000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/g%3E%3C/svg%3E");
+        background-size: contain;
+        background-repeat: no-repeat;
+        background-position: center center;
+        cursor: pointer;
+    }
+
+    .return_white_arrow {
+        position: relative;
+        width: 30px;
+        height: 30px;
+        background-image: url("data:image/svg+xml,%3Csvg width='178px' height='178px' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cg id='SVGRepo_bgCarrier' stroke-width='0'%3E%3C/g%3E%3Cg id='SVGRepo_tracerCarrier' stroke-linecap='round' stroke-linejoin='round'%3E%3C/g%3E%3Cg id='SVGRepo_iconCarrier'%3E%3Cpath d='M5 12H19M5 12L11 6M5 12L11 18' stroke='%23ffffff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/g%3E%3C/svg%3E");
+        background-size: contain;
+        background-repeat: no-repeat;
+        background-position: center center;
+        cursor: pointer;
     }
   
     /* Refresh icon */
@@ -2766,6 +2910,7 @@
         background-size: cover;
         margin: auto;
         user-select: none;
+        cursor: pointer;
     }
   
     .page_title {

@@ -254,7 +254,7 @@ function copyContentToClipboard(content, message) {
         notification(message);
     }, function(err) {
         console.error('Failed to copy content to clipboard: ', err);
-        notification('Failed to copy JSON object');
+        notification('Failed to copy, please try again');
     });
 }
 

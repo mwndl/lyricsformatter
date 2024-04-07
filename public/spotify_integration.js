@@ -132,6 +132,8 @@ function disconnectSpotify() {
 
 }
 
+let userEmail = '';
+let userCountry = '';
 
 async function fetchUserData() {
     try {
@@ -184,6 +186,9 @@ async function fetchUserData() {
         const spotifyLoginButton = document.getElementById('spotify_login_button');
         const userProfileDiv = document.getElementById('user_profile');
         const userProfileImage = document.getElementById('sp_user_pic');
+
+        userEmail = userData.email;
+        userCountry = userData.country;
 
         if (userProfileImage && userData.images.length > 0) {
             userProfileImage.src = userData.images[0].url;
