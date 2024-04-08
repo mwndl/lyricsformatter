@@ -6,8 +6,8 @@ let undoCursorPositionsStack = [];
 var redoCursorPositionsStack = [];
 var maxStackSize = 100;
 
-var lf_version = '2.14.0';
-var lf_release_date = '07/04/2024'
+var lf_version = '2.14.5';
+var lf_release_date = '08/04/2024'
 
 document.addEventListener('DOMContentLoaded', function () {
     var returnArrow = document.getElementById('return_arrow');
@@ -48,7 +48,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     document.getElementById('paste_button').addEventListener('click', function() { // paste
         pasteFromClipboard();
-        saveDraft();
+        autoSave();
    });    
 
     var refreshButton = document.getElementById('refresh_button');
@@ -686,6 +686,7 @@ function addToUndoStack() {
             clearTimeout(typingTimer); // auto 3s
             fetchCurrentlyPlayingData();
             checkLanguage();
+            saveDraft();
             
 
             // Get references to the elements
@@ -1606,7 +1607,6 @@ function addToUndoStack() {
             var manageDictionaryPopup = document.getElementById("manage_dictionary_popup");
             var manageDraftPopup = document.getElementById("manage_draft_popup");
             var diffcheckerPopup = document.getElementById("diffchecker_popup");
-            var diffLinkOutput = document.getElementById('diff_link_div');
 
             var overlay = document.getElementById("overlay");
 
@@ -1674,8 +1674,6 @@ function addToUndoStack() {
                 manageDictionaryPopup.style.display = "none";
                 manageDraftPopup.style.display = "none";
                 diffcheckerPopup.style.display = "none"
-
-                diffLinkOutput.style.display = 'none'
 
             });
 
@@ -2295,7 +2293,8 @@ function updateTabCounters() {
             // Deseleciona a textarea
             window.getSelection().removeAllRanges();
             updateTabCounters();
-            checkTextarea()
+            checkTextarea();
+            saveDraft();
         }
 
         function pasteFromClipboard() {
@@ -2322,6 +2321,8 @@ function updateTabCounters() {
                 } else {
                     notification('Pasted from clipboard!');
                 }
+
+                saveDraft()
                 
                 // Aqui você pode adicionar qualquer outra ação que deseja realizar após colar
             }).catch(function(err) {
@@ -3500,6 +3501,7 @@ function updateServerInfo(data) {
     function diffcheckerPopup() {
         document.getElementById('manage_draft_popup').style.display = 'none';
         document.getElementById('diffchecker_popup').style.display = 'block';
+        document.getElementById('diff_link_div').style.display = 'none'; // oculta o output do link
     }
 
     function closeDiff() {

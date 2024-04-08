@@ -363,6 +363,7 @@ async function fetchCurrentlyPlayingData() {
         // identifica mudança de faixa
         if (currentSongId !== delayedSongId) {
             recoverDraft() // caso haja um rascunho, ele irá exibir o alerta
+            storeSections(accessToken, currentSongId)
         }
 
         // define o delayer como o atual para identificar mudanças futuras
