@@ -47,4 +47,3 @@ LyricsFormatter is an independent tool created solely to assist users in transcr
 - **Spanish:** Andreks Tdos, Brayan Gutiérrez
 
 We hope LyricsFormatter is a useful tool for you!
-](https://github.com/mwndl/lyricsformatter?tab=readme-ov-file)
