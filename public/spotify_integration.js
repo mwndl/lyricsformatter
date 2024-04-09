@@ -836,3 +836,19 @@ async function resumePlayback() {
         console.error('Error resuming playback: ', error.message);
     }
 }
+
+function storeSections(accessToken, currentSongId) {
+    // Chamada para carregar a análise de áudio
+    loadAudioAnalysis(accessToken, currentSongId)
+        .then(data => {
+            if (data) {
+                // Atribui diretamente o array retornado às variáveis
+                sectionStartTimes = data;
+            } else {
+                sectionStartTimes = [];
+            }
+        })
+        .catch(error => {
+            console.error('Erro:', error);
+        });
+}
