@@ -132,6 +132,8 @@ function disconnectSpotify() {
 
 }
 
+let userEmail = '';
+let userCountry = '';
 
 async function fetchUserData() {
     try {
@@ -184,6 +186,9 @@ async function fetchUserData() {
         const spotifyLoginButton = document.getElementById('spotify_login_button');
         const userProfileDiv = document.getElementById('user_profile');
         const userProfileImage = document.getElementById('sp_user_pic');
+
+        userEmail = userData.email;
+        userCountry = userData.country;
 
         if (userProfileImage && userData.images.length > 0) {
             userProfileImage.src = userData.images[0].url;
@@ -358,6 +363,7 @@ async function fetchCurrentlyPlayingData() {
         // identifica mudança de faixa
         if (currentSongId !== delayedSongId) {
             recoverDraft() // caso haja um rascunho, ele irá exibir o alerta
+            storeSections(accessToken, currentSongId)
         }
 
         // define o delayer como o atual para identificar mudanças futuras
@@ -829,4 +835,20 @@ async function resumePlayback() {
     } catch (error) {
         console.error('Error resuming playback: ', error.message);
     }
+}
+
+function storeSections(accessToken, currentSongId) {
+    // Chamada para carregar a análise de áudio
+    loadAudioAnalysis(accessToken, currentSongId)
+        .then(data => {
+            if (data) {
+                // Atribui diretamente o array retornado às variáveis
+                sectionStartTimes = data;
+            } else {
+                sectionStartTimes = [];
+            }
+        })
+        .catch(error => {
+            console.error('Erro:', error);
+        });
 }

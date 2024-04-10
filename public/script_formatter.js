@@ -6,8 +6,8 @@ let undoCursorPositionsStack = [];
 var redoCursorPositionsStack = [];
 var maxStackSize = 100;
 
-var lf_version = '2.11.3';
-var lf_release_date = '05/04/2024'
+var lf_version = '2.14.6';
+var lf_release_date = '09/04/2024'
 
 document.addEventListener('DOMContentLoaded', function () {
     var returnArrow = document.getElementById('return_arrow');
@@ -46,8 +46,10 @@ document.addEventListener('DOMContentLoaded', function () {
     var copyButton = document.getElementById('copy_button');
     copyButton.addEventListener('click', copyToClipboard); // copy
 
-    var pasteButton = document.getElementById('paste_button');
-    pasteButton.addEventListener('click', pasteFromClipboard); // paste
+    document.getElementById('paste_button').addEventListener('click', function() { // paste
+        pasteFromClipboard();
+        autoSave();
+   });    
 
     var refreshButton = document.getElementById('refresh_button');
     refreshButton.addEventListener('click', handleRefreshButtonClick); // refresh
@@ -109,6 +111,7 @@ document.addEventListener('DOMContentLoaded', function () {
             'autoCapToggle',
             'autoFormatToggle',
             'saveDraft',
+            'saveOriginalDraft',
             'mxmPersonalTokenToggle',
             'autoSuggestion',
             'localHostToggle'
@@ -221,6 +224,12 @@ document.addEventListener('DOMContentLoaded', function () {
         button.addEventListener('click', function (event) {
             fixButton(event.target);
         });
+    });
+
+    const copyDiffButton = document.getElementById('copy_diff_link');
+    copyDiffButton.addEventListener('click', function() {
+        diffLink = document.getElementById('diff_link_output').textContent
+        copyContentToClipboard(diffLink, 'Link copied to clipboard')
     });
 
     document.addEventListener('keydown', function (event) {
@@ -677,6 +686,7 @@ function addToUndoStack() {
             clearTimeout(typingTimer); // auto 3s
             fetchCurrentlyPlayingData();
             checkLanguage();
+            saveDraft();
             
 
             // Get references to the elements
@@ -945,6 +955,11 @@ function addToUndoStack() {
         function isDraftChecked() {
             const saveDraft = document.getElementById('saveDraft');
             return saveDraft.checked;
+        }
+
+        function isOriginalDraftChecked() {
+            const saveOriginalDraft = document.getElementById('saveOriginalDraft');
+            return saveOriginalDraft.checked;
         }
 
         function isAutoSuggestionsChecked() {
@@ -1516,6 +1531,7 @@ function addToUndoStack() {
                 'autoCapToggle',
                 'autoFormatToggle',
                 'saveDraft',
+                'saveOriginalDraft',
                 'mxmPersonalTokenToggle',
                 'autoSuggestion',
                 'localHostToggle'
@@ -1541,6 +1557,11 @@ function addToUndoStack() {
             const cachedToken = localStorage.getItem('mxm_token');
             if (cachedToken !== null) {
                 document.getElementById('mxm_token_input').value = cachedToken;
+            }
+
+            draftToggle = isDraftChecked()
+            if (!draftToggle) {
+                document.getElementById('original_draft_toggle_div').style.display = 'none'
             }
         }
 
@@ -1583,6 +1604,10 @@ function addToUndoStack() {
             var shortcutsPopup = document.getElementById("shortcuts_popup");
             var aboutPopup = document.getElementById("about_popup");
 
+            var manageDictionaryPopup = document.getElementById("manage_dictionary_popup");
+            var manageDraftPopup = document.getElementById("manage_draft_popup");
+            var diffcheckerPopup = document.getElementById("diffchecker_popup");
+
             var overlay = document.getElementById("overlay");
 
             // Exibir ou ocultar mini menu ao clicar nos 'options_dots'
@@ -1611,6 +1636,9 @@ function addToUndoStack() {
                 miniMenu.style.display = "none";
                 settingsPopup.style.display = "block";
                 overlay.style.display = "block";
+                
+                updateMemoryUsage();
+                draftsCounter()
             });
 
             // Show Credits
@@ -1640,7 +1668,13 @@ function addToUndoStack() {
                 creditsPopup.style.display = "none";
                 shortcutsPopup.style.display = "none";
                 aboutPopup.style.display = "none";
+
                 overlay.style.display = "none";
+
+                manageDictionaryPopup.style.display = "none";
+                manageDraftPopup.style.display = "none";
+                diffcheckerPopup.style.display = "none"
+
             });
 
             // format e grammar
@@ -2139,6 +2173,8 @@ function updateTabCounters() {
         
             // Define o conteúdo do textarea como o texto modificado
             editor.value = content;
+
+            saveDraft()
         }
 
 
@@ -2257,7 +2293,8 @@ function updateTabCounters() {
             // Deseleciona a textarea
             window.getSelection().removeAllRanges();
             updateTabCounters();
-            checkTextarea()
+            checkTextarea();
+            saveDraft();
         }
 
         function pasteFromClipboard() {
@@ -2284,6 +2321,8 @@ function updateTabCounters() {
                 } else {
                     notification('Pasted from clipboard!');
                 }
+
+                saveDraft()
                 
                 // Aqui você pode adicionar qualquer outra ação que deseja realizar após colar
             }).catch(function(err) {
@@ -2908,19 +2947,9 @@ function updateServerInfo(data) {
 
 /* ****************************************** */
 
-    // teste para botão de expanção de funções do player no mobile (não terminado)
-    document.getElementById('toggle_options').addEventListener('click', function() {
-        var extendedOptions = document.querySelector('.extended-options');
-        this.classList.toggle('active');
-        if (extendedOptions.style.display === 'flex') {
-            extendedOptions.style.display = 'none';
-        } else {
-            extendedOptions.style.display = 'flex';
-        }
-    });
+/* FUNÇÕES PARA IMPORTAR E EXPORTAR O DICIONÁRIO */
 
-
-
+    // importa o arquivo do dicionário
     function importDictionary() {
         // Abre a biblioteca do PC filtrando apenas arquivos JSON
         const input = document.createElement('input');
@@ -2973,6 +3002,7 @@ function updateServerInfo(data) {
         input.click();
     }
 
+    // verifica se os dados do arquivo são válidos na estrutura esperada
     function isValidDictionary(data) {
         // Verifica se o objeto possui a estrutura correta
         if (!data || typeof data !== 'object') {
@@ -2998,6 +3028,7 @@ function updateServerInfo(data) {
         return true; // Estrutura válida
     }
     
+    // verifica se o idioma(s) do dicionário são suportados pela versão atual do LF
     function isValidLanguageData(languageData) {
         // Verifica se cada valor dentro do objeto é uma string
         for (const key in languageData) {
@@ -3009,7 +3040,7 @@ function updateServerInfo(data) {
         return true; // Dados da linguagem válidos
     }
 
-
+    // exporta o dicionário em um arquivo backup
     function exportDictionary() {
         const dictionaryCache = localStorage.getItem('dictionaryCache');
     
@@ -3031,7 +3062,7 @@ function updateServerInfo(data) {
         }
     }
 
-    // OBTER DATA ATUAL
+    // obtem a data atual
     function getCurrentDate() {
         const now = new Date();
         const year = now.getFullYear();
@@ -3040,6 +3071,11 @@ function updateServerInfo(data) {
         return `${year}${month}${day}`;
     }
 
+/* ****************************************** */
+
+/* FUNÇÕES PARA GERENCIAR OS DADOS EM CACHÊ */
+
+    // limpa apenas os toggles de preferências
     function deletePreferences() {
         localStorage.removeItem('localHostToggle');
         localStorage.removeItem('lfExportToggle');
@@ -3064,6 +3100,7 @@ function updateServerInfo(data) {
         notification('Preferences deleted successfully!');
     }
 
+    // limpa todos os dados em cachê (inclusive rascunhos)
     function clearCache() {
         localStorage.clear();
         cancelClearCache()
@@ -3168,211 +3205,915 @@ function updateServerInfo(data) {
 
 /* ****************************************** */
 
-function updateMemoryUsage() {
-    usage = calculateCacheSize();
-    document.getElementById('memory_usage').textContent = usage;
-}
+/* ATUALIZA OS CONTADORES DE MEMÓRIA  */
 
-function draftsCounter() {
-    var localDrafts = localStorage.getItem('localDrafts');
-    var totalLimit = localStorage.getItem('draftLimit');
-    var counter = 0;
+    function updateMemoryUsage() {
+        totalUsage = calculateCacheSize();
+        dictionaryUsage = calculateCacheSize('dictionaryCache');
+        draftUsage = calculateCacheSize('localDrafts');
 
-    if (localDrafts) {
+        document.getElementById('memory_usage').textContent = totalUsage;
+        document.getElementById('dictionary_memory').textContent = `Memory usage: ${dictionaryUsage}`;
+        document.getElementById('draft_memory').textContent = `Memory usage: ${draftUsage}`;
+    }
+
+    function draftsCounter() {
+        var localDrafts = localStorage.getItem('localDrafts');
+        var totalLimit = localStorage.getItem('draftLimit');
+        var counter = 0;
+
+        if (localDrafts) {
+            var draftsObject = JSON.parse(localDrafts);
+            counter = Object.keys(draftsObject).length;
+        }
+
+        if (totalLimit === '0') {
+            document.getElementById('draft_items').textContent = `Total drafts: ${counter}`;
+        } else {
+            document.getElementById('draft_items').textContent = `Total drafts: ${counter} / ${totalLimit}`;
+        }
+    }
+
+    function calculateCacheSize(hostID) {
+        let totalSize = 0;
+
+        // Se hostID for fornecido, calcula apenas para esse ID
+        if (hostID) {
+            const hostData = localStorage.getItem(hostID);
+            if (hostData) {
+                totalSize += (hostID.length + hostData.length) * 2;
+            }
+        } else {
+            // Calcula o tamanho total de todos os dados no armazenamento local
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                const value = localStorage.getItem(key);
+                totalSize += (key.length + value.length) * 2; // Aproximação do tamanho em bytes
+            }
+        }
+
+        // Convertendo bytes para KB ou MB
+        if (totalSize < 1024) {
+            return totalSize.toFixed(2) + ' bytes';
+        } else if (totalSize < 1048576) { // 1024 * 1024 (1 MB)
+            return (totalSize / 1024).toFixed(2) + ' KB';
+        } else {
+            return (totalSize / 1048576).toFixed(2) + ' MB';
+        }
+    }
+
+/* ****************************************** */
+
+/* POPUP DE GERENCIAMENTO DO DICIONÁRIO  */
+
+    function showDictionaryManagement() {
+        // Salvando o conteúdo atual da settings_tab
+        var originalContent = document.querySelector('.settings_tab').innerHTML;
+
+        // Criando o conteúdo da tela de gerenciamento do dicionário
+        var dictionaryManagementContent = `
+            <div class="dictionary_management">
+                <!-- Conteúdo da tela de gerenciamento do dicionário -->
+                <button onclick="showSettingsMenu()">Voltar</button>
+            </div>
+        `;
+
+        // Substituindo o conteúdo da settings_tab pelo conteúdo da tela de gerenciamento do dicionário
+        document.querySelector('.settings_tab').innerHTML = dictionaryManagementContent;
+    }
+
+    function showSettingsMenu() {
+        // Restaurando o conteúdo original da settings_tab
+        var originalContent = document.querySelector('.settings_tab').innerHTML;
+        
+        // Substituindo o conteúdo da settings_tab pelo conteúdo original
+        document.querySelector('.settings_tab').innerHTML = originalContent;
+    }
+
+
+/* ****************************************** */
+
+/* SISTEMA DE GERENCIAMENTO DE RASCUNHOS  */
+
+    function checkExpiredDrafts() {
+        var draftDuration = localStorage.getItem('draftDuration');
+        if (!draftDuration || draftDuration === '0') {
+            return; // Se não houver configuração de duração, ou caso ela seja '0' (nunca), não faça nada
+        }
+        draftDuration = parseInt(draftDuration);
+
+        var localDrafts = localStorage.getItem('localDrafts');
+        if (!localDrafts) {
+            return; // Não há rascunhos salvos
+        }
+
         var draftsObject = JSON.parse(localDrafts);
-        counter = Object.keys(draftsObject).length;
+        var currentDateTime = new Date();
+
+        for (var key in draftsObject) {
+            if (draftsObject.hasOwnProperty(key)) {
+                var draftDateTime = new Date(draftsObject[key].datetime);
+                var diffTime = Math.abs(currentDateTime - draftDateTime);
+                var diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+                if (diffDays > draftDuration) {
+                    delete draftsObject[key];
+                }
+            }
+        }
+
+        // Atualiza os rascunhos no localStorage
+        localStorage.setItem('localDrafts', JSON.stringify(draftsObject));
     }
 
-    document.getElementById('drafts_counter').textContent = `${counter} / ${totalLimit}`;
-}
+    isOriginalDraftChecked()
 
-function calculateCacheSize() {
-    let totalSize = 0;
-    for (let i = 0; i < localStorage.length; i++) {
-        const key = localStorage.key(i);
-        const value = localStorage.getItem(key);
-        totalSize += (key.length + value.length) * 2; // Aproximação do tamanho em bytes
-    }
+    function saveDraft() {
+        saveDraftToggle = isDraftChecked()
+        if (!saveDraftToggle) {
+            return
+        }
 
-    // Convertendo bytes para KB ou MB
-    if (totalSize < 1024) {
-        return totalSize.toFixed(2) + ' bytes';
-    } else if (totalSize < 1048576) { // 1024 * 1024 (1 MB)
-        return (totalSize / 1024).toFixed(2) + ' KB';
-    } else {
-        return (totalSize / 1048576).toFixed(2) + ' MB';
-    }
-}
-
-
-
-function showDictionaryManagement() {
-    // Salvando o conteúdo atual da settings_tab
-    var originalContent = document.querySelector('.settings_tab').innerHTML;
-
-    // Criando o conteúdo da tela de gerenciamento do dicionário
-    var dictionaryManagementContent = `
-        <div class="dictionary_management">
-            <!-- Conteúdo da tela de gerenciamento do dicionário -->
-            <button onclick="showSettingsMenu()">Voltar</button>
-        </div>
-    `;
-
-    // Substituindo o conteúdo da settings_tab pelo conteúdo da tela de gerenciamento do dicionário
-    document.querySelector('.settings_tab').innerHTML = dictionaryManagementContent;
-}
-
-function showSettingsMenu() {
-    // Restaurando o conteúdo original da settings_tab
-    var originalContent = document.querySelector('.settings_tab').innerHTML;
+        var editorValue = document.getElementById('editor').value;
+        var draftStatus = document.getElementById('draft_status');
     
-    // Substituindo o conteúdo da settings_tab pelo conteúdo original
-    document.querySelector('.settings_tab').innerHTML = originalContent;
-}
-
-
-/* DRAFTS */
-
-function checkExpiredDrafts() {
-    var draftDuration = localStorage.getItem('draftDuration');
-    if (!draftDuration) {
-        return; // Se não houver configuração de duração, não faz nada
+        if (editorValue === '') {
+            return;
+        }
+    
+        if (currentSongId === '' || currentIsrc === '') {
+            notification("Missing track data, unable to save draft");
+            return;
+        }
+    
+        draftStatus.textContent = 'Saving draft...';
+    
+        // Verifica se há algum draft salvo
+        var localDrafts = localStorage.getItem('localDrafts');
+        var draftsObject = localDrafts ? JSON.parse(localDrafts) : {};
+    
+        // Adiciona data e hora atual
+        var currentDateTime = new Date().toISOString();
+    
+        // Verifica se o rascunho já existe
+        var existingDraft = draftsObject[currentIsrc];
+    
+        // Se o rascunho existir e createOriginalTranscription for verdadeiro,
+        // verifica se o campo original_transcription já está presente e mantém seu valor
+        if (existingDraft) {
+            if (isOriginalDraftChecked() && existingDraft.original_transcription) {
+                var originalTranscription = existingDraft.original_transcription;
+            } else {
+                if (existingDraft.original_transcription) {
+                    var originalTranscription = existingDraft.original_transcription;
+                } else {
+                    var originalTranscription = '';
+                }
+            }
+        } else {
+            if (isOriginalDraftChecked()) {
+                var originalTranscription = editorValue;
+            } else {
+                var originalTranscription = '';
+            }
+        }
+    
+        // Atualiza ou adiciona o draft atual
+        var draft = {
+            "track_name": trackName,
+            "artist_name": artistName,
+            "track_id": currentSongId,
+            "datetime": currentDateTime,
+            "transcription": editorValue,
+            "original_transcription": originalTranscription
+        };
+    
+        draftsObject[currentIsrc] = draft;
+    
+        // Verifica o limite de rascunhos
+        var draftLimit = localStorage.getItem('draftLimit') || 100; // Limite padrão se não estiver definido
+    
+        // Verifica se o limite é ilimitado
+        if (draftLimit !== '0') {
+            draftLimit = parseInt(draftLimit);
+    
+            var draftKeys = Object.keys(draftsObject);
+            if (draftKeys.length > draftLimit) {
+                // Encontra o item mais antigo com base na datetime
+                var oldestKey = draftKeys.reduce(function (a, b) {
+                    return draftsObject[a].datetime < draftsObject[b].datetime ? a : b;
+                });
+    
+                // Exclui o item mais antigo
+                delete draftsObject[oldestKey];
+            }
+        }
+    
+        // Salva o draft no localStorage
+        localStorage.setItem('localDrafts', JSON.stringify(draftsObject));
+        // Define a função para atualizar o textContent após 1.5 segundos
+        setTimeout(function () {
+            draftStatus.textContent = 'Draft saved';
+        }, 1500);
+    
+        // Define a função para atualizar o textContent após 1.5 segundos
+        setTimeout(function () {
+            draftStatus.textContent = '';
+        }, 5000);
     }
-    draftDuration = parseInt(draftDuration);
 
-    var localDrafts = localStorage.getItem('localDrafts');
-    if (!localDrafts) {
-        return; // Não há rascunhos salvos
+    function recoverDraft() {
+        var localDrafts = localStorage.getItem('localDrafts');
+        var draftsObject = localDrafts ? JSON.parse(localDrafts) : {};
+
+        var currentDraft = draftsObject[currentIsrc];
+
+        if (currentDraft && currentDraft.transcription) {
+            // Exibindo o popup
+            document.getElementById('draft_content').style.display = 'flex';
+            document.getElementById('draft_overlay').style.display = 'block';
+
+            // Exibir a data se estiver disponível
+            if (currentDraft.datetime) {
+                var draftSavedDate = new Date(currentDraft.datetime);
+                var formattedDate = draftSavedDate.toLocaleString(); // Você pode personalizar o formato conforme necessário
+                document.getElementById('draft_saved_date').textContent = "Saved on: " + formattedDate;
+            }
+        }
+    }
+    function recoverConfirmed() {
+        var localDrafts = localStorage.getItem('localDrafts');
+        var draftsObject = localDrafts ? JSON.parse(localDrafts) : {};
+        var currentDraft = draftsObject[currentIsrc];
+
+        // Recuperando o rascunho
+        document.getElementById('editor').value = currentDraft.transcription;
+        notification("Draft successfully recovered!");
+
+        updateSidebar()
+        // Escondendo o popup
+        document.getElementById('draft_content').style.display = 'none';
+        document.getElementById('draft_overlay').style.display = 'none';
     }
 
-    var draftsObject = JSON.parse(localDrafts);
-    var currentDateTime = new Date();
+    function discardDraft() {
+        // Descartando o rascunho
+        notification("Draft discarded");
 
-    for (var key in draftsObject) {
-        if (draftsObject.hasOwnProperty(key)) {
-            var draftDateTime = new Date(draftsObject[key].datetime);
-            var diffTime = Math.abs(currentDateTime - draftDateTime);
-            var diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        // Escondendo o popup
+        document.getElementById('draft_content').style.display = 'none';
+        document.getElementById('draft_overlay').style.display = 'none';
+    }
 
-            if (diffDays > draftDuration) {
-                delete draftsObject[key];
+    function autoSave() {
+        const editor = document.getElementById('editor');
+        const content = editor.value;
+
+        if (content.trim() === '') {
+            return;
+        } else {
+            saveDraft()
+        }
+    }
+
+    function manageDictionary() {
+        document.getElementById('settings_popup').style.display = 'none';
+        document.getElementById('manage_dictionary_popup').style.display = 'block';
+        populateDictionaryPopupFromCache()
+    }
+
+    function closeManageDictionary() {
+        document.getElementById('settings_popup').style.display = 'block';
+        document.getElementById('manage_dictionary_popup').style.display = 'none';
+    }
+
+    function manageDraft() {
+        document.getElementById('settings_popup').style.display = 'none';
+        document.getElementById('manage_draft_popup').style.display = 'block';
+        populateDraftsPopupFromCache()
+    }
+
+    function closeManageDraft() {
+        document.getElementById('settings_popup').style.display = 'block';
+        document.getElementById('manage_draft_popup').style.display = 'none';
+    }
+
+    function diffcheckerPopup() {
+        document.getElementById('manage_draft_popup').style.display = 'none';
+        document.getElementById('diffchecker_popup').style.display = 'block';
+        document.getElementById('diff_link_div').style.display = 'none'; // oculta o output do link
+    }
+
+    function closeDiff() {
+        document.getElementById('manage_draft_popup').style.display = 'block';
+        document.getElementById('diffchecker_popup').style.display = 'none';
+        document.getElementById('diff_link_div').style.display = 'none';
+    }
+
+
+/* ****************************************** */
+
+/* POPULA AS TABELAS DO DICIONÁRIO COM OS DADOS EM CACHÊ  */
+
+    function populateDictionaryPopupFromCache() {
+        // Recupera os dados do cache
+        const cacheData = localStorage.getItem('dictionaryCache');
+
+        // Verifica se existem dados no cache
+        if (cacheData) {
+            const dictionaryCache = JSON.parse(cacheData);
+
+            // Obtém o elemento popup_content dentro do manage_dictionary_popup
+            const popupContent = document.querySelector('#manage_dictionary_popup .popup_content');
+
+            // Cria a tabela
+            const table = document.createElement('table');
+            table.setAttribute('border', '1');
+            table.setAttribute('id', 'dictionary_table');
+
+            // Cria o cabeçalho da tabela
+            const thead = document.createElement('thead');
+            thead.innerHTML = `
+                <tr>
+                    <th onclick="sortTable(0, 'dictionary_table')">Content</th>
+                    <th onclick="sortTable(1, 'dictionary_table')">Description</th>
+                    <th onclick="sortTable(2, 'dictionary_table')">Language</th>
+                    <th>Delete</th>
+                </tr>
+            `;
+            table.appendChild(thead);
+
+            // Cria o corpo da tabela
+            const tbody = document.createElement('tbody');
+
+            // Preenche o corpo da tabela com os dados do cache
+            Object.keys(dictionaryCache).forEach(language => {
+                Object.entries(dictionaryCache[language]).forEach(([word, description]) => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${word}</td>
+                        <td>${description}</td>
+                        <td>${language}</td>
+                        <td><span class="delete_button" onclick="deleteRow(this)">
+                            <svg fill="#ffffff" width="25px" height="25px" viewBox="-3.5 0 19 19" xmlns="http://www.w3.org/2000/svg" class="cf-icon-svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"><path d="M11.383 13.644A1.03 1.03 0 0 1 9.928 15.1L6 11.172 2.072 15.1a1.03 1.03 0 1 1-1.455-1.456l3.928-3.928L.617 5.79a1.03 1.03 0 1 1 1.455-1.456L6 8.261l3.928-3.928a1.03 1.03 0 0 1 1.455 1.456L7.455 9.716z"></path></g></svg>
+                        </span></td>
+                    `;
+                    tbody.appendChild(row);
+                });
+            });
+
+            // Adiciona o corpo da tabela à tabela
+            table.appendChild(tbody);
+            
+
+            // Limpa o conteúdo atual do popup_content
+            popupContent.innerHTML = '';
+
+            // Adiciona a tabela ao popup_content
+            popupContent.appendChild(table);
+
+            // Atualiza o número total de linhas
+            const rowCount = tbody.querySelectorAll('tr').length;
+            const dictionaryRows = document.getElementById('dictionary_rows');
+            dictionaryRows.textContent = `Total rows: ${rowCount}`;
+        }
+    }
+
+    function deleteRow(element) {
+        // Obtém a linha pai do botão "Delete"
+        const row = element.closest('tr');
+
+        // Obtém a palavra e o idioma da linha
+        const word = row.cells[0].textContent;
+        const language = row.cells[2].textContent;
+
+        // Recupera os dados do cache
+        const cacheData = localStorage.getItem('dictionaryCache');
+
+        // Verifica se existem dados no cache
+        if (cacheData) {
+            const dictionaryCache = JSON.parse(cacheData);
+
+            // Verifica se a palavra existe no cache para o idioma correspondente
+            if (dictionaryCache[language] && dictionaryCache[language][word]) {
+                // Remove a entrada do cache
+                delete dictionaryCache[language][word];
+
+                // Atualiza os dados no cache
+                localStorage.setItem('dictionaryCache', JSON.stringify(dictionaryCache));
+
+                // Remove a linha da tabela
+                row.parentNode.removeChild(row);
+
+                // Atualiza a contagem de linhas
+                const rowCount = document.querySelectorAll('#manage_dictionary_popup tbody tr').length;
+                const dictionaryRows = document.getElementById('dictionary_rows');
+                dictionaryRows.textContent = `Total rows: ${rowCount}`;
+
+                updateMemoryUsage()
             }
         }
     }
 
-    // Atualiza os rascunhos no localStorage
-    localStorage.setItem('localDrafts', JSON.stringify(draftsObject));
-}
+/* ****************************************** */
 
-function saveDraft() {
-    var editorValue = document.getElementById('editor').value;
-    var draftStatus = document.getElementById('draft_status');
+/* POPULA AS TABELAS DO RASCUNHO COM OS DADOS EM CACHÊ  */
 
-    if (editorValue === '') {
-        return;
-    }
+function populateDraftsPopupFromCache() {
+    // Recupera os dados do cache
+    const cacheData = localStorage.getItem('localDrafts');
 
-    if (currentSongId === '' || currentIsrc === '') {
-        notification("Missing track data, unable to save draft");
-        return;
-    }
+    // Verifica se existem dados no cache
+    if (cacheData) {
+        const draftsCache = JSON.parse(cacheData);
 
-    draftStatus.textContent = 'Saving draft...';
+        // Obtém o elemento popup_content dentro do manage_drafts_popup
+        const popupContent = document.querySelector('#manage_draft_popup .popup_content');
 
-    // Verifica se há algum draft salvo
-    var localDrafts = localStorage.getItem('localDrafts');
-    var draftsObject = localDrafts ? JSON.parse(localDrafts) : {};
+        // Cria a tabela
+        const table = document.createElement('table');
+        table.setAttribute('border', '1');
+        table.setAttribute('id', 'draft_table');
 
-    // Adiciona data e hora atual
-    var currentDateTime = new Date().toISOString();
+        // Cria o cabeçalho da tabela
+        const thead = document.createElement('thead');
+        thead.innerHTML = `
+            <tr>
+                <th onclick="sortTable(0, 'draft_table')">Date</th>
+                <th onclick="sortTable(1, 'draft_table')">Track Name</th>
+                <th onclick="sortTable(2, 'draft_table')">Artist Name</th>
+                <th>Play</th>
+                <th>Original</th>
+                <th>Final</th>
+                <th>Compare</th>
+                <th>Export</th>
+                <th>Delete</th>
+            </tr>
+        `;
+        table.appendChild(thead);
 
-    // Atualiza ou adiciona o draft atual
-    draftsObject[currentIsrc] = {
-        "track_name": trackName,
-        "artist_name": artistName,
-        "track_id": currentSongId,
-        "datetime": currentDateTime,
-        "transcription": editorValue
-    };
+        // Cria o corpo da tabela
+        const tbody = document.createElement('tbody');
 
-    // Verifica o limite de rascunhos
-    var draftLimit = localStorage.getItem('draftLimit') || 100; // Limite padrão se não estiver definido
-    draftLimit = parseInt(draftLimit);
-
-    var draftKeys = Object.keys(draftsObject);
-    if (draftKeys.length > draftLimit) {
-        // Encontra o item mais antigo com base na datetime
-        var oldestKey = draftKeys.reduce(function (a, b) {
-            return draftsObject[a].datetime < draftsObject[b].datetime ? a : b;
+        // Preenche o corpo da tabela com os dados do cache
+        Object.keys(draftsCache).forEach(isrcCode => {
+            const draft = draftsCache[isrcCode];
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${new Date(draft.datetime).toLocaleDateString()}</td>
+                <td>${draft.track_name}</td>
+                <td>${draft.artist_name}</td>
+                <td><span title='Play "${draft.track_name}" by "${draft.artist_name}"' class="table_svg_icon" onclick="draftStartPlayback('${draft.track_id}')">
+                    <svg fill="#ffffff" width="25px" height="25px" viewBox="0 0 32 32" version="1.1" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M5.92 24.096q0 1.088 0.928 1.728 0.512 0.288 1.088 0.288 0.448 0 0.896-0.224l16.16-8.064q0.48-0.256 0.8-0.736t0.288-1.088-0.288-1.056-0.8-0.736l-16.16-8.064q-0.448-0.224-0.896-0.224-0.544 0-1.088 0.288-0.928 0.608-0.928 1.728v16.16z"></path> </g></svg>
+                </span></td>
+                <td>${draft.original_transcription ? 
+                        `<span title="Copy transcription" class="table_svg_icon" onclick="copyTranscriptionFromCache('original_transcription', '${isrcCode}')">
+                            <svg width="25px" height="25px" viewBox="0 -0.5 25 25" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M8.25005 8.5C8.25005 8.91421 8.58584 9.25 9.00005 9.25C9.41426 9.25 9.75005 8.91421 9.75005 8.5H8.25005ZM9.00005 8.267H9.75006L9.75004 8.26283L9.00005 8.267ZM9.93892 5.96432L10.4722 6.49171L9.93892 5.96432ZM12.2311 5V4.24999L12.2269 4.25001L12.2311 5ZM16.269 5L16.2732 4.25H16.269V5ZM18.5612 5.96432L18.0279 6.49171V6.49171L18.5612 5.96432ZM19.5 8.267L18.75 8.26283V8.267H19.5ZM19.5 12.233H18.75L18.7501 12.2372L19.5 12.233ZM18.5612 14.5357L18.0279 14.0083L18.5612 14.5357ZM16.269 15.5V16.25L16.2732 16.25L16.269 15.5ZM16 14.75C15.5858 14.75 15.25 15.0858 15.25 15.5C15.25 15.9142 15.5858 16.25 16 16.25V14.75ZM9.00005 9.25C9.41426 9.25 9.75005 8.91421 9.75005 8.5C9.75005 8.08579 9.41426 7.75 9.00005 7.75V9.25ZM8.73105 8.5V7.74999L8.72691 7.75001L8.73105 8.5ZM6.43892 9.46432L6.97218 9.99171L6.43892 9.46432ZM5.50005 11.767H6.25006L6.25004 11.7628L5.50005 11.767ZM5.50005 15.734L6.25005 15.7379V15.734H5.50005ZM8.73105 19L8.72691 19.75H8.73105V19ZM12.769 19V19.75L12.7732 19.75L12.769 19ZM15.0612 18.0357L14.5279 17.5083L15.0612 18.0357ZM16 15.733H15.25L15.2501 15.7372L16 15.733ZM16.75 15.5C16.75 15.0858 16.4143 14.75 16 14.75C15.5858 14.75 15.25 15.0858 15.25 15.5H16.75ZM9.00005 7.75C8.58584 7.75 8.25005 8.08579 8.25005 8.5C8.25005 8.91421 8.58584 9.25 9.00005 9.25V7.75ZM12.7691 8.5L12.7732 7.75H12.7691V8.5ZM15.0612 9.46432L15.5944 8.93694V8.93694L15.0612 9.46432ZM16.0001 11.767L15.2501 11.7628V11.767H16.0001ZM15.2501 15.5C15.2501 15.9142 15.5858 16.25 16.0001 16.25C16.4143 16.25 16.7501 15.9142 16.7501 15.5H15.2501ZM9.75005 8.5V8.267H8.25005V8.5H9.75005ZM9.75004 8.26283C9.74636 7.60005 10.0061 6.96296 10.4722 6.49171L9.40566 5.43694C8.65985 6.19106 8.24417 7.21056 8.25006 8.27117L9.75004 8.26283ZM10.4722 6.49171C10.9382 6.02046 11.5724 5.75365 12.2352 5.74999L12.2269 4.25001C11.1663 4.25587 10.1515 4.68282 9.40566 5.43694L10.4722 6.49171ZM12.2311 5.75H16.269V4.25H12.2311V5.75ZM16.2649 5.74999C16.9277 5.75365 17.5619 6.02046 18.0279 6.49171L19.0944 5.43694C18.3486 4.68282 17.3338 4.25587 16.2732 4.25001L16.2649 5.74999ZM18.0279 6.49171C18.494 6.96296 18.7537 7.60005 18.7501 8.26283L20.25 8.27117C20.2559 7.21056 19.8402 6.19106 19.0944 5.43694L18.0279 6.49171ZM18.75 8.267V12.233H20.25V8.267H18.75ZM18.7501 12.2372C18.7537 12.8999 18.494 13.537 18.0279 14.0083L19.0944 15.0631C19.8402 14.3089 20.2559 13.2894 20.25 12.2288L18.7501 12.2372ZM18.0279 14.0083C17.5619 14.4795 16.9277 14.7463 16.2649 14.75L16.2732 16.25C17.3338 16.2441 18.3486 15.8172 19.0944 15.0631L18.0279 14.0083ZM16.269 14.75H16V16.25H16.269V14.75ZM9.00005 7.75H8.73105V9.25H9.00005V7.75ZM8.72691 7.75001C7.6663 7.75587 6.65146 8.18282 5.90566 8.93694L6.97218 9.99171C7.43824 9.52046 8.07241 9.25365 8.73519 9.24999L8.72691 7.75001ZM5.90566 8.93694C5.15985 9.69106 4.74417 10.7106 4.75006 11.7712L6.25004 11.7628C6.24636 11.1001 6.50612 10.463 6.97218 9.99171L5.90566 8.93694ZM4.75005 11.767V15.734H6.25005V11.767H4.75005ZM4.75006 15.7301C4.73847 17.9382 6.51879 19.7378 8.72691 19.75L8.7352 18.25C7.35533 18.2424 6.2428 17.1178 6.25004 15.7379L4.75006 15.7301ZM8.73105 19.75H12.769V18.25H8.73105V19.75ZM12.7732 19.75C13.8338 19.7441 14.8486 19.3172 15.5944 18.5631L14.5279 17.5083C14.0619 17.9795 13.4277 18.2463 12.7649 18.25L12.7732 19.75ZM15.5944 18.5631C16.3402 17.8089 16.7559 16.7894 16.75 15.7288L15.2501 15.7372C15.2537 16.3999 14.994 17.037 14.5279 17.5083L15.5944 18.5631ZM16.75 15.733V15.5H15.25V15.733H16.75ZM9.00005 9.25H12.7691V7.75H9.00005V9.25ZM12.7649 9.24999C13.4277 9.25365 14.0619 9.52046 14.5279 9.99171L15.5944 8.93694C14.8486 8.18282 13.8338 7.75587 12.7732 7.75001L12.7649 9.24999ZM14.5279 9.99171C14.994 10.463 15.2537 11.1001 15.2501 11.7628L16.75 11.7712C16.7559 10.7106 16.3402 9.69106 15.5944 8.93694L14.5279 9.99171ZM15.2501 11.767V15.5H16.7501V11.767H15.2501Z" fill="#ffffff"></path> </g></svg>
+                        </span>` : '-'}</td>
+                <td><span title="Copy transcription" class="table_svg_icon" onclick="copyTranscriptionFromCache('transcription', '${isrcCode}')">
+                    <svg width="25px" height="25px" viewBox="0 -0.5 25 25" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M8.25005 8.5C8.25005 8.91421 8.58584 9.25 9.00005 9.25C9.41426 9.25 9.75005 8.91421 9.75005 8.5H8.25005ZM9.00005 8.267H9.75006L9.75004 8.26283L9.00005 8.267ZM9.93892 5.96432L10.4722 6.49171L9.93892 5.96432ZM12.2311 5V4.24999L12.2269 4.25001L12.2311 5ZM16.269 5L16.2732 4.25H16.269V5ZM18.5612 5.96432L18.0279 6.49171V6.49171L18.5612 5.96432ZM19.5 8.267L18.75 8.26283V8.267H19.5ZM19.5 12.233H18.75L18.7501 12.2372L19.5 12.233ZM18.5612 14.5357L18.0279 14.0083L18.5612 14.5357ZM16.269 15.5V16.25L16.2732 16.25L16.269 15.5ZM16 14.75C15.5858 14.75 15.25 15.0858 15.25 15.5C15.25 15.9142 15.5858 16.25 16 16.25V14.75ZM9.00005 9.25C9.41426 9.25 9.75005 8.91421 9.75005 8.5C9.75005 8.08579 9.41426 7.75 9.00005 7.75V9.25ZM8.73105 8.5V7.74999L8.72691 7.75001L8.73105 8.5ZM6.43892 9.46432L6.97218 9.99171L6.43892 9.46432ZM5.50005 11.767H6.25006L6.25004 11.7628L5.50005 11.767ZM5.50005 15.734L6.25005 15.7379V15.734H5.50005ZM8.73105 19L8.72691 19.75H8.73105V19ZM12.769 19V19.75L12.7732 19.75L12.769 19ZM15.0612 18.0357L14.5279 17.5083L15.0612 18.0357ZM16 15.733H15.25L15.2501 15.7372L16 15.733ZM16.75 15.5C16.75 15.0858 16.4143 14.75 16 14.75C15.5858 14.75 15.25 15.0858 15.25 15.5H16.75ZM9.00005 7.75C8.58584 7.75 8.25005 8.08579 8.25005 8.5C8.25005 8.91421 8.58584 9.25 9.00005 9.25V7.75ZM12.7691 8.5L12.7732 7.75H12.7691V8.5ZM15.0612 9.46432L15.5944 8.93694V8.93694L15.0612 9.46432ZM16.0001 11.767L15.2501 11.7628V11.767H16.0001ZM15.2501 15.5C15.2501 15.9142 15.5858 16.25 16.0001 16.25C16.4143 16.25 16.7501 15.9142 16.7501 15.5H15.2501ZM9.75005 8.5V8.267H8.25005V8.5H9.75005ZM9.75004 8.26283C9.74636 7.60005 10.0061 6.96296 10.4722 6.49171L9.40566 5.43694C8.65985 6.19106 8.24417 7.21056 8.25006 8.27117L9.75004 8.26283ZM10.4722 6.49171C10.9382 6.02046 11.5724 5.75365 12.2352 5.74999L12.2269 4.25001C11.1663 4.25587 10.1515 4.68282 9.40566 5.43694L10.4722 6.49171ZM12.2311 5.75H16.269V4.25H12.2311V5.75ZM16.2649 5.74999C16.9277 5.75365 17.5619 6.02046 18.0279 6.49171L19.0944 5.43694C18.3486 4.68282 17.3338 4.25587 16.2732 4.25001L16.2649 5.74999ZM18.0279 6.49171C18.494 6.96296 18.7537 7.60005 18.7501 8.26283L20.25 8.27117C20.2559 7.21056 19.8402 6.19106 19.0944 5.43694L18.0279 6.49171ZM18.75 8.267V12.233H20.25V8.267H18.75ZM18.7501 12.2372C18.7537 12.8999 18.494 13.537 18.0279 14.0083L19.0944 15.0631C19.8402 14.3089 20.2559 13.2894 20.25 12.2288L18.7501 12.2372ZM18.0279 14.0083C17.5619 14.4795 16.9277 14.7463 16.2649 14.75L16.2732 16.25C17.3338 16.2441 18.3486 15.8172 19.0944 15.0631L18.0279 14.0083ZM16.269 14.75H16V16.25H16.269V14.75ZM9.00005 7.75H8.73105V9.25H9.00005V7.75ZM8.72691 7.75001C7.6663 7.75587 6.65146 8.18282 5.90566 8.93694L6.97218 9.99171C7.43824 9.52046 8.07241 9.25365 8.73519 9.24999L8.72691 7.75001ZM5.90566 8.93694C5.15985 9.69106 4.74417 10.7106 4.75006 11.7712L6.25004 11.7628C6.24636 11.1001 6.50612 10.463 6.97218 9.99171L5.90566 8.93694ZM4.75005 11.767V15.734H6.25005V11.767H4.75005ZM4.75006 15.7301C4.73847 17.9382 6.51879 19.7378 8.72691 19.75L8.7352 18.25C7.35533 18.2424 6.2428 17.1178 6.25004 15.7379L4.75006 15.7301ZM8.73105 19.75H12.769V18.25H8.73105V19.75ZM12.7732 19.75C13.8338 19.7441 14.8486 19.3172 15.5944 18.5631L14.5279 17.5083C14.0619 17.9795 13.4277 18.2463 12.7649 18.25L12.7732 19.75ZM15.5944 18.5631C16.3402 17.8089 16.7559 16.7894 16.75 15.7288L15.2501 15.7372C15.2537 16.3999 14.994 17.037 14.5279 17.5083L15.5944 18.5631ZM16.75 15.733V15.5H15.25V15.733H16.75ZM9.00005 9.25H12.7691V7.75H9.00005V9.25ZM12.7649 9.24999C13.4277 9.25365 14.0619 9.52046 14.5279 9.99171L15.5944 8.93694C14.8486 8.18282 13.8338 7.75587 12.7732 7.75001L12.7649 9.24999ZM14.5279 9.99171C14.994 10.463 15.2537 11.1001 15.2501 11.7628L16.75 11.7712C16.7559 10.7106 16.3402 9.69106 15.5944 8.93694L14.5279 9.99171ZM15.2501 11.767V15.5H16.7501V11.767H15.2501Z" fill="#ffffff"></path> </g></svg>
+                </span></td>
+                <td>${draft.original_transcription ? 
+                    `<span title="Compare versions" class="table_svg_icon" onclick="compareDrafts('${isrcCode}','original_transcription', 'transcription')">
+                    <svg fill="#ffffff" width="25px" height="25px" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"><path d="M1,8A1,1,0,0,1,2,7H9.586L7.293,4.707A1,1,0,1,1,8.707,3.293l4,4a1,1,0,0,1,0,1.414l-4,4a1,1,0,1,1-1.414-1.414L9.586,9H2A1,1,0,0,1,1,8Zm21,7H14.414l2.293-2.293a1,1,0,0,0-1.414-1.414l-4,4a1,1,0,0,0,0,1.414l4,4a1,1,0,0,0,1.414-1.414L14.414,17H22a1,1,0,0,0,0-2Z"></path></g></svg>
+                    </span>` : '-'}</td>
+                <td><span title="Export this draft" class="table_svg_icon" onclick="exportDraft('${isrcCode}')">
+                    <svg width="25px" height="25px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <g id="Interface / Download"> <path id="Vector" d="M6 21H18M12 3V17M12 17L17 12M12 17L7 12" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path> </g> </g></svg>
+                </span></td>
+                <td><span title="Delete this draft" class="table_svg_icon" onclick="deleteDraft('${isrcCode}')">
+                <svg fill="#ffffff" width="25px" height="25px" viewBox="-3.5 0 19 19" xmlns="http://www.w3.org/2000/svg" class="cf-icon-svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"><path d="M11.383 13.644A1.03 1.03 0 0 1 9.928 15.1L6 11.172 2.072 15.1a1.03 1.03 0 1 1-1.455-1.456l3.928-3.928L.617 5.79a1.03 1.03 0 1 1 1.455-1.456L6 8.261l3.928-3.928a1.03 1.03 0 0 1 1.455 1.456L7.455 9.716z"></path></g></svg>
+                </span></td>
+            `;
+            tbody.appendChild(row);
         });
 
-        // Exclui o item mais antigo
-        delete draftsObject[oldestKey];
+        // Adiciona o corpo da tabela à tabela
+        table.appendChild(tbody);
+
+        // Limpa o conteúdo atual do popup_content
+        popupContent.innerHTML = '';
+
+        // Adiciona a tabela ao popup_content
+        popupContent.appendChild(table);
     }
-
-    // Salva o draft no localStorage
-    localStorage.setItem('localDrafts', JSON.stringify(draftsObject));
-    // Define a função para atualizar o textContent após 1.5 segundos
-    setTimeout(function () {
-        draftStatus.textContent = 'Draft saved';
-    }, 1500);
-
-    // Define a função para atualizar o textContent após 1.5 segundos
-    setTimeout(function () {
-        draftStatus.textContent = '';
-    }, 5000);
 }
 
-function recoverDraft() {
-    var localDrafts = localStorage.getItem('localDrafts');
-    var draftsObject = localDrafts ? JSON.parse(localDrafts) : {};
+    function copyTranscriptionFromCache(transcriptionVersion, trackId) {
+        // Recupera os dados do cache
+        const cacheData = localStorage.getItem('localDrafts');
+    
+        // Verifica se existem dados no cache
+        if (cacheData) {
+            const draftsCache = JSON.parse(cacheData);
+    
+            // Verifica se o rascunho existe no cache
+            if (draftsCache[trackId]) {
+                const transcription = draftsCache[trackId][transcriptionVersion] || draftsCache[trackId].transcription;
+                // Copia a transcrição para a área de transferência
+                navigator.clipboard.writeText(transcription)
+                    .then(() => {
+                        notification('Transcription copied to clipboard!');
+                    })
+                    .catch(err => {
+                        console.error('Failed to copy transcription: ', err);
+                        notification('Failed to copy transcription, please try again');
+                    });
+            } else {
+                console.error('Draft not found in cache');
+                notification('Draft not found in cache, please try again');
+            }
+        } else {
+            console.error('Cache is empty');
+            notification('Cache is empty, please try again');
+        }
+    }
 
-    var currentDraft = draftsObject[currentIsrc];
+    function draftStartPlayback(trackId) {
 
-    if (currentDraft && currentDraft.transcription) {
-        // Exibindo o popup
-        document.getElementById('draft_content').style.display = 'flex';
-        document.getElementById('draft_overlay').style.display = 'block';
+        if (deviceId !== undefined) {
+            console.log(deviceId)
+            playTrack(trackId, deviceId);
 
-        // Exibir a data se estiver disponível
-        if (currentDraft.datetime) {
-            var draftSavedDate = new Date(currentDraft.datetime);
-            var formattedDate = draftSavedDate.toLocaleString(); // Você pode personalizar o formato conforme necessário
-            document.getElementById('draft_saved_date').textContent = "Saved on: " + formattedDate;
+            document.getElementById("overlay").style.display = "none";
+            document.getElementById('manage_draft_popup').style.display = "none";
+            document.getElementById('manage_dictionary_popup').style.display = "none";
+        } else {
+            console.error('deviceId is undefined. Make sure to initialize it before calling draftStartPlayback or playTrack.');
+            notification("An error occurred, please refresh the page")
+        }
+    }
+
+    function importDrafts() {
+        // Abre a biblioteca do PC filtrando apenas arquivos JSON
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = '.json';
+
+        input.onchange = function (event) {
+            const file = event.target.files[0];
+            const reader = new FileReader();
+
+            reader.onload = function () {
+                try {
+                    const newDrafts = JSON.parse(reader.result);
+
+                    // Verifica se o arquivo tem a estrutura correta
+                    if (isValidDrafts(newDrafts)) {
+                        // Recupera os rascunhos existentes do armazenamento local
+                        const existingDrafts = JSON.parse(localStorage.getItem('localDrafts')) || {};
+
+                        // Mescla os novos rascunhos com os existentes
+                        const mergedDrafts = { ...existingDrafts, ...newDrafts };
+
+                        // Salva a lista mesclada de volta no armazenamento local
+                        localStorage.setItem('localDrafts', JSON.stringify(mergedDrafts));
+
+                        populateDraftsPopupFromCache()
+
+                        updateMemoryUsage() 
+                        draftsCounter()
+
+                        notification('Drafts imported successfully!');
+                    } else {
+                        notification('The file does not have the correct structure');
+                    }
+                } catch (error) {
+                    notification('Error reading the file');
+                    console.error(error);
+                }
+            };
+
+            reader.readAsText(file);
+        };
+
+        input.click();
+    }
+
+    function isValidDrafts(drafts) {
+        // Verifica se drafts é um objeto não vazio
+        if (typeof drafts !== 'object' || drafts === null || Object.keys(drafts).length === 0) {
+            return false;
+        }
+
+        // Verifica se cada entrada é válida
+        for (const draftId in drafts) {
+            if (!drafts.hasOwnProperty(draftId)) {
+                continue;
+            }
+
+            const draft = drafts[draftId];
+
+            // Verifica se cada rascunho tem a estrutura necessária
+            if (
+                typeof draft !== 'object' ||
+                draft === null ||
+                !draft.hasOwnProperty('track_name') ||
+                !draft.hasOwnProperty('artist_name') ||
+                !draft.hasOwnProperty('track_id') ||
+                !draft.hasOwnProperty('datetime') ||
+                !draft.hasOwnProperty('transcription')
+            ) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    function exportDraft(trackId) {
+        console.log('Exporting draft with trackId:', trackId);
+        
+        // Recupera os dados do cache
+        const cacheData = localStorage.getItem('localDrafts');
+        console.log('Cache data:', cacheData);
+
+        // Verifica se existem dados no cache
+        if (cacheData) {
+            const draftsCache = JSON.parse(cacheData);
+            console.log('Drafts cache:', draftsCache);
+
+            // Verifica se o rascunho existe no cache
+            if (draftsCache[trackId]) {
+                console.log('Draft found in cache:', draftsCache[trackId]);
+
+                // Cria um objeto com o trackId como chave e o objeto de rascunho como valor
+                const draftToExport = { [trackId]: draftsCache[trackId] };
+                
+                // Cria um blob com os dados do rascunho
+                const blob = new Blob([JSON.stringify(draftToExport)], { type: 'application/json' });
+                
+                // Cria um objeto URL para o blob
+                const url = URL.createObjectURL(blob);
+                
+                // Cria um link para o objeto URL
+                const link = document.createElement('a');
+                link.href = url;
+                
+                // Define o nome do arquivo
+                const fileName = draftsCache[trackId].track_name.replace(/[^a-z0-9]/gi, '_').toLowerCase() + '_draft.json';
+                link.download = fileName;
+                
+                // Simula o clique no link para iniciar o download
+                link.click();
+                
+                // Libera o objeto URL
+                URL.revokeObjectURL(url);
+            } else {
+                console.error('Draft not found in cache');
+                notification('Draft not found in cache, please try again');
+            }
+        } else {
+            console.error('Cache is empty');
+            notification('Cache is empty, please try again');
+        }
+    }
+
+    function exportAllDrafts() {
+        console.log('Exporting all drafts from cache');
+
+        // Recupera os dados do cache
+        const cacheData = localStorage.getItem('localDrafts');
+        console.log('Cache data:', cacheData);
+
+        // Verifica se existem dados no cache
+        if (cacheData) {
+            const draftsCache = JSON.parse(cacheData);
+            console.log('Drafts cache:', draftsCache);
+
+            // Verifica se há algum rascunho no cache
+            if (Object.keys(draftsCache).length > 0) {
+                // Cria um blob com todos os dados do cache
+                const blob = new Blob([JSON.stringify(draftsCache)], { type: 'application/json' });
+
+                // Cria um objeto URL para o blob
+                const url = URL.createObjectURL(blob);
+
+                // Cria um link para o objeto URL
+                const link = document.createElement('a');
+                link.href = url;
+
+                // Define o nome do arquivo
+                const fileName = `lf${lf_version}_draftbackup.json`;
+                link.download = fileName;
+
+                // Simula o clique no link para iniciar o download
+                link.click();
+
+                // Libera o objeto URL
+                URL.revokeObjectURL(url);
+            } else {
+                console.error('No drafts found in cache');
+                notification('No drafts found in cache, please try again');
+            }
+        } else {
+            console.error('Cache is empty');
+            notification('Cache is empty, please try again');
+        }
+    }
+
+    function deleteDraft(trackId) {
+        // Recupera os dados do cache
+        const cacheData = localStorage.getItem('localDrafts');
+
+        // Verifica se existem dados no cache
+        if (cacheData) {
+            const draftsCache = JSON.parse(cacheData);
+
+            // Verifica se o rascunho existe no cache
+            if (draftsCache[trackId]) {
+                // Remove o rascunho com base no trackId
+                delete draftsCache[trackId];
+                
+                // Atualiza os dados do cache após a remoção do rascunho
+                localStorage.setItem('localDrafts', JSON.stringify(draftsCache));
+
+                // Recarrega a tabela de rascunhos para refletir as mudanças
+                populateDraftsPopupFromCache();
+                updateMemoryUsage() 
+                draftsCounter()
+
+                notification('Draft deleted successfully!');
+            } else {
+                console.error('Draft not found in cache');
+                notification('Draft not found in cache, please try again');
+            }
+        } else {
+            console.error('Cache is empty');
+            notification('Cache is empty, please try again.');
+        }
+    }
+
+/* ****************************************** */
+
+/* FUNÇÃO DE ORDENAÇÃO DE TABELA */
+
+function sortTable(columnIndex, tableId) {
+    var table, rows, switching, i, x, y, shouldSwitch;
+    table = document.getElementById(tableId);
+    switching = true;
+    while (switching) {
+        switching = false;
+        rows = table.rows;
+        for (i = 1; i < (rows.length - 1); i++) {
+            shouldSwitch = false;
+            x = rows[i].getElementsByTagName("td")[columnIndex];
+            y = rows[i + 1].getElementsByTagName("td")[columnIndex];
+            if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+                shouldSwitch= true;
+                break;
+            }
+        }
+        if (shouldSwitch) {
+            rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+            switching = true;
         }
     }
 }
-function recoverConfirmed() {
-    var localDrafts = localStorage.getItem('localDrafts');
-    var draftsObject = localDrafts ? JSON.parse(localDrafts) : {};
-    var currentDraft = draftsObject[currentIsrc];
 
-    // Recuperando o rascunho
-    document.getElementById('editor').value = currentDraft.transcription;
-    notification("Draft successfully recovered!");
+async function compareDrafts(trackId) {
+    // Recupera os dados do cache
+    const cacheData = localStorage.getItem('localDrafts');
 
-    updateSidebar()
-    // Escondendo o popup
-    document.getElementById('draft_content').style.display = 'none';
-    document.getElementById('draft_overlay').style.display = 'none';
-}
+    // Verifica se existem dados no cache
+    if (cacheData) {
+        const draftsCache = JSON.parse(cacheData);
 
-function discardDraft() {
-    // Descartando o rascunho
-    notification("Draft discarded");
+        // Verifica se o rascunho existe no cache
+        if (draftsCache[trackId]) {
+            const transcription1 = draftsCache[trackId].original_transcription;
+            const transcription2 = draftsCache[trackId].transcription;
 
-    // Escondendo o popup
-    document.getElementById('draft_content').style.display = 'none';
-    document.getElementById('draft_overlay').style.display = 'none';
-}
+            const url = `https://api.diffchecker.com/public/text?output_type=html&email=${userEmail}`;
+            const data = {
+                "left": transcription1,
+                "right": transcription2,
+                "diff_level": "word"
+            };
 
-function autoSave() {
-    const editor = document.getElementById('editor');
-    const content = editor.value;
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
 
-    if (content.trim() === '') {
-        return;
+                if (response.ok) {
+                    const result = await response.text();
+                    // Remove o elemento <style> da tabela retornada pela API
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(result, 'text/html');
+                    const styleElement = doc.querySelector('style');
+                    if (styleElement) {
+                        styleElement.remove();
+                    }
+                    const table = doc.querySelector('.diff-table');
+
+                    // Adiciona cabeçalhos à tabela
+                    const headersRow = table.querySelector('thead tr');
+                    headersRow.innerHTML = `
+                        <td class="line-number-header" style="font-size: 11px; color: #747474"></td>
+                        <td class="side-content-header" style="font-size: 11px; color: #747474">Original Transcription</td>
+                        <td class="line-number-header" style="font-size: 11px; color: #747474"></td>
+                        <td class="side-content-header" style="font-size: 11px; color: #747474">Final Transcription</td>
+                    `;
+
+                    document.getElementById('diffchecker_table').innerHTML = table.outerHTML;
+
+                    document.getElementById('copyDiffLeft').onclick = function() {
+                        copyTranscriptionFromCache('original_transcription', trackId);
+                    };
+                    
+                    document.getElementById('copyDiffRight').onclick = function() {
+                        copyTranscriptionFromCache('transcription', trackId);
+                    };
+
+                    document.getElementById('get_diff_link').onclick = function() {
+                        fetchAndModifyTranscriptions(trackId)
+                    };
+
+                    diffcheckerPopup()
+                } else {
+                    console.error('Request failed:', response.statusText);
+                    notification("Request failed, please try again later")
+                }
+            } catch (error) {
+                console.error('Request failed:', error);
+                notification("Request failed, please try again later")
+            }
+        } else {
+            console.error('Draft not found in cache');
+            notification('Draft not found in cache, please try again');
+        }
     } else {
-        saveDraft()
+        console.error('Cache is empty');
+        notification('Cache is empty, please try again');
+    }
+}
+
+// Função para fazer a solicitação à API e comparar as transcrições
+async function fetchAndModifyTranscriptions(trackId) {
+    // Recupera os dados do cache
+    const cacheData = localStorage.getItem('localDrafts');
+
+    // Verifica se existem dados no cache
+    if (cacheData) {
+        const draftsCache = JSON.parse(cacheData);
+
+        // Verifica se o rascunho existe no cache
+        if (draftsCache[trackId]) {
+            const originalTranscription = draftsCache[trackId].original_transcription;
+            const transcription = draftsCache[trackId].transcription;
+            const diffTitle = `${draftsCache[trackId].track_name} - ${draftsCache[trackId].artist_name}`
+
+            // Dados a serem enviados para a API
+            const requestData = {
+                left: originalTranscription,
+                right: transcription,
+                title: diffTitle
+            };
+
+            try {
+                // Obter o valor de localHostToggle do localStorage
+                const localHostToggle = localStorage.getItem('localHostToggle');
+
+                // Verificar o valor de localHostToggle e definir window.serverPath
+                if (localHostToggle === 'true') {
+                    window.serverPath = 'http://localhost:3000'; 
+                } else {
+                    window.serverPath = 'https://datamatch-backend.onrender.com';
+                }
+
+                const response = await fetch(`${window.serverPath}/diff/compare`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(requestData)
+                });
+
+                if (response.ok) {
+                    const diffData = await response.json();
+                    // Faça algo com os dados da diferença, se necessário
+                    console.log(diffData);
+                    document.getElementById('diff_link_div').style.display = 'flex'
+                    document.getElementById('diff_link_output').textContent = `https://www.diffchecker.com/${diffData.slug}/`
+                } else {
+                    console.error('Request failed:', response.statusText);
+                    notification("Request failed, please try again later")
+                }
+            } catch (error) {
+                console.error('Request failed:', error);
+                notification("Request failed, please try again later")
+            }
+
+        } else {
+            console.error('Draft not found in cache');
+            notification('Draft not found in cache, please try again');
+        }
+    } else {
+        console.error('Cache is empty');
+        notification('Cache is empty, please try again');
     }
 }
