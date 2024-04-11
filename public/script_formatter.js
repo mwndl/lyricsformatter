@@ -1029,6 +1029,7 @@ document.addEventListener("DOMContentLoaded", function () {
     var langList = document.getElementById("language_list");
 
     var settingsOption = document.getElementById("settings_option");
+    var betaOption = document.getElementById("redirect_beta");
     var creditsOption = document.getElementById("credits_option");
     var suggestOption = document.getElementById("suggest_option");
     var aboutOption = document.getElementById("about_option");
@@ -1059,6 +1060,11 @@ document.addEventListener("DOMContentLoaded", function () {
     // Evitar que o clique no mini menu propague para o documento
     miniMenu.addEventListener("click", function (event) {
         event.stopPropagation();
+    });
+
+    // redirect to beta
+    betaOption.addEventListener("click", function () {
+        window.location.href = 'https://lyricsformatter-beta.onrender.com/?referrer=https://lyricsformatter.onrender.com/';
     });
 
     // Show Settings

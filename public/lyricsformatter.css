@@ -26,6 +26,25 @@
     font-weight: bold;
 }
 
+.redirect_beta {
+    height: 50%;
+    background-color: #000000;
+    color:rgb(255, 255, 255);
+    padding:  10px;
+    display:  flex;
+    align-items: center;
+    text-align: center;
+    justify-content: center;
+    border-radius: 12px;
+    font-weight: 600;
+    width: 150px;
+    cursor: pointer;
+}
+
+.redirect_beta:hover {
+    background-color: #101010;
+}
+
 /* DESKTOP */
 
 * {

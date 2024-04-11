@@ -20,6 +20,9 @@
                 <img class="return_arrow" id="return_arrow" src="images\arrow.svg" alt="Return Arrow" title="Return to Home" draggable="false" style="display:none">
             </div>
             <div class="page_title">LyricsFormatter</div>
+            <div>
+                <p id="redirect_beta" class="redirect_beta">Try the beta now! </p>
+            </div>
             <div class="settings">
                 <img class="options_dots" id="settings_dots" src="images\options.svg" alt="Options" title="Options" draggable="false" style="display:block">
                 <!-- Mini menu -->
@@ -286,7 +289,8 @@
         </div>
 
         <script>
-                document.addEventListener('DOMContentLoaded', function () {
+            document.addEventListener('DOMContentLoaded', function () {
+
                 var expandArrow = document.getElementById('expand_arrow');
                 var footer = document.getElementById('footer');
                 var footerHidedContent = document.getElementById('footer_hided_content');
@@ -318,6 +322,7 @@
                     }
                 });
             });
+
                 function closeSettings() {
                     var settingsPopup = document.getElementById("settings_popup");
                     var overlay = document.getElementById("overlay");
