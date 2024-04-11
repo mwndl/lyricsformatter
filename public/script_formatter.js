@@ -6,8 +6,8 @@ let undoCursorPositionsStack = [];
 var redoCursorPositionsStack = [];
 var maxStackSize = 100;
 
-var lf_version = '2.14.6';
-var lf_release_date = '09/04/2024'
+var lf_version = '2.14.7';
+var lf_release_date = '11/04/2024'
 
 document.addEventListener('DOMContentLoaded', function () {
     var returnArrow = document.getElementById('return_arrow');
@@ -455,6 +455,7 @@ function addToUndoStack() {
 
             addToUndoStack();
             updateSidebar();
+            saveDraft();
         }
 
         function addOrRemoveParentheses() {
@@ -462,9 +463,11 @@ function addToUndoStack() {
             if (languageParam === 'fr' || languageParam === 'it') {
                 addParenthesesAlt();
                 removeDuplicatePunctuations()
+                saveDraft();
             } else {
                 addParentheses()
                 removeDuplicatePunctuations()
+                saveDraft();
             }
         }
 
@@ -1545,7 +1548,7 @@ function addToUndoStack() {
                     checkbox.checked = JSON.parse(checkboxState);
                 } else {
                     // Se não houver informação em cache, defina os estados padrão
-                    if (checkboxId === 'autoCapToggle' || checkboxId === 'autoFormatToggle' || checkboxId === 'saveDraft') {
+                    if (checkboxId === 'autoCapToggle' || checkboxId === 'autoFormatToggle' /*|| checkboxId === 'saveDraft'*/) { // Remover o comentário após integração completa do Spotify
                         checkbox.checked = true; // Ativado
                     } else {
                         checkbox.checked = false; // Desativado
@@ -1562,6 +1565,10 @@ function addToUndoStack() {
             draftToggle = isDraftChecked()
             if (!draftToggle) {
                 document.getElementById('original_draft_toggle_div').style.display = 'none'
+                document.getElementById('manage_drafts_div').style.display = 'none'
+                document.getElementById('set_drafts_duration').style.display = 'none'
+                document.getElementById('set_drafts_limit').style.display = 'none'
+                document.getElementById('drafts_line_sep').style.display = 'none'
             }
         }
 
@@ -2791,6 +2798,7 @@ function updateServerInfo(data) {
             spMenu.style.display = 'flex';
             localStorage.setItem('spMenu', 'true');
             showPlaybackTabToggle.checked = true;
+            document.getElementById('unavailable_overlay').style = 'z-index:-1'
         }
 
         // Função para ocultar a div
@@ -2800,6 +2808,9 @@ function updateServerInfo(data) {
             spMenu.style.display = 'none';
             localStorage.setItem('spMenu', 'false');
             showPlaybackTabToggle.checked = false;
+            document.getElementById('unavailable_overlay').style = 'z-index:1';
+            document.getElementById('saveDraft').checked = false;
+            checkContent()
         }
 
         function showSpShortcuts() {

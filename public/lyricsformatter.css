@@ -946,6 +946,15 @@
         margin: 5px 0 5px 0;
     }
 
+    .unavailable_overlay {
+        position: absolute; /* Definindo a posição absoluta */
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: #28282899; /* Opacidade */
+    }
+
     .popup_option_column {
         height: 20%;
         width: 100%;
