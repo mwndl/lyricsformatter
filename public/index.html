@@ -495,7 +495,8 @@
                         <option value="300">300</option>
                     </select>
                 </div>
-                <div class="popup_option">
+                <div class="popup_option" style="position: relative;">
+                    <div class="unavailable_overlay" id="unavailable_overlay" style="z-index: 1;"></div>
                     <div class="popup_title">
                         <p class="popup_option_title">Save draft locally</p>
                         <p class="popup_option_description">If you edit any lyrics while listening to the song, we'll automatically save the edit as a draft for you</p>
@@ -523,10 +524,7 @@
                         <p class="popup_option_description">Connect your Spotify account to LyricsFormatter</p>
                     </div>
                     <div class="spotify_login" id="spotify_login_button" style="display:block">
-                        <button class="spotify_button" id="spotify_button">
-                            <img src="images/spotify_logo.webp" alt="Spotify Logo" class="spotify_logo">
-                            Connect
-                        </button>
+                        <button class="spotify_button" id="spotify_button">Connect</button>
                     </div>
                     <div class="user-profile" id="user_profile" style="display:none">
                         <img class="user-photo" id="sp_user_pic" src="#" alt="User Photo" title="User Photo"
@@ -591,7 +589,7 @@
                 </div>
             </div>
             <div class="settings_tab" id="storage_menu" style="display:none">
-                <div class="popup_option">
+                <div class="popup_option" id="manage_drafts_div">
                     <div class="popup_title">
                         <p class="popup_option_title">Manage drafts</p>
                         <p class="popup_option_description">Manage all your saved drafts</p>
@@ -605,8 +603,8 @@
                     </div>
                     <div class="white_button2" onclick="manageDictionary()">Open</div> 
                 </div>
-                <hr style="border-top: 1px solid rgb(100, 100, 100); border-right: none; border-bottom: none; border-left: none; border-image: initial; margin: 9px 0;">
-                <div class="popup_option">
+                <hr id="drafts_line_sep" style="border-top: 1px solid rgb(100, 100, 100); border-right: none; border-bottom: none; border-left: none; border-image: initial; margin: 9px 0;">
+                <div class="popup_option" id="set_drafts_duration">
                     <div class="popup_title">
                         <p class="popup_option_title">Set the duration of a draft</p>
                         <p class="popup_option_description">We'll check expired drafts and automatically delete them so they don't take up unnecessary space in your browser</p>
@@ -619,7 +617,7 @@
                         <option value="0">Never</option>
                     </select>
                 </div>
-                <div class="popup_option">
+                <div class="popup_option" id="set_drafts_limit">
                     <div class="popup_title">
                         <p class="popup_option_title">Maximum number of drafts</p>
                         <p class="popup_option_description">If the total number of drafts exceeds the limit set by you, we will delete the oldest item</p>
@@ -1843,10 +1841,23 @@
 
             draftToggle = isDraftChecked()
             originalDraftDiv = document.getElementById('original_draft_toggle_div')
+            manageDraftsDiv = document.getElementById('manage_drafts_div')
+            setDraftsDuration = document.getElementById('set_drafts_duration')
+            setDraftsLimit = document.getElementById('set_drafts_limit')
+            draftLineSep = document.getElementById('drafts_line_sep')
+
             if (!draftToggle) {
                 originalDraftDiv.style.display = 'none'
+                manageDraftsDiv.style.display = 'none'
+                setDraftsDuration.style.display = 'none'
+                setDraftsLimit.style.display = 'none'
+                draftLineSep.style.display = 'none'
             } else {
                 originalDraftDiv.style.display = 'flex'
+                manageDraftsDiv.style.display = 'flex'
+                setDraftsDuration.style.display = 'flex'
+                setDraftsLimit.style.display = 'flex'
+                draftLineSep.style.display = 'flex'
             }
         }
 
