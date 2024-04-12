@@ -6,7 +6,7 @@ let undoCursorPositionsStack = [];
 var redoCursorPositionsStack = [];
 var maxStackSize = 100;
 
-var lf_version = '2.14.8';
+var lf_version = '2.14.9';
 var lf_release_date = '12/04/2024'
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -3513,12 +3513,14 @@ function updateServerInfo(data) {
         document.getElementById('manage_draft_popup').style.display = 'none';
         document.getElementById('diffchecker_popup').style.display = 'block';
         document.getElementById('diff_link_div').style.display = 'none'; // oculta o output do link
+        document.getElementById('get_diff_link').style.display = 'flex'
     }
 
     function closeDiff() {
         document.getElementById('manage_draft_popup').style.display = 'block';
         document.getElementById('diffchecker_popup').style.display = 'none';
         document.getElementById('diff_link_div').style.display = 'none';
+        document.getElementById('get_diff_link').style.display = 'flex'
     }
 
 
@@ -4110,6 +4112,7 @@ async function fetchAndModifyTranscriptions(trackId) {
                     console.log(diffData);
                     document.getElementById('diff_link_div').style.display = 'flex'
                     document.getElementById('diff_link_output').textContent = `https://www.diffchecker.com/${diffData.slug}/`
+                    document.getElementById('get_diff_link').style.display = 'none'
                 } else {
                     console.error('Request failed:', response.statusText);
                     notification("Request failed, please try again later")
