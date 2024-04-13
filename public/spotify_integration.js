@@ -132,6 +132,8 @@ function disconnectSpotify() {
 
 }
 
+let userEmail = '';
+let userCountry = '';
 
 async function fetchUserData() {
     try {
@@ -184,6 +186,9 @@ async function fetchUserData() {
         const spotifyLoginButton = document.getElementById('spotify_login_button');
         const userProfileDiv = document.getElementById('user_profile');
         const userProfileImage = document.getElementById('sp_user_pic');
+
+        userEmail = userData.email;
+        userCountry = userData.country;
 
         if (userProfileImage && userData.images.length > 0) {
             userProfileImage.src = userData.images[0].url;
@@ -272,8 +277,11 @@ async function spotifyRenewAuth() {
     }
 }
 
+let delayedSongId = '';
 let currentSongId = '';
 let currentIsrc = '';
+let trackName = '';
+let artistName = '';
 let volumePercent = '';
 let currentDeviceId = '';
 
@@ -346,10 +354,20 @@ async function fetchCurrentlyPlayingData() {
         const currentlyPlayingData = await response.json();
 
         // definir o ID na variável
+        trackName = currentlyPlayingData.item.name
+        artistName = currentlyPlayingData.item.artists[0].name;
         currentSongId = currentlyPlayingData.item.id;
         currentIsrc = currentlyPlayingData.item.external_ids.isrc;
-
         volumePercent = currentlyPlayingData.device.volume_percent;
+
+        // identifica mudança de faixa
+        if (currentSongId !== delayedSongId) {
+            recoverDraft() // caso haja um rascunho, ele irá exibir o alerta
+            storeSections(accessToken, currentSongId)
+        }
+
+        // define o delayer como o atual para identificar mudanças futuras
+        delayedSongId = currentSongId;
 
         // definir a cor verde no dispositivo em reprodução
         currentDeviceId = currentlyPlayingData.device.id;
@@ -386,12 +404,13 @@ async function fetchCurrentlyPlayingData() {
         const artistElement = document.getElementById('sp_artist');
 
         if (albumArtElement && currentlyPlayingData.item.album.images.length > 0) {
-            albumArtElement.innerHTML = `<img src="${currentlyPlayingData.item.album.images[0].url}" alt="album art" title="${currentlyPlayingData.item.name} | ${currentlyPlayingData.item.artists[0].name}">`;
+            albumArtElement.innerHTML = `<img src="${currentlyPlayingData.item.album.images[0].url}" alt="Album Art" title="${currentlyPlayingData.item.name} | ${currentlyPlayingData.item.artists[0].name}">`;
         }
 
         if (titleElement) {
             titleElement.innerHTML = `<a href="https://open.spotify.com/track/${currentlyPlayingData.item.id}" target="_blank">${currentlyPlayingData.item.name}</a>`;
-        }
+            titleElement.dataset.id = currentSongId;
+        }   
 
         if (artistElement) {
             const artistLinks = currentlyPlayingData.item.artists.map(artist => `<a href="https://open.spotify.com/artist/${artist.id}" target="_blank">${artist.name}</a>`);
@@ -816,4 +835,20 @@ async function resumePlayback() {
     } catch (error) {
         console.error('Error resuming playback: ', error.message);
     }
+}
+
+function storeSections(accessToken, currentSongId) {
+    // Chamada para carregar a análise de áudio
+    loadAudioAnalysis(accessToken, currentSongId)
+        .then(data => {
+            if (data) {
+                // Atribui diretamente o array retornado às variáveis
+                sectionStartTimes = data;
+            } else {
+                sectionStartTimes = [];
+            }
+        })
+        .catch(error => {
+            console.error('Erro:', error);
+        });
 }

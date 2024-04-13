@@ -11,6 +11,9 @@ LyricsFormatter is a free service created with the help of talented users design
 - **Back-end verification:** The system checks if the lyrics formatting is correct for Musixmatch.
 - **Line character counter:** Track the number of characters on each line to make sure the lyrics are within the platform limits.
 - **Quick transcription shortcuts:** Use keyboard shortcuts to control the playback or even insert structure tags into the lyrics.
+- **Spotify integration:** Connect LyricsFormatter with Spotify to transcribe lyrics directly from the website.
+- **Draft compatibility:** Drafts are now supported, allowing a full backup of your lyrics.
+- **Diffchecker creation:** Generate Diffcheckers links based on saved draft transcriptions inside the settings menu, no need to copy and paste lyrics into multiple tabs.
 
 ## Benefits
 
@@ -23,7 +26,7 @@ LyricsFormatter is a free service created with the help of talented users design
 
 Access LyricsFormatter at: [Lyrics Formatter](https://lyricsformatter.onrender.com/)
 
-Or access our beta version: [Lyrics Formatter - BETA](https://lyricsformatter-beta.onrender.com/)
+Or access our beta version: [Lyrics Formatter - BETA](https://lyricsformatter-beta.onrender.com/?referrer=https://github.com/mwndl/lyricsformatter?tab=readme-ov-file)
 
 ## Acknowledgments
 
