@@ -6,7 +6,7 @@ let undoCursorPositionsStack = [];
 var redoCursorPositionsStack = [];
 var maxStackSize = 100;
 
-var lf_version = '2.14.9';
+var lf_version = '2.14.10';
 var lf_release_date = '12/04/2024'
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -3245,33 +3245,37 @@ function updateServerInfo(data) {
         }
     }
 
-    function calculateCacheSize(hostID) {
-        let totalSize = 0;
+function calculateCacheSize(hostID) {
+    let totalSize = 0;
 
-        // Se hostID for fornecido, calcula apenas para esse ID
-        if (hostID) {
-            const hostData = localStorage.getItem(hostID);
-            if (hostData) {
-                totalSize += (hostID.length + hostData.length) * 2;
-            }
-        } else {
-            // Calcula o tamanho total de todos os dados no armazenamento local
-            for (let i = 0; i < localStorage.length; i++) {
-                const key = localStorage.key(i);
-                const value = localStorage.getItem(key);
-                totalSize += (key.length + value.length) * 2; // Aproximação do tamanho em bytes
-            }
+    // Se hostID for fornecido, calcula apenas para esse ID
+    if (hostID) {
+        const hostData = localStorage.getItem(hostID);
+        if (hostData) {
+            // Usando Blob para calcular o tamanho do valor
+            const blob = new Blob([hostData]);
+            totalSize += blob.size;
         }
-
-        // Convertendo bytes para KB ou MB
-        if (totalSize < 1024) {
-            return totalSize.toFixed(2) + ' bytes';
-        } else if (totalSize < 1048576) { // 1024 * 1024 (1 MB)
-            return (totalSize / 1024).toFixed(2) + ' KB';
-        } else {
-            return (totalSize / 1048576).toFixed(2) + ' MB';
+    } else {
+        // Calcula o tamanho total de todos os dados no armazenamento local
+        for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            const value = localStorage.getItem(key);
+            // Usando JSON.stringify para calcular o tamanho do valor
+            const sizeInBytes = new Blob([JSON.stringify(value)]).size;
+            totalSize += sizeInBytes;
         }
     }
+
+    // Convertendo bytes para KB ou MB
+    if (totalSize < 1024) {
+        return totalSize.toFixed(2) + ' bytes';
+    } else if (totalSize < 1048576) { // 1024 * 1024 (1 MB)
+        return (totalSize / 1024).toFixed(2) + ' KB';
+    } else {
+        return (totalSize / 1048576).toFixed(2) + ' MB';
+    }
+}
 
 /* ****************************************** */
 
