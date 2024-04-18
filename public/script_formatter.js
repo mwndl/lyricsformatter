@@ -6,7 +6,7 @@ let undoCursorPositionsStack = [];
 var redoCursorPositionsStack = [];
 var maxStackSize = 100;
 
-var lf_version = '2.15.0';
+var lf_version = '2.15.1';
 var lf_release_date = '18/04/2024'
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -1560,7 +1560,6 @@ function addToUndoStack() {
 
             draftToggle = isDraftChecked()
             if (!draftToggle) {
-                document.getElementById('original_draft_toggle_div').style.display = 'none'
                 document.getElementById('manage_drafts_div').style.display = 'none'
                 document.getElementById('set_drafts_duration').style.display = 'none'
                 document.getElementById('set_drafts_limit').style.display = 'none'
