@@ -1829,20 +1829,17 @@
             updateSelectValues();
 
             draftToggle = isDraftChecked()
-            originalDraftDiv = document.getElementById('original_draft_toggle_div')
             manageDraftsDiv = document.getElementById('manage_drafts_div')
             setDraftsDuration = document.getElementById('set_drafts_duration')
             setDraftsLimit = document.getElementById('set_drafts_limit')
             draftLineSep = document.getElementById('drafts_line_sep')
 
             if (!draftToggle) {
-                originalDraftDiv.style.display = 'none'
                 manageDraftsDiv.style.display = 'none'
                 setDraftsDuration.style.display = 'none'
                 setDraftsLimit.style.display = 'none'
                 draftLineSep.style.display = 'none'
             } else {
-                originalDraftDiv.style.display = 'flex'
                 manageDraftsDiv.style.display = 'flex'
                 setDraftsDuration.style.display = 'flex'
                 setDraftsLimit.style.display = 'flex'
