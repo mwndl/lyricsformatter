@@ -37,7 +37,7 @@ Or access our beta version: [Lyrics Formatter - BETA](https://lyricsformatter-be
 
 LyricsFormatter is an independent tool created solely to assist users in transcribing song lyrics. It is not affiliated with or endorsed by Musixmatch. We provide this service as a supportive resource for individuals transcribing lyrics for Musixmatch, aiming to streamline the process and ensure adherence to Musixmatch's guidelines.
 
-## Credits
+## Contributors
 
 - **English:** Jen Galvin
 - **French:** Naomie M
@@ -46,4 +46,4 @@ LyricsFormatter is an independent tool created solely to assist users in transcr
 - **Portuguese (PT):** JJ. Aparício
 - **Spanish:** Andreks Tdos, Brayan Gutiérrez
 
-We hope LyricsFormatter is a useful tool for you!
+## Developed by Marcos Wiendl
