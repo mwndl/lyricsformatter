@@ -46,4 +46,4 @@ LyricsFormatter is an independent tool created solely to assist users in transcr
 - **Portuguese (PT):** JJ. Aparício
 - **Spanish:** Andreks Tdos, Brayan Gutiérrez
 
-Developed by Marcos Wiendl
+Developed by Marcos Wiendl for music ♪
