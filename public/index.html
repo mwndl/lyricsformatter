@@ -506,16 +506,6 @@
                         <span class="slider round"></span>
                     </label>
                 </div>
-                <div class="popup_option" id="original_draft_toggle_div">
-                    <div class="popup_title">
-                        <p class="popup_option_title">Keep original draft</p>
-                        <p class="popup_option_description">Alongside your final version of the lyrics, we'll also keep the first version saved for comparison and quality control purposes</p>
-                    </div>
-                    <label class="switch">
-                        <input type="checkbox" id="saveOriginalDraft" onclick="checkContent()">
-                        <span class="slider round"></span>
-                    </label>
-                </div>
             </div>
             <div class="settings_tab" id="playback_menu" style="display:none">
                 <div class="popup_option">
@@ -1824,7 +1814,6 @@
                 'autoCapToggle',
                 'autoFormatToggle',
                 'saveDraft',
-                'saveOriginalDraft',
                 'mxmPersonalTokenToggle',
                 'autoSuggestion',
                 'localHostToggle'
@@ -1840,20 +1829,17 @@
             updateSelectValues();
 
             draftToggle = isDraftChecked()
-            originalDraftDiv = document.getElementById('original_draft_toggle_div')
             manageDraftsDiv = document.getElementById('manage_drafts_div')
             setDraftsDuration = document.getElementById('set_drafts_duration')
             setDraftsLimit = document.getElementById('set_drafts_limit')
             draftLineSep = document.getElementById('drafts_line_sep')
 
             if (!draftToggle) {
-                originalDraftDiv.style.display = 'none'
                 manageDraftsDiv.style.display = 'none'
                 setDraftsDuration.style.display = 'none'
                 setDraftsLimit.style.display = 'none'
                 draftLineSep.style.display = 'none'
             } else {
-                originalDraftDiv.style.display = 'flex'
                 manageDraftsDiv.style.display = 'flex'
                 setDraftsDuration.style.display = 'flex'
                 setDraftsLimit.style.display = 'flex'
