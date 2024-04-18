@@ -6,8 +6,8 @@ let undoCursorPositionsStack = [];
 var redoCursorPositionsStack = [];
 var maxStackSize = 100;
 
-var lf_version = '2.14.9';
-var lf_release_date = '12/04/2024'
+var lf_version = '2.15.0';
+var lf_release_date = '18/04/2024'
 
 document.addEventListener('DOMContentLoaded', function () {
     var returnArrow = document.getElementById('return_arrow');
@@ -111,7 +111,6 @@ document.addEventListener('DOMContentLoaded', function () {
             'autoCapToggle',
             'autoFormatToggle',
             'saveDraft',
-            'saveOriginalDraft',
             'mxmPersonalTokenToggle',
             'autoSuggestion',
             'localHostToggle'
@@ -960,11 +959,6 @@ function addToUndoStack() {
             return saveDraft.checked;
         }
 
-        function isOriginalDraftChecked() {
-            const saveOriginalDraft = document.getElementById('saveOriginalDraft');
-            return saveOriginalDraft.checked;
-        }
-
         function isAutoSuggestionsChecked() {
             const autoSuggestions = document.getElementById('autoSuggestion');
             return autoSuggestions.checked;
@@ -1312,6 +1306,7 @@ function addToUndoStack() {
             const notification_div = document.getElementById("notification");
             const message = document.getElementById("notification-message");
             message.textContent = customMessage;
+            message.style = 'margin: 0 15px'
             notification_div.style.opacity = 1;
             notification_div.classList.remove("hidden");
 
@@ -1319,6 +1314,8 @@ function addToUndoStack() {
                 notification_div.style.opacity = 0;
                 setTimeout(() => {
                     notification_div.classList.add("hidden");
+                    message.textContent = ''
+                    message.style = ''
                 }, 500);
             }, 4000); // Tempo de exibição
         };
@@ -1534,7 +1531,6 @@ function addToUndoStack() {
                 'autoCapToggle',
                 'autoFormatToggle',
                 'saveDraft',
-                'saveOriginalDraft',
                 'mxmPersonalTokenToggle',
                 'autoSuggestion',
                 'localHostToggle'
@@ -2285,7 +2281,7 @@ function updateTabCounters() {
                 const altDeviceId = getParameterByName('alt_device_id');
                 const accessToken = localStorage.getItem('accessToken');
 
-                if (transferPlaybackToggle === true && currentSongId !== '') {
+                if (transferPlaybackToggle === true && currentSongId !== '' && currentDeviceId === deviceId && altDeviceId) {
                     transferPlayback(accessToken, altDeviceId)
                     notification('Content copied and playback transferred successfully!');
                 } else {
@@ -2322,14 +2318,14 @@ function updateTabCounters() {
                 const transferPlaybackToggle = isPasteTransferTottleChecked()
                 const accessToken = localStorage.getItem('accessToken');
 
-                if (transferPlaybackToggle === true && currentSongId !== '') {
+                if (transferPlaybackToggle === true && currentSongId !== '' && currentDeviceId !== deviceId) {
                     transferPlayback(accessToken, deviceId)
                     notification('Content pasted and playback transferred successfully!');
                 } else {
                     notification('Pasted from clipboard!');
                 }
 
-                saveDraft()
+                saveDraft(text)
                 
                 // Aqui você pode adicionar qualquer outra ação que deseja realizar após colar
             }).catch(function(err) {
@@ -3245,33 +3241,37 @@ function updateServerInfo(data) {
         }
     }
 
-    function calculateCacheSize(hostID) {
-        let totalSize = 0;
+function calculateCacheSize(hostID) {
+    let totalSize = 0;
 
-        // Se hostID for fornecido, calcula apenas para esse ID
-        if (hostID) {
-            const hostData = localStorage.getItem(hostID);
-            if (hostData) {
-                totalSize += (hostID.length + hostData.length) * 2;
-            }
-        } else {
-            // Calcula o tamanho total de todos os dados no armazenamento local
-            for (let i = 0; i < localStorage.length; i++) {
-                const key = localStorage.key(i);
-                const value = localStorage.getItem(key);
-                totalSize += (key.length + value.length) * 2; // Aproximação do tamanho em bytes
-            }
+    // Se hostID for fornecido, calcula apenas para esse ID
+    if (hostID) {
+        const hostData = localStorage.getItem(hostID);
+        if (hostData) {
+            // Usando Blob para calcular o tamanho do valor
+            const blob = new Blob([hostData]);
+            totalSize += blob.size;
         }
-
-        // Convertendo bytes para KB ou MB
-        if (totalSize < 1024) {
-            return totalSize.toFixed(2) + ' bytes';
-        } else if (totalSize < 1048576) { // 1024 * 1024 (1 MB)
-            return (totalSize / 1024).toFixed(2) + ' KB';
-        } else {
-            return (totalSize / 1048576).toFixed(2) + ' MB';
+    } else {
+        // Calcula o tamanho total de todos os dados no armazenamento local
+        for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            const value = localStorage.getItem(key);
+            // Usando JSON.stringify para calcular o tamanho do valor
+            const sizeInBytes = new Blob([JSON.stringify(value)]).size;
+            totalSize += sizeInBytes;
         }
     }
+
+    // Convertendo bytes para KB ou MB
+    if (totalSize < 1024) {
+        return totalSize.toFixed(2) + ' bytes';
+    } else if (totalSize < 1048576) { // 1024 * 1024 (1 MB)
+        return (totalSize / 1024).toFixed(2) + ' KB';
+    } else {
+        return (totalSize / 1048576).toFixed(2) + ' MB';
+    }
+}
 
 /* ****************************************** */
 
@@ -3337,9 +3337,8 @@ function updateServerInfo(data) {
         localStorage.setItem('localDrafts', JSON.stringify(draftsObject));
     }
 
-    isOriginalDraftChecked()
+    function saveDraft(text) {
 
-    function saveDraft() {
         saveDraftToggle = isDraftChecked()
         if (!saveDraftToggle) {
             return
@@ -3372,7 +3371,7 @@ function updateServerInfo(data) {
         // Se o rascunho existir e createOriginalTranscription for verdadeiro,
         // verifica se o campo original_transcription já está presente e mantém seu valor
         if (existingDraft) {
-            if (isOriginalDraftChecked() && existingDraft.original_transcription) {
+            if (text && existingDraft.original_transcription) {
                 var originalTranscription = existingDraft.original_transcription;
             } else {
                 if (existingDraft.original_transcription) {
@@ -3382,8 +3381,8 @@ function updateServerInfo(data) {
                 }
             }
         } else {
-            if (isOriginalDraftChecked()) {
-                var originalTranscription = editorValue;
+            if (text) {
+                var originalTranscription = text;
             } else {
                 var originalTranscription = '';
             }
