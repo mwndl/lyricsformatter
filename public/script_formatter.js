@@ -6,7 +6,7 @@ let undoCursorPositionsStack = [];
 var redoCursorPositionsStack = [];
 var maxStackSize = 100;
 
-var lf_version = '2.16.0';
+var lf_version = '2.16.1';
 var lf_release_date = '19/04/2024'
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -2503,6 +2503,10 @@ function updateTabCounters() {
             const loadingContainer = document.getElementById('loading_container')
 
             loadingContainer.style = 'display:none'
+
+                        // Define o texto de descrição
+                        const popupDescription = document.querySelector('.popup_description p');
+                        popupDescription.textContent = "The people who made this happen 🚀";
 
             credits.forEach(credit => {
 
