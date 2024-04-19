@@ -6,8 +6,8 @@ let undoCursorPositionsStack = [];
 var redoCursorPositionsStack = [];
 var maxStackSize = 100;
 
-var lf_version = '2.15.3';
-var lf_release_date = '18/04/2024'
+var lf_version = '2.16.0';
+var lf_release_date = '19/04/2024'
 
 document.addEventListener('DOMContentLoaded', function () {
     var returnArrow = document.getElementById('return_arrow');
@@ -49,10 +49,12 @@ document.addEventListener('DOMContentLoaded', function () {
     document.getElementById('paste_button').addEventListener('click', function() { // paste
         pasteFromClipboard();
         autoSave();
-   });    
+    });    
 
-    var refreshButton = document.getElementById('refresh_button');
-    refreshButton.addEventListener('click', handleRefreshButtonClick); // refresh
+    document.getElementById('refresh_button').addEventListener('click', function() {
+        autoFormat();
+        handleRefreshButtonClick();
+    });
 
     document.getElementById('mxm_icon_div').addEventListener('click', function() {
          getMxmLyrics(currentIsrc, 'xleU8AVcuM9iS99upAs0RfWjvty6Vjn7') // 10 requests per hour token (public)
@@ -250,6 +252,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     showFormatTab()
                     break;
                 case '8':
+                    autoFormat()
                     handleRefreshButtonClick()
                     break;
                 case '9':
@@ -265,6 +268,7 @@ document.addEventListener('DOMContentLoaded', function () {
             toggleTab()
         } else if ((event.ctrlKey || event.metaKey) && event.key === ',') { // Ctrl/Cmd + ,
             event.preventDefault();
+            autoFormat()
             handleRefreshButtonClick()
         // tags
         } else if ((event.ctrlKey || event.metaKey) && event.shiftKey && (event.key === 'I' || event.key === 'i') && isEditorFocused) { 
@@ -336,7 +340,7 @@ function undo() {
     updateSidebar();
     updateTabCounters();
     if (isDraftChecked()) {
-        saveDraft();
+        autoSave();
     }
 }
 
@@ -368,7 +372,7 @@ function redo() {
         updateTabCounters();
 
         if (isDraftChecked()) {
-            saveDraft();
+            autoSave();
         }
     }
 }
@@ -454,19 +458,20 @@ function addToUndoStack() {
 
             addToUndoStack();
             updateSidebar();
-            saveDraft();
+            autoSave();
+            autoFormat();
         }
 
         function addOrRemoveParentheses() {
             const languageParam = getParameterByName('language');
             if (languageParam === 'fr' || languageParam === 'it') {
                 addParenthesesAlt();
-                removeDuplicatePunctuations()
-                saveDraft();
+                removeDuplicatePunctuations();
+                autoSave();
             } else {
-                addParentheses()
-                removeDuplicatePunctuations()
-                saveDraft();
+                addParentheses();
+                removeDuplicatePunctuations();
+                autoSave();
             }
         }
 
@@ -630,58 +635,19 @@ function addToUndoStack() {
 
 /* CARREGAR SUGESTÕES DE FORMATO */
 
+
         // Add this function to your existing code
         function handleRefreshButtonClick() {
             var refreshButton = document.getElementById('refresh_button');
             var loadingSpinner = document.getElementById('loading_spinner');
             var textArea = document.getElementById('editor');
-            var autoFormatToggle = document.getElementById('autoFormatToggle');
             var selectedLanguageCode = getParameterByName('language')
-            const cursorPosition = editor.selectionStart; // Obtém a posição atual do cursor
 
             if (textArea.value === '') {
                 fetchCurrentlyPlayingData();
                 notification("The editor is empty, there's nothing to be checked here");
                 return;
             }
-
-            // Obter número da linha onde estava o cursor
-            var cursorLine = textArea.value.substr(0, cursorPosition).split("\n").length;
-
-            // EXECUTAR AUTO FORMAT
-            if (autoFormatToggle.checked) {
-
-                if (selectedLanguageCode === 'pt-BR' || selectedLanguageCode === 'pt-PT') {
-                    replaceX();
-                }
-
-                if (selectedLanguageCode === 'pt-BR' || selectedLanguageCode === 'pt-PT'|| 
-                selectedLanguageCode === 'en-US' || selectedLanguageCode === 'en-GB'|| 
-                selectedLanguageCode === 'es' || selectedLanguageCode === 'it'||
-                selectedLanguageCode === 'fr') {
-                    fixPunctuation();
-                }
-
-                replaceSpecialTags(); // auto replace tags
-                trimEditorContent(); // linhas antes ou depois da letra (1)
-                removeExcessInstrumental(); // remove tags instrumentais duplicadas
-                removeInstrumentalStardEnd(); // remove instrumentais no início/fim da letra
-                addSpaceAboveTags(); // add (caso não haja) espaços acima de todas as tags
-                removeSpacesAroundInstrumental(); // espaços ao redor de tags instrumentais
-                trimEditorContent(); // linhas antes ou depois da letra (2)
-                removeEOL(); // remove pontuações EOL
-                autoTrim(); // espaços extras no início ou fim 
-                removeDuplicateSpaces(); // espaços duplos entre palavras
-                removeDuplicateEmptyLines(); // linhas vazias duplicadas entre estrofes
-            }
-
-            // Encontre o índice do início da próxima linha
-            var nextLineIndex = textArea.value.indexOf("\n", cursorPosition);
-            if (nextLineIndex === -1) {
-                nextLineIndex = textArea.value.length; // Se for a última linha, vá até o final do texto
-            }
-            // Defina a posição do cursor para o final da linha onde estava o cursor antes da formatação automática
-            textArea.setSelectionRange(nextLineIndex, nextLineIndex);
 
             updateSidebar();
             resetLineIssues();
@@ -782,6 +748,50 @@ function addToUndoStack() {
                     refreshButton.style.display = 'block';
                     loadingSpinner.style.display = 'none';
                 });
+        }
+
+        function autoFormat() {
+            var textArea = document.getElementById('editor');
+            var autoFormatToggle = document.getElementById('autoFormatToggle');
+            var selectedLanguageCode = getParameterByName('language');
+            const cursorPosition = editor.selectionStart; // Obtém a posição atual do cursor
+
+            if (autoFormatToggle.checked) {
+
+                if (selectedLanguageCode === 'pt-BR' || selectedLanguageCode === 'pt-PT') {
+                    replaceX();
+                }
+
+                if (selectedLanguageCode === 'pt-BR' || selectedLanguageCode === 'pt-PT'|| 
+                selectedLanguageCode === 'en-US' || selectedLanguageCode === 'en-GB'|| 
+                selectedLanguageCode === 'es' || selectedLanguageCode === 'it'||
+                selectedLanguageCode === 'fr') {
+                    fixPunctuation();
+                }
+
+                replaceSpecialTags(); // auto replace tags
+                trimEditorContent(); // linhas antes ou depois da letra (1)
+                removeExcessInstrumental(); // remove tags instrumentais duplicadas
+                removeInstrumentalStardEnd(); // remove instrumentais no início/fim da letra
+                addSpaceAboveTags(); // add (caso não haja) espaços acima de todas as tags
+                removeSpacesAroundInstrumental(); // espaços ao redor de tags instrumentais
+                trimEditorContent(); // linhas antes ou depois da letra (2)
+                removeEOL(); // remove pontuações EOL
+                autoTrim(); // espaços extras no início ou fim 
+                removeDuplicateSpaces(); // espaços duplos entre palavras
+                removeDuplicateEmptyLines(); // linhas vazias duplicadas entre estrofes
+
+                // Encontre o índice do início da próxima linha
+                var nextLineIndex = textArea.value.indexOf("\n", cursorPosition);
+                if (nextLineIndex === -1) {
+                    nextLineIndex = textArea.value.length; // Se for a última linha, vá até o final do texto
+                }
+                // Defina a posição do cursor para o final da linha onde estava o cursor antes da formatação automática
+                textArea.setSelectionRange(nextLineIndex, nextLineIndex);
+
+                updateSidebar();
+                resetLineIssues();
+            }
         }
 
 /* ****************************************** */
@@ -1544,7 +1554,7 @@ function addToUndoStack() {
                     checkbox.checked = JSON.parse(checkboxState);
                 } else {
                     // Se não houver informação em cache, defina os estados padrão
-                    if (checkboxId === 'autoCapToggle' || checkboxId === 'autoFormatToggle' /*|| checkboxId === 'saveDraft'*/) { // Remover o comentário após integração completa do Spotify
+                    if (checkboxId === 'autoCapToggle' || checkboxId === 'autoFormatToggle' || checkboxId === 'autoSuggestion' /*|| checkboxId === 'saveDraft'*/) { 
                         checkbox.checked = true; // Ativado
                     } else {
                         checkbox.checked = false; // Desativado
@@ -2196,6 +2206,8 @@ function updateTabCounters() {
             ignoredContainers.push(containerId); // Adicionar o ID ao array ignoredContainers
             container.style.display = 'none';
             resetLineIssues();
+
+            autoFormat();
             handleRefreshButtonClick();
         } 
 
@@ -2213,6 +2225,8 @@ function updateTabCounters() {
             container.style.display = 'none';
             resetLineIssues();
             checkFormatPlaceholder(); // verifica se há containers, se não tiver, exibe o 'copy'
+
+            autoFormat();
             handleRefreshButtonClick();
 
             addToUndoStack();

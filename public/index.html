@@ -484,16 +484,14 @@
                 </div>
                 <div class="popup_option">
                     <div class="popup_title">
-                        <p class="popup_option_title">Maximum number of undo/redo actions</p>
-                        <p class="popup_option_description">Note: Large limits may impact performance, especially on older devices</p>
+                        <p class="popup_option_title">Auto suggestions</p>
+                        <p class="popup_option_description">Enable this option to receive automatic suggestions as you
+                            transcribe the lyrics</p>
                     </div>
-                    <select id="maxUndoRedoActions" class="select_list" onchange="checkContent()">
-                        <option value="50">50</option>
-                        <option value="75">75</option>
-                        <option value="100" selected>100</option>
-                        <option value="200">200</option>
-                        <option value="300">300</option>
-                    </select>
+                    <label class="switch">
+                        <input type="checkbox" id="autoSuggestion" onclick="checkContent()">
+                        <span class="slider round"></span>
+                    </label>
                 </div>
                 <div class="popup_option" style="position: relative;">
                     <div class="unavailable_overlay" id="unavailable_overlay" style="z-index: 1;"></div>
@@ -505,6 +503,19 @@
                         <input type="checkbox" id="saveDraft" onclick="checkContent()">
                         <span class="slider round"></span>
                     </label>
+                </div>
+                <div class="popup_option">
+                    <div class="popup_title">
+                        <p class="popup_option_title">Undo/redo limit</p>
+                        <p class="popup_option_description">Note: Large limits may impact performance, especially on older devices</p>
+                    </div>
+                    <select id="maxUndoRedoActions" class="select_list" onchange="checkContent()">
+                        <option value="50">50</option>
+                        <option value="75">75</option>
+                        <option value="100" selected>100</option>
+                        <option value="200">200</option>
+                        <option value="300">300</option>
+                    </select>
                 </div>
             </div>
             <div class="settings_tab" id="playback_menu" style="display:none">
@@ -671,7 +682,7 @@
                 <div class="popup_option">
                     <div class="popup_title">
                         <p class="popup_option_title">Use personal Musixmatch API key</p>
-                        <p class="popup_option_description">If you have a personal Musixmatch API key, you can add it here to enjoy an experience without our request limits (don't worry, this data isn't stored on our end)</p>
+                        <p class="popup_option_description">Use your own key to bypass per-user access restrictions (saved locally, we'll never store this in our database)</p>
                     </div>
                     <label class="switch">
                         <input type="checkbox" id="mxmPersonalTokenToggle" onclick="checkContent()">
@@ -693,17 +704,6 @@
                 </div>
                 <div class="popup_option">
                     <div class="popup_title">
-                        <p class="popup_option_title">Auto suggestions</p>
-                        <p class="popup_option_description">Enable this option to receive automatic suggestions as you
-                            transcribe the lyrics</p>
-                    </div>
-                    <label class="switch">
-                        <input type="checkbox" id="autoSuggestion" onclick="checkContent()">
-                        <span class="slider round"></span>
-                    </label>
-                </div>
-                <div class="popup_option">
-                    <div class="popup_title">
                         <p class="popup_option_title">Run on local server</p>
                         <p class="popup_option_description">Enable this option to switch to the local server</p>
                     </div>
@@ -711,6 +711,14 @@
                         <input type="checkbox" id="localHostToggle" onclick="checkContent()">
                         <span class="slider round"></span>
                     </label>
+                </div>
+                <hr style="border-top: 1px solid rgb(100, 100, 100); border-right: none; border-bottom: none; border-left: none; border-image: initial; margin: 9px 0;">
+                <div class="popup_option" style="margin-top: 8px;">
+                    <div class="popup_title">
+                        <p class="popup_option_title">Detect browser</p>
+                        <p class="popup_option_description">Check user browser response</p>
+                    </div>
+                    <div class="white_button2" id="delete_data" onclick="detectBrowser()">Detect</div>
                 </div>
             </div>
         </div>
