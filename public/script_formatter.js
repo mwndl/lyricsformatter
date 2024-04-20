@@ -1,4 +1,5 @@
 var typingTimer;
+var autoSaveTimer;
 
 var undoStack = [];
 var redoStack = [];
@@ -6,8 +7,8 @@ let undoCursorPositionsStack = [];
 var redoCursorPositionsStack = [];
 var maxStackSize = 100;
 
-var lf_version = '2.16.1';
-var lf_release_date = '19/04/2024'
+var lf_version = '2.16.2';
+var lf_release_date = '20/04/2024'
 
 document.addEventListener('DOMContentLoaded', function () {
     var returnArrow = document.getElementById('return_arrow');
@@ -132,8 +133,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         if (isDraftChecked()) {
-            clearTimeout(typingTimer);
-            typingTimer = setTimeout(autoSave, doneTypingInterval);
+            autoSave();
         }
     }
 
@@ -653,8 +653,6 @@ function addToUndoStack() {
             resetLineIssues();
             clearTimeout(typingTimer); // auto 3s
             fetchCurrentlyPlayingData();
-            checkLanguage();
-            saveDraft();
             
 
             // Get references to the elements
@@ -670,6 +668,8 @@ function addToUndoStack() {
                 loadingSpinner.style.display = 'none';
                 return;
             }
+
+            checkLanguage();
 
             // Prepare the data to send to the API
             var requestData = {
@@ -3495,7 +3495,8 @@ function calculateCacheSize(hostID) {
         if (content.trim() === '') {
             return;
         } else {
-            saveDraft()
+            clearTimeout(autoSaveTimer);
+            autoSaveTimer = setTimeout(saveDraft, 3000);
         }
     }
 
