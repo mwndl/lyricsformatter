@@ -1168,7 +1168,6 @@
         height: 100%;
         object-fit: cover; /* Garante que a imagem cubra totalmente o contêiner redondo */
         border-radius: 50%; /* Mantém a imagem redonda */
-        background-color: #666;
         overflow: hidden; /* Permite que o conteúdo do colaborator_country fique visível fora dos limites da imagem */
     }
     

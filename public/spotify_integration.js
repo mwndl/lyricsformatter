@@ -192,6 +192,8 @@ async function fetchUserData() {
 
         if (userProfileImage && userData.images.length > 0) {
             userProfileImage.src = userData.images[0].url;
+        } else {
+            userProfileImage.src = 'https://i.imgur.com/IUi8ZwC.png?3';
         }
 
         if (spotifyLoginButton && userProfileDiv) {
