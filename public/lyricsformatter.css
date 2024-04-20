@@ -1158,7 +1158,6 @@
         height: 50px;
         margin-right: 15px;
         border-radius: 50%;
-        background-color: #666;
         position: relative;
         pointer-events: none; /* Impede que o elemento receba eventos do ponteiro do mouse */
     }
