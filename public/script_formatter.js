@@ -7,7 +7,7 @@ let undoCursorPositionsStack = [];
 var redoCursorPositionsStack = [];
 var maxStackSize = 100;
 
-var lf_version = '2.17.1';
+var lf_version = '2.18.0';
 var lf_release_date = '20/04/2024'
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -231,6 +231,28 @@ document.addEventListener('DOMContentLoaded', function () {
     copyDiffButton.addEventListener('click', function() {
         diffLink = document.getElementById('diff_link_output').textContent
         copyContentToClipboard(diffLink, 'Link copied to clipboard')
+    });
+
+    // Botão enter no editor, função para previnir comportamento de scroll automático
+    document.getElementById('editor').addEventListener('keydown', function(event) {
+        if (event.key === 'Enter') {
+            // Salva a posição atual do cursor
+            var startPos = this.selectionStart;
+            var endPos = this.selectionEnd;
+        
+            // Insere uma quebra de linha
+            var currentValue = this.value;
+            var newValue = currentValue.substring(0, startPos) + '\n' + currentValue.substring(endPos, currentValue.length);
+            this.value = newValue;
+        
+            // Move o cursor para a posição correta após a quebra de linha
+            this.selectionStart = this.selectionEnd = startPos + 1;
+        
+            updateSidebar();
+            autoSave();
+            // Impede o comportamento padrão do Enter
+            event.preventDefault();
+          }
     });
 
     document.addEventListener('keydown', function (event) {
@@ -3365,7 +3387,6 @@ function calculateCacheSize(hostID) {
         }
     
         if (currentSongId === '' || currentIsrc === '') {
-            notification("Missing track data, unable to save draft");
             return;
         }
     
