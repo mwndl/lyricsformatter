@@ -7,7 +7,7 @@ let undoCursorPositionsStack = [];
 var redoCursorPositionsStack = [];
 var maxStackSize = 100;
 
-var lf_version = '2.18.4';
+var lf_version = '2.18.5';
 var lf_release_date = '21/04/2024'
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -820,6 +820,8 @@ function addToUndoStack() {
 
                 updateSidebar();
                 resetLineIssues();
+
+                addToUndoStack();
             }
         }
 
@@ -2290,8 +2292,6 @@ function updateTabCounters() {
                 return
             }
 
-            addToUndoStack()
-
             editor.value = ''; // apaga a transcrição
             updateSidebar(); // reseta os contadores de caracteres e a barra lateral
             ignoredContainers = []; // limpa a memória de alertas ignorados
@@ -2300,6 +2300,7 @@ function updateTabCounters() {
             updateTabCounters();
             checkTextarea()
             notification('Textarea cleared successfully!');
+            addToUndoStack()
         }
 
 
