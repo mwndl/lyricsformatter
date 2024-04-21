@@ -7,7 +7,7 @@ let undoCursorPositionsStack = [];
 var redoCursorPositionsStack = [];
 var maxStackSize = 100;
 
-var lf_version = '2.18.2';
+var lf_version = '2.18.3';
 var lf_release_date = '21/04/2024'
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -247,6 +247,8 @@ document.addEventListener('DOMContentLoaded', function () {
         
             // Move o cursor para a posição correta após a quebra de linha
             this.selectionStart = this.selectionEnd = startPos + 1;
+
+            addToUndoStack()
         
             updateSidebar();
             autoSave();
