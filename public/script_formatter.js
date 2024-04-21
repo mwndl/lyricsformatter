@@ -7,14 +7,13 @@ let undoCursorPositionsStack = [];
 var redoCursorPositionsStack = [];
 var maxStackSize = 100;
 
-var lf_version = '2.18.0';
-var lf_release_date = '20/04/2024'
+var lf_version = '2.18.1';
+var lf_release_date = '21/04/2024'
 
 document.addEventListener('DOMContentLoaded', function () {
     var returnArrow = document.getElementById('return_arrow');
     var lyricsBox = document.getElementById('lyrics_box');
     var textArea = document.getElementById('editor');
-    var textarea = document.querySelector('.editor');
     const selector = document.querySelector('.language_selector');
     const selectedLanguage = document.querySelector('.selected_language');
     const languageList = document.querySelector('.language_list_div');
@@ -250,6 +249,11 @@ document.addEventListener('DOMContentLoaded', function () {
         
             updateSidebar();
             autoSave();
+
+            if (isAutoCapChecked()) {
+                autoCap();
+            }
+
             // Impede o comportamento padrão do Enter
             event.preventDefault();
           }
