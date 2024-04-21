@@ -7,7 +7,7 @@ let undoCursorPositionsStack = [];
 var redoCursorPositionsStack = [];
 var maxStackSize = 100;
 
-var lf_version = '2.18.3';
+var lf_version = '2.18.4';
 var lf_release_date = '21/04/2024'
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -236,6 +236,8 @@ document.addEventListener('DOMContentLoaded', function () {
     // Botão enter no editor, função para previnir comportamento de scroll automático
     document.getElementById('editor').addEventListener('keydown', function(event) {
         if (event.key === 'Enter') {
+            addToUndoStack()
+
             // Salva a posição atual do cursor
             var startPos = this.selectionStart;
             var endPos = this.selectionEnd;
@@ -247,8 +249,6 @@ document.addEventListener('DOMContentLoaded', function () {
         
             // Move o cursor para a posição correta após a quebra de linha
             this.selectionStart = this.selectionEnd = startPos + 1;
-
-            addToUndoStack()
         
             updateSidebar();
             autoSave();
