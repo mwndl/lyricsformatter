@@ -7,8 +7,8 @@ let undoCursorPositionsStack = [];
 var redoCursorPositionsStack = [];
 var maxStackSize = 100;
 
-var lf_version = '2.18.5';
-var lf_release_date = '21/04/2024'
+var lf_version = '2.18.6';
+var lf_release_date = '22/04/2024'
 
 document.addEventListener('DOMContentLoaded', function () {
     var returnArrow = document.getElementById('return_arrow');
@@ -489,6 +489,11 @@ function addToUndoStack() {
             updateSidebar();
             autoSave();
             autoFormat();
+
+            if (isAutoSuggestionsChecked()) {
+                clearTimeout(typingTimer);
+                typingTimer = setTimeout(autoSuggestion, 3000);
+            }
         }
 
         function addOrRemoveParentheses() {
@@ -798,6 +803,7 @@ function addToUndoStack() {
                     fixPunctuation();
                 }
 
+                removeEOL(); // remove pontuações EOL
                 replaceSpecialTags(); // auto replace tags
                 trimEditorContent(); // linhas antes ou depois da letra (1)
                 removeExcessInstrumental(); // remove tags instrumentais duplicadas
@@ -805,7 +811,6 @@ function addToUndoStack() {
                 addSpaceAboveTags(); // add (caso não haja) espaços acima de todas as tags
                 removeSpacesAroundInstrumental(); // espaços ao redor de tags instrumentais
                 trimEditorContent(); // linhas antes ou depois da letra (2)
-                removeEOL(); // remove pontuações EOL
                 autoTrim(); // espaços extras no início ou fim 
                 removeDuplicateSpaces(); // espaços duplos entre palavras
                 removeDuplicateEmptyLines(); // linhas vazias duplicadas entre estrofes
