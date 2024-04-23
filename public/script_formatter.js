@@ -7,8 +7,8 @@ let undoCursorPositionsStack = [];
 var redoCursorPositionsStack = [];
 var maxStackSize = 100;
 
-var lf_version = '2.17.1';
-var lf_release_date = '20/04/2024'
+var lf_version = '2.18.6';
+var lf_release_date = '22/04/2024'
 
 document.addEventListener('DOMContentLoaded', function () {
     var returnArrow = document.getElementById('return_arrow');
@@ -231,6 +231,35 @@ document.addEventListener('DOMContentLoaded', function () {
     copyDiffButton.addEventListener('click', function() {
         diffLink = document.getElementById('diff_link_output').textContent
         copyContentToClipboard(diffLink, 'Link copied to clipboard')
+    });
+
+    // Botão enter no editor, função para previnir comportamento de scroll automático
+    document.getElementById('editor').addEventListener('keydown', function(event) {
+        if (event.key === 'Enter') {
+            addToUndoStack()
+
+            // Salva a posição atual do cursor
+            var startPos = this.selectionStart;
+            var endPos = this.selectionEnd;
+        
+            // Insere uma quebra de linha
+            var currentValue = this.value;
+            var newValue = currentValue.substring(0, startPos) + '\n' + currentValue.substring(endPos, currentValue.length);
+            this.value = newValue;
+        
+            // Move o cursor para a posição correta após a quebra de linha
+            this.selectionStart = this.selectionEnd = startPos + 1;
+        
+            updateSidebar();
+            autoSave();
+
+            if (isAutoCapChecked()) {
+                autoCap();
+            }
+
+            // Impede o comportamento padrão do Enter
+            event.preventDefault();
+          }
     });
 
     document.addEventListener('keydown', function (event) {
@@ -460,6 +489,11 @@ function addToUndoStack() {
             updateSidebar();
             autoSave();
             autoFormat();
+
+            if (isAutoSuggestionsChecked()) {
+                clearTimeout(typingTimer);
+                typingTimer = setTimeout(autoSuggestion, 3000);
+            }
         }
 
         function addOrRemoveParentheses() {
@@ -769,6 +803,7 @@ function addToUndoStack() {
                     fixPunctuation();
                 }
 
+                removeEOL(); // remove pontuações EOL
                 replaceSpecialTags(); // auto replace tags
                 trimEditorContent(); // linhas antes ou depois da letra (1)
                 removeExcessInstrumental(); // remove tags instrumentais duplicadas
@@ -776,7 +811,6 @@ function addToUndoStack() {
                 addSpaceAboveTags(); // add (caso não haja) espaços acima de todas as tags
                 removeSpacesAroundInstrumental(); // espaços ao redor de tags instrumentais
                 trimEditorContent(); // linhas antes ou depois da letra (2)
-                removeEOL(); // remove pontuações EOL
                 autoTrim(); // espaços extras no início ou fim 
                 removeDuplicateSpaces(); // espaços duplos entre palavras
                 removeDuplicateEmptyLines(); // linhas vazias duplicadas entre estrofes
@@ -791,6 +825,8 @@ function addToUndoStack() {
 
                 updateSidebar();
                 resetLineIssues();
+
+                addToUndoStack();
             }
         }
 
@@ -2261,8 +2297,6 @@ function updateTabCounters() {
                 return
             }
 
-            addToUndoStack()
-
             editor.value = ''; // apaga a transcrição
             updateSidebar(); // reseta os contadores de caracteres e a barra lateral
             ignoredContainers = []; // limpa a memória de alertas ignorados
@@ -2271,6 +2305,7 @@ function updateTabCounters() {
             updateTabCounters();
             checkTextarea()
             notification('Textarea cleared successfully!');
+            addToUndoStack()
         }
 
 
@@ -3365,7 +3400,6 @@ function calculateCacheSize(hostID) {
         }
     
         if (currentSongId === '' || currentIsrc === '') {
-            notification("Missing track data, unable to save draft");
             return;
         }
     
