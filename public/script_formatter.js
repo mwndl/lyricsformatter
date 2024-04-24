@@ -7,7 +7,7 @@ let undoCursorPositionsStack = [];
 var redoCursorPositionsStack = [];
 var maxStackSize = 100;
 
-var lf_version = '2.18.7';
+var lf_version = '2.19.0';
 var lf_release_date = '24/04/2024'
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -187,7 +187,6 @@ document.addEventListener('DOMContentLoaded', function () {
         loadDevMode();
         loadSpMenu();
         checkTrackIdParams();
-        checkSpotifyParams();
         checkLTExportParams();
         fetchCreditsData();
         fetchServerInfo();
@@ -1008,11 +1007,6 @@ function addToUndoStack() {
         function isAutoSuggestionsChecked() {
             const autoSuggestions = document.getElementById('autoSuggestion');
             return autoSuggestions.checked;
-        }
-
-        function isDisplayPlaybackToggleChecked() {
-            const showPlaybackTabToggle = document.getElementById('displayPlaybackTabToggle');
-            return showPlaybackTabToggle.checked;
         }
 
         function isMxmPersonalTokenToggleChecked() {
@@ -2811,48 +2805,21 @@ function updateServerInfo(data) {
 
 /* EXIBIR OU OCULTAR CONFIGURAÇÕES DO SPOTIFY */
 
-        // Função para verificar os parâmetros da URL e acionar a função correspondente
-        function checkSpotifyParams() {
-            const spMenuParam = getParameterByName('sp_menu');
-            
-            if (spMenuParam !== null) {
-                if (spMenuParam === '1') {
-                    showSpMenuDiv();
-                    removeParameterFromURL('sp_menu')
-                } else if (spMenuParam === '0') {
-                    hideSpMenuDiv();
-                    removeParameterFromURL('sp_menu')
-                }
-            }
-        }
-
-        function displayPlaybackTabToggle() {
-            checked = isDisplayPlaybackToggleChecked()
-            if (checked === true) {
-                showSpMenuDiv();
-            } else {
-                hideSpMenuDiv();
-            }
-        }
 
         // Função para exibir a div
         function showSpMenuDiv() {
-            const spMenu = document.getElementById('playback_sub');
-            const showPlaybackTabToggle = document.getElementById('displayPlaybackTabToggle');
-            spMenu.style.display = 'flex';
-            localStorage.setItem('spMenu', 'true');
-            showPlaybackTabToggle.checked = true;
-            document.getElementById('unavailable_overlay').style = 'z-index:-1'
+            var elements = document.getElementsByClassName('unavailable_overlay');
+            for(var i = 0; i < elements.length; i++) {
+                elements[i].style.zIndex = '-1';
+            }
         }
 
         // Função para ocultar a div
         function hideSpMenuDiv() {
-            const spMenu = document.getElementById('playback_sub');
-            const showPlaybackTabToggle = document.getElementById('displayPlaybackTabToggle');
-            spMenu.style.display = 'none';
-            localStorage.setItem('spMenu', 'false');
-            showPlaybackTabToggle.checked = false;
-            document.getElementById('unavailable_overlay').style = 'z-index:1';
+            var elements = document.getElementsByClassName('unavailable_overlay');
+            for(var i = 0; i < elements.length; i++) {
+                elements[i].style.zIndex = '1';
+            }
             document.getElementById('saveDraft').checked = false;
             checkContent()
         }

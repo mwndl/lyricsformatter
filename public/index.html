@@ -436,7 +436,7 @@
                 <div class="impr_menu_true" id="pref_sub" style="">
                     <p>Preferences</p>
                 </div>
-                <div class="impr_menu_false" id="playback_sub" style="display:none" title="">
+                <div class="impr_menu_false" id="playback_sub" title="">
                     <p>Playback</p>
                 </div>
                 <div class="impr_menu_false" id="storage_sub" style="">
@@ -493,8 +493,8 @@
                         <span class="slider round"></span>
                     </label>
                 </div>
-                <div class="popup_option" style="position: relative;">
-                    <div class="unavailable_overlay" id="unavailable_overlay" style="z-index: 1;"></div>
+                <div class="popup_option">
+                    <div class="unavailable_overlay" id="unavailable_overlay" onclick="notification('Spotify connection required');"></div>
                     <div class="popup_title">
                         <p class="popup_option_title">Save draft locally</p>
                         <p class="popup_option_description">If you edit any lyrics while listening to the song, we'll automatically save the edit as a draft for you</p>
@@ -540,6 +540,7 @@
                     </div>
                 </div>
                 <div class="popup_option">
+                    <div class="unavailable_overlay" id="unavailable_overlay" onclick="notification('Spotify connection required');"></div>
                     <div class="popup_title">
                         <p class="popup_option_title">Backwards value</p>
                         <p class="popup_option_description">Specify the duration in seconds to rewind during backward
@@ -554,6 +555,7 @@
                     </select>
                 </div>
                 <div class="popup_option">
+                    <div class="unavailable_overlay" id="unavailable_overlay" onclick="notification('Spotify connection required');"></div>
                     <div class="popup_title">
                         <p class="popup_option_title">Fast forward value</p>
                         <p class="popup_option_description">Specify the duration in seconds to fast forward during
@@ -569,6 +571,7 @@
                     </select>
                 </div>
                 <div class="popup_option">
+                    <div class="unavailable_overlay" id="unavailable_overlay" onclick="notification('Spotify connection required');"></div>
                     <div class="popup_title">
                         <p class="popup_option_title">Transfer playback on copy</p>
                         <p class="popup_option_description">If there is an alternative playback device, the song will be transferred back automatically when you tap the copy button</p>
@@ -579,6 +582,7 @@
                     </label>
                 </div>
                 <div class="popup_option">
+                    <div class="unavailable_overlay" id="unavailable_overlay" onclick="notification('Spotify connection required');"></div>
                     <div class="popup_title">
                         <p class="popup_option_title">Transfer playback on paste</p>
                         <p class="popup_option_description">If there is a currently playing track on another device, the song will be transferred to LyricsFormatter when you tap the paste button</p>
@@ -669,16 +673,6 @@
                 </div>
             </div>
             <div class="settings_tab" id="devtools_menu" style="display:none">
-                <div class="popup_option">
-                    <div class="popup_title">
-                        <p class="popup_option_title">Display playback tab</p>
-                        <p class="popup_option_description">To hide the tab permanently, make sure to disconnect your account</p>
-                    </div>
-                    <label class="switch">
-                        <input type="checkbox" id="displayPlaybackTabToggle" onclick="displayPlaybackTabToggle()">
-                        <span class="slider round"></span>
-                    </label>
-                </div>
                 <div class="popup_option">
                     <div class="popup_title">
                         <p class="popup_option_title">Use personal Musixmatch API key</p>
@@ -1071,6 +1065,7 @@
             </div>
         </div>
         <div class="popup_content" style="display: flex; align-items: center;">
+            <p class="no_data_table">No data available</p>
         </div>
         <div class="popup_bottom" >
             <div style="display: flex; flex-direction: column;">
@@ -1092,6 +1087,7 @@
             </div>
         </div>
         <div class="popup_content" style="display: flex; align-items: center;">
+            <p class="no_data_table">No data available</p>
         </div>
         <div class="popup_bottom" >
             <div style="display: flex; flex-direction: column;">
