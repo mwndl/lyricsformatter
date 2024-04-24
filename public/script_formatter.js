@@ -7,8 +7,8 @@ let undoCursorPositionsStack = [];
 var redoCursorPositionsStack = [];
 var maxStackSize = 100;
 
-var lf_version = '2.18.6';
-var lf_release_date = '22/04/2024'
+var lf_version = '2.18.7';
+var lf_release_date = '24/04/2024'
 
 document.addEventListener('DOMContentLoaded', function () {
     var returnArrow = document.getElementById('return_arrow');
