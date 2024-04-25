@@ -7,7 +7,7 @@ let undoCursorPositionsStack = [];
 var redoCursorPositionsStack = [];
 var maxStackSize = 100;
 
-var lf_version = '2.19.1';
+var lf_version = '2.19.2';
 var lf_release_date = '25/04/2024'
 
 document.addEventListener('DOMContentLoaded', function () {
