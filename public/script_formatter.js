@@ -7,8 +7,8 @@ let undoCursorPositionsStack = [];
 var redoCursorPositionsStack = [];
 var maxStackSize = 100;
 
-var lf_version = '2.19.0';
-var lf_release_date = '24/04/2024'
+var lf_version = '2.19.1';
+var lf_release_date = '25/04/2024'
 
 document.addEventListener('DOMContentLoaded', function () {
     var returnArrow = document.getElementById('return_arrow');
@@ -254,6 +254,11 @@ document.addEventListener('DOMContentLoaded', function () {
 
             if (isAutoCapChecked()) {
                 autoCap();
+            }
+
+            if (isAutoSuggestionsChecked()) {
+                clearTimeout(typingTimer);
+                typingTimer = setTimeout(autoSuggestion, 3000);
             }
 
             // Impede o comportamento padrão do Enter

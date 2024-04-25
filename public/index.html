@@ -1717,6 +1717,7 @@
                     // Adicionar o parâmetro 'track_id' à URL, se o trackId não for nulo
                     if (trackId) {
                         addParamToURL('track_id', trackId);
+                        storeSections(accessToken, trackId)
                     }
                 }
                 function hideTracker() {
