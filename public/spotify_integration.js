@@ -57,7 +57,7 @@ function openSpotifyAuthorization() {
 
     // Verificar se a janela pop-up foi aberta corretamente
     if (!popup || popup.closed || typeof popup.closed == 'undefined') {
-        alert('Por favor, permita janelas pop-up para continuar.');
+        notification('Please allow pop-up windows to continue.');
     } else {
         // Adicionar um intervalo para verificar a URL do popup
         var interval = setInterval(function() {
@@ -123,6 +123,8 @@ function disconnectSpotify() {
     // Exibir o botão de login e ocultar a foto do perfil
     document.getElementById('spotify_login_button').style.display = 'block';
     document.getElementById('user_profile').style.display = 'none';
+
+    hideSpMenuDiv()
 
     // Remover o listener 'ready' do player atual, se houver
     if (player) {
@@ -202,6 +204,7 @@ async function fetchUserData() {
         }
 
     } catch (error) {
+        disconnectSpotify();
         console.error('Error getting user data from Spotify: ', error.message);
     }
 }
