@@ -436,7 +436,7 @@
                 <div class="impr_menu_true" id="pref_sub" style="">
                     <p>Preferences</p>
                 </div>
-                <div class="impr_menu_false" id="playback_sub" style="display:none" title="">
+                <div class="impr_menu_false" id="playback_sub" title="">
                     <p>Playback</p>
                 </div>
                 <div class="impr_menu_false" id="storage_sub" style="">
@@ -484,7 +484,29 @@
                 </div>
                 <div class="popup_option">
                     <div class="popup_title">
-                        <p class="popup_option_title">Maximum number of undo/redo actions</p>
+                        <p class="popup_option_title">Auto suggestions</p>
+                        <p class="popup_option_description">Enable this option to receive automatic suggestions as you
+                            transcribe the lyrics</p>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="autoSuggestion" onclick="checkContent()">
+                        <span class="slider round"></span>
+                    </label>
+                </div>
+                <div class="popup_option">
+                    <div class="unavailable_overlay" id="unavailable_overlay" onclick="notification('Spotify connection required');"></div>
+                    <div class="popup_title">
+                        <p class="popup_option_title">Save draft locally</p>
+                        <p class="popup_option_description">If you edit any lyrics while listening to the song, we'll automatically save the edit as a draft for you</p>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="saveDraft" onclick="checkContent()">
+                        <span class="slider round"></span>
+                    </label>
+                </div>
+                <div class="popup_option">
+                    <div class="popup_title">
+                        <p class="popup_option_title">Undo/redo limit</p>
                         <p class="popup_option_description">Note: Large limits may impact performance, especially on older devices</p>
                     </div>
                     <select id="maxUndoRedoActions" class="select_list" onchange="checkContent()">
@@ -494,17 +516,6 @@
                         <option value="200">200</option>
                         <option value="300">300</option>
                     </select>
-                </div>
-                <div class="popup_option" style="position: relative;">
-                    <div class="unavailable_overlay" id="unavailable_overlay" style="z-index: 1;"></div>
-                    <div class="popup_title">
-                        <p class="popup_option_title">Save draft locally</p>
-                        <p class="popup_option_description">If you edit any lyrics while listening to the song, we'll automatically save the edit as a draft for you</p>
-                    </div>
-                    <label class="switch">
-                        <input type="checkbox" id="saveDraft" onclick="checkContent()">
-                        <span class="slider round"></span>
-                    </label>
                 </div>
             </div>
             <div class="settings_tab" id="playback_menu" style="display:none">
@@ -529,6 +540,7 @@
                     </div>
                 </div>
                 <div class="popup_option">
+                    <div class="unavailable_overlay" id="unavailable_overlay" onclick="notification('Spotify connection required');"></div>
                     <div class="popup_title">
                         <p class="popup_option_title">Backwards value</p>
                         <p class="popup_option_description">Specify the duration in seconds to rewind during backward
@@ -543,6 +555,7 @@
                     </select>
                 </div>
                 <div class="popup_option">
+                    <div class="unavailable_overlay" id="unavailable_overlay" onclick="notification('Spotify connection required');"></div>
                     <div class="popup_title">
                         <p class="popup_option_title">Fast forward value</p>
                         <p class="popup_option_description">Specify the duration in seconds to fast forward during
@@ -558,6 +571,7 @@
                     </select>
                 </div>
                 <div class="popup_option">
+                    <div class="unavailable_overlay" id="unavailable_overlay" onclick="notification('Spotify connection required');"></div>
                     <div class="popup_title">
                         <p class="popup_option_title">Transfer playback on copy</p>
                         <p class="popup_option_description">If there is an alternative playback device, the song will be transferred back automatically when you tap the copy button</p>
@@ -568,6 +582,7 @@
                     </label>
                 </div>
                 <div class="popup_option">
+                    <div class="unavailable_overlay" id="unavailable_overlay" onclick="notification('Spotify connection required');"></div>
                     <div class="popup_title">
                         <p class="popup_option_title">Transfer playback on paste</p>
                         <p class="popup_option_description">If there is a currently playing track on another device, the song will be transferred to LyricsFormatter when you tap the paste button</p>
@@ -660,18 +675,8 @@
             <div class="settings_tab" id="devtools_menu" style="display:none">
                 <div class="popup_option">
                     <div class="popup_title">
-                        <p class="popup_option_title">Display playback tab</p>
-                        <p class="popup_option_description">To hide the tab permanently, make sure to disconnect your account</p>
-                    </div>
-                    <label class="switch">
-                        <input type="checkbox" id="displayPlaybackTabToggle" onclick="displayPlaybackTabToggle()">
-                        <span class="slider round"></span>
-                    </label>
-                </div>
-                <div class="popup_option">
-                    <div class="popup_title">
                         <p class="popup_option_title">Use personal Musixmatch API key</p>
-                        <p class="popup_option_description">If you have a personal Musixmatch API key, you can add it here to enjoy an experience without our request limits (don't worry, this data isn't stored on our end)</p>
+                        <p class="popup_option_description">Use your own key to bypass per-user access restrictions (saved locally, we'll never store this in our database)</p>
                     </div>
                     <label class="switch">
                         <input type="checkbox" id="mxmPersonalTokenToggle" onclick="checkContent()">
@@ -693,17 +698,6 @@
                 </div>
                 <div class="popup_option">
                     <div class="popup_title">
-                        <p class="popup_option_title">Auto suggestions</p>
-                        <p class="popup_option_description">Enable this option to receive automatic suggestions as you
-                            transcribe the lyrics</p>
-                    </div>
-                    <label class="switch">
-                        <input type="checkbox" id="autoSuggestion" onclick="checkContent()">
-                        <span class="slider round"></span>
-                    </label>
-                </div>
-                <div class="popup_option">
-                    <div class="popup_title">
                         <p class="popup_option_title">Run on local server</p>
                         <p class="popup_option_description">Enable this option to switch to the local server</p>
                     </div>
@@ -711,6 +705,14 @@
                         <input type="checkbox" id="localHostToggle" onclick="checkContent()">
                         <span class="slider round"></span>
                     </label>
+                </div>
+                <hr style="border-top: 1px solid rgb(100, 100, 100); border-right: none; border-bottom: none; border-left: none; border-image: initial; margin: 9px 0;">
+                <div class="popup_option" style="margin-top: 8px;">
+                    <div class="popup_title">
+                        <p class="popup_option_title">Detect browser</p>
+                        <p class="popup_option_description">Check user browser response</p>
+                    </div>
+                    <div class="white_button2" id="delete_data" onclick="detectBrowser()">Detect</div>
                 </div>
             </div>
         </div>
@@ -1063,6 +1065,7 @@
             </div>
         </div>
         <div class="popup_content" style="display: flex; align-items: center;">
+            <p class="no_data_table">No data available</p>
         </div>
         <div class="popup_bottom" >
             <div style="display: flex; flex-direction: column;">
@@ -1084,6 +1087,7 @@
             </div>
         </div>
         <div class="popup_content" style="display: flex; align-items: center;">
+            <p class="no_data_table">No data available</p>
         </div>
         <div class="popup_bottom" >
             <div style="display: flex; flex-direction: column;">
@@ -1578,8 +1582,6 @@
                             trackId = currentTrackId;
                             playbackId = currentPlaybackId;
 
-                            // carregar estrofes
-                            storeSections(accessToken, trackId)
                             showTracker();
 
                         }
@@ -1588,8 +1590,6 @@
                             trackId = currentTrackId;
                             playbackId = currentPlaybackId;
 
-                            // carregar estrofes
-                            storeSections(accessToken, trackId)
                             showTracker();
                         }
                         if (trackId === currentTrackId && currentPlaybackId !== playbackId) { // mudanças de player
@@ -1597,8 +1597,6 @@
                             trackId = currentTrackId;
                             playbackId = currentPlaybackId;
 
-                            // carregar estrofes
-                            storeSections(accessToken, trackId)
                             showTracker();
                         }
 
@@ -1713,6 +1711,7 @@
                     // Adicionar o parâmetro 'track_id' à URL, se o trackId não for nulo
                     if (trackId) {
                         addParamToURL('track_id', trackId);
+                        storeSections(accessToken, trackId)
                     }
                 }
                 function hideTracker() {

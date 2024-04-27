@@ -1,4 +1,5 @@
 var typingTimer;
+var autoSaveTimer;
 
 var undoStack = [];
 var redoStack = [];
@@ -6,8 +7,8 @@ let undoCursorPositionsStack = [];
 var redoCursorPositionsStack = [];
 var maxStackSize = 100;
 
-var lf_version = '2.15.1';
-var lf_release_date = '18/04/2024'
+var lf_version = '2.19.2';
+var lf_release_date = '25/04/2024'
 
 document.addEventListener('DOMContentLoaded', function () {
     var returnArrow = document.getElementById('return_arrow');
@@ -49,10 +50,12 @@ document.addEventListener('DOMContentLoaded', function () {
     document.getElementById('paste_button').addEventListener('click', function() { // paste
         pasteFromClipboard();
         autoSave();
-   });    
+    });    
 
-    var refreshButton = document.getElementById('refresh_button');
-    refreshButton.addEventListener('click', handleRefreshButtonClick); // refresh
+    document.getElementById('refresh_button').addEventListener('click', function() {
+        autoFormat();
+        handleRefreshButtonClick();
+    });
 
     document.getElementById('mxm_icon_div').addEventListener('click', function() {
          getMxmLyrics(currentIsrc, 'xleU8AVcuM9iS99upAs0RfWjvty6Vjn7') // 10 requests per hour token (public)
@@ -130,8 +133,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         if (isDraftChecked()) {
-            clearTimeout(typingTimer);
-            typingTimer = setTimeout(autoSave, doneTypingInterval);
+            autoSave();
         }
     }
 
@@ -185,7 +187,6 @@ document.addEventListener('DOMContentLoaded', function () {
         loadDevMode();
         loadSpMenu();
         checkTrackIdParams();
-        checkSpotifyParams();
         checkLTExportParams();
         fetchCreditsData();
         fetchServerInfo();
@@ -231,6 +232,40 @@ document.addEventListener('DOMContentLoaded', function () {
         copyContentToClipboard(diffLink, 'Link copied to clipboard')
     });
 
+    // Botão enter no editor, função para previnir comportamento de scroll automático
+    document.getElementById('editor').addEventListener('keydown', function(event) {
+        if (event.key === 'Enter') {
+            addToUndoStack()
+
+            // Salva a posição atual do cursor
+            var startPos = this.selectionStart;
+            var endPos = this.selectionEnd;
+        
+            // Insere uma quebra de linha
+            var currentValue = this.value;
+            var newValue = currentValue.substring(0, startPos) + '\n' + currentValue.substring(endPos, currentValue.length);
+            this.value = newValue;
+        
+            // Move o cursor para a posição correta após a quebra de linha
+            this.selectionStart = this.selectionEnd = startPos + 1;
+        
+            updateSidebar();
+            autoSave();
+
+            if (isAutoCapChecked()) {
+                autoCap();
+            }
+
+            if (isAutoSuggestionsChecked()) {
+                clearTimeout(typingTimer);
+                typingTimer = setTimeout(autoSuggestion, 3000);
+            }
+
+            // Impede o comportamento padrão do Enter
+            event.preventDefault();
+          }
+    });
+
     document.addEventListener('keydown', function (event) {
 
         var editor = document.getElementById('editor');
@@ -250,6 +285,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     showFormatTab()
                     break;
                 case '8':
+                    autoFormat()
                     handleRefreshButtonClick()
                     break;
                 case '9':
@@ -265,6 +301,7 @@ document.addEventListener('DOMContentLoaded', function () {
             toggleTab()
         } else if ((event.ctrlKey || event.metaKey) && event.key === ',') { // Ctrl/Cmd + ,
             event.preventDefault();
+            autoFormat()
             handleRefreshButtonClick()
         // tags
         } else if ((event.ctrlKey || event.metaKey) && event.shiftKey && (event.key === 'I' || event.key === 'i') && isEditorFocused) { 
@@ -336,7 +373,7 @@ function undo() {
     updateSidebar();
     updateTabCounters();
     if (isDraftChecked()) {
-        saveDraft();
+        autoSave();
     }
 }
 
@@ -368,7 +405,7 @@ function redo() {
         updateTabCounters();
 
         if (isDraftChecked()) {
-            saveDraft();
+            autoSave();
         }
     }
 }
@@ -454,19 +491,25 @@ function addToUndoStack() {
 
             addToUndoStack();
             updateSidebar();
-            saveDraft();
+            autoSave();
+            autoFormat();
+
+            if (isAutoSuggestionsChecked()) {
+                clearTimeout(typingTimer);
+                typingTimer = setTimeout(autoSuggestion, 3000);
+            }
         }
 
         function addOrRemoveParentheses() {
             const languageParam = getParameterByName('language');
             if (languageParam === 'fr' || languageParam === 'it') {
                 addParenthesesAlt();
-                removeDuplicatePunctuations()
-                saveDraft();
+                removeDuplicatePunctuations();
+                autoSave();
             } else {
-                addParentheses()
-                removeDuplicatePunctuations()
-                saveDraft();
+                addParentheses();
+                removeDuplicatePunctuations();
+                autoSave();
             }
         }
 
@@ -630,14 +673,13 @@ function addToUndoStack() {
 
 /* CARREGAR SUGESTÕES DE FORMATO */
 
+
         // Add this function to your existing code
         function handleRefreshButtonClick() {
             var refreshButton = document.getElementById('refresh_button');
             var loadingSpinner = document.getElementById('loading_spinner');
             var textArea = document.getElementById('editor');
-            var autoFormatToggle = document.getElementById('autoFormatToggle');
             var selectedLanguageCode = getParameterByName('language')
-            const cursorPosition = editor.selectionStart; // Obtém a posição atual do cursor
 
             if (textArea.value === '') {
                 fetchCurrentlyPlayingData();
@@ -645,50 +687,10 @@ function addToUndoStack() {
                 return;
             }
 
-            // Obter número da linha onde estava o cursor
-            var cursorLine = textArea.value.substr(0, cursorPosition).split("\n").length;
-
-            // EXECUTAR AUTO FORMAT
-            if (autoFormatToggle.checked) {
-
-                if (selectedLanguageCode === 'pt-BR' || selectedLanguageCode === 'pt-PT') {
-                    replaceX();
-                }
-
-                if (selectedLanguageCode === 'pt-BR' || selectedLanguageCode === 'pt-PT'|| 
-                selectedLanguageCode === 'en-US' || selectedLanguageCode === 'en-GB'|| 
-                selectedLanguageCode === 'es' || selectedLanguageCode === 'it'||
-                selectedLanguageCode === 'fr') {
-                    fixPunctuation();
-                }
-
-                replaceSpecialTags(); // auto replace tags
-                trimEditorContent(); // linhas antes ou depois da letra (1)
-                removeExcessInstrumental(); // remove tags instrumentais duplicadas
-                removeInstrumentalStardEnd(); // remove instrumentais no início/fim da letra
-                addSpaceAboveTags(); // add (caso não haja) espaços acima de todas as tags
-                removeSpacesAroundInstrumental(); // espaços ao redor de tags instrumentais
-                trimEditorContent(); // linhas antes ou depois da letra (2)
-                removeEOL(); // remove pontuações EOL
-                autoTrim(); // espaços extras no início ou fim 
-                removeDuplicateSpaces(); // espaços duplos entre palavras
-                removeDuplicateEmptyLines(); // linhas vazias duplicadas entre estrofes
-            }
-
-            // Encontre o índice do início da próxima linha
-            var nextLineIndex = textArea.value.indexOf("\n", cursorPosition);
-            if (nextLineIndex === -1) {
-                nextLineIndex = textArea.value.length; // Se for a última linha, vá até o final do texto
-            }
-            // Defina a posição do cursor para o final da linha onde estava o cursor antes da formatação automática
-            textArea.setSelectionRange(nextLineIndex, nextLineIndex);
-
             updateSidebar();
             resetLineIssues();
             clearTimeout(typingTimer); // auto 3s
             fetchCurrentlyPlayingData();
-            checkLanguage();
-            saveDraft();
             
 
             // Get references to the elements
@@ -704,6 +706,8 @@ function addToUndoStack() {
                 loadingSpinner.style.display = 'none';
                 return;
             }
+
+            checkLanguage();
 
             // Prepare the data to send to the API
             var requestData = {
@@ -782,6 +786,52 @@ function addToUndoStack() {
                     refreshButton.style.display = 'block';
                     loadingSpinner.style.display = 'none';
                 });
+        }
+
+        function autoFormat() {
+            var textArea = document.getElementById('editor');
+            var autoFormatToggle = document.getElementById('autoFormatToggle');
+            var selectedLanguageCode = getParameterByName('language');
+            const cursorPosition = editor.selectionStart; // Obtém a posição atual do cursor
+
+            if (autoFormatToggle.checked) {
+
+                if (selectedLanguageCode === 'pt-BR' || selectedLanguageCode === 'pt-PT') {
+                    replaceX();
+                }
+
+                if (selectedLanguageCode === 'pt-BR' || selectedLanguageCode === 'pt-PT'|| 
+                selectedLanguageCode === 'en-US' || selectedLanguageCode === 'en-GB'|| 
+                selectedLanguageCode === 'es' || selectedLanguageCode === 'it'||
+                selectedLanguageCode === 'fr') {
+                    fixPunctuation();
+                }
+
+                removeEOL(); // remove pontuações EOL
+                replaceSpecialTags(); // auto replace tags
+                trimEditorContent(); // linhas antes ou depois da letra (1)
+                removeExcessInstrumental(); // remove tags instrumentais duplicadas
+                removeInstrumentalStardEnd(); // remove instrumentais no início/fim da letra
+                addSpaceAboveTags(); // add (caso não haja) espaços acima de todas as tags
+                removeSpacesAroundInstrumental(); // espaços ao redor de tags instrumentais
+                trimEditorContent(); // linhas antes ou depois da letra (2)
+                autoTrim(); // espaços extras no início ou fim 
+                removeDuplicateSpaces(); // espaços duplos entre palavras
+                removeDuplicateEmptyLines(); // linhas vazias duplicadas entre estrofes
+
+                // Encontre o índice do início da próxima linha
+                var nextLineIndex = textArea.value.indexOf("\n", cursorPosition);
+                if (nextLineIndex === -1) {
+                    nextLineIndex = textArea.value.length; // Se for a última linha, vá até o final do texto
+                }
+                // Defina a posição do cursor para o final da linha onde estava o cursor antes da formatação automática
+                textArea.setSelectionRange(nextLineIndex, nextLineIndex);
+
+                updateSidebar();
+                resetLineIssues();
+
+                addToUndoStack();
+            }
         }
 
 /* ****************************************** */
@@ -962,11 +1012,6 @@ function addToUndoStack() {
         function isAutoSuggestionsChecked() {
             const autoSuggestions = document.getElementById('autoSuggestion');
             return autoSuggestions.checked;
-        }
-
-        function isDisplayPlaybackToggleChecked() {
-            const showPlaybackTabToggle = document.getElementById('displayPlaybackTabToggle');
-            return showPlaybackTabToggle.checked;
         }
 
         function isMxmPersonalTokenToggleChecked() {
@@ -1544,7 +1589,7 @@ function addToUndoStack() {
                     checkbox.checked = JSON.parse(checkboxState);
                 } else {
                     // Se não houver informação em cache, defina os estados padrão
-                    if (checkboxId === 'autoCapToggle' || checkboxId === 'autoFormatToggle' /*|| checkboxId === 'saveDraft'*/) { // Remover o comentário após integração completa do Spotify
+                    if (checkboxId === 'autoCapToggle' || checkboxId === 'autoFormatToggle' || checkboxId === 'autoSuggestion' /*|| checkboxId === 'saveDraft'*/) { 
                         checkbox.checked = true; // Ativado
                     } else {
                         checkbox.checked = false; // Desativado
@@ -2196,6 +2241,8 @@ function updateTabCounters() {
             ignoredContainers.push(containerId); // Adicionar o ID ao array ignoredContainers
             container.style.display = 'none';
             resetLineIssues();
+
+            autoFormat();
             handleRefreshButtonClick();
         } 
 
@@ -2213,6 +2260,8 @@ function updateTabCounters() {
             container.style.display = 'none';
             resetLineIssues();
             checkFormatPlaceholder(); // verifica se há containers, se não tiver, exibe o 'copy'
+
+            autoFormat();
             handleRefreshButtonClick();
 
             addToUndoStack();
@@ -2247,8 +2296,6 @@ function updateTabCounters() {
                 return
             }
 
-            addToUndoStack()
-
             editor.value = ''; // apaga a transcrição
             updateSidebar(); // reseta os contadores de caracteres e a barra lateral
             ignoredContainers = []; // limpa a memória de alertas ignorados
@@ -2257,6 +2304,7 @@ function updateTabCounters() {
             updateTabCounters();
             checkTextarea()
             notification('Textarea cleared successfully!');
+            addToUndoStack()
         }
 
 
@@ -2490,9 +2538,9 @@ function updateTabCounters() {
 
             loadingContainer.style = 'display:none'
 
-            // Define o texto de descrição
-            const popupDescription = document.querySelector('.popup_description p');
-            popupDescription.textContent = "Here's the list of contributors who made this project real in each language. 🚀";
+                        // Define o texto de descrição
+                        const popupDescription = document.querySelector('.popup_description p');
+                        popupDescription.textContent = "The people who made this happen 🚀";
 
             credits.forEach(credit => {
 
@@ -2762,48 +2810,21 @@ function updateServerInfo(data) {
 
 /* EXIBIR OU OCULTAR CONFIGURAÇÕES DO SPOTIFY */
 
-        // Função para verificar os parâmetros da URL e acionar a função correspondente
-        function checkSpotifyParams() {
-            const spMenuParam = getParameterByName('sp_menu');
-            
-            if (spMenuParam !== null) {
-                if (spMenuParam === '1') {
-                    showSpMenuDiv();
-                    removeParameterFromURL('sp_menu')
-                } else if (spMenuParam === '0') {
-                    hideSpMenuDiv();
-                    removeParameterFromURL('sp_menu')
-                }
-            }
-        }
-
-        function displayPlaybackTabToggle() {
-            checked = isDisplayPlaybackToggleChecked()
-            if (checked === true) {
-                showSpMenuDiv();
-            } else {
-                hideSpMenuDiv();
-            }
-        }
 
         // Função para exibir a div
         function showSpMenuDiv() {
-            const spMenu = document.getElementById('playback_sub');
-            const showPlaybackTabToggle = document.getElementById('displayPlaybackTabToggle');
-            spMenu.style.display = 'flex';
-            localStorage.setItem('spMenu', 'true');
-            showPlaybackTabToggle.checked = true;
-            document.getElementById('unavailable_overlay').style = 'z-index:-1'
+            var elements = document.getElementsByClassName('unavailable_overlay');
+            for(var i = 0; i < elements.length; i++) {
+                elements[i].style.zIndex = '-1';
+            }
         }
 
         // Função para ocultar a div
         function hideSpMenuDiv() {
-            const spMenu = document.getElementById('playback_sub');
-            const showPlaybackTabToggle = document.getElementById('displayPlaybackTabToggle');
-            spMenu.style.display = 'none';
-            localStorage.setItem('spMenu', 'false');
-            showPlaybackTabToggle.checked = false;
-            document.getElementById('unavailable_overlay').style = 'z-index:1';
+            var elements = document.getElementsByClassName('unavailable_overlay');
+            for(var i = 0; i < elements.length; i++) {
+                elements[i].style.zIndex = '1';
+            }
             document.getElementById('saveDraft').checked = false;
             checkContent()
         }
@@ -3351,7 +3372,6 @@ function calculateCacheSize(hostID) {
         }
     
         if (currentSongId === '' || currentIsrc === '') {
-            notification("Missing track data, unable to save draft");
             return;
         }
     
@@ -3481,7 +3501,8 @@ function calculateCacheSize(hostID) {
         if (content.trim() === '') {
             return;
         } else {
-            saveDraft()
+            clearTimeout(autoSaveTimer);
+            autoSaveTimer = setTimeout(saveDraft, 3000);
         }
     }
 
