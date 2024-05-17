@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="google" value="notranslate">
+    <title>Spotify Authorization</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            padding: 0 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #000;
+            color: #fff;
+            font-family: Arial, sans-serif;
+            user-select: none;
+        }
+
+        p {
+            margin: 0;
+        }
+
+        .container {
+            text-align: center;
+            position: relative;
+        }
+
+        .error-title-div {
+            font-size: 24px;
+            margin-bottom: 15px;
+        }
+
+        .error-description-div {
+            font-size: 18px;
+            margin-bottom: 22px;
+        }
+
+        svg {
+            top: calc(50% - 60px); 
+            left: calc(50% - 10px);
+            width: 120px;
+            height: 120px; 
+        }
+
+        .close_popup_div {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+        }
+
+        .close_button {
+            background-color: #fff;
+            color: #000;
+            padding: 11px 20px;
+            cursor: pointer;
+            border-radius: 12px;
+        }
+
+        .close_button:hover {
+            background-color: #dddddd;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <svg fill="#ff0000" viewBox="-3.5 0 19 19" xmlns="http://www.w3.org/2000/svg" class="cf-icon-svg" stroke="#ff0000"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"><path d="M11.383 13.644A1.03 1.03 0 0 1 9.928 15.1L6 11.172 2.072 15.1a1.03 1.03 0 1 1-1.455-1.456l3.928-3.928L.617 5.79a1.03 1.03 0 1 1 1.455-1.456L6 8.261l3.928-3.928a1.03 1.03 0 0 1 1.455 1.456L7.455 9.716z"></path></g></svg>
+        <div class="error-title-div">
+            <p>Something went wrong</p> 
+        </div>
+        <div class="error-description-div">
+            <p id="error_description_text" style="display:none"></p>
+            <p id="error_code_div" style="font-style: italic; user-select: text;display:none;font-size: 14px;
+            color: #e2e2e2;margin-top:10px">Error code: <span style="color: #a0a0a0;" id="error_status_code">--</span></p>
+        </div>
+        <div class="close_popup_div">
+            <div class="close_button" onclick="closePopup()">Close</div>
+        </div>
+    </div>
+
+    <script>
+        function closePopup() {
+            window.close(); // Fechar a janela
+        }
+
+        // Função para obter os parâmetros da URL
+        function getUrlParams() {
+            var params = {};
+            var urlParams = new URLSearchParams(window.location.search);
+            urlParams.forEach(function(value, key) {
+                params[key] = value;
+            });
+            return params;
+        }
+
+        // Função para atualizar a página com os parâmetros da URL
+        function updatePage() {
+            var params = getUrlParams();
+            if (params.error_description) {
+                document.getElementById("error_description_text").style.display = "block"
+                document.getElementById("error_description_text").textContent = params.error_description;
+            }
+            if (params.error_code) {
+                document.getElementById("error_code_div").style.display = "block"
+                document.getElementById("error_status_code").textContent = params.error_code;
+            }
+        }
+
+        // Chamada para atualizar a página ao carregar
+        window.onload = function() {
+            updatePage();
+        };
+    </script>
+</body>
+</html>

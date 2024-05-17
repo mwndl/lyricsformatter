@@ -1,7 +1,6 @@
 document.addEventListener('DOMContentLoaded', function () {
     // Adicionar evento de clique à div com id 'disconnect_option'
     document.getElementById('disconnect_option').addEventListener('click', disconnectSpotify);
-    processSpotifyTokensFromURL();
 
     // Selecionar o botão pelo ID
     var spotifyButton = document.getElementById('spotify_button');
@@ -16,32 +15,95 @@ document.addEventListener('visibilitychange', function() {
     if (!document.hidden) {
         // ações a executar quando a página ficar ativa novamente
         fetchCurrentlyPlayingData()
+        highlightDevice(currentDeviceId)
     }
 });
 
-function processSpotifyTokensFromURL() {
-    // Verificar se há tokens do Spotify na URL
-    const urlParams = new URLSearchParams(window.location.search);
-    const accessToken = urlParams.get('access_token');
-    const refreshToken = urlParams.get('refresh_token');
+window.addEventListener('message', receiveMessage, false);
 
-    // Se os tokens estiverem presentes, armazená-los em cache e fazer a solicitação para obter dados do usuário
-    if (accessToken && refreshToken) {
-        // Armazenar os tokens em cache
-        cacheSpotifyTokens(accessToken, refreshToken);
+function openSpotifyAuthorization() {
+    // Obter o valor de localHostToggle do localStorage
+    const localHostToggle = localStorage.getItem('localHostToggle');
 
-        // Remover os parâmetros da URL
-        window.history.replaceState({}, document.title, window.location.pathname);
-
-        // Fazer a solicitação para obter dados do usuário
-        fetchUserData()
-            .then(() => {
-                player.connect();
-            })
-            .catch(error => {
-                console.error('Error processing Spotify tokens:', error);
-            });
+    // Verificar o valor de localHostToggle e definir window.serverPath
+    if (localHostToggle === 'true') {
+        window.serverPath = 'http://localhost:3000'; 
+    } else {
+        window.serverPath = 'https://datamatch-backend.onrender.com';
     }
+
+    var currentDomain = window.location.hostname;
+
+    // Extrai o prefixo após 'lyricsformatter' usando uma expressão regular
+    var match = currentDomain.match(/lyricsformatter-(\w+)\.onrender\.com/);
+    
+    if (match && match[1]) {
+        if (localHostToggle === 'true') {
+            callbackPath = 'sp_callback_local_' + match[1];
+        } else {
+            callbackPath = 'sp_callback_' + match[1];
+        }
+    } else {
+        // padrão
+        callbackPath = 'sp_callback_production';
+    }
+    
+    console.log('Callback Path:', callbackPath);
+
+    var spotifyAuthorizationUrl = `https://accounts.spotify.com/pt-BR/authorize?client_id=51a45f01c96645e386611edf4a345b50&redirect_uri=${window.serverPath}/formatter/${callbackPath}&response_type=code&scope=user-read-playback-state%20user-modify-playback-state%20user-read-currently-playing%20user-read-email%20user-read-playback-state%20streaming%20app-remote-control%20user-follow-modify%20user-follow-read%20user-read-playback-position%20user-top-read%20user-read-recently-played%20user-library-read%20user-library-modify%20user-read-private&show_dialog=true&current_domain=${currentDomain}`;
+
+    // Abrir a URL de autorização do Spotify em uma nova janela pop-up
+    var popup = window.open(spotifyAuthorizationUrl, 'Spotify Authorization', 'width=600,height=700');
+
+    // Verificar se a janela pop-up foi aberta corretamente
+    if (!popup || popup.closed || typeof popup.closed == 'undefined') {
+        notification('Please allow pop-up windows to continue.');
+    } else {
+        // Adicionar um intervalo para verificar a URL do popup
+        var interval = setInterval(function() {
+            try {
+                if (popup.location.href.includes('access_token') && popup.location.href.includes('refresh_token')) {
+                    clearInterval(interval);
+                    // Extrair os tokens da URL do popup
+                    var urlParams = new URLSearchParams(popup.location.search);
+                    var accessToken = urlParams.get('access_token');
+                    var refreshToken = urlParams.get('refresh_token');
+                    // Enviar os tokens para a função que os processará
+                    processSpotifyTokens(accessToken, refreshToken);
+                    // Fechar a janela pop-up
+                    popup.close();
+                }
+            } catch (error) {
+                // Ignorar erros de segurança devido à política de mesma origem
+            }
+        }, 1000);
+    }
+}
+
+function receiveMessage(event) {
+
+    // Verificar se os dados da mensagem estão presentes
+    if (event.data && event.data.accessToken && event.data.refreshToken) {
+        // Processar os tokens recebidos
+        var accessToken = event.data.accessToken;
+        var refreshToken = event.data.refreshToken;
+        console.log('Access Token recebido:', accessToken);
+        console.log('Refresh Token recebido:', refreshToken);
+
+        // Chamar a função para processar os tokens (adaptada para a janela principal)
+        processSpotifyTokens(accessToken, refreshToken);
+    }
+}
+
+// Função para processar os tokens do Spotify (adaptada para a janela principal)
+function processSpotifyTokens(accessToken, refreshToken) {
+    // Armazenar os tokens em cache
+    const tokenRenewal = new Date().toISOString();
+    cacheSpotifyTokens(accessToken, refreshToken, tokenRenewal);
+
+    // Fazer a solicitação para obter dados do usuário
+    fetchUserData();
+    checkTrackIdParams();
 }
 
 // Função para armazenar os tokens do Spotify em cache
@@ -56,15 +118,40 @@ function disconnectSpotify() {
     // Remover os tokens do armazenamento local do navegador
     localStorage.removeItem('accessToken');
     localStorage.removeItem('refreshToken');
+    localStorage.removeItem('tokenRenewal');
 
     // Exibir o botão de login e ocultar a foto do perfil
     document.getElementById('spotify_login_button').style.display = 'block';
     document.getElementById('user_profile').style.display = 'none';
+
+    hideSpMenuDiv()
+
+    // Remover o listener 'ready' do player atual, se houver
+    if (player) {
+        player.removeListener('ready');
+        player.disconnect();
+    }
+
 }
 
+let userEmail = '';
+let userCountry = '';
 
 async function fetchUserData() {
     try {
+        // Verificar se é necessário renovar o token
+        const tokenRenewalTime = localStorage.getItem('tokenRenewal');
+        if (tokenRenewalTime) {
+            const currentTime = new Date();
+            const lastRenewalTime = new Date(tokenRenewalTime);
+            const timeDifferenceMinutes = (currentTime - lastRenewalTime) / (1000 * 60);
+
+            // Se o tempo desde a última renovação for maior que 55 minutos, renovar o token
+            if (timeDifferenceMinutes > 55) {
+                await spotifyRenewAuth();
+            }
+        }
+
         // Recuperar os tokens do armazenamento local do navegador
         const accessToken = localStorage.getItem('accessToken');
         const refreshToken = localStorage.getItem('refreshToken');
@@ -73,6 +160,8 @@ async function fetchUserData() {
         if (!accessToken || !refreshToken) {
             return; // sair da função porque não há tokens do Spotify
         }
+
+        showSpMenuDiv() // exibir o menu de configs do spotify
 
         // Fazer uma solicitação fetch para a rota /user no servidor do Spotify
         const response = await fetch('https://api.spotify.com/v1/me', {
@@ -95,16 +184,18 @@ async function fetchUserData() {
         // Extrair os dados do usuário da resposta
         const userData = await response.json();
 
-        // Exibir os dados do usuário no console (você pode fazer outra coisa com eles)
-        console.log('User data from Spotify: ', userData);
-
         // Exibir a foto de perfil do usuário e ocultar o botão de login
         const spotifyLoginButton = document.getElementById('spotify_login_button');
         const userProfileDiv = document.getElementById('user_profile');
         const userProfileImage = document.getElementById('sp_user_pic');
 
+        userEmail = userData.email;
+        userCountry = userData.country;
+
         if (userProfileImage && userData.images.length > 0) {
             userProfileImage.src = userData.images[0].url;
+        } else {
+            userProfileImage.src = 'https://i.imgur.com/IUi8ZwC.png?3';
         }
 
         if (spotifyLoginButton && userProfileDiv) {
@@ -113,7 +204,29 @@ async function fetchUserData() {
         }
 
     } catch (error) {
+        disconnectSpotify();
         console.error('Error getting user data from Spotify: ', error.message);
+    }
+}
+
+async function checkTokenExpiration() {
+    const tokenRenewalTime = new Date(localStorage.getItem('tokenRenewal')).getTime(); // Tempo em milissegundos
+    const currentTime = new Date().getTime(); // Tempo atual em milissegundos
+
+    // Calcula a diferença de tempo em milissegundos
+    const timeDifference = tokenRenewalTime - currentTime;
+
+    // Converte o tempo limite para 5 minutos em milissegundos
+    const fiveMinutesInMilliseconds = 5 * 60 * 1000;
+
+    if (timeDifference < fiveMinutesInMilliseconds) {
+        // Chama a função para renovar o token e espera a resolução da promessa
+        await spotifyRenewAuth();
+        // Retorna o novo token após a renovação
+        return localStorage.getItem('accessToken');
+    } else {
+        // Retorna o token atual
+        return localStorage.getItem('accessToken');
     }
 }
 
@@ -156,18 +269,42 @@ async function spotifyRenewAuth() {
         // Atualizar o accessToken no armazenamento local do navegador
         localStorage.setItem('accessToken', accessToken);
 
-        console.log('Spotify authorization renewed successfully!');
-        fetchCurrentlyPlayingData()
+        // Definir o item 'tokenRenewal' com a data e hora atual
+        const tokenRenewalTime = new Date().toISOString();
+        localStorage.setItem('tokenRenewal', tokenRenewalTime);
+
+        fetchCurrentlyPlayingData();
+
+        return accessToken;
     } catch (error) {
         notification('Spotify authentication failed, please refresh the page');
         console.error('Error renewing Spotify authorization.', error.message);
     }
 }
 
+let delayedSongId = '';
 let currentSongId = '';
+let currentIsrc = '';
+let trackName = '';
+let artistName = '';
+let volumePercent = '';
+let currentDeviceId = '';
 
 async function fetchCurrentlyPlayingData() {
     try {
+        // Verificar se é necessário renovar o token
+        const tokenRenewalTime = localStorage.getItem('tokenRenewal');
+        if (tokenRenewalTime) {
+            const currentTime = new Date();
+            const lastRenewalTime = new Date(tokenRenewalTime);
+            const timeDifferenceMinutes = (currentTime - lastRenewalTime) / (1000 * 60);
+
+            // Se o tempo desde a última renovação for maior que 55 minutos, renovar o token
+            if (timeDifferenceMinutes > 55) {
+                await spotifyRenewAuth();
+            }
+        }
+
         // Obter o token de acesso do armazenamento local do navegador
         const accessToken = localStorage.getItem('accessToken');
 
@@ -177,7 +314,7 @@ async function fetchCurrentlyPlayingData() {
         }
 
         // Fazer uma solicitação fetch para a rota /me/player/currently-playing do Spotify
-        const response = await fetch('https://api.spotify.com/v1/me/player/currently-playing', {
+        const response = await fetch('https://api.spotify.com/v1/me/player', {
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${accessToken}`
@@ -188,18 +325,26 @@ async function fetchCurrentlyPlayingData() {
         if (response.status === 204) {
             document.getElementById('sp_player_div').style.display = ''; // Exibir elemento
             document.getElementById('sp_connect').style.display = 'none'; // Ocultar elemento
+            document.getElementById('mxm_icon_div').style.display = 'none';
+            document.getElementById('sp_fast_transfer').style.display = 'none'
             document.getElementById('playback_info').style.display = 'none'; // Ocultar elemento
-            document.getElementById('no_playback').style.display = 'block'; // Ocultar elemento
+            document.getElementById('no_playback').style.display = 'block'; // Exibir elemento 
             currentSongId = '';
+            currentIsrc = '';
             return; // Sair da função
+
         } else if (response.status === 200) {
             document.getElementById('sp_player_div').style.display = ''; // Exibir elemento
             document.getElementById('sp_connect').style.display = 'block'; // exibir elemento
+            document.getElementById('mxm_icon_div').style.display = 'block';
             document.getElementById('playback_info').style.display = 'flex'; // exibir elemento
             document.getElementById('no_playback').style.display = 'none'; // exibir elemento
+
         } else if (response.status === 401) {
             spotifyRenewAuth()
             currentSongId = '';
+            currentIsrc = '';
+            currentDeviceId = '';
         } else {
             document.getElementById('sp_player_div').style.display = 'none'; // ocultar elemento
             return; // Sair da função
@@ -214,7 +359,48 @@ async function fetchCurrentlyPlayingData() {
         const currentlyPlayingData = await response.json();
 
         // definir o ID na variável
+        trackName = currentlyPlayingData.item.name
+        artistName = currentlyPlayingData.item.artists[0].name;
         currentSongId = currentlyPlayingData.item.id;
+        currentIsrc = currentlyPlayingData.item.external_ids.isrc;
+        volumePercent = currentlyPlayingData.device.volume_percent;
+
+        // identifica mudança de faixa
+        if (currentSongId !== delayedSongId) {
+            recoverDraft() // caso haja um rascunho, ele irá exibir o alerta
+            storeSections(accessToken, currentSongId)
+        }
+
+        // define o delayer como o atual para identificar mudanças futuras
+        delayedSongId = currentSongId;
+
+        // definir a cor verde no dispositivo em reprodução
+        currentDeviceId = currentlyPlayingData.device.id;
+        highlightDevice(currentDeviceId)
+
+        /*  quick transfer */
+
+                spTransferIcon = document.getElementById('sp_fast_transfer');
+                altDeviceId = getParameterByName('alt_device_id')
+
+                if (currentlyPlayingData.device.id === deviceId && altDeviceId === null) {
+                    spTransferIcon.style.display = 'none'
+                } else {
+
+                    if (currentlyPlayingData.device.id === deviceId) {
+                        spTransferIcon.title = `Transfer the song back`;
+                    } else {
+                        addParamToURL('alt_device_id', currentlyPlayingData.device.id);
+                        spTransferIcon.style.display = '';
+                        spTransferIcon.title = 'Transfer the song to LyricsFormatter';
+                    }
+                }
+
+                if (altDeviceId) {
+                    spTransferIcon.style.display = 'block'
+                }
+
+        /*  quick transfer */
 
         // Atualizar os elementos HTML com as informações da música atualmente reproduzida
         const albumArtElement = document.getElementById('sp_album_art');
@@ -223,12 +409,13 @@ async function fetchCurrentlyPlayingData() {
         const artistElement = document.getElementById('sp_artist');
 
         if (albumArtElement && currentlyPlayingData.item.album.images.length > 0) {
-            albumArtElement.innerHTML = `<img src="${currentlyPlayingData.item.album.images[0].url}" alt="album art" title="${currentlyPlayingData.item.name} | ${currentlyPlayingData.item.artists[0].name}">`;
+            albumArtElement.innerHTML = `<img src="${currentlyPlayingData.item.album.images[0].url}" alt="Album Art" title="${currentlyPlayingData.item.name} | ${currentlyPlayingData.item.artists[0].name}">`;
         }
 
         if (titleElement) {
             titleElement.innerHTML = `<a href="https://open.spotify.com/track/${currentlyPlayingData.item.id}" target="_blank">${currentlyPlayingData.item.name}</a>`;
-        }
+            titleElement.dataset.id = currentSongId;
+        }   
 
         if (artistElement) {
             const artistLinks = currentlyPlayingData.item.artists.map(artist => `<a href="https://open.spotify.com/artist/${artist.id}" target="_blank">${artist.name}</a>`);
@@ -246,8 +433,69 @@ async function fetchCurrentlyPlayingData() {
            // pausado
         }
 
+        return currentlyPlayingData;
+
     } catch (error) {
         console.error('Error getting data from currently playing song: ', error.message);
+    }
+}
+
+function highlightDevice(currentDeviceId) {
+    // Encontre a div com id "devices_options"
+    const devicesOptionsDiv = document.getElementById('devices_options');
+
+    // Encontre todas as divs filhas com a classe "sp_device"
+    const deviceDivs = devicesOptionsDiv.querySelectorAll('.sp_device');
+
+    // Itere sobre as divs para adicionar/remover a classe conforme necessário
+    deviceDivs.forEach(deviceDiv => {
+        // Remova a classe '.current_device' de todas as divs
+        deviceDiv.classList.remove('current_device');
+
+        // Verifique se o currentDeviceId está vazio
+        if (currentDeviceId === '') {
+            // Redefina a classe para 'sp_device'
+            deviceDiv.classList.add('sp_device');
+        } else {
+            // Verifique se o data-id da div é igual ao currentDeviceId
+            if (deviceDiv.getAttribute('data-id') === currentDeviceId) {
+                // Adicione a classe '.current_device' ao dispositivo correto
+                deviceDiv.classList.add('current_device');
+            }
+        }
+    });
+}
+
+async function setPlayerVolume(volumePercent) {
+    playing = getParameterByName('track_id')
+    if (!playing) {
+        return
+    }
+
+    try {
+        // Obter o token de acesso do armazenamento local do navegador
+        const accessToken = localStorage.getItem('accessToken');
+
+        // Verificar se o token de acesso está em cache
+        if (!accessToken) {
+            return; // Sair da função porque não há token do Spotify
+        }
+
+        // Fazer uma solicitação fetch para definir o volume do player do Spotify
+        const response = await fetch('https://api.spotify.com/v1/me/player/volume?volume_percent=' + volumePercent, {
+            method: 'PUT',
+            headers: {
+                'Authorization': `Bearer ${accessToken}`
+            }
+        });
+
+        if (response.ok) {
+            notification(volumePercent + '%')
+        } else {
+            console.error('Error adjusting player volume:', response.statusText);
+        }
+    } catch (error) {
+        console.error('Error adjusting player volume:', error);
     }
 }
 
@@ -332,9 +580,6 @@ function beforeLastSection(currentPosition, sectionStartTimes) {
         return 0;
     }
 }
-
-
-
 
 
 // Função para curtir/descurtir uma música com base no ID da música
@@ -438,6 +683,7 @@ async function fetchAvailableDevices() {
 
         // Atualizar o menu com os nomes dos dispositivos disponíveis e definir o 'data-id' como o ID do dispositivo
         const devicesOptionsElement = document.getElementById('devices_options');
+        
         if (devicesOptionsElement) {
             devicesOptionsElement.innerHTML = ''; // Limpar o conteúdo atual do menu
             devicesData.devices.forEach(device => {
@@ -461,6 +707,7 @@ async function fetchAvailableDevices() {
             });
         }
 
+
     } catch (error) {
         console.error('Error fetching available devices: ', error.message);
     }
@@ -470,7 +717,7 @@ async function fetchAvailableDevices() {
 async function transferPlayback(accessToken, deviceID) {
     try {
 
-        await fetch('https://api.spotify.com/v1/me/player', {
+        const response = await fetch('https://api.spotify.com/v1/me/player', {
             method: 'PUT',
             headers: {
                 'Authorization': `Bearer ${accessToken}`,
@@ -480,13 +727,21 @@ async function transferPlayback(accessToken, deviceID) {
                 device_ids: [deviceID]
             })
         });
-
+        
+        if (!response.ok) {
+            throw new Error('response not ok');
+        }
+        highlightDevice(deviceID)
         console.log('Playback transferred successfully.');
-        fetchAvailableDevices(); // Update the list of available devices
 
     } catch (error) {
         console.error('Error transferring playback: ', error.message);
-        fetchAvailableDevices(); // Update the list of available devices
+        fetchAvailableDevices().then(() => {
+            fetchCurrentlyPlayingData()
+        });
+        const urlWithoutAltDevice = removeParameterFromURL('alt_device_id');
+        history.replaceState(null, '', urlWithoutAltDevice);
+        notification("Unable to switch playback, the device is unavailable")
     }
 }
 
@@ -523,49 +778,6 @@ async function playTrack(trackId, deviceId) {
         console.error('Error playing track: ', error.message);
     }
 }
-
-
-function togglePlayPause() {
-    const svg1 = document.getElementById('svg1'); // Botão de play
-    const svg2 = document.getElementById('svg2'); // Botão de pause
-
-    // Verifica se o svg1 está visível, o que indica que a música está pausada
-    if (window.getComputedStyle(svg1).display === 'block') {
-        // Se o svg1 está visível, esconde ele e mostra o svg2
-        svg1.style.display = 'none';
-        svg2.style.display = 'block';
-    } else {
-        // Se o svg1 não está visível, mostra ele e esconde o svg2
-        svg1.style.display = 'block';
-        svg2.style.display = 'none';
-    }
-}
-
-
-
-document.addEventListener('DOMContentLoaded', function () {
-    
-    // Obter o estado atual do player
-    player.getCurrentState().then(state => {
-        if (!state) {
-            console.error('O usuário não está reproduzindo música através do Web Playback SDK');
-            return;
-        }
-
-        const current_track = state.track_window.current_track;
-        const next_track = state.track_window.next_tracks[0];
-
-        console.log('Atualmente tocando:', current_track);
-        console.log('Próxima música:', next_track);
-
-    }).catch(error => {
-        console.error('Erro ao obter estado atual do player:', error);
-    });
-
-    setInterval(checkPlayerState, 2000);
-
-});
-
 
 
 async function pausePlayback() {
@@ -628,4 +840,20 @@ async function resumePlayback() {
     } catch (error) {
         console.error('Error resuming playback: ', error.message);
     }
+}
+
+function storeSections(accessToken, currentSongId) {
+    // Chamada para carregar a análise de áudio
+    loadAudioAnalysis(accessToken, currentSongId)
+        .then(data => {
+            if (data) {
+                // Atribui diretamente o array retornado às variáveis
+                sectionStartTimes = data;
+            } else {
+                sectionStartTimes = [];
+            }
+        })
+        .catch(error => {
+            console.error('Erro:', error);
+        });
 }
