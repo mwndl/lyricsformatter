@@ -9,161 +9,451 @@
     <link rel="stylesheet" href="lyricsformatter.css">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="script_formatter.js"></script>
+    <script src="spotify_integration.js"></script>
+    <script src="langtool_integration.js"></script>
     <link rel="icon" href="/images/favicon.ico" type="image/x-icon">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" integrity="sha384-e3b0a8b1e4095176f4a6f42c37b4efb51337fba6c937e281a5f3800f76475893" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+        integrity="sha384-e3b0a8b1e4095176f4a6f42c37b4efb51337fba6c937e281a5f3800f76475893" crossorigin="anonymous">
     <title>LyricsFormatter</title>
 </head>
 
-    <body>
-        <div class="top">
-            <div class="return">
-                <img class="return_arrow" id="return_arrow" src="images\arrow.svg" alt="Return Arrow" title="Return to Home" draggable="false" style="display:none">
-            </div>
-            <div class="page_title">LyricsFormatter</div>
-            <div>
-                <p id="redirect_beta" class="redirect_beta">Try the beta now! </p>
-            </div>
-            <div class="settings">
-                <img class="options_dots" id="settings_dots" src="images\options.svg" alt="Options" title="Options" draggable="false" style="display:block">
-                <!-- Mini menu -->
-                <div id="mini_menu" class="mini-menu">
-                    <ul>
-                        <li id="settings_option" style="display:none; border-radius: 10px;">
-                            <p>Settings</p>
-                        </li>
-                        <li id="credits_option" style="display:block; border-radius: 10px;">
-                            <p>Credits</p>
-                        </li>
-                        <li id="suggest_option" style="display:none; border-radius: 10px;">
-                            <p>Suggest a Feature</p>
-                        </li>
-                        <li id="about_option" style="display:block; border-radius: 10px;">
-                            <p>About This Tool</p>
-                        </li>
-                    </ul>
-                </div>
+<body>
+    <div class="top">
+        <div class="return">
+            <img class="return_arrow" id="return_arrow" src="images\arrow.svg" alt="Return Arrow" title="Return" draggable="false" style="display:none;">
+        </div>
+        <div class="page_title">LyricsFormatter</div>
+        <div class="settings">
+            <img class="options_dots" id="settings_dots" src="images\options.svg" alt="Options" title="Options"
+                draggable="false" style="display:block">
+            <!-- Mini menu -->
+            <div id="mini_menu" class="mini-menu">
+                <ul>
+                    <li id="settings_option" style="display:block; border-radius: 10px;">
+                        <p>Settings</p>
+                    </li>
+                    <li id="shortcuts_option" style="display:block; border-radius: 10px;">
+                        <p>Shortcuts</p>
+                    </li>
+                    <li id="credits_option" style="display:block; border-radius: 10px;">
+                        <p>Credits</p>
+                    </li>
+                    <li id="about_option" style="display:block; border-radius: 10px;">
+                        <p>About This Tool</p>
+                    </li>
+                </ul>
             </div>
         </div>
-    
-        <div class="main">
-            <div class="main_content">
-                <div class="main_left">
-                    <div class="lyrics_box" id="lyrics_box">
-                        <div class="editor-container">
-                            <div class="line_issues" id="line_issues"></div>
-                            <div class="character_counter"></div>
-                            <textarea class="editor" id="editor" placeholder="Paste the lyrics here..." oninput="checkContent();"></textarea>
-                        </div>
+    </div>
+
+    <div class="main" id="main">
+        <div class="main_content">
+            <div class="main_left" id="main_left" style="height: 100%;">
+                <div class="lyrics_box" id="lyrics_box">
+                    <div class="editor-container" id="editor-container">
+                        <div class="line_issues" id="line_issues"></div>
+                        <div class="character_counter"></div>
+                        <textarea class="editor" id="editor" placeholder="Paste the lyrics here..."
+                            oninput="checkContent();"></textarea>
                     </div>
                 </div>
-                <div class="main_right">
-                    <div class="language_selector">
-                        <div class="lang_selector_div" title="Tap to see list of supported languages">
-                            <div class="selected_language">Select Language</div>
-                            <div class="mobile_footer_arrow">
-                                <img class="lang_expand_arrow" id="lang_expand_arrow" src="images/expand_arrow.svg" alt="Expand Arrow" draggable="false">
-                            </div>
+            </div>
+            <div class="main_right">
+                <div class="language_selector">
+                    <div class="lang_selector_div" title="Tap to see list of supported languages">
+                        <div class="selected_language">Select Language</div>
+                        <div class="mobile_footer_arrow">
+                            <img class="lang_expand_arrow" id="lang_expand_arrow" src="images/expand_arrow.svg"
+                                alt="Expand Arrow" draggable="false">
                         </div>
+                    </div>
+                    <div class="language_list_div" id="language_list_div">
                         <ul class="language_list" id="language_list">
-                            <li data-lang="en-UK">English (UK)</li>
+                            <li data-lang="en-AU" style="display:none">English (AU)<span class="new_tag">new</span></li>
+                            <li data-lang="en-CA" style="display:none">English (CA)<span class="new_tag">new</span></li>
+                            <li data-lang="en-NZ" style="display:none">English (NZ)<span class="new_tag">new</span></li>
+                            <li data-lang="en-GB">English (UK)</li>
                             <li data-lang="en-US">English (US)</li>
-                            <li data-lang="fr">French<span class="new_tag">new</span></li>
-                            <li data-lang="it">Italian<span class="new_tag">new</span></li>
+                            <li data-lang="nl" style="display:none">Dutch</li>
+                            <li data-lang="fr">French</li>
+                            <li data-lang="de" style="display:none">German<span class="new_tag">new</span></li>
+                            <li data-lang="it">Italian</li>
                             <li data-lang="pt-BR">Portuguese (BR)</li>
                             <li data-lang="pt-PT">Portuguese (PT)</li>
-                            <li data-lang="es">Spanish<span class="new_tag">new</span></li>
+                            <li data-lang="es">Spanish</li>
                             <p>More languages soon...</p>
                         </ul>
                     </div>
-                    <div class="improvements_box">
-                        <div class="improvements_box_top">
-                            <div class="improvements_box_text">
-                                <p>Suggestions</p>
-                            </div>
-                            <div class="improvements_box_buttons" style="">
-                                <div class="reset_div">
-                                    <button class="reset_button" id="reset_button" style="display:none" title="Reset transcription" onclick="resetTranscription()">
-                                        <div class="reset_symbol"></div>
-                                    </button>
+                </div>
+                <div class="improvements_box_text">
+                    <p>Suggestions</p>
+                </div>
+                <div class="improvements_box" id="improvements_box" style="height: calc(90% - 120px);">
+                    <div class="improvements_box_top">
+                        <div class="improvements_menu" id="improvements_menu" style="display:flex">
+                            <div class="improv_tabs">
+                                <div class="improvements_option">
+                                    <div class="impr_menu_true" id="lf_option" style="" title="">
+                                        <p id="format_tab_text" style="font-weight: 500;">Format</p>
+                                    </div>
+                                    <div class="impr_menu_false" id="lt_option" style="" title="Show grammar suggestions">
+                                        <p id="grammar_tab_text" style="font-weight: 500;">Grammar</p>
+                                    </div>
                                 </div>
-                                <div class="refresh_div">
-                                    <button class="refresh_button" id="refresh_button" style="display:none" title="Refresh suggestions" onclick="handleRefreshButtonClick()">
-                                        <div class="refresh_symbol"></div>
-                                    </button>
-                                    <div class="loading_spinner_loop" id="loading_spinner" style="display:none">
-                                        <div class="loading_spinner">
-                                          <div></div>
+                            </div>
+                            <div class="improvement_buttons">
+                                <div class="improv_buttons_left">
+                                    <div class="undo">
+                                        <button class="gray_button" id="undo_button" style="display:block"
+                                            title="Undo Action">
+                                            <div class="undo_symbol"></div>
+                                        </button>
+                                    </div>
+                                    <div class="redo">
+                                        <button class="gray_button" id="redo_button" style="display:block"
+                                            title="Redo Action">
+                                            <div class="redo_symbol"></div>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="improv_buttons_right">
+                                    <div class="gray_buttons_div" style="display:none">
+                                        <button class="gray_button" id="save_button" style="display:block" title="Save Transcription">
+                                            <div class="save_symbol"></div>
+                                        </button>
+                                    </div>
+                                    <div class="gray_buttons_div">
+                                        <button class="gray_button" id="reset_button" style="display:block" title="Reset Transcription">
+                                            <div class="reset_symbol"></div>
+                                        </button>
+                                    </div>
+                                    <div class="gray_buttons_div">
+                                        <button class="gray_button" id="copy_button" style="display:block" title="Copy Trascription">
+                                            <div class="copy_symbol"></div>
+                                        </button>
+                                    </div>
+                                    <div class="gray_buttons_div">
+                                        <button class="gray_button" id="paste_button" style="display:block" title="Paste Trascription">
+                                            <div class="paste_symbol"></div>
+                                        </button>
+                                    </div>
+                                    <div class="refresh_div">
+                                        <button class="white_button" id="refresh_button" style="display:block"
+                                            title="Refresh Suggestions">
+                                            <div class="refresh_symbol"></div>
+                                        </button>
+                                        <div class="loading_spinner_loop" id="loading_spinner" title="Loading Suggestions..." style="display:none">
+                                            <div class="loading_spinner">
+                                                <div></div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        <div class="improvements_box_content">
-                            <div class="improvements" id="improvements_containers">
-                                <div class="improvements_placeholder_div" id="improvements_placeholder_div">
-                                    <div class="improvements_placeholder" id="improvements_placeholder">Type something or paste your transcription to start...</div>
-                                </div>
-                            </div>                            
+                    </div>
+                    <div class="improvements_box_content">
+                        <div class="improvements" id="format_containers" style="display:flex">
+                            <div class="improvements_placeholder_div" id="improvements_placeholder_div1">
+                                <div class="improvements_placeholder" id="improvements_placeholder1">Type something or
+                                    paste your current transcription to check the format...</div>
+                            </div>
+                        </div>
+                        <div class="improvements" id="grammar_containers" style="display:none">
+                            <div class="improvements_placeholder_div" id="improvements_placeholder_div2">
+                                <div class="improvements_placeholder" id="improvements_placeholder2">Type something or
+                                    paste your current transcription to check the grammar...</div>
+                            </div>
                         </div>
                     </div>
-                    <div class="sp_player_div">
-                        <div class="sp_player_div_content">
-                            <div class="sp_search">
-                                <div class="search-container">
-                                    <input type="text" placeholder="Paste a Spotify track ID or URL" id="search_input">
-                                    <button type="submit" style="" id="search_btn">Search</button>
-                                    <div class="loading_spinner_loop" id="loading_spinner" style="display:none">
-                                      <div class="loading_spinner">
+                </div>
+                <div class="sp_player_div" id="sp_player_div" style="display:none; margin: 0 0 0 0">
+                    <div class="sp_player_div_content">
+                        <div class="sp_search" style="display:none">
+                            <div class="search-container">
+                                <input type="text" placeholder="Paste a Spotify track ID or URL" id="search_input">
+                                <button type="submit" style="" id="search_btn">Search</button>
+                                <div class="loading_spinner_loop" id="loading_spinner" style="display:none">
+                                    <div class="loading_spinner">
                                         <div></div>
-                                      </div>
                                     </div>
                                 </div>
                             </div>
-                            <div class="sp_player">
-                                <div class="spotify_preview" style="border-radius: 12px; overflow: hidden; user-select: none;">
-                                    <iframe id="spotify_iframe_preview" border-radius: 12px user-select: none src="" width="100%"
-                                      height="100%" frameBorder="0" allowfullscreen=""
-                                      allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-                                      loading="lazy"></iframe>
-                                  </div>
+                        </div>
+                        <div class="sp_player">
+                            <div class="spotify_player">
+                                <div class="sp_web_player">
+                                    <div class="sp_up">
+                                        <div class="button-container">
+                                            <div class="round-button" id="player_refresh" style="display:block" title="Refresh">
+                                                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" id="player_refresh_svg" style="display:block">
+                                                    <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                                                    <g id="SVGRepo_tracerCarrier" stroke-linecap="round"
+                                                        stroke-linejoin="round"></g>
+                                                    <g id="SVGRepo_iconCarrier">
+                                                        <path
+                                                            d="M4.39502 12.0014C4.39544 12.4156 4.73156 12.751 5.14577 12.7506C5.55998 12.7502 5.89544 12.4141 5.89502 11.9999L4.39502 12.0014ZM6.28902 8.1116L6.91916 8.51834L6.91952 8.51777L6.28902 8.1116ZM9.33502 5.5336L9.0396 4.84424L9.03866 4.84464L9.33502 5.5336ZM13.256 5.1336L13.4085 4.39927L13.4062 4.39878L13.256 5.1336ZM16.73 7.0506L16.1901 7.57114L16.1907 7.57175L16.73 7.0506ZM17.7142 10.2078C17.8286 10.6059 18.2441 10.8358 18.6422 10.7214C19.0403 10.607 19.2703 10.1915 19.1558 9.79342L17.7142 10.2078ZM17.7091 9.81196C17.6049 10.2129 17.8455 10.6223 18.2464 10.7265C18.6473 10.8307 19.0567 10.5901 19.1609 10.1892L17.7091 9.81196ZM19.8709 7.45725C19.9751 7.05635 19.7346 6.6469 19.3337 6.54272C18.9328 6.43853 18.5233 6.67906 18.4191 7.07996L19.8709 7.45725ZM18.2353 10.7235C18.6345 10.8338 19.0476 10.5996 19.1579 10.2004C19.2683 9.80111 19.034 9.38802 18.6348 9.2777L18.2353 10.7235ZM15.9858 8.5457C15.5865 8.43537 15.1734 8.66959 15.0631 9.06884C14.9528 9.46809 15.187 9.88119 15.5863 9.99151L15.9858 8.5457ZM19.895 11.9999C19.8946 11.5856 19.5585 11.2502 19.1443 11.2506C18.7301 11.251 18.3946 11.5871 18.395 12.0014L19.895 11.9999ZM18.001 15.8896L17.3709 15.4829L17.3705 15.4834L18.001 15.8896ZM14.955 18.4676L15.2505 19.157L15.2514 19.1566L14.955 18.4676ZM11.034 18.8676L10.8815 19.6019L10.8839 19.6024L11.034 18.8676ZM7.56002 16.9506L8.09997 16.4301L8.09938 16.4295L7.56002 16.9506ZM6.57584 13.7934C6.46141 13.3953 6.04593 13.1654 5.64784 13.2798C5.24974 13.3942 5.01978 13.8097 5.13421 14.2078L6.57584 13.7934ZM6.58091 14.1892C6.6851 13.7884 6.44457 13.3789 6.04367 13.2747C5.64277 13.1705 5.23332 13.4111 5.12914 13.812L6.58091 14.1892ZM4.41914 16.544C4.31495 16.9449 4.55548 17.3543 4.95638 17.4585C5.35727 17.5627 5.76672 17.3221 5.87091 16.9212L4.41914 16.544ZM6.05478 13.2777C5.65553 13.1674 5.24244 13.4016 5.13212 13.8008C5.02179 14.2001 5.25601 14.6132 5.65526 14.7235L6.05478 13.2777ZM8.30426 15.4555C8.70351 15.5658 9.11661 15.3316 9.22693 14.9324C9.33726 14.5331 9.10304 14.12 8.70378 14.0097L8.30426 15.4555ZM5.89502 11.9999C5.89379 10.7649 6.24943 9.55591 6.91916 8.51834L5.65889 7.70487C4.83239 8.98532 4.3935 10.4773 4.39502 12.0014L5.89502 11.9999ZM6.91952 8.51777C7.57513 7.50005 8.51931 6.70094 9.63139 6.22256L9.03866 4.84464C7.65253 5.4409 6.47568 6.43693 5.65852 7.70544L6.91952 8.51777ZM9.63045 6.22297C10.7258 5.75356 11.9383 5.62986 13.1059 5.86842L13.4062 4.39878C11.9392 4.09906 10.4158 4.25448 9.0396 4.84424L9.63045 6.22297ZM13.1035 5.86793C14.2803 6.11232 15.3559 6.7059 16.1901 7.57114L17.27 6.53006C16.2264 5.44761 14.8807 4.70502 13.4085 4.39927L13.1035 5.86793ZM16.1907 7.57175C16.9065 8.31258 17.4296 9.21772 17.7142 10.2078L19.1558 9.79342C18.8035 8.5675 18.1557 7.44675 17.2694 6.52945L16.1907 7.57175ZM19.1609 10.1892L19.8709 7.45725L18.4191 7.07996L17.7091 9.81196L19.1609 10.1892ZM18.6348 9.2777L15.9858 8.5457L15.5863 9.99151L18.2353 10.7235L18.6348 9.2777ZM18.395 12.0014C18.3963 13.2363 18.0406 14.4453 17.3709 15.4829L18.6312 16.2963C19.4577 15.0159 19.8965 13.5239 19.895 11.9999L18.395 12.0014ZM17.3705 15.4834C16.7149 16.5012 15.7707 17.3003 14.6587 17.7786L15.2514 19.1566C16.6375 18.5603 17.8144 17.5643 18.6315 16.2958L17.3705 15.4834ZM14.6596 17.7782C13.5643 18.2476 12.3517 18.3713 11.1842 18.1328L10.8839 19.6024C12.3508 19.9021 13.8743 19.7467 15.2505 19.157L14.6596 17.7782ZM11.1865 18.1333C10.0098 17.8889 8.93411 17.2953 8.09997 16.4301L7.02008 17.4711C8.06363 18.5536 9.40936 19.2962 10.8815 19.6019L11.1865 18.1333ZM8.09938 16.4295C7.38355 15.6886 6.86042 14.7835 6.57584 13.7934L5.13421 14.2078C5.48658 15.4337 6.13433 16.5545 7.02067 17.4718L8.09938 16.4295ZM5.12914 13.812L4.41914 16.544L5.87091 16.9212L6.58091 14.1892L5.12914 13.812ZM5.65526 14.7235L8.30426 15.4555L8.70378 14.0097L6.05478 13.2777L5.65526 14.7235Z"
+                                                            fill="#ffffff"></path>
+                                                    </g>
+                                                </svg>
+                                                <div class="lds-ring" id="player_refresh_loading_spinner" style="display:none"><div></div><div></div><div></div><div></div></div>
+                                            </div>
+                                            <div class="round-button" id="mxm_icon_div" title="See lyrics" style="display:none">
+                                                <div class="mxm_white_logo" id="mxm_white_logo" style="display:block"></div>
+                                                <div class="lds-ring" id="mxm_loading_spinner" style="display:none"><div></div><div></div><div></div><div></div></div>
+                                            </div>
+                                            <div class="round-button" id="sp_fast_transfer" style="display:none" onclick="togglePlayer()" title="">
+                                                <div id="sp_fast_transfer_icon" style="display:block">
+                                                    <svg viewBox="0 0 24 24" version="1.1"
+                                                        xmlns="http://www.w3.org/2000/svg"
+                                                        xmlns:xlink="http://www.w3.org/1999/xlink" fill="#ffffff">
+                                                        <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                                                        <g id="SVGRepo_tracerCarrier" stroke-linecap="round"
+                                                            stroke-linejoin="round"></g>
+                                                        <g id="SVGRepo_iconCarrier">
+                                                            <g id="Page-1" stroke="none" stroke-width="1" fill="none"
+                                                                fill-rule="evenodd">
+                                                                <g id="Transfer">
+                                                                    <rect id="Rectangle" fill-rule="nonzero" x="0" y="0"
+                                                                        width="24" height="24"> </rect>
+                                                                    <path d="M19,7 L5,7 M20,17 L5,17" id="Shape"
+                                                                        stroke="#ffffff" stroke-width="2"
+                                                                        stroke-linecap="round"> </path>
+                                                                    <path
+                                                                        d="M16,3 L19.2929,6.29289 C19.6834,6.68342 19.6834,7.31658 19.2929,7.70711 L16,11"
+                                                                        id="Path" stroke="#ffffff" stroke-width="2"
+                                                                        stroke-linecap="round"> </path>
+                                                                    <path
+                                                                        d="M8,13 L4.70711,16.2929 C4.31658,16.6834 4.31658,17.3166 4.70711,17.7071 L8,21"
+                                                                        id="Path" stroke="#ffffff" stroke-width="2"
+                                                                        stroke-linecap="round"> </path>
+                                                                </g>
+                                                            </g>
+                                                        </g>
+                                                    </svg>
+                                                </div>
+                                                <div class="lds-ring" id="sp_fast_transfer_loading_spinner" style="display:none"><div></div><div></div><div></div><div></div></div>
+                                            </div>
+                                            <div class="round-button" id="sp_connect" style="display:none" title="See available devices">
+                                                <div id="sp_connect_icon_green" style="display:block">
+                                                    <svg viewBox="0 0 24 24" fill="none"
+                                                        xmlns="http://www.w3.org/2000/svg" stroke="#ffffff"
+                                                        stroke-width="0.00024000000000000003">
+                                                        <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                                                        <g id="SVGRepo_tracerCarrier" stroke-linecap="round"
+                                                            stroke-linejoin="round" stroke="#CCCCCC"
+                                                            stroke-width="0.096"></g>
+                                                        <g id="SVGRepo_iconCarrier">
+                                                            <path fill-rule="evenodd" clip-rule="evenodd"
+                                                                d="M8.93417 2L9 2L15.0658 2C15.9523 1.99995 16.7161 1.99991 17.3278 2.08215C17.9833 2.17028 18.6117 2.36902 19.1213 2.87868C19.631 3.38835 19.8297 4.0167 19.9179 4.67221C20.0001 5.28387 20.0001 6.04769 20 6.93417V17.0658C20.0001 17.9523 20.0001 18.7161 19.9179 19.3278C19.8297 19.9833 19.631 20.6117 19.1213 21.1213C18.6117 21.631 17.9833 21.8297 17.3278 21.9179C16.7161 22.0001 15.9523 22.0001 15.0658 22H8.9342C8.0477 22.0001 7.28388 22.0001 6.67221 21.9179C6.0167 21.8297 5.38835 21.631 4.87868 21.1213C4.36902 20.6117 4.17028 19.9833 4.08215 19.3278C3.99991 18.7161 3.99995 17.9523 4 17.0658L4 7L4 6.93417C3.99995 6.04769 3.99991 5.28387 4.08215 4.67221C4.17028 4.0167 4.36902 3.38835 4.87868 2.87868C5.38835 2.36902 6.0167 2.17028 6.67221 2.08215C7.28387 1.99991 8.04769 1.99995 8.93417 2ZM12 12C10.8954 12 10 12.8954 10 14C10 15.1046 10.8954 16 12 16C13.1046 16 14 15.1046 14 14C14 12.8954 13.1046 12 12 12ZM8 14C8 11.7909 9.79086 10 12 10C14.2091 10 16 11.7909 16 14C16 16.2091 14.2091 18 12 18C9.79086 18 8 16.2091 8 14ZM13 7C13 6.44772 12.5523 6 12 6C11.4477 6 11 6.44772 11 7V7.01123C11 7.56352 11.4477 8.01123 12 8.01123C12.5523 8.01123 13 7.56352 13 7.01123V7Z"
+                                                                fill="#1ED760"></path>
+                                                        </g>
+                                                    </svg>
+                                                </div>
+                                                <div id="sp_connect_icon_white" style="display:none">
+                                                    <svg viewBox="0 0 24.00 24.00" fill="none"
+                                                        xmlns="http://www.w3.org/2000/svg" stroke="#ffffff"
+                                                        stroke-width="0.00024000000000000003">
+                                                        <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                                                        <g id="SVGRepo_tracerCarrier" stroke-linecap="round"
+                                                            stroke-linejoin="round" stroke="#CCCCCC"
+                                                            stroke-width="0.096"></g>
+                                                        <g id="SVGRepo_iconCarrier">
+                                                            <path fill-rule="evenodd" clip-rule="evenodd"
+                                                                d="M8.93417 2L9 2L15.0658 2C15.9523 1.99995 16.7161 1.99991 17.3278 2.08215C17.9833 2.17028 18.6117 2.36902 19.1213 2.87868C19.631 3.38835 19.8297 4.0167 19.9179 4.67221C20.0001 5.28387 20.0001 6.04769 20 6.93417V17.0658C20.0001 17.9523 20.0001 18.7161 19.9179 19.3278C19.8297 19.9833 19.631 20.6117 19.1213 21.1213C18.6117 21.631 17.9833 21.8297 17.3278 21.9179C16.7161 22.0001 15.9523 22.0001 15.0658 22H8.9342C8.0477 22.0001 7.28388 22.0001 6.67221 21.9179C6.0167 21.8297 5.38835 21.631 4.87868 21.1213C4.36902 20.6117 4.17028 19.9833 4.08215 19.3278C3.99991 18.7161 3.99995 17.9523 4 17.0658L4 7L4 6.93417C3.99995 6.04769 3.99991 5.28387 4.08215 4.67221C4.17028 4.0167 4.36902 3.38835 4.87868 2.87868C5.38835 2.36902 6.0167 2.17028 6.67221 2.08215C7.28387 1.99991 8.04769 1.99995 8.93417 2ZM12 12C10.8954 12 10 12.8954 10 14C10 15.1046 10.8954 16 12 16C13.1046 16 14 15.1046 14 14C14 12.8954 13.1046 12 12 12ZM8 14C8 11.7909 9.79086 10 12 10C14.2091 10 16 11.7909 16 14C16 16.2091 14.2091 18 12 18C9.79086 18 8 16.2091 8 14ZM13 7C13 6.44772 12.5523 6 12 6C11.4477 6 11 6.44772 11 7V7.01123C11 7.56352 11.4477 8.01123 12 8.01123C12.5523 8.01123 13 7.56352 13 7.01123V7Z"
+                                                                fill="#ffffff"></path>
+                                                        </g>
+                                                    </svg>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="sp_main">
+                                        <div class="no_playback" id="no_playback" style="display:block">
+                                            <p>No tracks currently playing</p>
+                                        </div>
+                                        <div class="playback_info" id="playback_info" style="display:none">
+                                            <div class="sp_left">
+                                                <div class="sp_album_art" id="sp_album_art"></div>
+                                            </div>
+                                            <div class="sp_right">
+                                                <div class="song-info" style="max-height: 50px;">
+                                                    <p class="sp_title" data-id="" id="sp_title"></p>
+                                                    <p class="sp_album" id="sp_album"></p>
+                                                    <p class="sp_artist" id="sp_artist"></p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="mobile_expanded_content" id="mobile_expanded_content">
-                <div class="main_right">
-                    <div class="language_selector"></div>
-                    <div class="improvements_box"></div>
-                    <div class="sp_player_div"></div>
+        </div>
+        <div class="mobile_expanded_content" id="mobile_expanded_content">
+            <div class="main_right">
+                <div class="language_selector"></div>
+                <div class="improvements_box"></div>
+                <div class="sp_player_div"></div>
+            </div>
+        </div>
+    </div>
+    <div class="draft_status" id="draft_status"></div>
+    <div class="draft_div" id="draft_content" style="display:none">
+        <div class="draft_text_content">
+            <p class="draft_title">Draft found, do you want to recover?</p>
+            <p class="draft_saved" id="draft_saved_date"></p>
+        </div>
+        <div class="draft_buttons">
+            <div class="discard_button" onclick="discardDraft()">Discard</div>
+            <div class="recover_button" onclick="recoverConfirmed()">Recover</div>
+        </div>
+    </div>
+    <div id="draft_overlay"></div>
+    <div class="draft_status" id="draft_status"></div>
+    <div id="notification" class="hidden">
+        <div class="notification-content">
+            <p id="notification-message"></p>
+        </div>
+    </div>
+    <div class="footer" id="footer">
+        <div class="player" id="sdk_player" style="display:none">
+            <div id="timer_div">
+                <div id="timer">0:00</div>
+            </div>
+            <script src="https://sdk.scdn.co/spotify-player.js"></script>
+            <div class="control-container" id="play_pause">
+                <svg width="20px" height="20px" viewBox="-1 0 8 8" version="1.1" xmlns="http://www.w3.org/2000/svg"
+                    xmlns:xlink="http://www.w3.org/1999/xlink" fill="#ffffff" stroke="#ffffff" style="display:none">
+                    <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                    <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round" stroke="#CCCCCC"
+                        stroke-width="0.33599999999999997"></g>
+                    <g id="SVGRepo_iconCarrier">
+                        <title>pause [#ffffff]</title>
+                        <desc>Created with Sketch.</desc>
+                        <defs> </defs>
+                        <g id="Page-1" stroke-width="0.00008" fill="none" fill-rule="evenodd">
+                            <g id="Dribbble-Light-Preview" transform="translate(-227.000000, -3765.000000)"
+                                fill="#ffffff">
+                                <g id="icons" transform="translate(56.000000, 160.000000)">
+                                    <path
+                                        d="M172,3605 C171.448,3605 171,3605.448 171,3606 L171,3612 C171,3612.552 171.448,3613 172,3613 C172.552,3613 173,3612.552 173,3612 L173,3606 C173,3605.448 172.552,3605 172,3605 M177,3606 L177,3612 C177,3612.552 176.552,3613 176,3613 C175.448,3613 175,3612.552 175,3612 L175,3606 C175,3605.448 175.448,3605 176,3605 C176.552,3605 177,3605.448 177,3606"
+                                        id="pause-[#ffffff]"> </path>
+                                </g>
+                            </g>
+                        </g>
+                    </g>
+                </svg>
+                <svg fill="#ffffff" viewBox="0 0 32 32" version="1.1" xmlns="http://www.w3.org/2000/svg"
+                    stroke="#ffffff" stroke-width="0.00032" style="display:none; margin-left: 7px">
+                    <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                    <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+                    <g id="SVGRepo_iconCarrier">
+                        <title>play</title>
+                        <path
+                            d="M5.92 24.096q0 1.088 0.928 1.728 0.512 0.288 1.088 0.288 0.448 0 0.896-0.224l16.16-8.064q0.48-0.256 0.8-0.736t0.288-1.088-0.288-1.056-0.8-0.736l-16.16-8.064q-0.448-0.224-0.896-0.224-0.544 0-1.088 0.288-0.928 0.608-0.928 1.728v16.16z">
+                        </path>
+                    </g>
+                </svg>
+            </div>
+            <div class="controls-center">
+                <div id="track_position" class="track_position">0:00</div>
+                <div class="tracker_container">
+                    <input type="range" id="tracker" class="tracker" min="0" value="0" max="100">
+                    <div id="hoverTimeDisplay" class="hover_time_display">00:00</div>
+                </div>
+                <div id="track_duration" class="track_duration">0:00</div>
+            </div>
+            <div class="controls-right">
+                <div class="control-container" id="previous_section">
+                    <img src="images/backward.svg" alt="Backward">
+                </div>
+                <div class="control-container" id="3s_backward" style="position: relative;">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                        <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+                        <g id="SVGRepo_iconCarrier">
+                            <path
+                                d="M12.0016 3.47945C11.9216 3.47945 11.8416 3.48945 11.7616 3.48945L12.5816 2.46945C12.8416 2.14945 12.7916 1.66945 12.4616 1.41945C12.1316 1.16945 11.6716 1.20945 11.4116 1.53945L9.44156 3.99945C9.43156 4.00945 9.43156 4.01945 9.42156 4.03945C9.39156 4.07945 9.37156 4.12945 9.35156 4.16945C9.33156 4.21945 9.31156 4.25945 9.30156 4.29945C9.29156 4.34945 9.29156 4.38945 9.29156 4.43945C9.29156 4.48945 9.29156 4.53945 9.29156 4.58945C9.29156 4.60945 9.29156 4.61945 9.29156 4.63945C9.30156 4.66945 9.32156 4.68945 9.33156 4.71945C9.35156 4.76945 9.37156 4.80945 9.39156 4.85945C9.42156 4.89945 9.45156 4.93945 9.49156 4.96945C9.51156 4.99945 9.52156 5.02945 9.55156 5.04945C9.57156 5.05945 9.58156 5.06945 9.60156 5.07945C9.63156 5.09945 9.65156 5.10945 9.68156 5.11945C9.73156 5.14945 9.79156 5.16945 9.85156 5.17945C9.88156 5.19945 9.91156 5.19945 9.94156 5.19945C9.97156 5.19945 9.99156 5.20945 10.0216 5.20945C10.0516 5.20945 10.0716 5.19945 10.0916 5.18945C10.1216 5.18945 10.1516 5.19945 10.1816 5.18945C10.8216 5.03945 11.4216 4.96945 11.9916 4.96945C16.4816 4.96945 20.1316 8.61945 20.1316 13.1095C20.1316 17.5994 16.4816 21.2495 11.9916 21.2495C7.50156 21.2495 3.85156 17.5994 3.85156 13.1095C3.85156 11.3695 4.42156 9.68945 5.50156 8.24945C5.75156 7.91945 5.68156 7.44945 5.35156 7.19945C5.02156 6.94945 4.55156 7.01945 4.30156 7.34945C3.02156 9.04945 2.35156 11.0395 2.35156 13.1095C2.35156 18.4195 6.67156 22.7495 11.9916 22.7495C17.3116 22.7495 21.6316 18.4295 21.6316 13.1095C21.6316 7.78945 17.3116 3.47945 12.0016 3.47945Z"
+                                fill="#ffffff"></path>
+                        </g>
+                    </svg>
+                    <p style="position: absolute; top: 54%; left: 51%; color: #ffffff; font-size: small; transform: translate(-50%, -50%); z-index: 1;"
+                        id="backwardValue"></p>
+                </div>
+
+                <div class="control-container" id="3s_forward" style="position: relative;">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                        <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+                        <g id="SVGRepo_iconCarrier">
+                            <path
+                                d="M19.4791 7.09052C19.2191 6.77052 18.7491 6.72052 18.4291 6.98052C18.1091 7.24052 18.0591 7.71052 18.3191 8.03052C19.4491 9.43052 20.0791 11.0905 20.1391 12.8305C20.2991 17.3105 16.7791 21.0905 12.2891 21.2405C7.79906 21.4005 4.02906 17.8805 3.86906 13.4005C3.70906 8.92052 7.22906 5.14052 11.7191 4.99052C12.2891 4.97052 12.8891 5.02052 13.5391 5.15052C13.5791 5.16052 13.6191 5.15052 13.6591 5.15052C13.7591 5.20052 13.8791 5.23052 13.9891 5.23052C14.1591 5.23052 14.3191 5.18052 14.4591 5.06052C14.7791 4.80052 14.8291 4.33052 14.5791 4.01052L12.5991 1.54052C12.3391 1.22052 11.8691 1.16052 11.5491 1.42052C11.2291 1.68052 11.1791 2.15052 11.4291 2.47052L12.2591 3.50052C12.0691 3.49052 11.8691 3.48052 11.6791 3.49052C6.36906 3.67052 2.19906 8.15052 2.38906 13.4605C2.57906 18.7705 7.04906 22.9405 12.3591 22.7505C17.6691 22.5605 21.8391 18.0905 21.6491 12.7805C21.5591 10.7105 20.8191 8.74052 19.4791 7.09052Z"
+                                fill="#ffffff"></path>
+                        </g>
+                    </svg>
+                    <p style="position: absolute; top: 54%; left: 49%; color: #ffffff; font-size: small; transform: translate(-50%, -50%); z-index: 1;"
+                        id="forwardValue"></p>
+                </div>
+                <div class="control-container" id="next_section">
+                    <img src="images/forward.svg" alt="Forward">
+                </div>
+            </div>
+            <div class="control-container" id="toggle_options">
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M12 6V18M12 6L7 11M12 6L17 11" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path> </g></svg>
+            </div>
+            <div class="extended-options">
+                <div class="option">Opção 1</div>
+                <div class="option">Opção 2</div>
+                <!-- Adicione outras opções conforme necessário -->
+            </div>
+        </div>
+    </div>
+    </div>
+    <div class="development_message" id="development_message">
+        <h2>Mobile Interface Not Available</h2>
+        <p>This is a tool created for desktop browsers and we don't yet have a functional mobile interface. Please switch to a PC for a better experience.</p>
+    </div>
+
+    <div class="lt_redirect" id="lt_redirect" style="display:none">
+        <p>Click here to download the official LanguageTool add-on!</p>
+    </div>
+
+    <div id="overlay"></div>
+
+    <div id="devices_options" class="devices_options" style="display:none; bottom: 105px">
+    </div>
+
+    <div id="settings_popup" class="popup">
+        <div id="closeButton" onclick="closeSettings()">&#215;</div>
+        <div class="popup_title">
+            <h2 onclick="handleSettingsClick()">Settings</h2>
+        </div>
+        <div class="popup_submenu">
+            <div class="improvements_option">
+                <div class="impr_menu_true" id="pref_sub" style="">
+                    <p>Preferences</p>
+                </div>
+                <div class="impr_menu_false" id="playback_sub" title="">
+                    <p>Playback</p>
+                </div>
+                <div class="impr_menu_false" id="storage_sub" style="">
+                    <p>Storage</p>
+                </div>
+                <div class="impr_menu_false" id="dev_sub" style="display:none">
+                    <p>Development Tools</p>
                 </div>
             </div>
         </div>
-        <div id="notification" class="hidden">
-            <div class="notification-content">
-              <p id="notification-message"></p>
-            </div>
-        </div>
-        <div class="footer" id="footer">
-            <div class="footer_message">Please note that this tool only provides suggestions based on your current transcription. It is still essential to thoroughly review all the content before sending.</div>
-        </div>    
-        <div class="development_message">
-            <h2>Mobile Interface Under Development</h2>
-            <p>The interface for mobile devices is still under development. Please use a PC for the best experience.</p>
-        </div>
-
-        <div id="overlay"></div>
-
-        <div id="settings_popup" class="popup">
-            <div id="closeButton" onclick="closeSettings()">&#215;</div>
-            <div class="popup_title">
-                <h2>Settings</h2>
-            </div>
-            <div class="popup_content">
+        <div class="popup_content">
+            <div class="settings_tab" id="preferences_menu" style="display:block">
+                
                 <div class="popup_option" style="display:none">
                     <div class="popup_title">
                         <p class="popup_option_title">Character counter</p>
-                        <p class="popup_option_description">Select this option for the character counter</p>
+                        <p class="popup_option_description">description</p>
                     </div>
                     <label class="switch">
                         <input type="checkbox" id="characterCounterToggle" onclick="checkContent()">
@@ -173,7 +463,8 @@
                 <div class="popup_option">
                     <div class="popup_title">
                         <p class="popup_option_title">Auto capitalization</p>
-                        <p class="popup_option_description">Select this option to automatically capitalize the first letter of the lines</p>
+                        <p class="popup_option_description">Enable this option to automatically capitalize the first letter
+                            of the lines</p>
                     </div>
                     <label class="switch">
                         <input type="checkbox" id="autoCapToggle" onclick="checkContent()">
@@ -182,120 +473,1401 @@
                 </div>
                 <div class="popup_option">
                     <div class="popup_title">
-                        <p class="popup_option_title">Auto trim lines</p>
-                        <p class="popup_option_description">Select this option to automatically trim the lines</p>
+                        <p class="popup_option_title">Auto format lyrics</p>
+                        <p class="popup_option_description">Enable this option to automatically fix the sections format and
+                            remove unnecessary spaces and empty lines</p>
                     </div>
                     <label class="switch">
-                        <input type="checkbox" id="autoTrimToggle" onclick="checkContent()">
+                        <input type="checkbox" id="autoFormatToggle" onclick="checkContent()">
                         <span class="slider round"></span>
                     </label>
                 </div>
                 <div class="popup_option">
                     <div class="popup_title">
-                        <p class="popup_option_title">Remove duplicate lines and spaces</p>
-                        <p class="popup_option_description">Select this option to automatically remove spaces and duplicate lines</p>
+                        <p class="popup_option_title">Auto suggestions</p>
+                        <p class="popup_option_description">Enable this option to receive automatic suggestions as you
+                            transcribe the lyrics</p>
                     </div>
                     <label class="switch">
-                        <input type="checkbox" id="removeDoubleSpacesAndLinesToggle" onclick="checkContent()">
+                        <input type="checkbox" id="autoSuggestion" onclick="checkContent()">
+                        <span class="slider round"></span>
+                    </label>
+                </div>
+                <div class="popup_option">
+                    <div class="unavailable_overlay" id="unavailable_overlay" onclick="notification('Spotify connection required');"></div>
+                    <div class="popup_title">
+                        <p class="popup_option_title">Save draft locally</p>
+                        <p class="popup_option_description">If you edit any lyrics while listening to the song, we'll automatically save the edit as a draft for you</p>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="saveDraft" onclick="checkContent()">
                         <span class="slider round"></span>
                     </label>
                 </div>
                 <div class="popup_option">
                     <div class="popup_title">
-                        <p class="popup_option_title">Auto capitalize tags</p>
-                        <p class="popup_option_description">Select this option to automatically capitalize tags</p>
+                        <p class="popup_option_title">Undo/redo limit</p>
+                        <p class="popup_option_description">Note: Large limits may impact performance, especially on older devices</p>
                     </div>
-                    <label class="switch">
-                        <input type="checkbox" id="autoCapTagsToggle" onclick="checkContent()">
-                        <span class="slider round"></span>
-                    </label>
-                </div>
-                <div class="popup_option">
-                    <div class="popup_title">
-                        <p class="popup_option_title">Automatic suggestions</p>
-                        <p class="popup_option_description">Select this option for automatic format suggestions</p>
-                    </div>
-                    <label class="switch">
-                        <input type="checkbox" id="autoSuggestions" onclick="checkContent()">
-                        <span class="slider round"></span>
-                    </label>
-                </div>
-            </div>
-        </div>
-
-        <div id="credits_popup" class="popup">
-            <div id="closeButton" onclick="closeCredits()">&#215;</div>
-            <div class="popup_title">
-                <h2>Credits</h2>
-            </div>
-            <div class="popup_description">
-                <p></p>
-            </div>
-            <div class="popup_content" style="display: flex; align-items: center;">
-                <div class="loading_container" id="loading_container">
-                    <div class="loading_spinner_loop" id="loading_spinner_credits" style="display:block">
-                        <div class="loading_spinner">
-                            <div></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div id="suggest_popup" class="popup">
-            <div id="closeButton" onclick="closeSuggestions()">&#215;</div>
-            <div class="popup_title">
-                <h2>Suggest a feature</h2>
-            </div>
-            <div class="popup_description">
-                <p></p>
-            </div>
-            <div class="popup_content" style="display: flex; align-items: center;">
-                <form>
-                    <select name="select_menu" id="select_menu" onchange="updateOptions()">
-                        <option value="" disabled selected>Select an option</option>
-                        <option value="option1">Suggest word for the dictionary</option>
-                        <option value="option2">Suggest a new format alert</option>
-                        <option value="option3">Send a feedback</option>
-                        <option value="option4">Report a bug</option>
+                    <select id="maxUndoRedoActions" class="select_list" onchange="checkContent()">
+                        <option value="50">50</option>
+                        <option value="75">75</option>
+                        <option value="100" selected>100</option>
+                        <option value="200">200</option>
+                        <option value="300">300</option>
                     </select>
-                    <br>
-                    <input type="text" name="text1" style="display: none;">
-                    <br>
-                    <input type="text" name="text2" style="display: none;">
-                    <br>
-                    <input type="text" name="text3" style="display: none;">
-                    <br>
-                    <textarea type="text" name="text4" style="display: none; word-wrap: break-word;"></textarea>
-                </form>
+                </div>
+            </div>
+            <div class="settings_tab" id="playback_menu" style="display:none">
+                <div class="popup_option">
+                    <div class="popup_title">
+                        <p class="popup_option_title">Spotify account</p>
+                        <p class="popup_option_description">Connect your Spotify account to LyricsFormatter</p>
+                    </div>
+                    <div class="spotify_login" id="spotify_login_button" style="display:block">
+                        <button class="spotify_button" id="spotify_button">Connect</button>
+                    </div>
+                    <div class="user-profile" id="user_profile" style="display:none">
+                        <img class="user-photo" id="sp_user_pic" src="#" alt="User Photo" title="User Photo"
+                            draggable="false">
+                        <div id="user_menu" class="user-menu">
+                            <ul>
+                                <li id="disconnect_option" style="border-radius: 10px;">
+                                    <p>Disconnect account</p>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="popup_option">
+                    <div class="unavailable_overlay" id="unavailable_overlay" onclick="notification('Spotify connection required');"></div>
+                    <div class="popup_title">
+                        <p class="popup_option_title">Backwards value</p>
+                        <p class="popup_option_description">Specify the duration in seconds to rewind during backward
+                            playback</p>
+                    </div>
+                    <select id="rewind_list" class="select_list" onchange="updateSelectValues()">
+                        <option value="1">1s</option>
+                        <option value="2">2s</option>
+                        <option value="3">3s</option>
+                        <option value="4">4s</option>
+                        <option value="5">5s</option>
+                    </select>
+                </div>
+                <div class="popup_option">
+                    <div class="unavailable_overlay" id="unavailable_overlay" onclick="notification('Spotify connection required');"></div>
+                    <div class="popup_title">
+                        <p class="popup_option_title">Fast forward value</p>
+                        <p class="popup_option_description">Specify the duration in seconds to fast forward during
+                            playback
+                        </p>
+                    </div>
+                    <select id="forward_list" class="select_list" onchange="updateSelectValues()">
+                        <option value="1">1s</option>
+                        <option value="2">2s</option>
+                        <option value="3">3s</option>
+                        <option value="4">4s</option>
+                        <option value="5">5s</option>
+                    </select>
+                </div>
+                <div class="popup_option">
+                    <div class="unavailable_overlay" id="unavailable_overlay" onclick="notification('Spotify connection required');"></div>
+                    <div class="popup_title">
+                        <p class="popup_option_title">Transfer playback on copy</p>
+                        <p class="popup_option_description">If there is an alternative playback device, the song will be transferred back automatically when you tap the copy button</p>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="copyTransferToggle" onclick="checkContent()">
+                        <span class="slider round"></span>
+                    </label>
+                </div>
+                <div class="popup_option">
+                    <div class="unavailable_overlay" id="unavailable_overlay" onclick="notification('Spotify connection required');"></div>
+                    <div class="popup_title">
+                        <p class="popup_option_title">Transfer playback on paste</p>
+                        <p class="popup_option_description">If there is a currently playing track on another device, the song will be transferred to LyricsFormatter when you tap the paste button</p>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="pasteTransferToggle" onclick="checkContent()">
+                        <span class="slider round"></span>
+                    </label>
+                </div>
+            </div>
+            <div class="settings_tab" id="storage_menu" style="display:none">
+                <div class="popup_option" id="manage_drafts_div">
+                    <div class="popup_title">
+                        <p class="popup_option_title">Manage drafts</p>
+                        <p class="popup_option_description">Manage all your saved drafts</p>
+                    </div>
+                    <div class="white_button2" onclick="manageDraft()">Open</div> 
+                </div>
+                <div class="popup_option">
+                    <div class="popup_title">
+                        <p class="popup_option_title">Manage dictionary</p>
+                        <p class="popup_option_description">Import, export or delete words from your local dictionary</p>
+                    </div>
+                    <div class="white_button2" onclick="manageDictionary()">Open</div> 
+                </div>
+                <hr id="drafts_line_sep" style="border-top: 1px solid rgb(100, 100, 100); border-right: none; border-bottom: none; border-left: none; border-image: initial; margin: 9px 0;">
+                <div class="popup_option" id="set_drafts_duration">
+                    <div class="popup_title">
+                        <p class="popup_option_title">Set the duration of a draft</p>
+                        <p class="popup_option_description">We'll check expired drafts and automatically delete them so they don't take up unnecessary space in your browser</p>
+                    </div>
+                    <select id="draft_duration" class="select_list" style="width: 80px;" onchange="updateSelectValues()">
+                        <option value="3">3 days</option>
+                        <option value="7">7 days</option>
+                        <option value="30">30 days</option>
+                        <option value="60">60 days</option>
+                        <option value="0">Never</option>
+                    </select>
+                </div>
+                <div class="popup_option" id="set_drafts_limit">
+                    <div class="popup_title">
+                        <p class="popup_option_title">Maximum number of drafts</p>
+                        <p class="popup_option_description">If the total number of drafts exceeds the limit set by you, we will delete the oldest item</p>
+                    </div>
+                    <select id="draft_limit" class="select_list" style="width: 80px;" onchange="updateSelectValues()">
+                        <option value="25">25 drafts</option>
+                        <option value="50">50 drafts</option>
+                        <option value="100">100 drafts</option>
+                        <option value="500">500 drafts</option>
+                        <option value="1000">1000 drafts</option>
+                    </select>
+                </div>
+                <hr style="border-top: 1px solid rgb(100, 100, 100); border-right: none; border-bottom: none; border-left: none; border-image: initial; margin: 9px 0;">
+                <div class="popup_option">
+                    <div class="popup_title">
+                        <p class="popup_option_title">Reset preferences</p>
+                        <p class="popup_option_description">Reset all preferences to default</p>
+                    </div>
+                    <div class="white_button2" id="delete_data" onclick="deletePreferences()">Reset</div>
+                </div>
+                <div class="popup_option" id="export_cache_div">
+                    <div class="popup_title">
+                        <p class="popup_option_title">Export local storage file<span class="info_icon">ⓘ</span></p>
+                        <p class="popup_option_description">Export all local data stored on this site (including tokens)</p>
+                    </div>
+                    <div class="white_button2" id="export_dictionary" onclick="exportCacheData()">Export</div> 
+                </div>
+                <div class="popup_option" id="import_cache_div">
+                    <div class="popup_title">
+                        <p class="popup_option_title">Import local storage file</p>
+                        <p class="popup_option_description">Import and replace all cached data</p>
+                    </div>
+                    <div class="white_button2" id="export_dictionary" onclick="importCacheData()">Import</div> 
+                </div>
+                <hr style="border-top: 1px solid rgb(100, 100, 100); border-right: none; border-bottom: none; border-left: none; border-image: initial; margin: 9px 0;">
+                <div class="popup_option">
+                    <div class="popup_title">
+                        <p class="popup_option_title">Memory usage</p>
+                    </div>
+                    <div class="right_side_text" id="memory_usage" onclick="updateMemoryUsage()">-</div>
+                </div>
+                <div class="popup_option">
+                    <div class="popup_title">
+                        <p class="popup_option_title">Delete all local data</p>
+                        <p class="popup_option_description">This will delete all data from your browser, including your dictionary, be sure to keep a backup</p>
+                    </div>
+                    <div class="black_button2" id="delete_data" onclick="confirmClearCache()">Reset</div>
+                </div>
+            </div>
+            <div class="settings_tab" id="devtools_menu" style="display:none">
+                <div class="popup_option">
+                    <div class="popup_title">
+                        <p class="popup_option_title">Use personal Musixmatch API key</p>
+                        <p class="popup_option_description">Use your own key to bypass per-user access restrictions (saved locally, we'll never store this in our database)</p>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="mxmPersonalTokenToggle" onclick="checkContent()">
+                        <span class="slider round"></span>
+                    </label>
+                </div>
+                <div class="text_input_full" style="margin-bottom: 3px;" id="mxm_token_field">
+                    <input type="text" id="mxm_token_input" placeholder="Enter your Musixmatch API key here" oninput="checkMxmToken()">
+                </div>
+                <div class="popup_option">
+                    <div class="popup_title">
+                        <p class="popup_option_title">Export button on LT suggestions</p>
+                        <p class="popup_option_description">Copy data from each object returned by the LanguageTool API - for debugging and development purposes</p>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="lfExportToggle" onclick="checkContent()">
+                        <span class="slider round"></span>
+                    </label>
+                </div>
+                <div class="popup_option">
+                    <div class="popup_title">
+                        <p class="popup_option_title">Run on local server</p>
+                        <p class="popup_option_description">Enable this option to switch to the local server</p>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="localHostToggle" onclick="checkContent()">
+                        <span class="slider round"></span>
+                    </label>
+                </div>
+                <hr style="border-top: 1px solid rgb(100, 100, 100); border-right: none; border-bottom: none; border-left: none; border-image: initial; margin: 9px 0;">
+                <div class="popup_option" style="margin-top: 8px;">
+                    <div class="popup_title">
+                        <p class="popup_option_title">Detect browser</p>
+                        <p class="popup_option_description">Check user browser response</p>
+                    </div>
+                    <div class="white_button2" id="delete_data" onclick="detectBrowser()">Detect</div>
+                </div>
             </div>
         </div>
+    </div>
 
-        <div id="about_popup" class="popup">
-            <div id="closeButton" onclick="closeAboutInfo()">&#215;</div>
-            <div class="popup_title">
-                <h2>About this tool</h2>
+    <div id="credits_popup" class="popup">
+        <div id="closeButton" onclick="closeCredits()">&#215;</div>
+        <div class="popup_title">
+            <h2>Credits</h2>
+        </div>
+        <div class="popup_description">
+            <p></p>
+        </div>
+        <div class="popup_content" style="display: flex; align-items: center;">
+            <div class="loading_container" id="loading_container">
+                <div class="loading_spinner_loop" id="loading_spinner_credits" style="display:block">
+                    <div class="loading_spinner"><div></div></div>
+                </div>
             </div>
-            <div class="popup_description">
-            </div>
-            <div class="popup_content" id="aboutContent" style="display: flex; align-items: center;">
-                <div class="loading_container" id="loading_container">
-                    <div class="loading_spinner_loop" id="loading_spinner_credits" style="display:block">
-                        <div class="loading_spinner">
-                            <div></div>
-                        </div>
+        </div>
+    </div>
+
+    <div id="about_popup" class="popup">
+        <div id="closeButton" onclick="closeAboutInfo()">&#215;</div>
+        <div class="popup_title">
+            <h2>About this tool</h2>
+        </div>
+        <div class="popup_content" id="aboutContent" style="display: flex; align-items: center;">
+            <div class="loading_container" id="loading_container">
+                <div class="loading_spinner_loop" id="loading_spinner_credits" style="display:block">
+                    <div class="loading_spinner">
+                        <div></div>
                     </div>
                 </div>
             </div>
         </div>
+    </div>
 
-        <script>
-            document.addEventListener('DOMContentLoaded', function () {
+    <div id="shortcuts_popup" class="popup">
+        <div id="closeButton" onclick="closeShortcuts()">&#215;</div>
+        <div class="popup_title">
+            <h2>Shortcuts</h2>
+        </div>
+        <div class="popup_submenu">
+            <div class="improvements_option">
+                <div class="impr_menu_true" id="op_keyboard" style="" title="">
+                    <p>Keyboard</p>
+                </div>
+                <div class="impr_menu_false" id="op_numpad" style="" title="Show numpad shortcuts">
+                    <p>Numpad</p>
+                </div>
+            </div>
+        </div>
+        <div class="popup_content" id="shortcutsKeyboardContent" style="display: flex; align-items: center;">
+            <div class="popup_content_intern" style="margin-bottom: 15px; display:none" id="audio_controls_keyboard">
+                <h3 class="popup_content_intern">Audio controls</h3>
+                <div class="popup_option">
+                    <div class="popup_title">
+                        <p class="shortcut_option">Play/Pause</p>
+                        <p class="popup_option_description"></p>
+                    </div>
+                    <div class="shortcut_icon_larger" color="blue">Tab</div>
+                </div>
+                <hr style="border-top: 1px solid rgb(100, 100, 100); border-right: none; border-bottom: none; border-left: none; border-image: initial; margin: 9px 0;">
+                <div class="popup_option">
+                    <div class="popup_title">
+                        <p class="shortcut_option">Rewind X seconds</p>
+                        <p class="popup_option_description"></p>
+                    </div>
+                    <div class="shortcut_icon_larger" color="blue">Shift</div>
+                    <div class="shortcut_icon_larger" color="blue">Tab</div>
+                </div>
+                <hr style="border-top: 1px solid rgb(100, 100, 100); border-right: none; border-bottom: none; border-left: none; border-image: initial; margin: 9px 0;">
+                <div class="popup_option">
+                    <div class="popup_title">
+                        <p class="shortcut_option">Skip X seconds</p>
+                        <p class="popup_option_description"></p>
+                    </div>
+                    <div class="shortcut_icon_larger" color="blue">Shift</div>
+                    <div class="shortcut_icon" color="blue" style="max-height: 40px;">Q</div>
+                </div>
+                <hr style="border-top: 1px solid rgb(100, 100, 100); border-right: none; border-bottom: none; border-left: none; border-image: initial; margin: 9px 0;">
+            </div>
+            <div class="popup_content_intern" id="navegation_keyboard" style="margin-bottom: 15px;">
+                <h3>Navegation</h3>
+                <div class="popup_option">
+                    <div class="popup_title">
+                        <p class="shortcut_option">Alternate Tabs: Format/Grammar</p>
+                        <p class="popup_option_description"></p>
+                    </div>
+                    <div class="shortcut_icon_larger" data="ctrl_meta_key" color="purple">Ctrl</div>
+                    <div class="shortcut_icon" color="purple" style="max-height: 40px;">.</div>
+                </div>
+                <hr style="border-top: 1px solid rgb(100, 100, 100); border-right: none; border-bottom: none; border-left: none; border-image: initial; margin: 9px 0;">
+                <div class="popup_option">
+                    <div class="popup_title">
+                        <p class="shortcut_option">Refresh suggestions</p>
+                        <p class="popup_option_description"></p>
+                    </div>
+                    <div class="shortcut_icon_larger" data="ctrl_meta_key" color="purple">Ctrl</div>
+                    <div class="shortcut_icon" color="purple" style="max-height: 40px;">,</div>
+                </div>
+                <hr style="border-top: 1px solid rgb(100, 100, 100); border-right: none; border-bottom: none; border-left: none; border-image: initial; margin: 9px 0;">
+            </div>
+            <div class="popup_content_intern" id="additional_features_keyboard" style="margin-bottom: 15px; display:none">
+                <h3>Additional Features</h3>
+                <div class="popup_option">
+                    <div class="popup_title">
+                        <p class="shortcut_option">Switch players</p>
+                        <p class="popup_option_description"></p>
+                    </div>
+                    <div class="shortcut_icon_larger" color="green">Shift</div>
+                    <div class="shortcut_icon" color="green" style="max-height: 40px;">A</div>
+                </div>
+                <hr style="border-top: 1px solid rgb(100, 100, 100); border-right: none; border-bottom: none; border-left: none; border-image: initial; margin: 9px 0;">
+                <div class="popup_option">
+                    <div class="popup_title">
+                        <p class="shortcut_option">Start timer</p>
+                        <p class="popup_option_description">Press the spacebar to start and release to stop the timer</p>
+                    </div>
+                    <div class="shortcut_icon_larger" color="green">Spacebar</div>
+                </div>
+                <hr style="border-top: 1px solid rgb(100, 100, 100); border-right: none; border-bottom: none; border-left: none; border-image: initial; margin: 9px 0;">
+                <div class="popup_option">
+                    <div class="popup_title">
+                        <p class="shortcut_option">Save draft</p>
+                        <p class="popup_option_description"></p>
+                    </div>
+                    <div class="shortcut_icon_larger" data="ctrl_meta_key" color="green">Ctrl</div>
+                    <div class="shortcut_icon" color="green" style="max-height: 40px;">S</div>
+                </div>
+                <hr style="border-top: 1px solid rgb(100, 100, 100); border-right: none; border-bottom: none; border-left: none; border-image: initial; margin: 9px 0;">
+                <div class="popup_option">
+                    <div class="popup_title">
+                        <p class="shortcut_option">Add or remove parentheses</p>
+                        <p class="popup_option_description">You must select the text to be changed</p>
+                    </div>
+                    <div class="shortcut_icon_larger" data="ctrl_meta_key" color="green">Ctrl</div>
+                    <div class="shortcut_icon_larger" color="green">Shift</div>
+                    <div class="shortcut_icon" color="green" style="max-height: 40px;">E</div>
+                </div>
+                <hr style="border-top: 1px solid rgb(100, 100, 100); border-right: none; border-bottom: none; border-left: none; border-image: initial; margin: 9px 0;">
+            </div>
+            <div class="popup_content_intern" id="tags_shortcuts_keyboard">
+                <h3>Tag Shortcuts</h3>
+                <div class="popup_option">
+                    <div class="popup_title">
+                        <p class="shortcut_option">#INTRO</p>
+                        <p class="popup_option_description"></p>
+                    </div>
+                    <div class="shortcut_icon_larger" data="ctrl_meta_key" color="orange">Ctrl</div>
+                    <div class="shortcut_icon_larger" color="orange">Shift</div>
+                    <div class="shortcut_icon" color="orange" style="max-height: 40px;">I</div>
+                </div>
+                <hr style="border-top: 1px solid rgb(100, 100, 100); border-right: none; border-bottom: none; border-left: none; border-image: initial; margin: 9px 0;">
+                <div class="popup_option">
+                    <div class="popup_title">
+                        <p class="shortcut_option">#VERSE</p>
+                        <p class="popup_option_description"></p>
+                    </div>
+                    <div class="shortcut_icon_larger" data="ctrl_meta_key" color="orange">Ctrl</div>
+                    <div class="shortcut_icon_larger" color="orange">Shift</div>
+                    <div class="shortcut_icon" color="orange" style="max-height: 40px;">V</div>
+                </div>
+                <hr style="border-top: 1px solid rgb(100, 100, 100); border-right: none; border-bottom: none; border-left: none; border-image: initial; margin: 9px 0;">
+                <div class="popup_option">
+                    <div class="popup_title">
+                        <p class="shortcut_option">#PRE-CHORUS</p>
+                        <p class="popup_option_description"></p>
+                    </div>
+                    <div class="shortcut_icon_larger" data="ctrl_meta_key" color="orange">Ctrl</div>
+                    <div class="shortcut_icon_larger" color="orange">Shift</div>
+                    <div class="shortcut_icon" color="orange" style="max-height: 40px;">P</div>
+                </div>
+                <hr style="border-top: 1px solid rgb(100, 100, 100); border-right: none; border-bottom: none; border-left: none; border-image: initial; margin: 9px 0;">
+                <div class="popup_option">
+                    <div class="popup_title">
+                        <p class="shortcut_option">#CHORUS</p>
+                        <p class="popup_option_description"></p>
+                    </div>
+                    <div class="shortcut_icon_larger" data="ctrl_meta_key" color="orange">Ctrl</div>
+                    <div class="shortcut_icon_larger" color="orange">Shift</div>
+                    <div class="shortcut_icon" color="orange" style="max-height: 40px;">C</div>
+                </div>
+                <hr style="border-top: 1px solid rgb(100, 100, 100); border-right: none; border-bottom: none; border-left: none; border-image: initial; margin: 9px 0;">
+                <div class="popup_option">
+                    <div class="popup_title">
+                        <p class="shortcut_option">#BRIDGE</p>
+                        <p class="popup_option_description"></p>
+                    </div>
+                    <div class="shortcut_icon_larger" data="ctrl_meta_key" color="orange">Ctrl</div>
+                    <div class="shortcut_icon_larger" color="orange">Shift</div>
+                    <div class="shortcut_icon" color="orange" style="max-height: 40px;">B</div>
+                </div>
+                <hr style="border-top: 1px solid rgb(100, 100, 100); border-right: none; border-bottom: none; border-left: none; border-image: initial; margin: 9px 0;">
+                <div class="popup_option">
+                    <div class="popup_title">
+                        <p class="shortcut_option">#HOOK</p>
+                        <p class="popup_option_description"></p>
+                    </div>
+                    <div class="shortcut_icon_larger" data="ctrl_meta_key" color="orange">Ctrl</div>
+                    <div class="shortcut_icon_larger" color="orange">Shift</div>
+                    <div class="shortcut_icon" color="orange" style="max-height: 40px;">H</div>
+                </div>
+                <hr style="border-top: 1px solid rgb(100, 100, 100); border-right: none; border-bottom: none; border-left: none; border-image: initial; margin: 9px 0;">
+                <div class="popup_option">
+                    <div class="popup_title">
+                        <p class="shortcut_option">#OUTRO</p>
+                        <p class="popup_option_description"></p>
+                    </div>
+                    <div class="shortcut_icon_larger" data="ctrl_meta_key" color="orange">Ctrl</div>
+                    <div class="shortcut_icon_larger" color="orange">Shift</div>
+                    <div class="shortcut_icon" color="orange" style="max-height: 40px;">O</div>
+                </div>
+                <hr style="border-top: 1px solid rgb(100, 100, 100); border-right: none; border-bottom: none; border-left: none; border-image: initial; margin: 9px 0;">
+                <div class="popup_option">
+                    <div class="popup_title">
+                        <p class="shortcut_option">#INSTRUMENTAL</p>
+                        <p class="popup_option_description"></p>
+                    </div>
+                    <div class="shortcut_icon_larger" data="ctrl_meta_key" color="orange">Ctrl</div>
+                    <div class="shortcut_icon_larger" color="orange">Shift</div>
+                    <div class="shortcut_icon" color="orange" style="max-height: 40px;">X</div>
+                </div>
+                <hr style="border-top: 1px solid rgb(100, 100, 100); border-right: none; border-bottom: none; border-left: none; border-image: initial; margin: 9px 0;">
+            </div>
+        </div>
+        <div class="popup_content" id="shortcutsNumpadContent" style="display: none; align-items: center;">
+            <div class="popup_content_intern" style="margin-bottom: 15px; display:none" id="audio_controls_numpad">
+                <h3 class="popup_content_intern">Audio controls</h3>
+                <div class="popup_option">
+                    <div class="popup_title">
+                        <p class="shortcut_option">Play/Pause</p>
+                        <p class="popup_option_description"></p>
+                    </div>
+                    <div class="shortcut_icon" color="blue">0</div>
+                </div>
+                <hr style="border-top: 1px solid rgb(100, 100, 100); border-right: none; border-bottom: none; border-left: none; border-image: initial; margin: 9px 0;">
+                <div class="popup_option">
+                    <div class="popup_title">
+                        <p class="shortcut_option">Rewind X seconds</p>
+                        <p class="popup_option_description"></p>
+                    </div>
+                    <div class="shortcut_icon" color="blue">1</div>
+                </div>
+                <hr style="border-top: 1px solid rgb(100, 100, 100); border-right: none; border-bottom: none; border-left: none; border-image: initial; margin: 9px 0;">
+                <div class="popup_option">
+                    <div class="popup_title">
+                        <p class="shortcut_option">Skip X seconds</p>
+                        <p class="popup_option_description"></p>
+                    </div>
+                    <div class="shortcut_icon" color="blue">3</div>
+                </div>
+                <hr style="border-top: 1px solid rgb(100, 100, 100); border-right: none; border-bottom: none; border-left: none; border-image: initial; margin: 9px 0;">
+                <div class="popup_option">
+                    <div class="popup_title">
+                        <p class="shortcut_option">Rewind to the last audio section</p>
+                        <p class="popup_option_description"></p>
+                    </div>
+                    <div class="shortcut_icon" color="blue">4</div>
+                </div>
+                <hr style="border-top: 1px solid rgb(100, 100, 100); border-right: none; border-bottom: none; border-left: none; border-image: initial; margin: 9px 0;">
+                <div class="popup_option">
+                    <div class="popup_title">
+                        <p class="shortcut_option">Play the current audio section</p>
+                        <p class="popup_option_description"></p>
+                    </div>
+                    <div class="shortcut_icon" color="blue">5</div>
+                </div>
+                <hr style="border-top: 1px solid rgb(100, 100, 100); border-right: none; border-bottom: none; border-left: none; border-image: initial; margin: 9px 0;">
+                <div class="popup_option">
+                    <div class="popup_title">
+                        <p class="shortcut_option">Skip to next audio section</p>
+                        <p class="popup_option_description"></p>
+                    </div>
+                    <div class="shortcut_icon" color="blue">6</div>
+                </div>
+                <hr style="border-top: 1px solid rgb(100, 100, 100); border-right: none; border-bottom: none; border-left: none; border-image: initial; margin: 9px 0;">
+            </div>
+            <div class="popup_content_intern" style="margin-bottom: 15px;" id="navegation_numpad">
+                <h3>Navegation</h3>
+                <div class="popup_option">
+                    <div class="popup_title">
+                        <p class="shortcut_option">Switch to 'Format' tab</p>
+                        <p class="popup_option_description"></p>
+                    </div>
+                    <div class="shortcut_icon" color="purple">7</div>
+                </div>
+                <hr style="border-top: 1px solid rgb(100, 100, 100); border-right: none; border-bottom: none; border-left: none; border-image: initial; margin: 9px 0;">
+                <div class="popup_option">
+                    <div class="popup_title">
+                        <p class="shortcut_option">Refresh suggestions</p>
+                        <p class="popup_option_description"></p>
+                    </div>
+                    <div class="shortcut_icon" color="purple">8</div>
+                </div>
+                <hr style="border-top: 1px solid rgb(100, 100, 100); border-right: none; border-bottom: none; border-left: none; border-image: initial; margin: 9px 0;">
+                <div class="popup_option">
+                    <div class="popup_title">
+                        <p class="shortcut_option">Switch to 'Grammar' tab</p>
+                        <p class="popup_option_description"></p>
+                    </div>
+                    <div class="shortcut_icon" color="purple">9</div>
+                </div>
+                <hr style="border-top: 1px solid rgb(100, 100, 100); border-right: none; border-bottom: none; border-left: none; border-image: initial; margin: 9px 0;">
+            </div>
+            <div class="popup_content_intern" id="additional_features_numpad" style="display:none">
+                <h3>Additional Features</h3>
+                <div class="popup_option">
+                    <div class="popup_title">
+                        <p class="shortcut_option">Volume up</p>
+                        <p class="popup_option_description"></p>
+                    </div>
+                    <div class="shortcut_icon" color="green">+</div>
+                </div>
+                <hr style="border-top: 1px solid rgb(100, 100, 100); border-right: none; border-bottom: none; border-left: none; border-image: initial; margin: 9px 0;">
+                <div class="popup_option">
+                    <div class="popup_title">
+                        <p class="shortcut_option">Volume down</p>
+                        <p class="popup_option_description"></p>
+                    </div>
+                    <div class="shortcut_icon" color="green">-</div>
+                </div>
+                <hr style="border-top: 1px solid rgb(100, 100, 100); border-right: none; border-bottom: none; border-left: none; border-image: initial; margin: 9px 0;">
+                <div class="popup_option">
+                    <div class="popup_title">
+                        <p class="shortcut_option">Switch players</p>
+                        <p class="popup_option_description"></p>
+                    </div>
+                    <div class="shortcut_icon" color="green">*</div>
+                </div>
+                <hr style="border-top: 1px solid rgb(100, 100, 100); border-right: none; border-bottom: none; border-left: none; border-image: initial; margin: 9px 0;">
+                <div class="popup_option">
+                    <div class="popup_title">
+                        <p class="shortcut_option">Start timer</p>
+                        <p class="popup_option_description"></p>
+                    </div>
+                    <div class="shortcut_icon" color="green">2</div>
+                </div>
+                <hr style="border-top: 1px solid rgb(100, 100, 100); border-right: none; border-bottom: none; border-left: none; border-image: initial; margin: 9px 0;">
+            </div>
+        </div>
+    </div>
 
-                var expandArrow = document.getElementById('expand_arrow');
-                var footer = document.getElementById('footer');
-                var footerHidedContent = document.getElementById('footer_hided_content');
-                var mobileFooterDiv = document.getElementById('mobile_footer_div');
+    <div id="manage_dictionary_popup" class="alt_popup">
+        <div class="popup_title" style="flex-direction: row;">
+            <div style="display: flex; flex-direction: row;">
+                <div style="margin-right: 20px;" class="return_white_arrow" title="Return" onclick="closeManageDictionary()"></div>
+                <h2>Manage dictionary</h2>
+            </div>
+        </div>
+        <div class="popup_content" style="display: flex; align-items: center;">
+            <p class="no_data_table">No data available</p>
+        </div>
+        <div class="popup_bottom" >
+            <div style="display: flex; flex-direction: column;">
+                <p id="dictionary_rows">Total rows: 0</p>
+                <p id="dictionary_memory">Memory usage -</p>
+            </div>
+            <div style="display: flex; flex-direction: row;">
+                <div class="white_button2" id="import_dictionary" onclick="importDictionary()">Import</div> 
+                <div class="white_button2" id="export_dictionary" style="margin-left: 5px;" onclick="exportDictionary()">Export</div> 
+            </div>
+        </div>
+    </div>
 
+    <div id="manage_draft_popup" class="alt_popup">
+        <div class="popup_title" style="flex-direction: row;">
+            <div style="display: flex; flex-direction: row;">
+                <div style="margin-right: 20px;" class="return_white_arrow" title="Return" onclick="closeManageDraft()"></div>
+                <h2>Manage drafts</h2>
+            </div>
+        </div>
+        <div class="popup_content" style="display: flex; align-items: center;">
+            <p class="no_data_table">No data available</p>
+        </div>
+        <div class="popup_bottom" >
+            <div style="display: flex; flex-direction: column;">
+                <p id="draft_items">Total drafts: 0</p>
+                <p id="draft_memory">Memory usage -</p>
+            </div>
+            <div style="display: flex; flex-direction: row;">
+                <div class="white_button2" id="export_dictionary" title="Import drafts" style="margin-left: 5px;" onclick="importDrafts()">Import</div>
+                <div class="white_button2" id="export_dictionary" style="margin-left: 5px;" onclick="exportAllDrafts()">Export</div> 
+            </div>
+        </div>
+    </div>
+
+    <div id="diffchecker_popup" class="diff_popup" style="display:none">
+        <div class="popup_title" style="flex-direction: row; justify-content: space-between; width: 100%;">
+            <div style="display: flex; flex-direction: row;">
+                <div style="margin-right: 20px;" class="return_black_arrow" title="Return" onclick="closeDiff()"></div>
+                <h2>Diffchecker</h2>
+            </div>
+            <div style="display: flex; flex-direction: row;">
+                <div class="diff_link_div" id="diff_link_div" style="user-select:text; display:none">
+                    <p class="diff_link_output" id="diff_link_output"></p>
+                    <div id="copy_diff_link">
+                        <svg width="30px" height="30px" viewBox="0 -0.5 25 25" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M8.25005 8.5C8.25005 8.91421 8.58584 9.25 9.00005 9.25C9.41426 9.25 9.75005 8.91421 9.75005 8.5H8.25005ZM9.00005 8.267H9.75006L9.75004 8.26283L9.00005 8.267ZM9.93892 5.96432L10.4722 6.49171L9.93892 5.96432ZM12.2311 5V4.24999L12.2269 4.25001L12.2311 5ZM16.269 5L16.2732 4.25H16.269V5ZM18.5612 5.96432L18.0279 6.49171V6.49171L18.5612 5.96432ZM19.5 8.267L18.75 8.26283V8.267H19.5ZM19.5 12.233H18.75L18.7501 12.2372L19.5 12.233ZM18.5612 14.5357L18.0279 14.0083L18.5612 14.5357ZM16.269 15.5V16.25L16.2732 16.25L16.269 15.5ZM16 14.75C15.5858 14.75 15.25 15.0858 15.25 15.5C15.25 15.9142 15.5858 16.25 16 16.25V14.75ZM9.00005 9.25C9.41426 9.25 9.75005 8.91421 9.75005 8.5C9.75005 8.08579 9.41426 7.75 9.00005 7.75V9.25ZM8.73105 8.5V7.74999L8.72691 7.75001L8.73105 8.5ZM6.43892 9.46432L6.97218 9.99171L6.43892 9.46432ZM5.50005 11.767H6.25006L6.25004 11.7628L5.50005 11.767ZM5.50005 15.734L6.25005 15.7379V15.734H5.50005ZM8.73105 19L8.72691 19.75H8.73105V19ZM12.769 19V19.75L12.7732 19.75L12.769 19ZM15.0612 18.0357L14.5279 17.5083L15.0612 18.0357ZM16 15.733H15.25L15.2501 15.7372L16 15.733ZM16.75 15.5C16.75 15.0858 16.4143 14.75 16 14.75C15.5858 14.75 15.25 15.0858 15.25 15.5H16.75ZM9.00005 7.75C8.58584 7.75 8.25005 8.08579 8.25005 8.5C8.25005 8.91421 8.58584 9.25 9.00005 9.25V7.75ZM12.7691 8.5L12.7732 7.75H12.7691V8.5ZM15.0612 9.46432L15.5944 8.93694V8.93694L15.0612 9.46432ZM16.0001 11.767L15.2501 11.7628V11.767H16.0001ZM15.2501 15.5C15.2501 15.9142 15.5858 16.25 16.0001 16.25C16.4143 16.25 16.7501 15.9142 16.7501 15.5H15.2501ZM9.75005 8.5V8.267H8.25005V8.5H9.75005ZM9.75004 8.26283C9.74636 7.60005 10.0061 6.96296 10.4722 6.49171L9.40566 5.43694C8.65985 6.19106 8.24417 7.21056 8.25006 8.27117L9.75004 8.26283ZM10.4722 6.49171C10.9382 6.02046 11.5724 5.75365 12.2352 5.74999L12.2269 4.25001C11.1663 4.25587 10.1515 4.68282 9.40566 5.43694L10.4722 6.49171ZM12.2311 5.75H16.269V4.25H12.2311V5.75ZM16.2649 5.74999C16.9277 5.75365 17.5619 6.02046 18.0279 6.49171L19.0944 5.43694C18.3486 4.68282 17.3338 4.25587 16.2732 4.25001L16.2649 5.74999ZM18.0279 6.49171C18.494 6.96296 18.7537 7.60005 18.7501 8.26283L20.25 8.27117C20.2559 7.21056 19.8402 6.19106 19.0944 5.43694L18.0279 6.49171ZM18.75 8.267V12.233H20.25V8.267H18.75ZM18.7501 12.2372C18.7537 12.8999 18.494 13.537 18.0279 14.0083L19.0944 15.0631C19.8402 14.3089 20.2559 13.2894 20.25 12.2288L18.7501 12.2372ZM18.0279 14.0083C17.5619 14.4795 16.9277 14.7463 16.2649 14.75L16.2732 16.25C17.3338 16.2441 18.3486 15.8172 19.0944 15.0631L18.0279 14.0083ZM16.269 14.75H16V16.25H16.269V14.75ZM9.00005 7.75H8.73105V9.25H9.00005V7.75ZM8.72691 7.75001C7.6663 7.75587 6.65146 8.18282 5.90566 8.93694L6.97218 9.99171C7.43824 9.52046 8.07241 9.25365 8.73519 9.24999L8.72691 7.75001ZM5.90566 8.93694C5.15985 9.69106 4.74417 10.7106 4.75006 11.7712L6.25004 11.7628C6.24636 11.1001 6.50612 10.463 6.97218 9.99171L5.90566 8.93694ZM4.75005 11.767V15.734H6.25005V11.767H4.75005ZM4.75006 15.7301C4.73847 17.9382 6.51879 19.7378 8.72691 19.75L8.7352 18.25C7.35533 18.2424 6.2428 17.1178 6.25004 15.7379L4.75006 15.7301ZM8.73105 19.75H12.769V18.25H8.73105V19.75ZM12.7732 19.75C13.8338 19.7441 14.8486 19.3172 15.5944 18.5631L14.5279 17.5083C14.0619 17.9795 13.4277 18.2463 12.7649 18.25L12.7732 19.75ZM15.5944 18.5631C16.3402 17.8089 16.7559 16.7894 16.75 15.7288L15.2501 15.7372C15.2537 16.3999 14.994 17.037 14.5279 17.5083L15.5944 18.5631ZM16.75 15.733V15.5H15.25V15.733H16.75ZM9.00005 9.25H12.7691V7.75H9.00005V9.25ZM12.7649 9.24999C13.4277 9.25365 14.0619 9.52046 14.5279 9.99171L15.5944 8.93694C14.8486 8.18282 13.8338 7.75587 12.7732 7.75001L12.7649 9.24999ZM14.5279 9.99171C14.994 10.463 15.2537 11.1001 15.2501 11.7628L16.75 11.7712C16.7559 10.7106 16.3402 9.69106 15.5944 8.93694L14.5279 9.99171ZM15.2501 11.767V15.5H16.7501V11.767H15.2501Z" fill="#848484"></path> </g></svg>
+                    </div>
+                </div>
+                <input class="diff_name_input" style="display:none" placeholder="Set the name of the Diffckecker">
+                <div class="diff_get_link_button" id="get_diff_link" style="margin-left: 5px; color: #fff">Get Link</div> 
+            </div>
+        </div>
+        <div class="popup_content" style="display: flex; align-items: center; scrollbar-width: thin; scrollbar-color: #858585 #f1f2f4;">
+            <div id="diffchecker_table" style="width: 100%;"></div> <!-- Esta div será usada para mostrar a tabela de comparação -->
+        </div>
+        <div class="popup_bottom" >
+            <div style="display: flex; flex-direction: row; width: 100%;">
+                <div class="white_button2" id="copyDiffLeft" title="Import drafts" style="margin-left: 5px; width: 50%;">Copy</div>
+                <div class="white_button2" id="copyDiffRight" style="margin-left: 5px; width: 50%;">Copy</div> 
+            </div>
+        </div>
+    </div>
+
+    <script>
+
+        function ignoreButton(button) {
+            var container = button.closest('.container');
+            var containerId = container.id; /* Obter o ID da DIV container */
+            ignoredContainers.push(containerId); /* Adicionar o ID ao array ignoredContainers */
+            container.style.display = 'none';
+            resetLineIssues();
+            handleRefreshButtonClick();
+        }
+
+        let player;
+        let currentState;
+        let currentPosition;
+        let sectionStartTimes;
+        let deviceId;
+        let playbackId = '';
+        let currentPlaybackId = '';
+        let trackId = '';
+        let clickCount = 0;
+
+        //quick transfer button
+        let newDeviceId;
+        let mxmDeviceId;
+
+        let startTime;
+        let intervalId;
+        let isTimerRunning = false;
+
+        window.onSpotifyWebPlaybackSDKReady = () => {
+
+            fetchUserData().then(() => {
+
+                // Recuperar os tokens do armazenamento local do navegador
+                const accessToken = localStorage.getItem('accessToken');
+                const refreshToken = localStorage.getItem('refreshToken');
+
+                // Verificar se os tokens estão em cache
+                if (!accessToken || !refreshToken) {
+                    return; // sair da função porque não há tokens do Spotify
+                }
+
+                // botões playpause 
+                const controlContainer = document.getElementById('play_pause');
+                const svg1 = controlContainer.querySelector('svg:nth-child(1)');
+                const svg2 = controlContainer.querySelector('svg:nth-child(2)');
+
+                // carregar possível faixa em execução
+                fetchCurrentlyPlayingData()
+
+                // Definir nome do player com base no domínio
+                var currentDomain = window.location.hostname;
+                var match = currentDomain.match(/lyricsformatter-(\w+)\.onrender\.com/);
+
+                if (match && match[1]) {
+                    // Capitalizar a primeira letra de match[1]
+                    var capitalizedMatch = match[1].charAt(0).toUpperCase() + match[1].slice(1);
+
+                    playerName = `LyricsFormatter Player (${capitalizedMatch})`;
+                } else {
+                    playerName = `LyricsFormatter Player`;
+                }
+
+                // a partir daqui, cria-se a instancia do player sdk
+                const player = new Spotify.Player({
+                    name: playerName,
+                    getOAuthToken: cb => { 
+                        const token = checkTokenExpiration(); // Chama a função para obter o novo token
+                        cb(token); // Chama a função de callback do Spotify Player com o novo token
+                    },
+                    volume: 1.0
+                });
+
+                // Ready
+                player.addListener('ready', ({ device_id }) => {
+                    console.log('Device ID: ', device_id)
+                    deviceId = device_id;
+                    fetchAvailableDevices()
+
+                    // verificar parametro de autoplay
+                    var trackId = getParameterByName('track_id');
+                    if (trackId !== null) {
+                        playTrack(trackId, device_id);
+                    }
+                });
+
+                // Not Ready
+                player.addListener('not_ready', ({ device_id }) => {
+                    console.log('Device ID has gone offline', device_id);
+                    notification('Player has gone offline, please refresh the page');
+                    player.disconnect();
+                });
+
+                player.addListener('initialization_error', ({ message }) => {
+                    console.error(message);
+                    notification('Error initializing the player, please refresh the page');
+                    player.disconnect();
+                });
+
+                player.addListener('authentication_error', ({ message }) => {
+                    notification('Authentication error, please refresh the page');
+                });
+
+                player.addListener('account_error', ({ message }) => {
+                    console.error(message);
+                    notification('An unexpected error occurred, please refresh the page');
+                    player.disconnect();
+                });
+
+                player.connect();
+
+
+                document.getElementById('play_pause').onclick = function () {
+                    player.togglePlay();
+                };
+
+                document.getElementById('3s_backward').onclick = function () {
+                    rewind(document.getElementById('rewind_list').value);
+                };
+
+                document.getElementById('3s_forward').onclick = function () {
+                    fastForward(document.getElementById('forward_list').value)
+                };;
+
+                document.getElementById('previous_section').onclick = function () {
+                    lastSectionButton()
+                };;
+
+                document.getElementById('next_section').onclick = function () {
+                    nextSectionButton()
+                };;
+
+                document.addEventListener('keydown', function (event) {
+
+                    // Recuperar os tokens do armazenamento local do navegador
+                    const accessToken = localStorage.getItem('accessToken');
+                    const refreshToken = localStorage.getItem('refreshToken');
+
+                    // Verificar se os tokens estão em cache
+                    if (!accessToken || !refreshToken) {
+                        return; // sair da função porque não há tokens do Spotify
+                    }
+
+                    var numericKeys = ['0', '1', '3', '4', '5', '6'];
+
+                    // verifica se a tecla pressionada está no numpad
+                    var isNumpadKey = (event.location === KeyboardEvent.DOM_KEY_LOCATION_NUMPAD);
+
+                    if (numericKeys.includes(event.key) && isNumpadKey && !event.shiftKey) {
+                        event.preventDefault();
+                        switch (event.key) {
+                            case '1':
+                                rewind(document.getElementById('rewind_list').value);
+                                break;
+                            case '3':
+                                fastForward(document.getElementById('forward_list').value);
+                                break;
+                            case '4':
+                                lastSectionButton();
+                                break;
+                            case '5':
+                                repeatSectionButton();
+                                break;
+                            case '6':
+                                nextSectionButton();
+                                break;
+                            case '0':
+                                player.togglePlay();
+                                intervalStopTimer()
+                                break;
+                            default:
+                                // outras teclas (não são tratadas)
+                                break;
+                        }
+                    } else if (event.key === 'Tab' && event.shiftKey) { // Shift + Tab
+                        event.preventDefault();
+                        rewind(document.getElementById('rewind_list').value);
+                    } else if (event.key === 'Tab') { // Tab
+                        event.preventDefault();
+                        player.togglePlay();
+                        intervalStopTimer()
+                    } else if (event.key === 'Q' && event.shiftKey) { // Shift + Q
+                        event.preventDefault();
+                        fastForward(document.getElementById('forward_list').value);
+                    } else if (event.key === 'A' && event.shiftKey) { // Shift + Q
+                        event.preventDefault();
+                        togglePlayer();
+                    } else if (event.key === '*' && isNumpadKey) { // '+' do numpad
+                        event.preventDefault();
+                        togglePlayer();
+                    } else if (event.key === '-' && isNumpadKey) { // '+' do numpad
+                        event.preventDefault();
+                        let newVolume = parseInt(volumePercent) - 10;
+                        newVolume = Math.max(newVolume, 0);
+                        setPlayerVolume(newVolume);
+                        volumePercent = newVolume;
+                    } else if (event.key === '+' && isNumpadKey) { // '+' do numpad
+                        event.preventDefault();
+                        let newVolume = parseInt(volumePercent) + 10;
+                        // Limitar o volume a no máximo 100
+                        newVolume = Math.min(newVolume, 100);
+                        setPlayerVolume(newVolume);
+                        volumePercent = newVolume;
+                    }
+
+                });
+
+                /* COMANDOS DO TIMER */
+
+                document.addEventListener('keydown', function(event) {
+                    var numericKeys = ['2'];
+
+                    // verifica se a tecla pressionada está no numpad
+                    var isNumpadKey = (event.location === KeyboardEvent.DOM_KEY_LOCATION_NUMPAD);
+
+                    if (numericKeys.includes(event.key) && isNumpadKey && !isTimerRunning) {
+                        if (event.key === '2') {
+                            event.preventDefault();
+                            startTimer();
+                            isTimerRunning = true;
+                        }
+                    }
+                });
+
+                document.addEventListener('keyup', function(event) {
+                    var numericKeys = ['2'];
+
+                    // verifica se a tecla pressionada está no numpad
+                    var isNumpadKey = (event.location === KeyboardEvent.DOM_KEY_LOCATION_NUMPAD);
+
+                    if (numericKeys.includes(event.key) && isNumpadKey && isTimerRunning) {
+                        if (event.key === '2') {
+                            event.preventDefault();
+                            intervalStopTimer()
+                            isTimerRunning = false;
+                        }
+                    }
+                });
+
+                document.addEventListener('keydown', function(event) {
+                    // Verifica se o elemento '#editor' não está focado
+                    var editor = document.getElementById('editor');
+                    var isEditorFocused = editor === document.activeElement;
+
+                    // Verifica se a tecla pressionada é a barra de espaço e se o temporizador não está em execução
+                    if (event.key === ' ' && !isTimerRunning && !isEditorFocused) {
+                        startTimer();
+                    } else if (event.key === 'X' && event.shiftKey && !isTimerRunning) { // Shift + Q
+                        event.preventDefault();
+                        startTimer();
+                        isTimerRunning = true;
+                    }
+                });
+
+                document.addEventListener('keyup', function(event) {
+                    // Verifica se o temporizador está em execução e se a tecla solta é a barra de espaço
+                    if (event.key === ' ' && isTimerRunning) {
+                        intervalStopTimer()
+                    } else if (event.key === 'X' && event.shiftKey && isTimerRunning) { // Shift + Q
+                        event.preventDefault();
+                        intervalStopTimer()
+                        isTimerRunning = false;
+                    }
+                });
+
+                /* COMANDOS DO TIMER */
+
+                // Função para atualizar a barra de progresso com base na posição atual da música
+                function updateProgressBar(position, duration) {
+                    const tracker = document.getElementById('tracker');
+                    const trackPosition = document.getElementById('track_position');
+                    const trackDuration = document.getElementById('track_duration');
+
+                    if (duration > 0) {
+                        const progress = (position / duration) * 100;
+                        tracker.value = progress;
+                    }
+
+                    // Atualizar contadores de posição e duração
+                    trackPosition.textContent = formatTime(position);
+                    trackDuration.textContent = formatTime(duration);
+                }
+
+                // Função para formatar os milissegundos em minutos:segundos
+                function formatTime(milliseconds) {
+                    const totalSeconds = Math.floor(milliseconds / 1000);
+                    const mins = Math.floor(totalSeconds / 60);
+                    const secs = Math.floor(totalSeconds % 60);
+                    return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+                }
+
+
+                // MELHORAR
+
+                document.getElementById('tracker').addEventListener('click', function (event) {
+
+                    intervalStopTimer()
+                    const clickPosition = event.offsetX;
+                    const totalWidth = event.target.clientWidth;
+
+                    // Calcula a porcentagem da posição do clique
+                    const porcentagemPosicao = clickPosition / totalWidth;
+
+                    // Obtém a duração total da faixa em milissegundos
+                    player.getCurrentState().then(state => {
+                        if (state) {
+                            const duracaoTotal = state.duration;
+
+                            // Calcula a posição em milissegundos
+                            const novaPosicaoMillis = porcentagemPosicao * duracaoTotal;
+
+                            // Realiza o seek para a nova posição em milissegundos
+                            player.seek(novaPosicaoMillis).then(() => {
+                                // Atualiza a posição para a música atual
+                                positions[state.track_window.current_track.id] = novaPosicaoMillis;
+                            }).catch((err) => {
+                                console.error('Falha ao realizar o seek:', err);
+                            });
+                        }
+                    }).catch((err) => {
+                        console.error('Erro ao obter o estado atual do player:', err);
+                    });
+                });
+
+                // Função para iniciar o cronômetro
+                function startTimer() {
+                    if (!isTimerRunning) {
+                        startTime = Date.now(); // Armazena o tempo de início
+                        intervalId = setInterval(updateTimerDisplay, 50); // Atualiza o display do cronômetro a cada 50ms
+
+                        const timerElement = document.getElementById("timer");
+                        timerElement.style.display = "flex"; // Define o estilo de display para flex
+                        timerElement.style.opacity = "0.9"; // Define a opacidade
+                        isTimerRunning = true; // Atualiza o estado do temporizador
+                    }
+                }
+
+                // Função para parar o cronômetro
+                function intervalStopTimer() {
+                    if (isTimerRunning === true) {
+                        clearInterval(intervalId); // pausa o timer
+                        isTimerRunning = false;
+                        setTimeout(stopTimer, 2000);
+                    }
+                }
+
+                function stopTimer() {
+                    const timerElement = document.getElementById("timer");
+                    timerElement.style.opacity = "0";
+
+                    // Adicione um ouvinte de evento para detectar quando a transição de opacidade for concluída
+                    timerElement.addEventListener("transitionend", function(event) {
+                        // Verifica se a propriedade de transição que mudou é a opacidade
+                        if (event.propertyName === "opacity") {
+                            // Define o estilo display como none após a transição de opacidade
+                            timerElement.style.display = "none";
+                        }
+                    });
+                }
+
+                // Função para atualizar o display do cronômetro
+                function updateTimerDisplay() {
+                    const elapsed = Date.now() - startTime; // Calcula o tempo decorrido desde o início
+                    const seconds = Math.floor((elapsed / 1000) % 60); // Calcula os segundos restantes
+                    const minutes = Math.floor(elapsed / 60000); // Calcula os minutos
+                    const milliseconds = Math.floor((elapsed % 1000) / 10); // Calcula os milissegundos restantes
+                    
+                    let timeFormatted;
+                    if (minutes > 0) {
+                        timeFormatted = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}:${milliseconds < 10 ? '0' : ''}${milliseconds}`;
+                    } else {
+                        timeFormatted = `${seconds}:${milliseconds < 10 ? '0' : ''}${milliseconds}`;
+                    }
+
+                    // Atualiza o display do cronômetro
+                    const timer = document.getElementById("timer");
+                    timer.textContent = timeFormatted;
+                }
+
+
+
+                // Exibir o hover do tracker
+                document.getElementById('tracker').addEventListener('mousemove', function (event) {
+                    const hoverPosition = event.offsetX;
+                    const totalWidth = event.target.clientWidth;
+
+                    // Calcula a porcentagem da posição do hover
+                    const porcentagemPosicao = hoverPosition / totalWidth;
+
+                    // Obtém a duração total da faixa em segundos
+                    player.getCurrentState().then(state => {
+                        if (state) {
+                            const duracaoTotal = state.duration / 1000; // em segundos
+
+                            // Calcula a posição em segundos
+                            const novaPosicaoSeconds = porcentagemPosicao * duracaoTotal;
+
+                            // Converte segundos para mm:ss
+                            const minutos = Math.floor(novaPosicaoSeconds / 60);
+                            const segundos = Math.floor(novaPosicaoSeconds % 60);
+
+                            // Formata o tempo
+                            const tempoFormatado = `${minutos}:${segundos < 10 ? '0' : ''}${segundos}`;
+
+                            // Atualiza o texto do elemento de exibição de tempo
+                            const hoverTimeDisplay = document.getElementById('hoverTimeDisplay');
+                            hoverTimeDisplay.innerText = tempoFormatado;
+
+                            // Calcula a posição do elemento de exibição de tempo
+                            const containerWidth = event.target.parentNode.clientWidth;
+                            const displayWidth = hoverTimeDisplay.clientWidth;
+                            const leftOffset = (porcentagemPosicao * containerWidth) - (displayWidth / 2);
+
+                            // Define a posição do elemento de exibição de tempo
+                            hoverTimeDisplay.style.left = leftOffset + 'px';
+
+                            // Exibe o elemento de exibição de tempo
+                            hoverTimeDisplay.style.display = 'block';
+                        }
+                    }).catch((err) => {
+                        console.error('Erro ao obter o estado atual do player:', err);
+                    });
+                });
+
+                // Esconde o elemento de exibição de tempo quando o mouse sai do controle deslizante
+                document.getElementById('tracker').addEventListener('mouseleave', function () {
+                    document.getElementById('hoverTimeDisplay').style.display = 'none';
+                });
+
+                // MELHORAR
+
+
+
+                player.addListener('player_state_changed', newState => {
+                    currentState = newState; // Atualiza a variável currentState
+
+                    if (newState && newState.position && newState.duration) {
+                        const newPosition = newState.position;
+                        const duration = newState.duration;
+                        updateProgressBar(newPosition, duration);
+                    }
+
+                    // música está sendo reproduzida no SDK (e não em outros dispositivos)
+                    if (newState && typeof newState.playback_id === 'string' && newState.playback_id.trim() !== '') {
+                        currentTrackId = newState.track_window.current_track.id;
+                        currentPlaybackId = newState.playback_id;
+
+
+                        if (trackId === '') { // primeira faixa a ser reproduzida
+
+                            trackId = currentTrackId;
+                            playbackId = currentPlaybackId;
+
+                            showTracker();
+
+                        }
+                        if (trackId !== currentTrackId) { // próximas faixas
+
+                            trackId = currentTrackId;
+                            playbackId = currentPlaybackId;
+
+                            showTracker();
+                        }
+                        if (trackId === currentTrackId && currentPlaybackId !== playbackId) { // mudanças de player
+
+                            trackId = currentTrackId;
+                            playbackId = currentPlaybackId;
+
+                            showTracker();
+                        }
+
+                        fetchCurrentlyPlayingData()
+
+                        // Definir o botão play/pause com base no estado de reprodução
+                        if (newState.paused) {
+                            // Se estiver pausado, mostrar o botão de play
+                            svg1.style.display = 'none';
+                            svg2.style.display = 'block';
+                        } else {
+                            // Se estiver reproduzindo, mostrar o botão de pausa
+                            svg1.style.display = 'block';
+                            svg2.style.display = 'none';
+                        }
+                    } else {
+                        fetchCurrentlyPlayingData();
+                        hideTracker();
+                    }
+                });
+
+                // Função para iniciar o efeito de progresso na barra de progresso
+                function startProgressEffect() {
+                    const interval = 0.5 * 1000; // Intervalo em milissegundos (0.5 segundos)
+                    setInterval(() => {
+                        player.getCurrentState().then(state => {
+                            if (state) {
+                                currentPosition = state.position;
+                                const newPosition = state.position;
+                                const duration = state.duration;
+                                updateProgressBar(newPosition, duration);
+                            }
+                        });
+                    }, interval);
+                }
+
+                // Chama a função para iniciar o efeito de progresso na barra de progresso
+                startProgressEffect();
+
+                // Objeto para armazenar as posições atuais de cada música
+                const positions = {};
+
+                // Função para retroceder uma quantidade específica de segundos na reprodução
+                function rewind(seconds) {
+                    player.getCurrentState().then(state => {
+                        if (state) {
+                            const milliseconds = seconds * 1000; // Convertendo segundos para milissegundos
+                            const newPosition = Math.max(0, state.position - milliseconds);
+                            player.seek(newPosition).then(() => {
+                                positions[state.track_window.current_track.id] = newPosition; // Atualiza a posição para a música atual
+                            });
+                        }
+                    });
+                    intervalStopTimer()
+                }
+
+                // Função para avançar uma quantidade específica de segundos na reprodução
+                function fastForward(seconds) {
+                    player.getCurrentState().then(state => {
+                        if (state) {
+                            const milliseconds = seconds * 1000; // Convertendo segundos para milissegundos
+                            const newPosition = Math.min(state.duration, state.position + milliseconds);
+                            player.seek(newPosition).then(() => {
+                                positions[state.track_window.current_track.id] = newPosition; // Atualiza a posição para a música atual
+                            });
+                        }
+                    });
+                    intervalStopTimer()
+                }
+
+                // Função para mover o player para a próxima seção de áudio
+                function lastSectionButton() {
+                    const position = currentPosition / 1000; // Convertendo a posição atual para segundos
+                    const lastSectionTime = beforeLastSection(position, sectionStartTimes); // Obtendo o tempo da próxima seção em MS
+
+                    if (lastSectionTime !== null) {
+                        player.seek(lastSectionTime); // Movendo o player para a próxima seção de áudio
+                    }
+                    intervalStopTimer()
+                }
+
+                // Função para mover o player para a próxima seção de áudio
+                function repeatSectionButton() {
+                    const position = currentPosition / 1000; // Convertendo a posição atual para segundos
+                    const repeatSectionTime = repeatSection(position, sectionStartTimes); // Obtendo o tempo da próxima seção em MS
+
+                    if (repeatSectionTime !== null) {
+                        player.seek(repeatSectionTime); // Movendo o player para a próxima seção de áudio
+                    }
+                    intervalStopTimer()
+                }
+
+                // Função para mover o player para a próxima seção de áudio
+                function nextSectionButton() {
+                    const position = currentPosition / 1000; // Convertendo a posição atual para segundos
+                    const nextSectionTime = nextSection(position, sectionStartTimes); // Obtendo o tempo da próxima seção em MS
+
+                    if (nextSectionTime !== null) {
+                        player.seek(nextSectionTime); // Movendo o player para a próxima seção de áudio
+                    }
+                    intervalStopTimer()
+                }
+
+
+                function showTracker() {
+                    document.getElementById('sdk_player').style = 'display:flex';
+                    document.getElementById('sp_connect_icon_white').style.display = 'block'
+                    document.getElementById('sp_connect_icon_green').style.display = 'none'
+                    document.getElementById('devices_options').style.bottom = '150px'
+                    document.getElementById('main').style.height = 'calc(100% - 120px)'
+                    document.getElementById('footer').style.height = '60px'
+                    // Adicionar o parâmetro 'track_id' à URL, se o trackId não for nulo
+                    if (trackId) {
+                        addParamToURL('track_id', trackId);
+                        storeSections(accessToken, trackId)
+                    }
+                }
+                function hideTracker() {
+                    document.getElementById('sdk_player').style = 'display:none';
+                    document.getElementById('sp_connect_icon_green').style.display = 'block'
+                    document.getElementById('sp_connect_icon_white').style.display = 'none'
+                    document.getElementById('devices_options').style.bottom = '105px'
+                    document.getElementById('main').style.height = ''
+                    document.getElementById('footer').style.height = ''
+
+                    // Remover o parâmetro 'track_id' da URL
+                    var urlWithoutTrackId = removeParameterFromURL('track_id');
+                    history.replaceState(null, '', urlWithoutTrackId);
+                    intervalStopTimer()
+                }
+
+            });
+        };
+
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const spConnectButton = document.getElementById('sp_connect');
+            const menuOptions = document.getElementById('devices_options');
+            const spRefreshButton = document.getElementById('player_refresh')
+
+            // Adiciona um evento de clique à div com ID sp_connect
+            spConnectButton.addEventListener('click', function (e) {
+                // Mostra ou esconde o menu de opções ao clicar no botão sp_connect
+                if (menuOptions.style.display === 'none') {
+                    menuOptions.style.display = 'block';
+                } else {
+                    menuOptions.style.display = 'none';
+                }
+                e.stopPropagation(); // Impede a propagação do evento para evitar que o menu seja fechado imediatamente
+            });
+
+            // Fecha o menu ao clicar fora dele
+            document.addEventListener('click', function (e) {
+                if (!menuOptions.contains(e.target) && e.target !== spConnectButton) {
+                    menuOptions.style.display = 'none';
+                }
+            });
+
+            spRefreshButton.addEventListener('click', async function (e) {
+                document.getElementById('player_refresh_svg').style.display = 'none';
+                document.getElementById('player_refresh_loading_spinner').style.display = 'block';
+
+                try {
+                    // Executa as funções de busca de dados
+                    await fetchAvailableDevices();
+                    await fetchCurrentlyPlayingData();
+                    highlightDevice(currentDeviceId);
+                } catch (error) {
+                    console.error('Something went wrong', error);
+                } finally {
+                    document.getElementById('player_refresh_svg').style.display = 'block';
+                    document.getElementById('player_refresh_loading_spinner').style.display = 'none';
+                }
+            });
+        });
+        
+        // Função para alternar entre o player do site e o dispositivo atualmente em reprodução
+        async function togglePlayer() {
+
+            document.getElementById('sp_fast_transfer_icon').style.display = 'none';
+            document.getElementById('sp_fast_transfer_loading_spinner').style.display = 'block';
+
+            if (document.getElementById('sp_fast_transfer').style.display === 'none') {
+                notification('No default alternative player, try moving the song manually')
+                return;
+            }
+
+            const currentlyPlayingData = await fetchCurrentlyPlayingData();
+            if (currentlyPlayingData.device.id === deviceId) {
+                newDeviceId = getParameterByName('alt_device_id')
+            } else if (currentlyPlayingData.device.id !== deviceId) {
+                newDeviceId = deviceId;
+            }
+
+
+            // Transferir a reprodução para o novo dispositivo
+            const accessToken = localStorage.getItem('accessToken');
+            transferPlayback(accessToken, newDeviceId);
+
+            document.getElementById('sp_fast_transfer_icon').style.display = 'block';
+            document.getElementById('sp_fast_transfer_loading_spinner').style.display = 'none';
+        }
+
+        function checkContent() {
+
+            // Salvar o valor selecionado do select
+            const selectElement = document.getElementById('maxUndoRedoActions');
+            const selectedValue = selectElement.value;
+            localStorage.setItem('maxUndoRedoActions', selectedValue);
+
+            const checkboxIds = [
+                'copyTransferToggle',
+                'pasteTransferToggle',
+                'autoCapToggle',
+                'autoFormatToggle',
+                'saveDraft',
+                'mxmPersonalTokenToggle',
+                'autoSuggestion',
+                'localHostToggle'
+            ];
+
+            checkboxIds.forEach(function (checkboxId) {
+                const checkbox = document.getElementById(checkboxId);
+                localStorage.setItem(checkboxId, checkbox.checked);
+            });
+            setCheckboxStates();
+            setMaxStackValue();
+            displayTokenField();
+            updateSelectValues();
+
+            draftToggle = isDraftChecked()
+            manageDraftsDiv = document.getElementById('manage_drafts_div')
+            setDraftsDuration = document.getElementById('set_drafts_duration')
+            setDraftsLimit = document.getElementById('set_drafts_limit')
+            draftLineSep = document.getElementById('drafts_line_sep')
+
+            if (!draftToggle) {
+                manageDraftsDiv.style.display = 'none'
+                setDraftsDuration.style.display = 'none'
+                setDraftsLimit.style.display = 'none'
+                draftLineSep.style.display = 'none'
+            } else {
+                manageDraftsDiv.style.display = 'flex'
+                setDraftsDuration.style.display = 'flex'
+                setDraftsLimit.style.display = 'flex'
+                draftLineSep.style.display = 'flex'
+            }
+        }
+
+        function handleSettingsClick() {
+            clickCount++;
+
+            // Se o usuário clicou 5 vezes, exibir a div e reiniciar a contagem
+            if (clickCount === 5) {
+                displayDevModeDiv();
+                clickCount = 0;
+            }
+        }
+
+        loadDevMode();
+
+        /*
+
+        document.addEventListener('DOMContentLoaded', function () {
+            var expandArrow = document.getElementById('expand_arrow');
+            var footer = document.getElementById('footer');
+            var footerHidedContent = document.getElementById('footer_hided_content');
+            var mobileFooterDiv = document.getElementById('mobile_footer_div');
+
+            // Verificar se todos os elementos existem
+            if (expandArrow && footer && footerHidedContent && mobileFooterDiv) {
                 expandArrow.addEventListener('click', function (event) {
                     event.stopPropagation(); // Impede que o clique seja propagado para o corpo/documento
                     footer.classList.toggle('expanded');
@@ -310,139 +1882,190 @@
                         expandArrow.style.transform = "rotate(0deg)";
                     }
                 });
+            }
 
-                // Adiciona um ouvinte de eventos ao corpo/documento para fechar o footer quando clicar fora dele
-                document.body.addEventListener('click', function (event) {
-                    if (!footer.contains(event.target)) {
-                        // Se o clique ocorreu fora do footer, oculta o conteúdo e recolhe o footer
-                        footerHidedContent.style.display = "none";
-                        mobileFooterDiv.style.height = "100%";
-                        expandArrow.style.transform = "rotate(0deg)";
-                        footer.classList.remove('expanded');
-                    }
-                });
+            // Adiciona um ouvinte de eventos ao corpo/documento para fechar o footer quando clicar fora dele
+            document.body.addEventListener('click', function (event) {
+                if (footer && !footer.contains(event.target)) {
+                    // Se o clique ocorreu fora do footer, oculta o conteúdo e recolhe o footer
+                    footerHidedContent.style.display = "none";
+                    mobileFooterDiv.style.height = "100%";
+                    expandArrow.style.transform = "rotate(0deg)";
+                    footer.classList.remove('expanded');
+                }
             });
+        });
 
-                function closeSettings() {
-                    var settingsPopup = document.getElementById("settings_popup");
-                    var overlay = document.getElementById("overlay");
-                    settingsPopup.style.display = "none";
-                    overlay.style.display = "none";
-                }
-                function closeCredits() {
-                    var creditsPopup = document.getElementById("credits_popup");
-                    var overlay = document.getElementById("overlay");
-                    creditsPopup.style.display = "none";
-                    overlay.style.display = "none";
-                }
-                function closeSuggestions() {
-                    var suggestPopup = document.getElementById("suggest_popup");
-                    var overlay = document.getElementById("overlay");
-                    suggestPopup.style.display = "none";
-                    overlay.style.display = "none";
-                }
-                function closeAboutInfo() {
-                    var aboutPopup = document.getElementById("about_popup");
-                    var overlay = document.getElementById("overlay");
-                    aboutPopup.style.display = "none";
-                    overlay.style.display = "none";
-                }
+        */
+
+        function closeSettings() {
+            var settingsPopup = document.getElementById("settings_popup");
+            var overlay = document.getElementById("overlay");
+            settingsPopup.style.display = "none";
+            overlay.style.display = "none";
+        }
+        function closeCredits() {
+            var creditsPopup = document.getElementById("credits_popup");
+            var overlay = document.getElementById("overlay");
+            creditsPopup.style.display = "none";
+            overlay.style.display = "none";
+        }
+        function closeShortcuts() {
+            var shortcutsPopup = document.getElementById("shortcuts_popup");
+            var overlay = document.getElementById("overlay");
+            shortcutsPopup.style.display = "none";
+            overlay.style.display = "none";
+        }
+        function closeAboutInfo() {
+            var aboutPopup = document.getElementById("about_popup");
+            var overlay = document.getElementById("overlay");
+            aboutPopup.style.display = "none";
+            overlay.style.display = "none";
+        }
+
+        function updateSelectValues() {
+            rewindValue = document.getElementById('rewind_list').value
+            forwardValue = document.getElementById('forward_list').value
+            draftDuration = document.getElementById('draft_duration').value
+            draftLimit = document.getElementById('draft_limit').value
+
+            setStoredValue('rewindValue', rewindValue)
+            setStoredValue('forwardValue', forwardValue)
+            setStoredValue('draftDuration', draftDuration)
+            setStoredValue('draftLimit', draftLimit)
+
+            loadStoredValues();
+            draftsCounter();
+        }
+
+        // Função para obter os valores armazenados no localStorage ou definir padrões
+        function getStoredValue(id) {
+            if (id === 'rewindValue' || id === 'forwardValue') {
+                return localStorage.getItem(id) || '3'; // Valor padrão é 3 segundos
+            } else if (id === 'draftDuration') {
+                return localStorage.getItem(id) || '7'; // 7 dias como padrão para os rascunhos
+            } else if (id === 'draftLimit') {
+                return localStorage.getItem(id) || '100'; // 100 rascunhos como padrão para o limite
+            }
+
+            return localStorage.getItem(id);
+        }
+
+        // Função para armazenar os valores selecionados no localStorage
+        function setStoredValue(id, value) {
+            localStorage.setItem(id, value);
+        }
+
+        // Função para carregar os valores armazenados e definir os elementos correspondentes
+        function loadStoredValues() {
+            document.getElementById('rewind_list').value = getStoredValue('rewindValue');
+            document.getElementById('forward_list').value = getStoredValue('forwardValue');
+            document.getElementById('backwardValue').textContent = getStoredValue('rewindValue');
+            document.getElementById('forwardValue').textContent = getStoredValue('forwardValue');
+
+            document.getElementById('draft_duration').value = getStoredValue('draftDuration');
+            document.getElementById('draft_limit').value = getStoredValue('draftLimit');
+        }
+
+        // Carregar os valores armazenados ao carregar a página
+        window.onload = function () {
+            loadStoredValues();
+        };
 
 
-                // Função para atualizar as opções abaixo com base na seleção do menu seletor
-                function updateOptions() {
-                    var selectMenu = document.getElementById("select_menu");
-                    var text1 = document.getElementsByName("text1")[0];
-                    var text2 = document.getElementsByName("text2")[0];
-                    var text3 = document.getElementsByName("text3")[0];
-                    var text4 = document.getElementsByName("text4")[0];
+        // Função para atualizar as opções abaixo com base na seleção do menu seletor
+        function updateOptions() {
+            var selectMenu = document.getElementById("select_menu");
+            var text1 = document.getElementsByName("text1")[0];
+            var text2 = document.getElementsByName("text2")[0];
+            var text3 = document.getElementsByName("text3")[0];
+            var text4 = document.getElementsByName("text4")[0];
 
-                    // Verifica a opção selecionada
-                    var selectedOption = selectMenu.value;
+            // Verifica a opção selecionada
+            var selectedOption = selectMenu.value;
 
-                    // Remove todas as classes dos elementos de texto
-                    text1.classList.remove("option1", "option2", "option3", "option4");
-                    text2.classList.remove("option1", "option2", "option3", "option4");
-                    text3.classList.remove("option1", "option2", "option3", "option4");
-                    text4.classList.remove("option1", "option2", "option3", "option4");
+            // Remove todas as classes dos elementos de texto
+            text1.classList.remove("option1", "option2", "option3", "option4");
+            text2.classList.remove("option1", "option2", "option3", "option4");
+            text3.classList.remove("option1", "option2", "option3", "option4");
+            text4.classList.remove("option1", "option2", "option3", "option4");
 
-                    // Adiciona as classes apropriadas com base na opção selecionada
-                    switch (selectedOption) {
-                        case "option1": // Suggest word for the dictionary
-                            text1.classList.add("option1");
-                            text1.placeholder = "Digite o seu nome";
-                            text1.style.display = "block"
+            // Adiciona as classes apropriadas com base na opção selecionada
+            switch (selectedOption) {
+                case "option1": // Suggest word for the dictionary
+                    text1.classList.add("option1");
+                    text1.placeholder = "Digite o seu nome";
+                    text1.style.display = "block"
 
-                            text2.classList.add("option1");
-                            text2.placeholder = "Digite aqui as palavras incorretas (separe cada uma usando uma '/')";
-                            text2.style.display = "block"; 
+                    text2.classList.add("option1");
+                    text2.placeholder = "Digite aqui as palavras incorretas (separe cada uma usando uma '/')";
+                    text2.style.display = "block";
 
-                            text3.classList.add("option1");
-                            text3.placeholder = "Digite aqui a correção";
-                            text3.style.display = "block"; 
+                    text3.classList.add("option1");
+                    text3.placeholder = "Digite aqui a correção";
+                    text3.style.display = "block";
 
-                            text4.classList.add("popup_details");
-                            text4.placeholder = "Observações";
-                            text4.style.display = "block"; 
-                            break;
-                        case "option2": // Suggest a new format alert
-                            text1.classList.add("option2");
-                            text1.placeholder = "Digite o seu nome";
-                            text1.style.display = "block"
+                    text4.classList.add("popup_details");
+                    text4.placeholder = "Observações";
+                    text4.style.display = "block";
+                    break;
+                case "option2": // Suggest a new format alert
+                    text1.classList.add("option2");
+                    text1.placeholder = "Digite o seu nome";
+                    text1.style.display = "block"
 
-                            text2.classList.add("option2");
-                            text2.placeholder = "Format suggestion";
-                            text2.style.display = "block"; 
+                    text2.classList.add("option2");
+                    text2.placeholder = "Format suggestion";
+                    text2.style.display = "block";
 
-                            text3.classList.add("option2");
-                            text3.placeholder = "Digite aqui a correção";
-                            text3.style.display = "block"; 
+                    text3.classList.add("option2");
+                    text3.placeholder = "Digite aqui a correção";
+                    text3.style.display = "block";
 
-                            text4.classList.add("popup_details");
-                            text4.placeholder = "Observações";
-                            text4.style.display = "block"; 
-                            break;
-                        case "option3": // Send a feedback
-                            text1.classList.add("option3");
-                            text1.placeholder = "Digite o seu nome";
-                            text1.style.display = "block"
+                    text4.classList.add("popup_details");
+                    text4.placeholder = "Observações";
+                    text4.style.display = "block";
+                    break;
+                case "option3": // Send a feedback
+                    text1.classList.add("option3");
+                    text1.placeholder = "Digite o seu nome";
+                    text1.style.display = "block"
 
-                            text2.classList.add("option3");
-                            text2.placeholder = "Enter your feedback";
-                            text2.style.display = "block"; 
+                    text2.classList.add("option3");
+                    text2.placeholder = "Enter your feedback";
+                    text2.style.display = "block";
 
-                            text3.classList.add("option3");
-                            text3.placeholder = "Digite aqui a correção";
-                            text3.style.display = "none"; 
+                    text3.classList.add("option3");
+                    text3.placeholder = "Digite aqui a correção";
+                    text3.style.display = "none";
 
-                            text4.classList.add("popup_details");
-                            text4.placeholder = "Observações";
-                            text4.style.display = "none"; 
-                            break;
-                        case "option4": // Report a bug
-                            text1.classList.add("option4");
-                            text1.placeholder = "Digite o seu nome";
-                            text1.style.display = "block"
+                    text4.classList.add("popup_details");
+                    text4.placeholder = "Observações";
+                    text4.style.display = "none";
+                    break;
+                case "option4": // Report a bug
+                    text1.classList.add("option4");
+                    text1.placeholder = "Digite o seu nome";
+                    text1.style.display = "block"
 
-                            text2.classList.add("option4");
-                            text2.placeholder = "Enter the bug details";
-                            text2.style.display = "block"; // Exibe o segundo campo de texto
+                    text2.classList.add("option4");
+                    text2.placeholder = "Enter the bug details";
+                    text2.style.display = "block"; // Exibe o segundo campo de texto
 
-                            
-                            text3.classList.add("option4");
-                            text3.placeholder = "Digite aqui a correção";
-                            text3.style.display = "none"; 
 
-                            text4.classList.add("popup_details");
-                            text4.placeholder = "Observações";
-                            text4.style.display = "none"; 
-                            break;
-                        default:
-                            break;
-                    }
-                }
-        </script>
-    </body>
+                    text3.classList.add("option4");
+                    text3.placeholder = "Digite aqui a correção";
+                    text3.style.display = "none";
+
+                    text4.classList.add("popup_details");
+                    text4.placeholder = "Observações";
+                    text4.style.display = "none";
+                    break;
+                default:
+                    break;
+            }
+        }
+    </script>
+</body>
+
 </html>
-
-
