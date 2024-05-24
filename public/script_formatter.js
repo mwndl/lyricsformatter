@@ -7,7 +7,7 @@ let undoCursorPositionsStack = [];
 var redoCursorPositionsStack = [];
 var maxStackSize = 100;
 
-var lf_version = '2.20.1';
+var lf_version = '2.21.0';
 var lf_release_date = '24/05/2024'
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -812,8 +812,8 @@ function addToUndoStack() {
                 trimEditorContent(); // linhas antes ou depois da letra (1)
                 removeExcessInstrumental(); // remove tags instrumentais duplicadas
                 removeInstrumentalStardEnd(); // remove instrumentais no início/fim da letra
-                addSpaceAboveTags(); // add (caso não haja) espaços acima de todas as tags
                 removeSpacesAroundInstrumental(); // espaços ao redor de tags instrumentais
+                addSpaceAboveTags(); // add (caso não haja) espaços acima de todas as tags
                 trimEditorContent(); // linhas antes ou depois da letra (2)
                 autoTrim(); // espaços extras no início ou fim 
                 removeDuplicateSpaces(); // espaços duplos entre palavras
@@ -4030,9 +4030,9 @@ async function compareDrafts(trackId) {
             // Gera o email dinâmico
             const currentDate = new Date();
             const day = String(currentDate.getDate()).padStart(2, '0');
-            const month = String(currentDate.getMonth() + 1).padStart(2, '0');
-            const year = currentDate.getFullYear();
-            const userEmail = `public${day}${month}${year}${randomBase}@datamatch.com`;
+            const dayNumber = Number(day);
+            randomBase = Number(randomBase);
+            const userEmail = `guest${dayNumber * randomBase}@datamatch.com`;
 
             const url = `https://api.diffchecker.com/public/text?output_type=html&email=${userEmail}`;
             const data = {
