@@ -7,8 +7,8 @@ let undoCursorPositionsStack = [];
 var redoCursorPositionsStack = [];
 var maxStackSize = 100;
 
-var lf_version = '2.19.2';
-var lf_release_date = '25/04/2024'
+var lf_version = '2.21.1';
+var lf_release_date = '24/05/2024'
 
 document.addEventListener('DOMContentLoaded', function () {
     var returnArrow = document.getElementById('return_arrow');
@@ -812,8 +812,8 @@ function addToUndoStack() {
                 trimEditorContent(); // linhas antes ou depois da letra (1)
                 removeExcessInstrumental(); // remove tags instrumentais duplicadas
                 removeInstrumentalStardEnd(); // remove instrumentais no início/fim da letra
-                addSpaceAboveTags(); // add (caso não haja) espaços acima de todas as tags
                 removeSpacesAroundInstrumental(); // espaços ao redor de tags instrumentais
+                addSpaceAboveTags(); // add (caso não haja) espaços acima de todas as tags
                 trimEditorContent(); // linhas antes ou depois da letra (2)
                 autoTrim(); // espaços extras no início ou fim 
                 removeDuplicateSpaces(); // espaços duplos entre palavras
@@ -4002,6 +4002,11 @@ function sortTable(columnIndex, tableId) {
     }
 }
 
+function setRandomBase() {
+    const randomBase = String(Math.floor(Math.random() * 99) + 1).padStart(2, '0');
+    localStorage.setItem('randomBase', randomBase);
+}
+
 async function compareDrafts(trackId) {
     // Recupera os dados do cache
     const cacheData = localStorage.getItem('localDrafts');
@@ -4014,6 +4019,18 @@ async function compareDrafts(trackId) {
         if (draftsCache[trackId]) {
             const transcription1 = draftsCache[trackId].original_transcription;
             const transcription2 = draftsCache[trackId].transcription;
+
+            // Verifica se o randomBase existe no localStorage, caso contrário, cria um novo
+            let randomBase = localStorage.getItem('randomBase');
+            if (!randomBase) {
+                setRandomBase();
+                randomBase = localStorage.getItem('randomBase');
+            }
+
+            // Gera o email dinâmico
+            const currentDate = new Date();
+            const day = String(currentDate.getDate()).padStart(2, '0');
+            const userEmail = `guest${randomBase}${day}@datamatch.com`;
 
             const url = `https://api.diffchecker.com/public/text?output_type=html&email=${userEmail}`;
             const data = {
