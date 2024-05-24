@@ -7,7 +7,7 @@ let undoCursorPositionsStack = [];
 var redoCursorPositionsStack = [];
 var maxStackSize = 100;
 
-var lf_version = '2.21.1';
+var lf_version = '2.22.0';
 var lf_release_date = '24/05/2024'
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -2829,34 +2829,14 @@ function updateServerInfo(data) {
             checkContent()
         }
 
-        function showSpShortcuts() {
-            document.getElementById('audio_controls_numpad').style = 'margin-bottom: 15px;'
-            document.getElementById('additional_features_numpad').style = ""
-            document.getElementById('audio_controls_keyboard').style = 'margin-bottom: 15px;'
-            document.getElementById('additional_features_keyboard').style = "margin-bottom: 15px;"
-            document.getElementById('navegation_keyboard').style = "margin-bottom: 15px;"
-            document.getElementById('navegation_numpad').style = "margin-bottom: 15px;"
-        }
-
-        function hideSpShortcuts() {
-            document.getElementById('audio_controls_numpad').style = 'margin-bottom: 15px; display:none'
-            document.getElementById('additional_features_numpad').style = "display:none"
-            document.getElementById('audio_controls_keyboard').style = 'margin-bottom: 15px; display:none'
-            document.getElementById('additional_features_keyboard').style = "margin-bottom: 15px; display:none"
-            document.getElementById('navegation_keyboard').style = ""
-            document.getElementById('navegation_numpad').style = ""
-        }
-
         // exibe / oculta o menu do spotify
         function loadSpMenu() {
             const spMenu = localStorage.getItem('spMenu');
 
             if (spMenu === 'true') {
                 showSpMenuDiv();
-                showSpShortcuts()
             } else if (spMenu === 'false') {
                 hideSpMenuDiv();
-                hideSpShortcuts()
             }
         }
 
