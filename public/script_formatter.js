@@ -7,7 +7,7 @@ let undoCursorPositionsStack = [];
 var redoCursorPositionsStack = [];
 var maxStackSize = 100;
 
-var lf_version = '2.20.0';
+var lf_version = '2.20.1';
 var lf_release_date = '24/05/2024'
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -4032,7 +4032,7 @@ async function compareDrafts(trackId) {
             const day = String(currentDate.getDate()).padStart(2, '0');
             const month = String(currentDate.getMonth() + 1).padStart(2, '0');
             const year = currentDate.getFullYear();
-            const userEmail = `public+${day}${month}${year}${randomBase}@datamatch.com`;
+            const userEmail = `public${day}${month}${year}${randomBase}@datamatch.com`;
 
             const url = `https://api.diffchecker.com/public/text?output_type=html&email=${userEmail}`;
             const data = {
