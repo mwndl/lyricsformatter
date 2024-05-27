@@ -7,8 +7,8 @@ let undoCursorPositionsStack = [];
 var redoCursorPositionsStack = [];
 var maxStackSize = 100;
 
-var lf_version = '2.19.2';
-var lf_release_date = '25/04/2024'
+var lf_version = '2.22.0';
+var lf_release_date = '24/05/2024'
 
 document.addEventListener('DOMContentLoaded', function () {
     var returnArrow = document.getElementById('return_arrow');
@@ -812,8 +812,8 @@ function addToUndoStack() {
                 trimEditorContent(); // linhas antes ou depois da letra (1)
                 removeExcessInstrumental(); // remove tags instrumentais duplicadas
                 removeInstrumentalStardEnd(); // remove instrumentais no início/fim da letra
-                addSpaceAboveTags(); // add (caso não haja) espaços acima de todas as tags
                 removeSpacesAroundInstrumental(); // espaços ao redor de tags instrumentais
+                addSpaceAboveTags(); // add (caso não haja) espaços acima de todas as tags
                 trimEditorContent(); // linhas antes ou depois da letra (2)
                 autoTrim(); // espaços extras no início ou fim 
                 removeDuplicateSpaces(); // espaços duplos entre palavras
@@ -2829,34 +2829,14 @@ function updateServerInfo(data) {
             checkContent()
         }
 
-        function showSpShortcuts() {
-            document.getElementById('audio_controls_numpad').style = 'margin-bottom: 15px;'
-            document.getElementById('additional_features_numpad').style = ""
-            document.getElementById('audio_controls_keyboard').style = 'margin-bottom: 15px;'
-            document.getElementById('additional_features_keyboard').style = "margin-bottom: 15px;"
-            document.getElementById('navegation_keyboard').style = "margin-bottom: 15px;"
-            document.getElementById('navegation_numpad').style = "margin-bottom: 15px;"
-        }
-
-        function hideSpShortcuts() {
-            document.getElementById('audio_controls_numpad').style = 'margin-bottom: 15px; display:none'
-            document.getElementById('additional_features_numpad').style = "display:none"
-            document.getElementById('audio_controls_keyboard').style = 'margin-bottom: 15px; display:none'
-            document.getElementById('additional_features_keyboard').style = "margin-bottom: 15px; display:none"
-            document.getElementById('navegation_keyboard').style = ""
-            document.getElementById('navegation_numpad').style = ""
-        }
-
         // exibe / oculta o menu do spotify
         function loadSpMenu() {
             const spMenu = localStorage.getItem('spMenu');
 
             if (spMenu === 'true') {
                 showSpMenuDiv();
-                showSpShortcuts()
             } else if (spMenu === 'false') {
                 hideSpMenuDiv();
-                hideSpShortcuts()
             }
         }
 
@@ -4002,6 +3982,11 @@ function sortTable(columnIndex, tableId) {
     }
 }
 
+function setRandomBase() {
+    const randomBase = String(Math.floor(Math.random() * 99) + 1).padStart(2, '0');
+    localStorage.setItem('randomBase', randomBase);
+}
+
 async function compareDrafts(trackId) {
     // Recupera os dados do cache
     const cacheData = localStorage.getItem('localDrafts');
@@ -4014,6 +3999,18 @@ async function compareDrafts(trackId) {
         if (draftsCache[trackId]) {
             const transcription1 = draftsCache[trackId].original_transcription;
             const transcription2 = draftsCache[trackId].transcription;
+
+            // Verifica se o randomBase existe no localStorage, caso contrário, cria um novo
+            let randomBase = localStorage.getItem('randomBase');
+            if (!randomBase) {
+                setRandomBase();
+                randomBase = localStorage.getItem('randomBase');
+            }
+
+            // Gera o email dinâmico
+            const currentDate = new Date();
+            const day = String(currentDate.getDate()).padStart(2, '0');
+            const userEmail = `guest${randomBase}${day}@datamatch.com`;
 
             const url = `https://api.diffchecker.com/public/text?output_type=html&email=${userEmail}`;
             const data = {
