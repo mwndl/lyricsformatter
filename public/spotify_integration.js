@@ -325,6 +325,7 @@ async function fetchCurrentlyPlayingData() {
         if (response.status === 204) {
             document.getElementById('sp_player_div').style.display = ''; // Exibir elemento
             document.getElementById('sp_connect').style.display = 'none'; // Ocultar elemento
+            document.getElementById('songmatch_button_div').style.display = 'none'
             document.getElementById('mxm_icon_div').style.display = 'none';
             document.getElementById('sp_fast_transfer').style.display = 'none'
             document.getElementById('playback_info').style.display = 'none'; // Ocultar elemento
@@ -336,6 +337,7 @@ async function fetchCurrentlyPlayingData() {
         } else if (response.status === 200) {
             document.getElementById('sp_player_div').style.display = ''; // Exibir elemento
             document.getElementById('sp_connect').style.display = 'block'; // exibir elemento
+            document.getElementById('songmatch_button_div').style.display = 'block'
             document.getElementById('mxm_icon_div').style.display = 'block';
             document.getElementById('playback_info').style.display = 'flex'; // exibir elemento
             document.getElementById('no_playback').style.display = 'none'; // exibir elemento
