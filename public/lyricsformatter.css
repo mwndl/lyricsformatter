@@ -1704,7 +1704,7 @@
             top: 4%;
             width: 18px;
             height: 18px;
-            background-image: url("/images/mxm_white.png");
+            background-image: url("./images/mxm_white.png");
             background-size: contain;
             background-position: center center;
             cursor: pointer;

@@ -7,8 +7,8 @@ let undoCursorPositionsStack = [];
 var redoCursorPositionsStack = [];
 var maxStackSize = 100;
 
-var lf_version = '2.22.0';
-var lf_release_date = '24/05/2024'
+var lf_version = '2.23.1';
+var lf_release_date = '15/07/2024'
 
 document.addEventListener('DOMContentLoaded', function () {
     var returnArrow = document.getElementById('return_arrow');
@@ -910,6 +910,29 @@ function addToUndoStack() {
                     console.error('An error occurred:', error);
                 });
         }
+
+/* FUNÇÃO PARA ABRIR FAIXA EM REPRODUÇÃO NO SONGMATCH */
+
+function openSongmatch() {
+
+    document.getElementById('songmatch_button').style.display = 'none';
+    document.getElementById('songmatch_button_loading_spinner').style.display = 'block';
+
+    trackId = currentSongId;
+
+    if (trackId === null) {
+        document.getElementById('songmatch_button').style.display = 'block';
+        document.getElementById('songmatch_button_loading_spinner').style.display = 'none';
+        return
+    }
+
+    const redirectUrl = `https://songmatch.onrender.com/?query=${trackId}`;
+    window.open(redirectUrl, '_blank');
+
+    document.getElementById('songmatch_button').style.display = 'block';
+    document.getElementById('songmatch_button_loading_spinner').style.display = 'none';
+
+}
 
 
 /* SELECIONAR TEXTO COM BASE NO OFFSET E LENGTH */
