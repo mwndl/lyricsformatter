@@ -321,11 +321,14 @@ async function fetchCurrentlyPlayingData() {
             }
         });
 
+        aiToggle = isAIButtonChecked()
+
         // Verificar se a resposta indica que não há música sendo reproduzida (código 204)
         if (response.status === 204) {
             document.getElementById('sp_player_div').style.display = ''; // Exibir elemento
             document.getElementById('sp_connect').style.display = 'none'; // Ocultar elemento
             document.getElementById('songmatch_button_div').style.display = 'none'
+            document.getElementById('ai_metadata_generator').style.display = 'none'
             document.getElementById('mxm_icon_div').style.display = 'none';
             document.getElementById('sp_fast_transfer').style.display = 'none'
             document.getElementById('playback_info').style.display = 'none'; // Ocultar elemento
@@ -338,6 +341,8 @@ async function fetchCurrentlyPlayingData() {
             document.getElementById('sp_player_div').style.display = ''; // Exibir elemento
             document.getElementById('sp_connect').style.display = 'block'; // exibir elemento
             document.getElementById('songmatch_button_div').style.display = 'block'
+            if (aiToggle) {document.getElementById('ai_metadata_generator').style.display = 'block'} 
+            else {document.getElementById('ai_metadata_generator').style.display = 'none'}
             document.getElementById('mxm_icon_div').style.display = 'block';
             document.getElementById('playback_info').style.display = 'flex'; // exibir elemento
             document.getElementById('no_playback').style.display = 'none'; // exibir elemento
