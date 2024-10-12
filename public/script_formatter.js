@@ -7,8 +7,8 @@ let undoCursorPositionsStack = [];
 var redoCursorPositionsStack = [];
 var maxStackSize = 100;
 
-var lf_version = '2.23.1';
-var lf_release_date = '15/07/2024'
+var lf_version = '2.24.0';
+var lf_release_date = '12/10/2024'
 
 document.addEventListener('DOMContentLoaded', function () {
     var returnArrow = document.getElementById('return_arrow');
@@ -116,7 +116,8 @@ document.addEventListener('DOMContentLoaded', function () {
             'saveDraft',
             'mxmPersonalTokenToggle',
             'autoSuggestion',
-            'localHostToggle'
+            'localHostToggle',
+            'aiToggle'
         ];
     
         checkboxIds.forEach(function (checkboxId) {
@@ -1037,6 +1038,11 @@ function openSongmatch() {
             return autoSuggestions.checked;
         }
 
+        function isAIButtonChecked() { 
+            const aiTestingToggle = document.getElementById('aiToggle');
+            return aiTestingToggle.checked;
+        }
+
         function isMxmPersonalTokenToggleChecked() {
             const mxmTokenToggle = document.getElementById('mxmPersonalTokenToggle');
             return mxmTokenToggle.checked;
@@ -1601,7 +1607,8 @@ function openSongmatch() {
                 'saveDraft',
                 'mxmPersonalTokenToggle',
                 'autoSuggestion',
-                'localHostToggle'
+                'localHostToggle',
+                'aiToggle'
             ];
 
             checkboxIds.forEach(function (checkboxId) {
@@ -1632,6 +1639,15 @@ function openSongmatch() {
                 document.getElementById('set_drafts_duration').style.display = 'none'
                 document.getElementById('set_drafts_limit').style.display = 'none'
                 document.getElementById('drafts_line_sep').style.display = 'none'
+            }
+
+            
+            aiToggle = isAIButtonChecked()
+
+            if (aiToggle && currentSongId != '') {
+                document.getElementById('ai_metadata_generator').style.display = 'block'
+            } else {
+                document.getElementById('ai_metadata_generator').style.display = 'none'
             }
         }
 
@@ -2531,6 +2547,62 @@ function updateTabCounters() {
         }
 
 /* ****************************************** */
+
+async function generateAI() {
+    const url = 'http://127.0.0.1:5000/transcribe';
+
+    // Obter o valor de localHostToggle do localStorage
+    const aiToggle = localStorage.getItem('aiToggle');
+
+    // Verificar o valor de localHostToggle e definir window.serverPath
+    if (aiToggle === 'true') {
+        // Define the body of the request
+        const body = {
+            spotify_track_id: currentSongId
+        };
+
+        try {
+
+            document.getElementById('ai_button').style.display = "none"
+            document.getElementById('ai_button_loading_spinner').style.display = "block"
+
+            notification('The content is being generated locally, please wait...');
+
+            // Faz a requisição
+            const response = await fetch(url, {
+                method: 'POST', // Método HTTP
+                headers: {
+                    'Content-Type': 'application/json' // Define o tipo de conteúdo
+                },
+                body: JSON.stringify(body) // Converte o objeto body para uma string JSON
+            });
+
+            // Verifica se a resposta foi bem-sucedida
+            if (!response.ok) {
+                notification('Erro: ${response.status}');
+                throw new Error(`Erro: ${response.status}`);
+            }
+
+            // Obtém a resposta em formato JSON
+            const data = await response.json();
+
+            // Imprime a resposta no console
+            console.log(data);
+
+            // Concatenar os textos em uma única string
+            const lines = data.map(item => item.text).join('\n');
+
+            // Atualiza o valor do editor com as linhas
+            document.getElementById('editor').value = lines;
+
+            document.getElementById('ai_button').style.display = "block"
+            document.getElementById('ai_button_loading_spinner').style.display = "none"
+        } catch (error) {
+            console.error('Falha na requisição:', error);
+        }
+    }
+
+}
 
 
 /* POPUP 'CREDITS' */
